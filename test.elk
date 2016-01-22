@@ -1,0 +1,34 @@
+function getCountByIndexType(var a, var b, var c) {
+    health
+    count a
+    count b
+    count c
+}
+
+function dump() {
+  //reindex "chengpohi" "chengpohi-tmp" "bookmark" "name, url, _tab_id"
+  //count "chengpohi-tmp"
+  //query "chengpohi-tmp"
+  delete "chengpohi"
+}
+
+function chengpohi() {
+  count "chengpohi"
+  //query "chengpohi-tmp"
+  //delete "chengpohi"
+}
+
+function coolmarks() {
+  //reindex "chengpohi" "chengpohi-tmp" "bookmark" "name, url, _tab_id, created_at"
+  //reindex "chengpohi-tmp" "chengpohi" "bookmark" "name, url, _tab_id, created_at"
+  //count "chengpohi-tmp"
+  //reindex "chengpohi-tmp" "chengpohi" "bookmark" "name, url, _tab_id"
+  update "chengpohi" "tab" "(_id, AU5ipWybyYFDwCsP6AeN)"
+  //query "chengpohi"
+}
+
+//dump()
+//chengpohi()
+//coolmarks()
+//delete "chengpohi"
+//query "chengpohi"
