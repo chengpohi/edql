@@ -1,0 +1,37 @@
+GET countIndex {
+    count
+}
+
+GET boolQuery {
+    bool query in indexName / indexType {
+      title must match ["hello", "world"]
+      title must_not match ["foo", "bar"]
+    }
+}
+
+GET filterQuery {
+    bool filter in indexName / indexType {
+      title must match ["Hello", "World"]
+    }
+}
+
+POST indexData {
+    index in indexName / indexType [
+        {
+        "title": "Hello World"
+        "body": "foo bar"
+        },
+        {
+        "title": "I can eat grass"
+        "body": "not hurt my body"
+        }
+    ]
+}
+
+DELETE deleteIndex {
+    delete indexName
+}
+
+DELETE deleteIndexType {
+    delete indexName / indexType
+}
