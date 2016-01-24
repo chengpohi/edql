@@ -12,7 +12,9 @@ import scala.collection.mutable.ArrayBuffer
 object ELKParser extends ELKInstrumentParser{
   import fastparse.all._
 
-  val instrument = P(space ~ (status | count | delete | query | reindex | index | createIndex | update | functionInstrument) ~ space).map(ELK.Instrument)
+  val instrument = P(space ~ (status | count | delete | query | reindex
+    | index | createIndex | update | analysis | functionInstrument)
+    ~ space).map(ELK.Instrument)
 
   val methodParameter = P(space ~ "var" ~ space ~ strName.rep.! ~ ",".?).map(s => "$" + s)
   val functionDefine: P[(String, Map[String, String])] =

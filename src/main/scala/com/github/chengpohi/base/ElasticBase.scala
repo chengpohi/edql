@@ -4,17 +4,18 @@ import com.github.chengpohi.connector.ElasticClientConnector
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s.source.{JsonDocumentSource, DocumentMap}
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
 
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.search.sort.SortOrder.ASC
-import org.elasticsearch.transport.RemoteTransportException
 
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * ElasticBase function
@@ -122,6 +123,14 @@ class ElasticBase {
     })
   }
 
+  def analysis(analyzer: String, text: String) = {
+    val analyzeResponse = Future {
+      val request = new AnalyzeRequest(text)
+      request.analyzer(analyzer)
+      client.admin.indices().analyze(request).get()
+    }
+    analyzeResponse
+  }
 
   def getDocById(indexName: String, indexType: String, docId: String): GetResponse = client.execute {
     get id docId from s"$indexName/$indexType"

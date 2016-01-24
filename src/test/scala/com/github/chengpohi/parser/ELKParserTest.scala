@@ -69,6 +69,15 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       """.stripMargin.trim))
   }
 
+  "ELKParser" should "analysis doc by specific analyzer" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """analysis "standard" "foo,bar"""")
+    }
+    assert(outContent.toString.contains(
+    """"token":"foo","start_offset":0,""".stripMargin
+    ))
+  }
+
   after {
     ELKRunEngine.run( """ delete "test-parser-name" """)
   }
