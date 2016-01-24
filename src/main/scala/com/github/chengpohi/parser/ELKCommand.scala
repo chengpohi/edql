@@ -1,9 +1,12 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.base.{ElasticCommand, ElasticBase}
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.common.xcontent.{ToXContent, XContentType, XContentFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.io.Source
 
 /**
  * elasticservice
@@ -21,6 +24,7 @@ object ELKCommand {
   val i: Seq[String] => String = index
   val u: Seq[String] => String = update
   val ci: Seq[String] => String = createIndex
+  val a: Seq[String] => String = analysis
 
   def createIndex(parameters: Seq[String]): String = {
     val createResponse = ElasticCommand.createIndex(parameters.head)
@@ -65,5 +69,12 @@ object ELKCommand {
       case _ => null
     }
     ElasticCommand.index(indexName, indexType, uf)
+  }
+  def analysis(parameters: Seq[String]): String = {
+    val (analyzer, doc) = (parameters.head, parameters(1))
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
+    analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    builder.bytes().toUtf8
   }
 }
