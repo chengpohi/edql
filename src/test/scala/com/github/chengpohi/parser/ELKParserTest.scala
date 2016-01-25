@@ -79,6 +79,6 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   after {
-    ELKRunEngine.run( """ delete "test-parser-name" """)
+    ELKRunEngine.run( """ delete "test-parser-name"""")
   }
 }

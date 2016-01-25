@@ -30,6 +30,12 @@ class ElasticBase {
     }.await
   }
 
+  def deleteIndexType(indexName: String, indexType: String): Unit = {
+    client.execute {
+      delete mapping indexName / indexType
+    }.await
+  }
+
   def deleteById(documentId: String, indexName: String, indexType: String): Boolean = client.execute {
     delete id documentId from s"${indexName}/${indexType}"
   }.await.isFound
