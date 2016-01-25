@@ -1,12 +1,11 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.base.{ElasticCommand, ElasticBase}
+import com.github.chengpohi.base.{ElasticCommand}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
-import org.elasticsearch.common.xcontent.{ToXContent, XContentType, XContentFactory}
+import org.elasticsearch.common.xcontent.{XContentBuilder, ToXContent, XContentType, XContentFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.io.Source
 
 /**
  * elasticservice
@@ -40,8 +39,13 @@ object ELKCommand {
   }
 
   def delete(parameters: Seq[String]): String = {
-    ElasticCommand.deleteIndex(parameters.head)
-    s"delete ${parameters.head} success"
+    val (indexName, indexType) = (parameters.head, parameters(1))
+    indexType match {
+      case "*" => ElasticCommand.deleteIndex(indexName)
+      case _ => ElasticCommand.deleteIndexType(indexName, indexType)
+    }
+
+    s"delete ${parameters.head} $indexType success"
   }
 
   def query(parameters: Seq[String]): String = {
@@ -70,10 +74,16 @@ object ELKCommand {
     }
     ElasticCommand.index(indexName, indexType, uf)
   }
+
   def analysis(parameters: Seq[String]): String = {
     val (analyzer, doc) = (parameters.head, parameters(1))
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
+
     val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
+    xContentToStr(builder, analyzeResponse)
+  }
+
+  def xContentToStr(builder: XContentBuilder, analyzeResponse: AnalyzeResponse): String = {
     analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.bytes().toUtf8
   }
