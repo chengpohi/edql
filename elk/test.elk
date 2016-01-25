@@ -1,1 +1,5 @@
-count "chengpohi-tmp"
+count "chengpohi"
+//query "chengpohi"
+//reindex "chengpohi-tmp" "chengpohi" "bookmark" "name,created_at,url"
+//delete "chengpohi" "bookmark"
+//delete "chengpohi"
