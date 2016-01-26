@@ -8,7 +8,7 @@ class ELKInstrumentParser {
 
   import fastparse.all._
 
-  val StringChars = NamedFunction(!"\"\\ ".contains(_: Char), "StringChars")
+  val StringChars = NamedFunction(!"\"\\".contains(_: Char), "StringChars")
 
   val strChars = P(CharsWhile(StringChars))
   val space = P(CharsWhile(" \r\n".contains(_)).?)
@@ -27,15 +27,22 @@ class ELKInstrumentParser {
     ("query", Some(ELKCommand.q), Seq(c)))
   val reindex = P("reindex" ~ space ~ strOrVar.rep(4, sep = " ")).map(
     c => ("reindex", Some(ELKCommand.r), c))
-  val index = P("index" ~ space ~ strOrVar.rep(3, sep = " ")).map(
+  val index = P("index" ~ space ~/ strOrVar.rep(3, sep = " ")).map(
     c => ("index", Some(ELKCommand.i), c)
   )
   val createIndex = P("createIndex" ~ space ~ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
+  )
+  val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(
+    c => ("getMapping", Some(ELKCommand.gm), Seq(c))
   )
   val update = P("update" ~ space ~ strOrVar.rep(3, sep = " ")).map(c =>
     ("query", Some(ELKCommand.u), c))
   val analysis = P("analysis" ~ space ~ strOrVar.rep(2, sep = " ")).map(c =>
     ("analysis", Some(ELKCommand.a), c))
   val functionInstrument = P(strName.rep(1).! ~ "(" ~/ parameter.rep ~ ")").map(f => (f._1, None, f._2))
+
+  val instrument = P(space ~ (status | count | delete | query | reindex
+    | index | createIndex | update | analysis | getMapping | functionInstrument)
+    ~ space).map(ELK.Instrument)
 }

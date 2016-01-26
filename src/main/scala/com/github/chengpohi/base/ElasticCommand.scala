@@ -11,6 +11,12 @@ import scala.concurrent.duration.Duration
  * Created by chengpohi on 1/6/16.
  */
 object ElasticCommand extends ElasticBase {
+  def getMapping(indexName: String)  = {
+    client.execute {
+      get mapping indexName
+    }
+  }
+
   def index(indexName: String, indexType: String, uf: (String, String)): String = {
     val indexResponse = indexField(indexName, indexType, uf)
     Await.result(indexResponse, Duration.Inf).getId
