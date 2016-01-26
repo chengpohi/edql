@@ -1,10 +1,13 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.ResponseGenerator
+import com.github.chengpohi.ResponseGenerator._
 import com.github.chengpohi.base.{ElasticCommand}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.common.xcontent.{XContentBuilder, ToXContent, XContentType, XContentFactory}
 
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import scala.concurrent.duration.Duration
 
 /**
@@ -24,6 +27,16 @@ object ELKCommand {
   val u: Seq[String] => String = update
   val ci: Seq[String] => String = createIndex
   val a: Seq[String] => String = analysis
+  val gm: Seq[String] => String = getMapping
+
+  def getMapping(parameters: Seq[String]): String = {
+    val indexName = parameters.head
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+
+    val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
+    val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
+    buildGetMappingResponse(mappings)
+  }
 
   def createIndex(parameters: Seq[String]): String = {
     val createResponse = ElasticCommand.createIndex(parameters.head)
@@ -80,11 +93,7 @@ object ELKCommand {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
 
     val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
-    xContentToStr(builder, analyzeResponse)
+    buildAnalyzeResponse(analyzeResponse)
   }
 
-  def xContentToStr(builder: XContentBuilder, analyzeResponse: AnalyzeResponse): String = {
-    analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
-    builder.bytes().toUtf8
-  }
 }
