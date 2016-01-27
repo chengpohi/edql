@@ -40,9 +40,12 @@ class ELKInstrumentParser {
     ("query", Some(ELKCommand.u), c))
   val analysis = P("analysis" ~ space ~ strOrVar.rep(2, sep = " ")).map(c =>
     ("analysis", Some(ELKCommand.a), c))
+  val getDocById = P("get" ~ space ~ strOrVar.rep(3, sep = " ")).map(c =>
+    ("getDocById", Some(ELKCommand.gd), c))
+
   val functionInstrument = P(strName.rep(1).! ~ "(" ~/ parameter.rep ~ ")").map(f => (f._1, None, f._2))
 
   val instrument = P(space ~ (status | count | delete | query | reindex
-    | index | createIndex | update | analysis | getMapping | functionInstrument)
+    | index | createIndex | update | analysis | getMapping | getDocById | functionInstrument)
     ~ space).map(ELK.Instrument)
 }

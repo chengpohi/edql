@@ -2,6 +2,7 @@ package com.github.chengpohi
 
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.common.xcontent._
 
 import scala.collection.JavaConverters._
@@ -38,4 +39,11 @@ class ResponseGenerator {
     builder.bytes().toUtf8
   }
 
+  def buildGetResponse(getResponse: GetResponse): String = {
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.startObject()
+    getResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    builder.endObject()
+    builder.bytes().toUtf8
+  }
 }
