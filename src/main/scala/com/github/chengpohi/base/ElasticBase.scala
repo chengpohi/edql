@@ -138,7 +138,7 @@ class ElasticBase {
     analyzeResponse
   }
 
-  def getDocById(indexName: String, indexType: String, docId: String): GetResponse = client.execute {
+  def getDocById(indexName: String, indexType: String, docId: String) = client.execute {
     get id docId from s"$indexName/$indexType"
-  }.await
+  }
 }

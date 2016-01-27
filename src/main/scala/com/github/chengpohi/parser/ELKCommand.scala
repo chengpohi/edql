@@ -4,6 +4,7 @@ import com.github.chengpohi.ResponseGenerator
 import com.github.chengpohi.base.ElasticCommand
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.common.xcontent.{XContentFactory, XContentType}
 
 import scala.concurrent.duration.Duration
@@ -27,6 +28,7 @@ object ELKCommand extends ResponseGenerator{
   val ci: Seq[String] => String = createIndex
   val a: Seq[String] => String = analysis
   val gm: Seq[String] => String = getMapping
+  val gd: Seq[String] => String = getDocById
 
   def getMapping(parameters: Seq[String]): String = {
     val indexName = parameters.head
@@ -94,10 +96,14 @@ object ELKCommand extends ResponseGenerator{
 
   def analysis(parameters: Seq[String]): String = {
     val (analyzer, doc) = (parameters.head, parameters(1))
-    val builder = XContentFactory.contentBuilder(XContentType.JSON)
 
     val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
     buildAnalyzeResponse(analyzeResponse)
   }
 
+  def getDocById(parameters: Seq[String]): String = {
+    val (indexName, indexType, id) = (parameters.head, parameters(1), parameters(2))
+    val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName, indexType, id), Duration.Inf)
+    buildGetResponse(getResponse)
+  }
 }
