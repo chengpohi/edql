@@ -12,7 +12,6 @@ import scala.collection.mutable.ArrayBuffer
 object ELKParser extends ELKInstrumentParser{
   import fastparse.all._
 
-
   val methodParameter = P(space ~ "var" ~ space ~ strName.rep.! ~ ",".?).map(s => "$" + s)
   val functionDefine: P[(String, Map[String, String])] =
     P(space ~ "function" ~ space ~/ strName.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>

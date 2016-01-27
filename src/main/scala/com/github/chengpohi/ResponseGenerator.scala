@@ -3,13 +3,14 @@ package com.github.chengpohi
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.common.xcontent._
+
 import scala.collection.JavaConverters._
 
 /**
  * elasticshell
  * Created by chengpohi on 1/26/16.
  */
-object ResponseGenerator {
+class ResponseGenerator {
   val MAPPINGS = new XContentBuilderString("mappings")
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
