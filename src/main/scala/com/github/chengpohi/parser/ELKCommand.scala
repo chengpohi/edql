@@ -1,20 +1,19 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.ResponseGenerator
-import com.github.chengpohi.ResponseGenerator._
-import com.github.chengpohi.base.{ElasticCommand}
+import com.github.chengpohi.base.ElasticCommand
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
-import org.elasticsearch.common.xcontent.{XContentBuilder, ToXContent, XContentType, XContentFactory}
+import org.elasticsearch.common.xcontent.{XContentFactory, XContentType}
 
-import scala.concurrent.{Future, Await}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand {
+object ELKCommand extends ResponseGenerator{
 
   val TUPLE = """\((.*),(.*)\)""".r
 
@@ -62,7 +61,12 @@ object ELKCommand {
   }
 
   def query(parameters: Seq[String]): String = {
-    ElasticCommand.getAllDataByIndexName(parameters.head).toString
+    val (indexName, indexType) = (parameters.head, parameters(1))
+    indexType match {
+      case "*" => ElasticCommand.getAllDataByIndexName(indexName).toString
+      case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
+    }
+
   }
 
   def update(parameters: Seq[String]): String = {

@@ -23,8 +23,8 @@ class ELKInstrumentParser {
     ("count", Some(ELKCommand.c), Seq(c)))
   val delete = P("delete" ~ space ~ strOrVar ~ space ~ strOrVar.?).map(c =>
     ("delete", Some(ELKCommand.d), Seq(c._1, c._2.getOrElse("*"))))
-  val query = P("query" ~ space ~ strOrVar).map(c =>
-    ("query", Some(ELKCommand.q), Seq(c)))
+  val query = P("query" ~ space ~ strOrVar ~ space ~ strOrVar.?).map(c =>
+    ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse("*"))))
   val reindex = P("reindex" ~ space ~ strOrVar.rep(4, sep = " ")).map(
     c => ("reindex", Some(ELKCommand.r), c))
   val index = P("index" ~ space ~/ strOrVar.rep(3, sep = " ")).map(
