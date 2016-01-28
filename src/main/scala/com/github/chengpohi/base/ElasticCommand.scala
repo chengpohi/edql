@@ -17,10 +17,6 @@ object ElasticCommand extends ElasticBase {
     }
   }
 
-  def index(indexName: String, indexType: String, uf: (String, String)): String = {
-    val indexResponse = indexField(indexName, indexType, uf)
-    Await.result(indexResponse, Duration.Inf).getId
-  }
 
   def update(indexName: String, indexType: String, uf: (String, String)): String = {
     val res = getAllDataByScan(indexName, Some(indexType))
