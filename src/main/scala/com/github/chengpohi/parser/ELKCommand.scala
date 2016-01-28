@@ -14,7 +14,7 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand extends ResponseGenerator{
+object ELKCommand extends ResponseGenerator {
 
   val TUPLE = """\((.*),(.*)\)""".r
 
@@ -86,12 +86,19 @@ object ELKCommand extends ResponseGenerator{
   }
 
   def index(parameters: Seq[String]): String = {
-    val (indexName, indexType, fields) = (parameters.head, parameters(1), parameters(2))
+    val (indexName, indexType, fields, id) = (parameters.head, parameters(1), parameters(2), parameters(3))
     val uf: (String, String) = fields match {
       case TUPLE(field, value) => (field.trim, value.trim)
       case _ => null
     }
-    ElasticCommand.index(indexName, indexType, uf)
+    id match {
+      case "*" =>
+        val indexResponse = ElasticCommand.indexField(indexName, indexType, uf)
+        Await.result(indexResponse, Duration.Inf).getId
+      case id: String =>
+        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, uf, id)
+        Await.result(indexResponse, Duration.Inf).getId
+    }
   }
 
   def analysis(parameters: Seq[String]): String = {

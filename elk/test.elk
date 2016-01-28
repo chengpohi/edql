@@ -4,9 +4,8 @@ count "chengpohi"
 //delete "chengpohi" "bookmark"
 //delete "chengpohi"
 
-var bookmarks = query "chengpohi" "bookmark"
-bookmarks \\ "hits" \\ "hits" foreach (i => {
-  var tabId = i \\ "_source" \\ "_tab_id"
-  var tab = get "chengpohi" "tab" tabId
-  tab \\ ""
+query "chengpohi" "tab" \\ "hits" \\ "hits" foreach(i => {
+  var name = i \\ "_source" \\ "name"
+  var id = i \\ "_source" \\ "id"
+  update "chengpohi" "bookmark" id "(_tab_name, $name)"
 })

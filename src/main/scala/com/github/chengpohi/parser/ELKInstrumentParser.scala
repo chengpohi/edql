@@ -27,8 +27,8 @@ class ELKInstrumentParser {
     ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse("*"))))
   val reindex = P("reindex" ~ space ~/ strOrVar.rep(4, sep = " ")).map(
     c => ("reindex", Some(ELKCommand.r), c))
-  val index = P("index" ~ space ~/ strOrVar.rep(3, sep = " ")).map(
-    c => ("index", Some(ELKCommand.i), c)
+  val index = P("index" ~ space ~/ strOrVar.rep(3, sep = " ") ~ space ~ strOrVar.?).map(
+    c => ("index", Some(ELKCommand.i), c._1 :+ c._2.getOrElse("*"))
   )
   val createIndex = P("createIndex" ~ space ~/ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
