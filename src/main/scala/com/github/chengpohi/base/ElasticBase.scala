@@ -55,6 +55,10 @@ class ElasticBase {
     index into indexName / indexType fields uf
   }
 
+  def indexFieldById(indexName: String, indexType: String, uf: (String, String), docId: String): Future[IndexResponse] = client.execute {
+    index into indexName / indexType fields uf id docId
+  }
+
   def indexJSON(indexName: String, indexType: String, json: String): String = {
     val resp = client.execute {
       index into indexName / indexType doc new JsonDocumentSource(json)
