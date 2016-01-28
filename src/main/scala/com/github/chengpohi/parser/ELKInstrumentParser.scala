@@ -33,7 +33,7 @@ class ELKInstrumentParser {
   val createIndex = P("createIndex" ~ space ~/ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
   )
-  val getMapping = P(space ~ strOrVar ~ space ~/ "mapping").map(
+  val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(
     c => ("getMapping", Some(ELKCommand.gm), Seq(c))
   )
   val update = P("update" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
