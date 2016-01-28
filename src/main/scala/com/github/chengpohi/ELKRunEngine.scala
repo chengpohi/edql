@@ -25,8 +25,8 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
           try {
             println(ins(ps))
           } catch {
-            case e: IndexMissingException => e.printStackTrace()
-            case e: Exception => e.printStackTrace()
+            case e: IndexMissingException => println(e.getCause.getLocalizedMessage)
+            case e: Exception => println(e.getCause.getLocalizedMessage)
           }
       }
     }
