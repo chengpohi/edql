@@ -11,6 +11,7 @@ object ELKRepl {
     while (true) {
       print("input>")
       val str = StdIn.readLine()
+      if (str == "exit") System.exit(0)
       ELKRunEngine.run(str)
     }
   }
