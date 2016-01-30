@@ -66,6 +66,6 @@ class ResponseGenerator {
   }
 
   def buildCreateIndexResponse(createIndexResponse: CreateIndexResponse): String = {
-    s"""{"acknowledged": ${createIndexResponse.isAcknowledged}}"""
+    write(("acknowledged", createIndexResponse.isAcknowledged))
   }
 }
