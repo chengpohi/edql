@@ -1,6 +1,7 @@
 package com.github.chengpohi.helper
 
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.common.xcontent._
@@ -62,5 +63,9 @@ class ResponseGenerator {
 
   def beautyJSON(json: String): String = {
     pretty(render(parse(json)))
+  }
+
+  def buildCreateIndexResponse(createIndexResponse: CreateIndexResponse): String = {
+    s"""{"acknowledged": ${createIndexResponse.isAcknowledged}}"""
   }
 }

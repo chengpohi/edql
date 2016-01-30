@@ -2,10 +2,12 @@ package com.github.chengpohi.parser
 
 import com.github.chengpohi.base.ElasticCommand
 import com.github.chengpohi.helper.ResponseGenerator
+import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.get.GetResponse
-import org.elasticsearch.common.xcontent.{XContentFactory, XContentType}
+import com.sksamuel.elastic4s.ElasticDsl._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -15,10 +17,9 @@ import scala.concurrent.{Await, Future}
  * Created by chengpohi on 1/18/16.
  */
 object ELKCommand {
-
-
   val responseGenerator = new ResponseGenerator
-  val TUPLE = """\((.*),(.*)\)""".r
+  val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
+
 
   import responseGenerator._
 
@@ -33,6 +34,7 @@ object ELKCommand {
   val a: Seq[String] => String = analysis
   val gm: Seq[String] => String = getMapping
   val gd: Seq[String] => String = getDocById
+  val m: Seq[String] => String = mapping
 
   def getMapping(parameters: Seq[String]): String = {
     val indexName = parameters.head
@@ -108,6 +110,24 @@ object ELKCommand {
 
     val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
     buildAnalyzeResponse(analyzeResponse)
+  }
+
+
+  def buildFieldType(key: String, value: String) = value match {
+    case "string" => value typed StringType
+    case "date" => value typed DateType
+  }
+
+  def mapping(parameters: Seq[String]): String = {
+    val (indexName, indexType, fields) = (parameters.head, parameters(1), parameters(2))
+    val typeDefinitions = TUPLE.findAllIn(fields).map {
+      case TUPLE(key, value) => {
+        buildFieldType(key, value)
+      }
+    }
+    val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName, indexType, typeDefinitions.toIterable)
+    val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
+    buildCreateIndexResponse(result)
   }
 
   def getDocById(parameters: Seq[String]): String = {
