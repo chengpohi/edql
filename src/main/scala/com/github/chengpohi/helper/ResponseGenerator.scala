@@ -1,9 +1,12 @@
-package com.github.chengpohi
+package com.github.chengpohi.helper
 
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.common.xcontent._
+import org.json4s._
+import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
 
@@ -13,6 +16,7 @@ import scala.collection.JavaConverters._
  */
 class ResponseGenerator {
   val MAPPINGS = new XContentBuilderString("mappings")
+  implicit val formats = DefaultFormats
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
@@ -45,5 +49,18 @@ class ResponseGenerator {
     getResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
+  }
+
+  def extractJSON(json: String, filterName: String): String = {
+    val jObj = parse(json)
+    val filtered = jObj filterField {
+      case JField(`filterName`, _) => true
+      case _ => false
+    }
+    write(filtered)
+  }
+
+  def beautyJSON(json: String): String = {
+    pretty(render(parse(json)))
   }
 }
