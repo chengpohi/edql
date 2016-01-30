@@ -1,4 +1,6 @@
-package com.github.chengpohi
+package com.github.chengpohi.repl
+
+import com.github.chengpohi.ELKRunEngine
 
 import scala.io.StdIn
 

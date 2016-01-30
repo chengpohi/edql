@@ -89,9 +89,43 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
       ELKRunEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
     }
-    assert(outContent.toString.contains(""""_id":"hJJJJJJH""""))
+    assert(outContent.toString.contains( """"_id":"hJJJJJJH""""))
   }
 
+  "ELKParser" should "extract json data" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
+      Thread.sleep(1000)
+      ELKRunEngine.run( """query "test-parser-name" \\ "name" """)
+    }
+    assert(outContent.toString.contains( """[{"name":"hello"}]"""))
+  }
+
+  "ELKParser" should "beauty json data" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
+      Thread.sleep(1000)
+      ELKRunEngine.run( """query "test-parser-name" beauty""")
+    }
+    assert(outContent.toString.contains("""{
+                                          |  "took" : 2,
+                                          |  "timed_out" : false,
+                                          |  "_shards" : {
+                                          |    "total" : 5,
+                                          |    "successful" : 5,
+                                          |    "failed" : 0
+                                          |  },
+                                          |  "hits" : {
+                                          |    "total" : 0,
+                                          |    "max_score" : null,
+                                          |    "hits" : [ ]
+                                          |  }
+                                          |}""".stripMargin))
+  }
+
+  "ELKParser" should "set mapping for indexname indextype" in {
+    //ELKRunEngine.run("""mapping "chengpohi-tmp" "bookmark" "[(name,string),(created_at,date)]" """)
+  }
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")
   }

@@ -42,10 +42,24 @@ class ELKInstrumentParser {
     ("analysis", Some(ELKCommand.a), c))
   val getDocById = P("get" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
     ("getDocById", Some(ELKCommand.gd), c))
+  val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>
+    ("extract", ELKCommand.findJSONElements(c))
+  )
+
+  val beauty = P(space ~ "beauty" ~ space).map(c =>
+    ("beauty", ELKCommand.beautyJson)
+  )
 
   val functionInstrument = P(strName.rep(1).! ~ "(" ~/ parameter.rep ~ ")").map(f => (f._1, None, f._2))
 
   val instrument = P(space ~ (status | count | delete | query | reindex
     | index | createIndex | update | analysis | getMapping | getDocById | functionInstrument)
-    ~ space).map(ELK.Instrument)
+    ~ space ~ (extractJSON | beauty).? ~ space).map(i => i._4 match {
+    case Some((name, extractFunction)) if i._2.isDefined => {
+      val f: Seq[String] => String = i._2.get
+      val fComponent = (f andThen extractFunction)(_)
+      ELK.Instrument(i._1, Some(fComponent), i._3)
+    }
+    case _ => ELK.Instrument(i._1, i._2, i._3)
+  })
 }
