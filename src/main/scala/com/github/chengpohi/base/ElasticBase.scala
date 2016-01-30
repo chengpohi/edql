@@ -37,7 +37,7 @@ class ElasticBase {
   }
 
   def deleteById(documentId: String, indexName: String, indexType: String): Boolean = client.execute {
-    delete id documentId from s"${indexName}/${indexType}"
+    delete id documentId from s"$indexName/$indexType"
   }.await.isFound
 
   def createIndex(indexName: String) = client.execute {

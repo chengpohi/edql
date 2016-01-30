@@ -55,7 +55,6 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Console.withOut(outContent) {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" """)
       Thread.sleep(1000)
-
       ELKRunEngine.run( """ update "test-parser-name" "test-parser-type" "(name, elasticservice)" """)
       Thread.sleep(3000)
       ELKRunEngine.run( """ query "test-parser-name" """)
@@ -101,30 +100,14 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString.contains( """[{"name":"hello"}]"""))
   }
 
-  "ELKParser" should "beauty json data" in {
-    Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
-      Thread.sleep(1000)
-      ELKRunEngine.run( """query "test-parser-name" beauty""")
-    }
-    assert(outContent.toString.contains("""{
-                                          |  "took" : 2,
-                                          |  "timed_out" : false,
-                                          |  "_shards" : {
-                                          |    "total" : 5,
-                                          |    "successful" : 5,
-                                          |    "failed" : 0
-                                          |  },
-                                          |  "hits" : {
-                                          |    "total" : 0,
-                                          |    "max_score" : null,
-                                          |    "hits" : [ ]
-                                          |  }
-                                          |}""".stripMargin))
-  }
-
   "ELKParser" should "set mapping for indexname indextype" in {
-    //ELKRunEngine.run("""mapping "chengpohi-tmp" "bookmark" "[(name,string),(created_at,date)]" """)
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """mapping "test-mapping" "bookmark" "[(name,string),(created_at,date)]" """)
+      Thread.sleep(1000)
+      ELKRunEngine.run( """ "test-mapping" mapping """)
+    }
+    println(outContent.toString)
+    ELKRunEngine.run( """ delete "test-mapping"""")
   }
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")

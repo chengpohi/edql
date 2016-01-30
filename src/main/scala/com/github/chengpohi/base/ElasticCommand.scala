@@ -1,22 +1,27 @@
 package com.github.chengpohi.base
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.elasticsearch.action.search.SearchResponse
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 /**
- * elasticservice
+ * elasticshell
  * Created by chengpohi on 1/6/16.
  */
 object ElasticCommand extends ElasticBase {
-  def getMapping(indexName: String)  = {
+  def mappings(indexName: String, indexType: String, typeDefinitions: Iterable[TypedFieldDefinition]) = {
+    client.execute {
+      create index indexName mappings (
+        indexType as typeDefinitions
+        )
+    }
+  }
+
+  def getMapping(indexName: String) = {
     client.execute {
       get mapping indexName
     }
   }
-
 
   def update(indexName: String, indexType: String, uf: (String, String)): String = {
     val res = getAllDataByScan(indexName, Some(indexType))
