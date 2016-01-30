@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.ResponseGenerator
 import com.github.chengpohi.base.ElasticCommand
+import com.github.chengpohi.helper.ResponseGenerator
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.get.GetResponse
@@ -14,9 +14,13 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand extends ResponseGenerator {
+object ELKCommand {
 
+
+  val responseGenerator = new ResponseGenerator
   val TUPLE = """\((.*),(.*)\)""".r
+
+  import responseGenerator._
 
   val h: Seq[String] => String = health
   val c: Seq[String] => String = count
@@ -32,7 +36,6 @@ object ELKCommand extends ResponseGenerator {
 
   def getMapping(parameters: Seq[String]): String = {
     val indexName = parameters.head
-    val builder = XContentFactory.contentBuilder(XContentType.JSON)
 
     val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
     val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
@@ -68,7 +71,6 @@ object ELKCommand extends ResponseGenerator {
       case "*" => ElasticCommand.getAllDataByIndexName(indexName).toString
       case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
     }
-
   }
 
   def update(parameters: Seq[String]): String = {
@@ -112,5 +114,13 @@ object ELKCommand extends ResponseGenerator {
     val (indexName, indexType, id) = (parameters.head, parameters(1), parameters(2))
     val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName, indexType, id), Duration.Inf)
     buildGetResponse(getResponse)
+  }
+
+  def findJSONElements(c: String): String => String= {
+    extractJSON(_, c)
+  }
+
+  def beautyJson(): String => String = {
+    beautyJSON
   }
 }
