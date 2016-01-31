@@ -114,8 +114,8 @@ object ELKCommand {
 
 
   def buildFieldType(key: String, value: String) = value match {
-    case "string" => value typed StringType
-    case "date" => value typed DateType
+    case "string" => key typed StringType
+    case "date" => key typed DateType
   }
 
   def mapping(parameters: Seq[String]): String = {
