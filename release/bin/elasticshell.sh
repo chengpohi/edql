@@ -18,4 +18,4 @@ SINY_HOME=`dirname "$SCRIPT"`/..
 SINY_HOME=`cd "$SINY_HOME"; pwd`
 
 
-java -cp conf/:lib/elasticshell-assembly-1.0.jar com.github.chengpohi.ELKRepl
+java -cp conf/:lib/elasticshell-assembly-1.0.jar com.github.chengpohi.repl.ELKRepl
