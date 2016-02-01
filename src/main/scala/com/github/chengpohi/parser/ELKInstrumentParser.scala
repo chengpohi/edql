@@ -4,19 +4,8 @@ package com.github.chengpohi.parser
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-class ELKInstrumentParser {
-
+class ELKInstrumentParser extends CollectionParser{
   import fastparse.all._
-
-  val StringChars = NamedFunction(!"\"\\".contains(_: Char), "StringChars")
-
-  val strChars = P(CharsWhile(StringChars))
-  val space = P(CharsWhile(" \r\n".contains(_)).?)
-  val strName = P(CharIn('a' to 'z', 'A' to 'Z'))
-  val strParameter: P[String] = P("\"" ~ strChars.rep(1).! ~ "\"")
-  val variable: P[String] = P(strName.rep(1)).!.map(s => "$" + s)
-  val parameter: P[String] = P(space ~ strParameter ~ ",".? ~ space)
-  val strOrVar: P[String] = P(strParameter | variable)
 
   val status = P("health").map(s => ("health", Some(ELKCommand.h), Seq()))
   val count = P("count" ~ space ~/ strOrVar).map(c =>
@@ -52,7 +41,7 @@ class ELKInstrumentParser {
     ("beauty", ELKCommand.beautyJson)
   )
 
-  val functionInstrument = P(strName.rep(1).! ~ "(" ~/ parameter.rep ~ ")").map(f => (f._1, None, f._2))
+  val functionInstrument = P(variableChars.rep(1).! ~ "(" ~/ parameter.rep ~ ")").map(f => (f._1, None, f._2))
 
   val instrument = P(space ~ (status | count | delete | query | reindex
     | index | createIndex | update | analysis | getMapping | getDocById | mapping | functionInstrument)

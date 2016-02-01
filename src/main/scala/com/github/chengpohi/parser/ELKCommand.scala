@@ -3,6 +3,7 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.base.ElasticCommand
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
+import fastparse.core.Parsed
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
@@ -16,7 +17,7 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand {
+object ELKCommand extends CollectionParser{
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
 
@@ -112,23 +113,29 @@ object ELKCommand {
     buildAnalyzeResponse(analyzeResponse)
   }
 
-
-  def buildFieldType(key: String, value: String) = value match {
-    case "string" => key typed StringType
-    case "date" => key typed DateType
+  def buildFieldType(vs: Seq[String]) = {
+    def generateType(fieldName: String, fieldType: String) = fieldType match {
+      case "string" => vs.head typed StringType
+      case "date" => vs.head typed DateType
+    }
+    vs match {
+      case Seq(fieldName, fieldSourceType) => generateType(fieldName, fieldSourceType)
+      case Seq(fieldName, fieldSourceType, analyzer) => generateType(fieldName, fieldSourceType) index analyzer
+    }
   }
 
   def mapping(parameters: Seq[String]): String = {
     val (indexName, indexType, fields) = (parameters.head, parameters(1), parameters(2))
-    val typeDefinitions = TUPLE.findAllIn(fields).map {
-      case TUPLE(key, value) => {
-        buildFieldType(key, value)
-      }
+    val Parsed.Success(mapFields, _) = collection.parse(fields)
+    val typeDefinitions = mapFields.map {
+      case s: Seq[String] => buildFieldType(s)
     }
     val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName, indexType, typeDefinitions.toIterable)
     val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
     buildCreateIndexResponse(result)
   }
+
+
 
   def getDocById(parameters: Seq[String]): String = {
     val (indexName, indexType, id) = (parameters.head, parameters(1), parameters(2))
