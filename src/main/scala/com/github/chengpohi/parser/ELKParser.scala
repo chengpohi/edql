@@ -12,9 +12,9 @@ import scala.collection.mutable.ArrayBuffer
 object ELKParser extends ELKInstrumentParser{
   import fastparse.all._
 
-  val methodParameter = P(space ~ "var" ~ space ~ strName.rep.! ~ ",".?).map(s => "$" + s)
+  val methodParameter = P(space ~ "var" ~ space ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
   val functionDefine: P[(String, Map[String, String])] =
-    P(space ~ "function" ~ space ~/ strName.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>
+    P(space ~ "function" ~ space ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>
       (f._1, f._2.map(i => i -> "").toMap))
   val function = P(functionDefine ~/ instrument.rep ~ "}" ~ space).map(f => ELK.Function((f._1, f._3, f._2)))
 
@@ -37,12 +37,6 @@ object ELKParser extends ELKInstrumentParser{
     }
     (functions, instruments)
   }
-}
-
-case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
-  def apply(t: T) = f(t)
-
-  override def toString() = name
 }
 
 object ELK {
