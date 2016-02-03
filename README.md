@@ -1,22 +1,19 @@
 # ElasticShell
------------
 
 ## Preface
-This a *REPL* for elasticsearch, it uses *elk* syntax to interact with *elasticsearch*, it's more *BDD*, more easy to use it.
-Also you can use *elk* file to batch execute *elasticsearch* commands like shell file.
+This a ***REPL*** for elasticsearch, it uses ***elk*** syntax to interact with ***elasticsearch***, it's more ***BDD***, more easy to use it.
+Also you can use ***elk*** file to batch execute ***elasticsearch*** commands like shell file.
 
 ## Version
-For now support *elasticsearch-1.7.1*
+For now support ***elasticsearch-1.7.1***
 
 ## Installation
 
 ## conf
 
-In the *conf/application.conf*, you can configure your *elasticsearch host, port and clustername*.
+In the ***conf/application.conf***, you can configure your ***elasticsearch host, port and clustername***.
 
 ## Start
-
-Input:
 
 ```
 bin/elasticshell.sh
