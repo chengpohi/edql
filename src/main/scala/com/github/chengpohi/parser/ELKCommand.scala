@@ -17,133 +17,166 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand extends CollectionParser{
+object ELKCommand extends CollectionParser {
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
 
 
   import responseGenerator._
 
-  val h: Seq[String] => String = health
-  val c: Seq[String] => String = count
-  val d: Seq[String] => String = delete
-  val q: Seq[String] => String = query
-  val r: Seq[String] => String = reindex
-  val i: Seq[String] => String = index
-  val u: Seq[String] => String = update
-  val ci: Seq[String] => String = createIndex
-  val a: Seq[String] => String = analysis
-  val gm: Seq[String] => String = getMapping
-  val gd: Seq[String] => String = getDocById
-  val m: Seq[String] => String = mapping
+  val h: Seq[Any] => String = health
+  val c: Seq[Any] => String = count
+  val d: Seq[Any] => String = delete
+  val q: Seq[Any] => String = query
+  val r: Seq[Any] => String = reindex
+  val i: Seq[Any] => String = index
+  val u: Seq[Any] => String = update
+  val ci: Seq[Any] => String = createIndex
+  val a: Seq[Any] => String = analysis
+  val gm: Seq[Any] => String = getMapping
+  val gd: Seq[Any] => String = getDocById
+  val m: Seq[Any] => String = mapping
 
-  def getMapping(parameters: Seq[String]): String = {
-    val indexName = parameters.head
-
-    val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
-    val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
-    buildGetMappingResponse(mappings)
+  def getMapping(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName) => {
+        val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName.asInstanceOf[String])
+        val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
+        buildGetMappingResponse(mappings)
+      }
+    }
   }
 
-  def createIndex(parameters: Seq[String]): String = {
-    val createResponse = ElasticCommand.createIndex(parameters.head)
-    Await.result(createResponse, Duration.Inf).isAcknowledged.toString
+  def createIndex(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName) =>
+        val createResponse = ElasticCommand.createIndex(indexName.asInstanceOf[String])
+        Await.result(createResponse, Duration.Inf).isAcknowledged.toString
+    }
   }
 
-  def health(parameters: Seq[String]): String = {
+  def health(parameters: Seq[Any]): String = {
     ElasticCommand.clusterHealth()
   }
 
-  def count(parameters: Seq[String]): String = {
-    ElasticCommand.countCommand(parameters.head)
-  }
-
-  def delete(parameters: Seq[String]): String = {
-    val (indexName, indexType) = (parameters.head, parameters(1))
-    indexType match {
-      case "*" => ElasticCommand.deleteIndex(indexName)
-      case _ => ElasticCommand.deleteIndexType(indexName, indexType)
-    }
-
-    s"delete ${parameters.head} $indexType success"
-  }
-
-  def query(parameters: Seq[String]): String = {
-    val (indexName, indexType) = (parameters.head, parameters(1))
-    indexType match {
-      case "*" => ElasticCommand.getAllDataByIndexName(indexName).toString
-      case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
+  def count(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName) =>
+        ElasticCommand.countCommand(indexName.asInstanceOf[String])
     }
   }
 
-  def update(parameters: Seq[String]): String = {
-    val (indexName, indexType, updateFields) = (parameters.head, parameters(1), parameters(2))
-    val uf: (String, String) = updateFields match {
-      case TUPLE(field, value) => (field.trim, value.trim)
-      case _ => null
+  def delete(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType) => {
+        indexType match {
+          case "*" => ElasticCommand.deleteIndex(indexName.asInstanceOf[String])
+          case _ => ElasticCommand.deleteIndexType(indexName.asInstanceOf[String], indexType.asInstanceOf[String])
+        }
+        s"delete ${parameters.head} $indexType success"
+      }
     }
-    ElasticCommand.update(indexName, indexType, uf)
   }
 
-  def reindex(parameters: Seq[String]): String = {
-    val (sourceIndex, targetIndex, sourceIndexType, fields) = (parameters.head, parameters(1), parameters(2), parameters(3))
-    ElasticCommand.reindex(sourceIndex, targetIndex, sourceIndexType, fields.split(",").map(_.trim))
+  def query(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType) => {
+        indexType match {
+          case "*" => ElasticCommand.getAllDataByIndexName(indexName.asInstanceOf[String]).toString
+          case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName.asInstanceOf[String], indexType).toString
+        }
+      }
+    }
   }
 
-  def index(parameters: Seq[String]): String = {
-    val (indexName, indexType, fields, id) = (parameters.head, parameters(1), parameters(2), parameters(3))
-    val uf: (String, String) = fields match {
-      case TUPLE(field, value) => (field.trim, value.trim)
-      case _ => null
+  def update(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, updateFields) => {
+        val uf: (String, String) = updateFields.asInstanceOf[String] match {
+          case TUPLE(field, value) => (field.trim, value.trim)
+          case _ => null
+        }
+        ElasticCommand.update(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf)
+      }
     }
-    id match {
-      case "*" =>
-        val indexResponse = ElasticCommand.indexField(indexName, indexType, uf)
+  }
+
+  def reindex(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
+        ElasticCommand.reindex(sourceIndex.asInstanceOf[String], targetIndex.asInstanceOf[String], sourceIndexType.asInstanceOf[String],
+          fields.asInstanceOf[String].split(",").map(_.trim))
+      }
+    }
+  }
+
+  def index(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, fields) => {
+        val uf: (String, String) = fields.asInstanceOf[String] match {
+          case TUPLE(field, value) => (field.trim, value.trim)
+          case _ => null
+        }
+        val indexResponse = ElasticCommand.indexField(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf)
         Await.result(indexResponse, Duration.Inf).getId
-      case id: String =>
-        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, uf, id)
+      }
+      case Seq(indexName, indexType, fields, id) => {
+        val uf: (String, String) = fields.asInstanceOf[String] match {
+          case TUPLE(field, value) => (field.trim, value.trim)
+          case _ => null
+        }
+        val indexResponse = ElasticCommand.indexFieldById(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf, id.asInstanceOf[String])
         Await.result(indexResponse, Duration.Inf).getId
+      }
     }
   }
 
-  def analysis(parameters: Seq[String]): String = {
-    val (analyzer, doc) = (parameters.head, parameters(1))
-
-    val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
-    buildAnalyzeResponse(analyzeResponse)
+  def analysis(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(analyzer, doc) => {
+        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer.asInstanceOf[String], doc.asInstanceOf[String]), Duration.Inf)
+        buildAnalyzeResponse(analyzeResponse)
+      }
+    }
   }
 
-  def buildFieldType(vs: Seq[String]) = {
+  def buildFieldType(parameters: Seq[String]) = {
     def generateType(fieldName: String, fieldType: String) = fieldType match {
-      case "string" => vs.head typed StringType
-      case "date" => vs.head typed DateType
+      case "string" => fieldName typed StringType
+      case "date" => fieldName typed DateType
     }
-    vs match {
+    parameters match {
       case Seq(fieldName, fieldSourceType) => generateType(fieldName, fieldSourceType)
       case Seq(fieldName, fieldSourceType, analyzer) => generateType(fieldName, fieldSourceType) index analyzer
     }
   }
 
-  def mapping(parameters: Seq[String]): String = {
-    val (indexName, indexType, fields) = (parameters.head, parameters(1), parameters(2))
-    val Parsed.Success(mapFields, _) = collection.parse(fields)
-    val typeDefinitions = mapFields.map {
-      case s: Seq[String] => buildFieldType(s)
+  def mapping(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, fields) => {
+        val Parsed.Success(mapFields, _) = collection.parse(fields.asInstanceOf[String])
+        val typeDefinitions = mapFields.map {
+          case s: Seq[String @unchecked] => buildFieldType(s)
+        }
+        val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName.asInstanceOf[String], indexType.asInstanceOf[String], typeDefinitions.toIterable)
+        val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
+        buildCreateIndexResponse(result)
+      }
     }
-    val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName, indexType, typeDefinitions.toIterable)
-    val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
-    buildCreateIndexResponse(result)
   }
 
 
-
-  def getDocById(parameters: Seq[String]): String = {
-    val (indexName, indexType, id) = (parameters.head, parameters(1), parameters(2))
-    val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName, indexType, id), Duration.Inf)
-    buildGetResponse(getResponse)
+  def getDocById(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, id) => {
+        val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName.asInstanceOf[String],
+          indexType.asInstanceOf[String], id.asInstanceOf[String]), Duration.Inf)
+        buildGetResponse(getResponse)
+      }
+    }
   }
 
-  def findJSONElements(c: String): String => String= {
+  def findJSONElements(c: String): String => String = {
     extractJSON(_, c)
   }
 
