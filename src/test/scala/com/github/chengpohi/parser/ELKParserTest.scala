@@ -107,7 +107,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       ELKRunEngine.run( """ "test-mapping" mapping """)
     }
     assert(outContent.toString.contains(""""created_at":{"type":"date","format":"dateOptionalTime"}"""))
-    assert(outContent.toString.contains("""not_analyzed"""))
+    assert(outContent.toString.contains(""""not_analyzed"""))
     ELKRunEngine.run( """ delete "test-mapping"""")
   }
   after {
