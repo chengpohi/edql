@@ -102,7 +102,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "set mapping for indexname indextype" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """mapping "test-mapping" "bookmark" "[(name,string,not_analyzed),(created_at,date)]" """)
+      ELKRunEngine.run( """mapping "test-mapping" "bookmark" [("name","string","not_analyzed"),("created_at","date")] """)
       Thread.sleep(1000)
       ELKRunEngine.run( """ "test-mapping" mapping """)
     }
