@@ -152,17 +152,8 @@ object ELKCommand extends CollectionParser {
   }
 
   def mapping(parameters: Seq[Any]): String = {
-    parameters match {
-      case Seq(indexName, indexType, fields) => {
-        val Parsed.Success(mapFields, _) = collection.parse(fields.asInstanceOf[String])
-        val typeDefinitions = mapFields.map {
-          case s: Seq[String @unchecked] => buildFieldType(s)
-        }
-        val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName.asInstanceOf[String], indexType.asInstanceOf[String], typeDefinitions.toIterable)
-        val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
-        buildCreateIndexResponse(result)
-      }
-    }
+
+    ""
   }
 
 

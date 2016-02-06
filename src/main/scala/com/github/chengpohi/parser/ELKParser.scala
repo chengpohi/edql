@@ -39,6 +39,6 @@ object ELK {
     def value: Any
   }
 
-  case class Instrument(value: (String, Option[(Seq[String]) => String], Seq[String])) extends AnyVal with AST
+  case class Instrument(value: (String, Option[(Seq[Any]) => String], Seq[Any])) extends AnyVal with AST
 }
 
