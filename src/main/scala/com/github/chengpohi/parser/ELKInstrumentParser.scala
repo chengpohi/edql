@@ -45,7 +45,7 @@ class ELKInstrumentParser extends CollectionParser{
     | index | createIndex | update | analysis | getMapping | getDocById | mapping )
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
-      val f: Seq[String] => String = i._2.get
+      val f: Seq[Any] => String = i._2.get
       val fComponent = (f andThen extractFunction)(_)
       ELK.Instrument(i._1, Some(fComponent), i._3)
     }

@@ -14,16 +14,9 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
   def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): Unit = {
     instruments.foreach {
       case i: ELK.Instrument => i.value match {
-        case (name, None, parameters) =>
-          val (inss, vs) = functions.getOrElse(name, (Seq(), Map[String, String]()))
-          val vss = vs.keys.toList.zip(parameters).toMap
-          runInstruments(inss, vss)
         case (name, Some(ins), parameters) =>
-          val ps: Seq[String] = parameters.map(s => {
-            variables.getOrElse(s, s)
-          })
           try {
-            println(ins(ps))
+            println(ins(parameters))
           } catch {
             case e: IndexMissingException => println(e.getCause.getLocalizedMessage)
             case e: Exception => println(e.getCause.getLocalizedMessage)
