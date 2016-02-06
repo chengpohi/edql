@@ -31,7 +31,7 @@ class ELKInstrumentParser extends CollectionParser{
     ("analysis", Some(ELKCommand.a), c))
   val getDocById = P("get" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
     ("getDocById", Some(ELKCommand.gd), c))
-  val mapping = P("mapping" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
+  val mapping = P("mapping" ~ space ~/ ioParser).map(c =>
     ("mapping", Some(ELKCommand.m), c))
 
   val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>

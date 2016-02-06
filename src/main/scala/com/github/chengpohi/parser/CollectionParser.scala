@@ -24,6 +24,7 @@ class CollectionParser {
   val tuple: P[Seq[Any]] = P("(" ~ collection.rep(1, sep = space ~ "," ~ space.~/) ~ ")")
   val array: P[Seq[Any]] = P("[" ~ collection.rep(1, sep = space ~ "," ~ space.~/) ~ "]")
   val collection = P(space ~ (tuple | array | number | strOrVar) ~ space)
+  val ioParser = P(collection.rep(1, sep=space))
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
