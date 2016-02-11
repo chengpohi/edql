@@ -5,6 +5,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s.source.{JsonDocumentSource, DocumentMap}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
+import org.elasticsearch.action.bulk.BulkResponse
 
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
@@ -53,6 +54,15 @@ class ElasticBase {
 
   def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResponse] = client.execute {
     index into indexName / indexType fields fs
+  }
+
+  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]): Future[BulkResponse] = {
+    val bulkIndexes = for (
+      f <- fs
+    ) yield index into indexName / indexType fields f
+    client.execute {
+      bulk (bulkIndexes)
+    }
   }
 
   def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, String)], docId: String): Future[IndexResponse] = client.execute {

@@ -21,7 +21,7 @@ class CollectionParser {
   val strOrVar: P[String] = P(string | variable)
   val number: P[Int] = P(CharIn('0' to '9').rep(1)).!.map(_.toInt)
   val pair = P(string ~/ ":" ~/ collection)
-  val obj: P[Seq[Any]] = P("{" ~/ pair.rep(sep = ",".~/) ~ space ~ "}")
+  val obj: P[Seq[Any]] = P("{" ~ space ~/ pair.rep(sep = ",".~/) ~ space ~ "}")
 
 
   val tuple: P[Seq[Any]] = P("(" ~ collection.rep(1, sep = space ~ "," ~ space.~/) ~ ")")

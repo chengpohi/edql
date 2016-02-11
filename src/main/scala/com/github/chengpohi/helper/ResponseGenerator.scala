@@ -3,6 +3,7 @@ package com.github.chengpohi.helper
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
@@ -17,6 +18,10 @@ import scala.collection.JavaConverters._
  */
 class ResponseGenerator {
   val MAPPINGS = new XContentBuilderString("mappings")
+  val TOOK = new XContentBuilderString("took")
+  val ERRORS = new XContentBuilderString("errors")
+  val ITEMS = new XContentBuilderString("items");
+
   implicit val formats = DefaultFormats
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
@@ -42,6 +47,10 @@ class ResponseGenerator {
     analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
+  }
+
+  def buildBulkResponse(bulkResponse: BulkResponse): String = {
+    write(("hasFailures", bulkResponse.hasFailures))
   }
 
   def buildGetResponse(getResponse: GetResponse): String = {

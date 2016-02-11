@@ -4,7 +4,8 @@ package com.github.chengpohi.parser
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-class ELKInstrumentParser extends CollectionParser{
+class ELKInstrumentParser extends CollectionParser {
+
   import fastparse.all._
 
   val status = P("health").map(s => ("health", Some(ELKCommand.h), Seq()))
@@ -18,6 +19,9 @@ class ELKInstrumentParser extends CollectionParser{
     c => ("reindex", Some(ELKCommand.r), c))
   val index = P("index" ~ space ~/ ioParser ~ space).map(
     c => ("index", Some(ELKCommand.i), c)
+  )
+  val bulkIndex = P("bulkIndex" ~ space ~/ ioParser ~ space).map(
+    c => ("bulkIndex", Some(ELKCommand.bi), c)
   )
   val update = P("update" ~ space ~/ ioParser ~ space).map(c =>
     ("query", Some(ELKCommand.u), c)
@@ -43,7 +47,7 @@ class ELKInstrumentParser extends CollectionParser{
   )
 
   val instrument = P(space ~ (status | count | delete | query | reindex
-    | index | createIndex | update | analysis | getMapping | getDocById | mapping )
+    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Any] => String = i._2.get
