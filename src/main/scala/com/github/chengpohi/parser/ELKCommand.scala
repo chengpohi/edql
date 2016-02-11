@@ -7,6 +7,7 @@ import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 
 import scala.concurrent.duration.Duration
@@ -16,7 +17,7 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand extends CollectionParser {
+object ELKCommand{
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
 
@@ -29,6 +30,7 @@ object ELKCommand extends CollectionParser {
   val q: Seq[Any] => String = query
   val r: Seq[Any] => String = reindex
   val i: Seq[Any] => String = index
+  val bi: Seq[Any] => String = bulkIndex
   val u: Seq[Any] => String = update
   val ci: Seq[Any] => String = createIndex
   val a: Seq[Any] => String = analysis
@@ -102,6 +104,18 @@ object ELKCommand extends CollectionParser {
       case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
         ElasticCommand.reindex(sourceIndex.asInstanceOf[String], targetIndex.asInstanceOf[String], sourceIndexType.asInstanceOf[String],
           fields.asInstanceOf[String].split(",").map(_.trim))
+      }
+    }
+  }
+
+  def bulkIndex(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, fields) => {
+        val fs = fields.asInstanceOf[Seq[Seq[(String, String)]]]
+        val bulkResponse =
+          ElasticCommand.bulkIndex(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs)
+        val br: BulkResponse = Await.result(bulkResponse, Duration.Inf)
+        buildBulkResponse(br)
       }
     }
   }
