@@ -2,13 +2,12 @@ package com.github.chengpohi.parser
 
 import com.github.chengpohi.base.ElasticCommand
 import com.github.chengpohi.helper.ResponseGenerator
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
-import fastparse.core.Parsed
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.get.GetResponse
-import com.sksamuel.elastic4s.ElasticDsl._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -92,10 +91,7 @@ object ELKCommand extends CollectionParser {
   def update(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName, indexType, updateFields) => {
-        val uf: (String, String) = updateFields.asInstanceOf[String] match {
-          case TUPLE(field, value) => (field.trim, value.trim)
-          case _ => null
-        }
+        val uf = updateFields.asInstanceOf[Seq[(String, String)]]
         ElasticCommand.update(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf)
       }
     }
@@ -113,19 +109,15 @@ object ELKCommand extends CollectionParser {
   def index(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
-        val uf: (String, String) = fields.asInstanceOf[String] match {
-          case TUPLE(field, value) => (field.trim, value.trim)
-          case _ => null
-        }
-        val indexResponse = ElasticCommand.indexField(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf)
+        val fs = fields.asInstanceOf[Seq[(String, String)]]
+        val indexResponse =
+          ElasticCommand.indexField(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs)
         Await.result(indexResponse, Duration.Inf).getId
       }
       case Seq(indexName, indexType, fields, id) => {
-        val uf: (String, String) = fields.asInstanceOf[String] match {
-          case TUPLE(field, value) => (field.trim, value.trim)
-          case _ => null
-        }
-        val indexResponse = ElasticCommand.indexFieldById(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf, id.asInstanceOf[String])
+        val fs = fields.asInstanceOf[Seq[(String, String)]]
+
+        val indexResponse = ElasticCommand.indexFieldById(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs, id.asInstanceOf[String])
         Await.result(indexResponse, Duration.Inf).getId
       }
     }

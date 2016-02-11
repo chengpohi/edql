@@ -16,8 +16,11 @@ class ELKInstrumentParser extends CollectionParser{
     ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse("*"))))
   val reindex = P("reindex" ~ space ~/ strOrVar.rep(4, sep = " ")).map(
     c => ("reindex", Some(ELKCommand.r), c))
-  val index = P("index" ~ space ~/ strOrVar.rep(3, sep = " ") ~ space).map(
+  val index = P("index" ~ space ~/ ioParser ~ space).map(
     c => ("index", Some(ELKCommand.i), c)
+  )
+  val update = P("update" ~ space ~/ ioParser ~ space).map(c =>
+    ("query", Some(ELKCommand.u), c)
   )
   val createIndex = P("createIndex" ~ space ~/ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
@@ -25,8 +28,6 @@ class ELKInstrumentParser extends CollectionParser{
   val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(
     c => ("getMapping", Some(ELKCommand.gm), Seq(c))
   )
-  val update = P("update" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
-    ("query", Some(ELKCommand.u), c))
   val analysis = P("analysis" ~ space ~/ strOrVar.rep(2, sep = " ")).map(c =>
     ("analysis", Some(ELKCommand.a), c))
   val getDocById = P("get" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c =>
