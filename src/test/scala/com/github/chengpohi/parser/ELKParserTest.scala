@@ -26,16 +26,19 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "index doc by indexName, indexType, fields" in {
-    ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)"""")
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello","ppp":"fff"}""")
 
-    Thread.sleep(1000)
-    //then
-    ELKRunEngine.run( """ count "test-parser-name" """)
+      Thread.sleep(1000)
+      //then
+      ELKRunEngine.run( """ count "test-parser-name" """)
+    }
+    assert(outContent.toString.contains("1"))
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}""")
       Thread.sleep(1000)
       ELKRunEngine.run( """ reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" "name" """)
 
@@ -53,9 +56,9 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
       Thread.sleep(1000)
-      ELKRunEngine.run( """ update "test-parser-name" "test-parser-type" "(name, elasticservice)" """)
+      ELKRunEngine.run( """update "test-parser-name" "test-parser-type" {"name":"elasticservice"} """)
       Thread.sleep(3000)
       ELKRunEngine.run( """ query "test-parser-name" """)
     }
@@ -75,7 +78,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "delete index type by index type" in {
-    ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" """)
+    ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
     ELKRunEngine.run( """delete "test-parser-name" "test-parser-type" """)
     Console.withOut(outContent) {
       ELKRunEngine.run( """"test-parser-name" mapping""")
@@ -85,7 +88,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "index and get doc by id" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
       ELKRunEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
     }
     assert(outContent.toString.contains( """"_id":"hJJJJJJH""""))
@@ -93,7 +96,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "extract json data" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" "(name, hello)" "HJJJJJJH" """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
       Thread.sleep(1000)
       ELKRunEngine.run( """query "test-parser-name" \\ "name" """)
     }

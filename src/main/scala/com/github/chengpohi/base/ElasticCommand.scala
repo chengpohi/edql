@@ -23,10 +23,10 @@ object ElasticCommand extends ElasticBase {
     }
   }
 
-  def update(indexName: String, indexType: String, uf: (String, String)): String = {
+  def update(indexName: String, indexType: String, uf: Seq[(String, String)]): String = {
     val res = getAllDataByScan(indexName, Some(indexType))
     bulkUpdateField(indexName, res, indexType, uf)
-    s"update $indexName $indexType ${uf._1} with value ${uf._2}"
+    s"update $indexName $indexType ${uf}"
   }
 
   def countCommand(indexName: String): String = {
