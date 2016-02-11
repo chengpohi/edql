@@ -51,11 +51,11 @@ class ElasticBase {
     resp.getId
   }
 
-  def indexField(indexName: String, indexType: String, uf: (String, String)): Future[IndexResponse] = client.execute {
-    index into indexName / indexType fields uf
+  def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResponse] = client.execute {
+    index into indexName / indexType fields fs
   }
 
-  def indexFieldById(indexName: String, indexType: String, uf: (String, String), docId: String): Future[IndexResponse] = client.execute {
+  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, String)], docId: String): Future[IndexResponse] = client.execute {
     index into indexName / indexType fields uf id docId
   }
 
@@ -121,7 +121,7 @@ class ElasticBase {
     })
   }
 
-  def bulkUpdateField(indexName: String, response: Stream[SearchResponse], indexType: String, field: (String, String)) = {
+  def bulkUpdateField(indexName: String, response: Stream[SearchResponse], indexType: String, field: Seq[(String, String)]) = {
     response.foreach(r => {
       client.execute {
         bulk(
