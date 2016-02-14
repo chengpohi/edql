@@ -109,8 +109,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(1000)
       ELKRunEngine.run( """ "test-mapping" mapping """)
     }
-    assert(outContent.toString.contains(""""created_at":{"type":"date","format":"dateOptionalTime"}"""))
-    assert(outContent.toString.contains(""""not_analyzed"""))
+    assert(outContent.toString.contains( """"created_at":{"type":"date","format":"dateOptionalTime"}"""))
+    assert(outContent.toString.contains( """"not_analyzed"""))
     ELKRunEngine.run( """ delete "test-mapping"""")
   }
 
@@ -131,6 +131,16 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     }
     assert(outContent.toString.contains("7"))
     assert(outContent.toString.contains("false"))
+  }
+
+  "ELKParser" should "index newline" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run(
+        """bulkIndex "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
+      Thread.sleep(2000)
+      ELKRunEngine.run( """ count "test-parser-name" """)
+    }
+    println(outContent.toString)
   }
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")
