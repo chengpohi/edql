@@ -13,9 +13,8 @@ while [ -h "$SCRIPT" ] ; do
   fi
 done
 
-SINY_HOME=`dirname "$SCRIPT"`/..
+ELASTIC_SHELL_HOME=`dirname "$SCRIPT"`/..
 
-SINY_HOME=`cd "$SINY_HOME"; pwd`
+ELASTIC_SHELL_HOME=`cd "$ELASTIC_SHELL_HOME"; pwd`
 
-
-java -cp conf/:lib/elasticshell-assembly-1.0.jar com.github.chengpohi.repl.ELKRepl
+java -cp $ELASTIC_SHELL_HOME/conf/:$ELASTIC_SHELL_HOME/lib/elasticshell-assembly-1.0.jar com.github.chengpohi.repl.ELKRepl
