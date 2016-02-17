@@ -140,6 +140,23 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(2000)
       ELKRunEngine.run( """ count "test-parser-name" """)
     }
+    assert(outContent.toString.contains("1"))
+  }
+  "ELKParser" should "aggs data" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run(
+        """bulkIndex "test-parser-name" "test-parser-type" [
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 24},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 25},
+          |{"name": "hello","age": 25},
+          |{"name": "hello","age": 22},
+          |{"name": "hello","age": 22}
+          |] """.stripMargin)
+      Thread.sleep(2000)
+      ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"colors":{"terms": {"field": "color"}}""")
+    }
     println(outContent.toString)
   }
   after {

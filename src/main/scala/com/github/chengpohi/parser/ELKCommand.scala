@@ -37,6 +37,7 @@ object ELKCommand{
   val gm: Seq[Any] => String = getMapping
   val gd: Seq[Any] => String = getDocById
   val m: Seq[Any] => String = mapping
+  val ac: Seq[Any] => String = aggsCount
 
   def getMapping(parameters: Seq[Any]): String = {
     parameters match {
@@ -165,6 +166,15 @@ object ELKCommand{
         val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName.asInstanceOf[String], indexType.asInstanceOf[String], typeDefinitions.toIterable)
         val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
         buildCreateIndexResponse(result)
+      }
+    }
+  }
+
+  def aggsCount(parameters: Seq[Any]): String = {
+    parameters match {
+      case Seq(indexName, indexType, rawJson) => {
+        //ElasticCommand.aggsSearch(indexName.asInstanceOf[String], indexType.asInstanceOf[String], rawJson)
+        ""
       }
     }
   }

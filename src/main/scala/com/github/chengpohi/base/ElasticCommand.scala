@@ -4,6 +4,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.elasticsearch.action.search.SearchResponse
 
+import scala.concurrent.Future
+
 /**
  * elasticshell
  * Created by chengpohi on 1/6/16.
@@ -47,5 +49,11 @@ object ElasticCommand extends ElasticBase {
     val sourceData: Stream[SearchResponse] = getAllDataByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
     s"reindex from $sourceIndex to $targetIndex"
+  }
+
+  def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[SearchResponse] = {
+    client.execute {
+      search in "index" / "type" query "*" aggregations(aggsJson)
+    }
   }
 }
