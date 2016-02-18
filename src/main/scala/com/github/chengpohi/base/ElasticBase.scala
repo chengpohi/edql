@@ -119,7 +119,7 @@ class ElasticBase {
     override def map = source
   }
 
-  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Array[String]) = {
+  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]) = {
     response.foreach(r => {
       client.execute {
         bulk(

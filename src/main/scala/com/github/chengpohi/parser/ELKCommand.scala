@@ -17,7 +17,7 @@ import scala.concurrent.{Await, Future}
  * elasticservice
  * Created by chengpohi on 1/18/16.
  */
-object ELKCommand{
+object ELKCommand {
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
 
@@ -42,7 +42,7 @@ object ELKCommand{
   def getMapping(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName) => {
-        val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName.asInstanceOf[String])
+        val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
         val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
         buildGetMappingResponse(mappings)
       }
@@ -52,7 +52,7 @@ object ELKCommand{
   def createIndex(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName) =>
-        val createResponse = ElasticCommand.createIndex(indexName.asInstanceOf[String])
+        val createResponse = ElasticCommand.createIndex(indexName)
         Await.result(createResponse, Duration.Inf).isAcknowledged.toString
     }
   }
@@ -64,7 +64,7 @@ object ELKCommand{
   def count(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName) =>
-        ElasticCommand.countCommand(indexName.asInstanceOf[String])
+        ElasticCommand.countCommand(indexName)
     }
   }
 
@@ -72,8 +72,8 @@ object ELKCommand{
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case "*" => ElasticCommand.deleteIndex(indexName.asInstanceOf[String])
-          case _ => ElasticCommand.deleteIndexType(indexName.asInstanceOf[String], indexType.asInstanceOf[String])
+          case "*" => ElasticCommand.deleteIndex(indexName)
+          case _ => ElasticCommand.deleteIndexType(indexName, indexType)
         }
         s"delete ${parameters.head} $indexType success"
       }
@@ -84,8 +84,8 @@ object ELKCommand{
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case "*" => ElasticCommand.getAllDataByIndexName(indexName.asInstanceOf[String]).toString
-          case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName.asInstanceOf[String], indexType).toString
+          case "*" => ElasticCommand.getAllDataByIndexName(indexName).toString
+          case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
         }
       }
     }
@@ -95,7 +95,7 @@ object ELKCommand{
     parameters match {
       case Seq(indexName, indexType, updateFields) => {
         val uf = updateFields.asInstanceOf[Seq[(String, String)]]
-        ElasticCommand.update(indexName.asInstanceOf[String], indexType.asInstanceOf[String], uf)
+        ElasticCommand.update(indexName, indexType, uf)
       }
     }
   }
@@ -103,8 +103,7 @@ object ELKCommand{
   def reindex(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-        ElasticCommand.reindex(sourceIndex.asInstanceOf[String], targetIndex.asInstanceOf[String], sourceIndexType.asInstanceOf[String],
-          fields.asInstanceOf[String].split(",").map(_.trim))
+        ElasticCommand.reindex(sourceIndex, targetIndex, sourceIndexType, fields)
       }
     }
   }
@@ -114,7 +113,7 @@ object ELKCommand{
       case Seq(indexName, indexType, fields) => {
         val fs = fields.asInstanceOf[Seq[Seq[(String, String)]]]
         val bulkResponse =
-          ElasticCommand.bulkIndex(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs)
+          ElasticCommand.bulkIndex(indexName, indexType, fs)
         val br: BulkResponse = Await.result(bulkResponse, Duration.Inf)
         buildBulkResponse(br)
       }
@@ -126,13 +125,13 @@ object ELKCommand{
       case Seq(indexName, indexType, fields) => {
         val fs = fields.asInstanceOf[Seq[(String, String)]]
         val indexResponse =
-          ElasticCommand.indexField(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs)
+          ElasticCommand.indexField(indexName, indexType, fs)
         Await.result(indexResponse, Duration.Inf).getId
       }
       case Seq(indexName, indexType, fields, id) => {
         val fs = fields.asInstanceOf[Seq[(String, String)]]
 
-        val indexResponse = ElasticCommand.indexFieldById(indexName.asInstanceOf[String], indexType.asInstanceOf[String], fs, id.asInstanceOf[String])
+        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, fs, id)
         Await.result(indexResponse, Duration.Inf).getId
       }
     }
@@ -141,7 +140,7 @@ object ELKCommand{
   def analysis(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(analyzer, doc) => {
-        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer.asInstanceOf[String], doc.asInstanceOf[String]), Duration.Inf)
+        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
         buildAnalyzeResponse(analyzeResponse)
       }
     }
@@ -163,7 +162,7 @@ object ELKCommand{
       case Seq(indexName, indexType, fields) => {
         val fs: Seq[Seq[String]] = fields.asInstanceOf[Seq[Seq[String]]]
         val typeDefinitions = fs.map(f => buildFieldType(f))
-        val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName.asInstanceOf[String], indexType.asInstanceOf[String], typeDefinitions.toIterable)
+        val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName, indexType, typeDefinitions.toIterable)
         val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
         buildCreateIndexResponse(result)
       }
@@ -173,7 +172,7 @@ object ELKCommand{
   def aggsCount(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName, indexType, rawJson) => {
-        //ElasticCommand.aggsSearch(indexName.asInstanceOf[String], indexType.asInstanceOf[String], rawJson)
+        //ElasticCommand.aggsSearch(indexName, indexType, rawJson)
         ""
       }
     }
@@ -183,8 +182,8 @@ object ELKCommand{
   def getDocById(parameters: Seq[Any]): String = {
     parameters match {
       case Seq(indexName, indexType, id) => {
-        val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName.asInstanceOf[String],
-          indexType.asInstanceOf[String], id.asInstanceOf[String]), Duration.Inf)
+        val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName,
+          indexType, id), Duration.Inf)
         buildGetResponse(getResponse)
       }
     }
@@ -197,4 +196,6 @@ object ELKCommand{
   def beautyJson(): String => String = {
     beautyJSON
   }
+
+  implicit def anyToObject[T](a: Any): T = a.asInstanceOf[T]
 }
