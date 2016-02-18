@@ -15,7 +15,7 @@ class ELKInstrumentParser extends CollectionParser {
     ("delete", Some(ELKCommand.d), Seq(c._1, c._2.getOrElse("*"))))
   val query = P("query" ~ space ~/ strOrVar ~ space ~ strOrVar.?).map(c =>
     ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse("*"))))
-  val reindex = P("reindex" ~ space ~/ strOrVar.rep(4, sep = " ")).map(
+  val reindex = P("reindex" ~ space ~/ ioParser ~/ space).map(
     c => ("reindex", Some(ELKCommand.r), c))
   val index = P("index" ~ space ~/ ioParser ~ space).map(
     c => ("index", Some(ELKCommand.i), c)

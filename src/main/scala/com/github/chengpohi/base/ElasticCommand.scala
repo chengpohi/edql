@@ -45,7 +45,7 @@ object ElasticCommand extends ElasticBase {
     resp.toString
   }
 
-  def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Array[String]): String = {
+  def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): String = {
     val sourceData: Stream[SearchResponse] = getAllDataByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
     s"reindex from $sourceIndex to $targetIndex"

@@ -40,7 +40,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Console.withOut(outContent) {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}""")
       Thread.sleep(1000)
-      ELKRunEngine.run( """ reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" "name" """)
+      ELKRunEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
 
       Thread.sleep(2000)
 
@@ -155,7 +155,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |{"name": "hello","age": 22}
           |] """.stripMargin)
       Thread.sleep(2000)
-      ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"colors":{"terms": {"field": "color"}}""")
+      //ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"colors":{"terms": {"field": "color"}}""")
     }
     println(outContent.toString)
   }
