@@ -1,5 +1,7 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.collection.Js.{Str, Val}
+
 /**
  * elasticservice
  * Created by chengpohi on 1/18/16.
@@ -8,13 +10,13 @@ class ELKInstrumentParser extends CollectionParser {
 
   import fastparse.all._
 
-  val status = P("health").map(s => ("health", Some(ELKCommand.h), Seq()))
+  val status = P("health").map(s => ("health", Some(ELKCommand.h), Seq(Str(""))))
   val count = P("count" ~ space ~/ strOrVar).map(c =>
     ("count", Some(ELKCommand.c), Seq(c)))
   val delete = P("delete" ~ space ~/ strOrVar ~ space ~ strOrVar.?).map(c =>
-    ("delete", Some(ELKCommand.d), Seq(c._1, c._2.getOrElse("*"))))
+    ("delete", Some(ELKCommand.d), Seq(c._1, c._2.getOrElse(Str("*")))))
   val query = P("query" ~ space ~/ strOrVar ~ space ~ strOrVar.?).map(c =>
-    ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse("*"))))
+    ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse(Str("*")))))
   val reindex = P("reindex" ~ space ~/ ioParser ~/ space).map(
     c => ("reindex", Some(ELKCommand.r), c))
   val index = P("index" ~ space ~/ ioParser ~ space).map(
@@ -43,7 +45,7 @@ class ELKInstrumentParser extends CollectionParser {
     ("mapping", Some(ELKCommand.ac), c))
 
   val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>
-    ("extract", ELKCommand.findJSONElements(c))
+    ("extract", ELKCommand.findJSONElements(c.value))
   )
   val beauty = P(space ~ "beauty" ~ space).map(c =>
     ("beauty", ELKCommand.beautyJson)
@@ -53,10 +55,12 @@ class ELKInstrumentParser extends CollectionParser {
     | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
-      val f: Seq[Any] => String = i._2.get
+      val f: Seq[Val] => String = i._2.get
       val fComponent = (f andThen extractFunction)(_)
       ELK.Instrument(i._1, Some(fComponent), i._3)
     }
-    case _ => ELK.Instrument(i._1, i._2, i._3)
+    case _ => {
+      ELK.Instrument((i._1, i._2, i._3))
+    }
   })
 }

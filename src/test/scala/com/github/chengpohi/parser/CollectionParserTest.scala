@@ -1,9 +1,8 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.collection.Js.{Arr, Num, Obj, Str}
 import fastparse.core.Parsed
-import org.scalatest.{FlatSpec, BeforeAndAfter}
-
-import scala.collection.mutable.ArrayBuffer
+import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 
 /**
@@ -16,43 +15,24 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   import collectionParser._
 
   "collection" should "parse tuple" in {
-    val Parsed.Success(value1, _) = collection.parse("(1, 2 ,3 )")
-    assert(value1 === ArrayBuffer(1, 2, 3))
+    val Parsed.Success(value1, _) = jsonExpr.parse("(1, 2 ,3 )")
+    assert(value1 === Arr(Num(1.0), Num(2.0), Num(3.0)))
   }
 
   "collection" should "parse array" in {
-    val Parsed.Success(value, _) = collection.parse("[ (1,2,3), (4,5,6) ]")
-    val Parsed.Success(value2, _) = collection.parse("[(1, 2, 3), 7, 6]")
-    val Parsed.Success(value3, _) = collection.parse( """[("1", "2", 3), 7, 6]""")
-    assert(value === ArrayBuffer(ArrayBuffer(1, 2, 3), ArrayBuffer(4, 5, 6)))
-    assert(value2 === ArrayBuffer(ArrayBuffer(1, 2, 3), 7, 6))
-    assert(value3 === ArrayBuffer(ArrayBuffer("1", "2", 3), 7, 6))
+    val Parsed.Success(value, _) = jsonExpr.parse("[ (1,2,3), (4,5,6) ]")
+    val Parsed.Success(value2, _) = jsonExpr.parse("[(1, 2, 3), 7, 6]")
+    val Parsed.Success(value3, _) = jsonExpr.parse( """[("1", "2", 3), 7, 6]""")
+
+    assert(value === Arr(Arr(Num(1.0), Num(2.0), Num(3.0)), Arr(Num(4.0), Num(5.0), Num(6.0))))
+    assert(value2 === Arr(Arr(Num(1.0), Num(2.0), Num(3.0)), Num(7.0), Num(6.0)))
+    assert(value3 === Arr(Arr(Str("1"), Str("2"), Num(3.0)), Num(7.0), Num(6.0)))
   }
 
   "collection" should "parse json" in {
-    val Parsed.Success(value, _) = collection.parse( """{ "name":[1,2,3,4]}""")
-    val Parsed.Success(value1, _) = collection.parse( """{ "user": {"name":"123","age":23}}""")
-    val Parsed.Success(value2, _) = collection.parse(
-      """[
-        |{ "name":[1,2,3,4]},
-        |{ "name":[1,2,3,4]},
-        |{ "name":[1,2,3,4]},
-        |{ "name":[1,2,3,4]},
-        |{ "name":[1,2,3,4]},
-        |{ "name":[1,2,3,4]}
-        |]""".stripMargin)
-    assert(value === ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))))
-    assert(value1 === ArrayBuffer(("user", ArrayBuffer(("name", "123"), ("age", 23)))))
-    assert(value2 === ArrayBuffer(
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))),
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))),
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))),
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))),
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4))),
-      ArrayBuffer(("name", ArrayBuffer(1, 2, 3, 4)))))
-  }
-
-  "json4s" should "parse array to json" in {
-    val Parsed.Success(value1, _) = collection.parse( """{ "user": {"name":"123","age":23}}""")
+    val Parsed.Success(value, _) = jsonExpr.parse( """{ "name":[1,2,3,4]}""")
+    val Parsed.Success(value1, _) = jsonExpr.parse( """{ "user": {"name":"123","age":23}}""")
+    assert(value === Obj(("name", Arr(Num(1.0), Num(2.0), Num(3.0), Num(4.0)))))
+    assert(value1 === Obj(("user", Obj(("name", Str("123")), ("age", Num(23.0))))))
   }
 }
