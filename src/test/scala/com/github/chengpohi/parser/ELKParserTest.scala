@@ -39,10 +39,10 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
     Console.withOut(outContent) {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}""")
-      Thread.sleep(1000)
+      Thread.sleep(3000)
       ELKRunEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
 
-      Thread.sleep(2000)
+      Thread.sleep(3000)
 
       ELKRunEngine.run( """ query "test-parser-name-reindex" """)
       ELKRunEngine.run( """ delete "test-parser-name-reindex" """)

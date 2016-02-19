@@ -1,5 +1,6 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.collection.Js.Val
 import fastparse.core.Parsed.{Failure, Success}
 
 import scala.collection.mutable.ArrayBuffer
@@ -39,6 +40,6 @@ object ELK {
     def value: Any
   }
 
-  case class Instrument(value: (String, Option[(Seq[Any]) => String], Seq[Any])) extends AnyVal with AST
+  case class Instrument(value: (String, Option[Seq[Val] => String], Seq[Val])) extends AnyVal with AST
 }
 

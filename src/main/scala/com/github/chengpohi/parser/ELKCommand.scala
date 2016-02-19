@@ -9,6 +9,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
+import com.github.chengpohi.collection.Js._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -24,22 +25,22 @@ object ELKCommand {
 
   import responseGenerator._
 
-  val h: Seq[Any] => String = health
-  val c: Seq[Any] => String = count
-  val d: Seq[Any] => String = delete
-  val q: Seq[Any] => String = query
-  val r: Seq[Any] => String = reindex
-  val i: Seq[Any] => String = index
-  val bi: Seq[Any] => String = bulkIndex
-  val u: Seq[Any] => String = update
-  val ci: Seq[Any] => String = createIndex
-  val a: Seq[Any] => String = analysis
-  val gm: Seq[Any] => String = getMapping
-  val gd: Seq[Any] => String = getDocById
-  val m: Seq[Any] => String = mapping
-  val ac: Seq[Any] => String = aggsCount
+  val h: Seq[Val] => String = health
+  val c: Seq[Val] => String = count
+  val d: Seq[Val] => String = delete
+  val q: Seq[Val] => String = query
+  val r: Seq[Val] => String = reindex
+  val i: Seq[Val] => String = index
+  val bi: Seq[Val] => String = bulkIndex
+  val u: Seq[Val] => String = update
+  val ci: Seq[Val] => String = createIndex
+  val a: Seq[Val] => String = analysis
+  val gm: Seq[Val] => String = getMapping
+  val gd: Seq[Val] => String = getDocById
+  val m: Seq[Val] => String = mapping
+  val ac: Seq[Val] => String = aggsCount
 
-  def getMapping(parameters: Seq[Any]): String = {
+  def getMapping(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) => {
         val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
@@ -49,7 +50,7 @@ object ELKCommand {
     }
   }
 
-  def createIndex(parameters: Seq[Any]): String = {
+  def createIndex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) =>
         val createResponse = ElasticCommand.createIndex(indexName)
@@ -57,41 +58,41 @@ object ELKCommand {
     }
   }
 
-  def health(parameters: Seq[Any]): String = {
+  def health(parameters: Seq[Val]): String = {
     ElasticCommand.clusterHealth()
   }
 
-  def count(parameters: Seq[Any]): String = {
+  def count(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) =>
         ElasticCommand.countCommand(indexName)
     }
   }
 
-  def delete(parameters: Seq[Any]): String = {
+  def delete(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case "*" => ElasticCommand.deleteIndex(indexName)
+          case Str("*") => ElasticCommand.deleteIndex(indexName)
           case _ => ElasticCommand.deleteIndexType(indexName, indexType)
         }
-        s"delete ${parameters.head} $indexType success"
+        s"delete ${indexName.value} ${indexType.value} success"
       }
     }
   }
 
-  def query(parameters: Seq[Any]): String = {
+  def query(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case "*" => ElasticCommand.getAllDataByIndexName(indexName).toString
-          case indexType: String => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
+          case Str("*") => ElasticCommand.getAllDataByIndexName(indexName).toString
+          case _ => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
         }
       }
     }
   }
 
-  def update(parameters: Seq[Any]): String = {
+  def update(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, updateFields) => {
         val uf = updateFields.asInstanceOf[Seq[(String, String)]]
@@ -100,7 +101,7 @@ object ELKCommand {
     }
   }
 
-  def reindex(parameters: Seq[Any]): String = {
+  def reindex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
         ElasticCommand.reindex(sourceIndex, targetIndex, sourceIndexType, fields)
@@ -108,7 +109,7 @@ object ELKCommand {
     }
   }
 
-  def bulkIndex(parameters: Seq[Any]): String = {
+  def bulkIndex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
         val fs = fields.asInstanceOf[Seq[Seq[(String, String)]]]
@@ -120,24 +121,22 @@ object ELKCommand {
     }
   }
 
-  def index(parameters: Seq[Any]): String = {
+  def index(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
-        val fs = fields.asInstanceOf[Seq[(String, String)]]
         val indexResponse =
-          ElasticCommand.indexField(indexName, indexType, fs)
+          ElasticCommand.indexField(indexName, indexType, fields)
         Await.result(indexResponse, Duration.Inf).getId
       }
       case Seq(indexName, indexType, fields, id) => {
-        val fs = fields.asInstanceOf[Seq[(String, String)]]
-
-        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, fs, id)
+        val f: List[(String, String)] = fields
+        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, f, id)
         Await.result(indexResponse, Duration.Inf).getId
       }
     }
   }
 
-  def analysis(parameters: Seq[Any]): String = {
+  def analysis(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(analyzer, doc) => {
         val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
@@ -157,7 +156,7 @@ object ELKCommand {
     }
   }
 
-  def mapping(parameters: Seq[Any]): String = {
+  def mapping(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
         val fs: Seq[Seq[String]] = fields.asInstanceOf[Seq[Seq[String]]]
@@ -169,7 +168,7 @@ object ELKCommand {
     }
   }
 
-  def aggsCount(parameters: Seq[Any]): String = {
+  def aggsCount(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, rawJson) => {
         //ElasticCommand.aggsSearch(indexName, indexType, rawJson)
@@ -179,7 +178,7 @@ object ELKCommand {
   }
 
 
-  def getDocById(parameters: Seq[Any]): String = {
+  def getDocById(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, id) => {
         val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName,
@@ -197,5 +196,5 @@ object ELKCommand {
     beautyJSON
   }
 
-  implicit def anyToObject[T](a: Any): T = a.asInstanceOf[T]
+  //implicit def anyToObject[T](a: Any): T = a.asInstanceOf[T]
 }
