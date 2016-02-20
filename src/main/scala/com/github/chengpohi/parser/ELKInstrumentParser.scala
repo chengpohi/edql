@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.Js.{Str, Val}
+import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 
 /**
  * elasticservice

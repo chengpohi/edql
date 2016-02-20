@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.Js
+import com.github.chengpohi.collection.JsonCollection
 
 /**
  * elasticshell
@@ -17,27 +17,27 @@ class CollectionParser {
   val strChars = P(CharsWhile(StringChars))
   val collectionChars = P(CharsWhile(CollectionChars))
   val variableChars = P(CharIn('a' to 'z', 'A' to 'Z'))
-  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(Js.Str)
-  val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(Js.Str)
+  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(JsonCollection.Str)
+  val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   val strOrVar = P(string | variable)
-  val number = P(CharIn('0' to '9').rep(1)).!.map(x => Js.Num(x.toDouble))
+  val number = P(CharIn('0' to '9').rep(1)).!.map(x => JsonCollection.Num(x.toDouble))
   val pair = P(space ~/ string.map(_.value) ~/ space ~/ ":" ~/ jsonExpr)
-  val obj = P("{" ~ space ~/ pair.rep(sep = ",".~/) ~ space ~ "}").map(Js.Obj(_: _*))
+  val obj = P("{" ~ space ~/ pair.rep(sep = ",".~/) ~ space ~ "}").map(JsonCollection.Obj(_: _*))
 
-  val `null` = P("null").map(_ => Js.Null)
-  val `false` = P("false").map(_ => Js.False)
-  val `true` = P("true").map(_ => Js.True)
+  val `null` = P("null").map(_ => JsonCollection.Null)
+  val `false` = P("false").map(_ => JsonCollection.False)
+  val `true` = P("true").map(_ => JsonCollection.True)
 
 
-  val tuple = P("(" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ ")").map(Js.Arr(_: _*))
-  val array = P("[" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ "]").map(Js.Arr(_: _*))
+  val tuple = P("(" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ ")").map(JsonCollection.Arr(_: _*))
+  val array = P("[" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ "]").map(JsonCollection.Arr(_: _*))
   //val collection = P(space ~ (obj | tuple | array | number | strOrVar) ~ space)
 
-  val jsonExpr: P[Js.Val] = P(
+  val jsonExpr: P[JsonCollection.Val] = P(
     space ~ (obj | array | tuple | string | `true` | `false` | `null` | number) ~ space
   )
-  val ioParser: P[Seq[Js.Val]] = P(jsonExpr.rep(1, sep = space))
+  val ioParser: P[Seq[JsonCollection.Val]] = P(jsonExpr.rep(1, sep = space))
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {

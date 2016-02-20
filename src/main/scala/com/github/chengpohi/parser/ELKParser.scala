@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.Js.Val
+import com.github.chengpohi.collection.JsonCollection.Val
 import fastparse.core.Parsed.{Failure, Success}
 
 import scala.collection.mutable.ArrayBuffer
