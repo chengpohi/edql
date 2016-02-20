@@ -1,5 +1,6 @@
 package com.github.chengpohi.collection
 
+import scala.reflect.api.JavaUniverse
 import scala.reflect.runtime.universe._
 
 /**
@@ -7,6 +8,7 @@ import scala.reflect.runtime.universe._
  * Created by chengpohi on 2/17/16.
  */
 object JsonCollection {
+
   sealed trait Val extends Any {
     def value: Any
 
@@ -20,6 +22,7 @@ object JsonCollection {
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val
 
   case class Arr(value: Val*) extends AnyVal with Val
+
   case class Tuple(value: Val*) extends AnyVal with Val
 
   case class Num(value: Double) extends AnyVal with Val
@@ -44,9 +47,18 @@ object JsonCollection {
     v.value.asInstanceOf[T]
   }
 
+  def choiceType(tp: Type) = {
+    if (tp =:= typeOf[Int]) {
+      typeTag[Int]
+    } else {
+      typeTag[String]
+    }
+  }
+
   def extract[T](v: Val)(implicit tag: TypeTag[T]): T = {
-    if (tag.tpe =:= typeOf[List[Int]]) {
-      v.asInstanceOf[Arr].value.toList.map(i => extract[Int](i)).asInstanceOf[T]
+    if (tag.tpe <:< typeOf[List[_]]) {
+      val subType: Type = tag.tpe.typeArgs.head
+      v.asInstanceOf[Arr].value.toList.map(i => extract(i)(choiceType(subType))).asInstanceOf[T]
     } else if (tag.tpe =:= typeOf[Int]) {
       v.asInstanceOf[Num].value.toInt.asInstanceOf[T]
     } else {
