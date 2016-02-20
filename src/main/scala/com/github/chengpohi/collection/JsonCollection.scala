@@ -1,11 +1,12 @@
 package com.github.chengpohi.collection
 
+import scala.reflect.runtime.universe._
 
 /**
  * elasticshell
  * Created by chengpohi on 2/17/16.
  */
-object Js {
+object JsonCollection {
   sealed trait Val extends Any {
     def value: Any
 
@@ -41,6 +42,16 @@ object Js {
 
   implicit def valToGeneric[T](v: Val): T = {
     v.value.asInstanceOf[T]
+  }
+
+  def extract[T](v: Val)(implicit tag: TypeTag[T]): T = {
+    if (tag.tpe =:= typeOf[List[Int]]) {
+      v.asInstanceOf[Arr].value.toList.map(i => extract[Int](i)).asInstanceOf[T]
+    } else if (tag.tpe =:= typeOf[Int]) {
+      v.asInstanceOf[Num].value.toInt.asInstanceOf[T]
+    } else {
+      v.value.asInstanceOf[T]
+    }
   }
 }
 

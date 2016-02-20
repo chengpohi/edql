@@ -9,7 +9,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
-import com.github.chengpohi.collection.Js._
+import com.github.chengpohi.collection.JsonCollection._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}

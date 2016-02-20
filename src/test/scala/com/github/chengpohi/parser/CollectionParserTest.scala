@@ -1,6 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.Js.{Arr, Num, Obj, Str}
+import com.github.chengpohi.collection.JsonCollection
+import com.github.chengpohi.collection.JsonCollection.{Arr, Num, Obj, Str}
 import fastparse.core.Parsed
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
@@ -34,5 +35,15 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
     val Parsed.Success(value1, _) = jsonExpr.parse( """{ "user": {"name":"123","age":23}}""")
     assert(value === Obj(("name", Arr(Num(1.0), Num(2.0), Num(3.0), Num(4.0)))))
     assert(value1 === Obj(("user", Obj(("name", Str("123")), ("age", Num(23.0))))))
+  }
+
+  "json4s" should "parse array to json" in {
+    val Parsed.Success(value, _) = jsonExpr.parse( """[1,2,3,4]""")
+    val list1 = JsonCollection.extract[List[Int]](value)
+    assert(list1 === List(1, 2, 3, 4))
+  }
+
+  def foo(list: List[Int]): Unit = {
+    list.foreach(println)
   }
 }
