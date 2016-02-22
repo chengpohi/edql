@@ -43,7 +43,7 @@ object ELKCommand {
   def getMapping(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) => {
-        val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName)
+        val eventualMappingsResponse: Future[GetMappingsResponse] = ElasticCommand.getMapping(indexName.extract[String])
         val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
         buildGetMappingResponse(mappings)
       }
@@ -53,7 +53,7 @@ object ELKCommand {
   def createIndex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) =>
-        val createResponse = ElasticCommand.createIndex(indexName)
+        val createResponse = ElasticCommand.createIndex(indexName.extract[String])
         Await.result(createResponse, Duration.Inf).isAcknowledged.toString
     }
   }
@@ -65,7 +65,7 @@ object ELKCommand {
   def count(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName) =>
-        ElasticCommand.countCommand(indexName)
+        ElasticCommand.countCommand(indexName.extract[String])
     }
   }
 
@@ -73,8 +73,8 @@ object ELKCommand {
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case Str("*") => ElasticCommand.deleteIndex(indexName)
-          case _ => ElasticCommand.deleteIndexType(indexName, indexType)
+          case Str("*") => ElasticCommand.deleteIndex(indexName.extract[String])
+          case _ => ElasticCommand.deleteIndexType(indexName.extract[String], indexType.extract[String])
         }
         s"delete ${indexName.value} ${indexType.value} success"
       }
@@ -85,8 +85,9 @@ object ELKCommand {
     parameters match {
       case Seq(indexName, indexType) => {
         indexType match {
-          case Str("*") => ElasticCommand.getAllDataByIndexName(indexName).toString
-          case _ => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName, indexType).toString
+          case Str("*") => ElasticCommand.getAllDataByIndexName(indexName.extract[String]).toString
+          case _ => ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName.extract[String],
+            indexType.extract[String]).toString
         }
       }
     }
@@ -95,8 +96,7 @@ object ELKCommand {
   def update(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, updateFields) => {
-        val uf = updateFields.asInstanceOf[Seq[(String, String)]]
-        ElasticCommand.update(indexName, indexType, uf)
+        ElasticCommand.update(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
       }
     }
   }
@@ -104,7 +104,8 @@ object ELKCommand {
   def reindex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-        ElasticCommand.reindex(sourceIndex, targetIndex, sourceIndexType, fields)
+        ElasticCommand.reindex(sourceIndex.extract[String],
+          targetIndex.extract[String], sourceIndexType.extract[String], fields.extract[List[String]])
       }
     }
   }
@@ -112,9 +113,8 @@ object ELKCommand {
   def bulkIndex(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
-        val fs = fields.asInstanceOf[Seq[Seq[(String, String)]]]
         val bulkResponse =
-          ElasticCommand.bulkIndex(indexName, indexType, fs)
+          ElasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
         val br: BulkResponse = Await.result(bulkResponse, Duration.Inf)
         buildBulkResponse(br)
       }
@@ -125,12 +125,12 @@ object ELKCommand {
     parameters match {
       case Seq(indexName, indexType, fields) => {
         val indexResponse =
-          ElasticCommand.indexField(indexName, indexType, fields)
+          ElasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
         Await.result(indexResponse, Duration.Inf).getId
       }
       case Seq(indexName, indexType, fields, id) => {
-        val f: List[(String, String)] = fields
-        val indexResponse = ElasticCommand.indexFieldById(indexName, indexType, f, id)
+        val indexResponse = ElasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
+          fields.extract[List[(String, String)]], id.extract[String])
         Await.result(indexResponse, Duration.Inf).getId
       }
     }
@@ -139,7 +139,8 @@ object ELKCommand {
   def analysis(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(analyzer, doc) => {
-        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer, doc), Duration.Inf)
+        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer.extract[String],
+          doc.extract[String]), Duration.Inf)
         buildAnalyzeResponse(analyzeResponse)
       }
     }
@@ -159,9 +160,10 @@ object ELKCommand {
   def mapping(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, fields) => {
-        val fs: Seq[Seq[String]] = fields.asInstanceOf[Seq[Seq[String]]]
+        val fs = fields.extract[List[List[String]]]
         val typeDefinitions = fs.map(f => buildFieldType(f))
-        val mappings: Future[CreateIndexResponse] = ElasticCommand.mappings(indexName, indexType, typeDefinitions.toIterable)
+        val mappings: Future[CreateIndexResponse] =
+          ElasticCommand.mappings(indexName.extract[String], indexType.extract[String], typeDefinitions.toIterable)
         val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
         buildCreateIndexResponse(result)
       }
@@ -181,8 +183,8 @@ object ELKCommand {
   def getDocById(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, id) => {
-        val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName,
-          indexType, id), Duration.Inf)
+        val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName.extract[String],
+          indexType.extract[String], id.extract[String]), Duration.Inf)
         buildGetResponse(getResponse)
       }
     }
@@ -195,6 +197,4 @@ object ELKCommand {
   def beautyJson(): String => String = {
     beautyJSON
   }
-
-  //implicit def anyToObject[T](a: Any): T = a.asInstanceOf[T]
 }
