@@ -1,5 +1,6 @@
 package com.github.chengpohi.collection
 
+import scala.collection.generic.CanBuildFrom
 import scala.reflect.runtime.universe._
 
 /**
@@ -24,7 +25,7 @@ object JsonCollection {
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
     override def toJson: String = value.map {
-      case (n, v) => "{\"" +  n + "\":" + v.toJson + "}"
+      case (n, v) => "{\"" + n + "\":" + v.toJson + "}"
     }.mkString(",")
   }
 
@@ -58,31 +59,33 @@ object JsonCollection {
     override def toJson: String = value.toString
   }
 
-  implicit def numToDouble(n: Num): java.lang.Double = {
-    n.value
-  }
-
-  implicit def valToGeneric[T](v: Val): T = {
-    v.value.asInstanceOf[T]
-  }
-
-  def chooseType(tp: Type) = {
-    if (tp =:= typeOf[Int]) {
-      typeTag[Int]
-    } else {
-      typeTag[String]
+  implicit class JsonConverter(value: Val) {
+    def extract(tag: Type): Any = {
+      if (tag <:< typeOf[List[(_, _)]]) {
+        val subType: Type = tag.typeArgs.head
+        value.asInstanceOf[Obj].value.toList.map(i =>
+          (i._1, i._2.extract(subType.typeArgs(1)))
+        )
+      } else if (tag <:< typeOf[List[_]]) {
+        val subType: Type = tag.typeArgs.head
+        value.asInstanceOf[Arr].value.toList.map(i => {
+          i.extract(subType)
+        })
+      } else if (tag <:< typeOf[(_, _)]) {
+        val subType = tag.typeArgs
+        val (tp1, tp2) = (subType.head, subType(1))
+        val vals = value.asInstanceOf[Arr].value.toList
+        (vals.head.extract(tp1), vals(1).extract(tp2))
+      } else if (tag =:= typeOf[Int]) {
+        value.asInstanceOf[Num].value
+      } else {
+        value.value
+      }
     }
+
+    def extract[T](implicit tag: TypeTag[T]): T = extract(tag.tpe).asInstanceOf[T]
   }
 
-  def extract[T](v: Val)(implicit tag: TypeTag[T]): T = {
-    if (tag.tpe <:< typeOf[List[_]]) {
-      val subType: Type = tag.tpe.typeArgs.head
-      v.asInstanceOf[Arr].value.toList.map(i => extract(i)(chooseType(subType))).asInstanceOf[T]
-    } else if (tag.tpe =:= typeOf[Int]) {
-      v.asInstanceOf[Num].value.toInt.asInstanceOf[T]
-    } else {
-      v.value.asInstanceOf[T]
-    }
-  }
 }
+
 
