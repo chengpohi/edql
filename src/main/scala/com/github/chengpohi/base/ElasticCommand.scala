@@ -1,6 +1,7 @@
 package com.github.chengpohi.base
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.SearchType
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.elasticsearch.action.search.SearchResponse
 
@@ -53,7 +54,7 @@ object ElasticCommand extends ElasticBase {
 
   def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[SearchResponse] = {
     client.execute {
-      search in "index" / "type" query "*" aggregations(aggsJson)
+      search in indexName / indexType query "*" aggregations aggsJson searchType SearchType.QueryThenFetch size 0
     }
   }
 }
