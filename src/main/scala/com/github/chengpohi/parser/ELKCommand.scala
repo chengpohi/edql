@@ -10,6 +10,7 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 import com.github.chengpohi.collection.JsonCollection._
+import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -173,8 +174,10 @@ object ELKCommand {
   def aggsCount(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, rawJson) => {
-        //ElasticCommand.aggsSearch(indexName, indexType, rawJson)
-        ""
+        val aggsSearch: Future[SearchResponse] =
+          ElasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
+        val searchResponse: SearchResponse = Await.result(aggsSearch, Duration.Inf)
+        buildSearchResponse(searchResponse)
       }
     }
   }
