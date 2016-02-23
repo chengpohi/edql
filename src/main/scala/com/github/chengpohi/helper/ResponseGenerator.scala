@@ -5,6 +5,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -76,5 +77,13 @@ class ResponseGenerator {
 
   def buildCreateIndexResponse(createIndexResponse: CreateIndexResponse): String = {
     write(("acknowledged", createIndexResponse.isAcknowledged))
+  }
+
+  def buildSearchResponse(searchResponse: SearchResponse): String = {
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.startObject()
+    searchResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    builder.endObject()
+    builder.bytes().toUtf8
   }
 }

@@ -52,7 +52,7 @@ class ELKInstrumentParser extends CollectionParser {
   )
 
   val instrument = P(space ~ (status | count | delete | query | reindex
-    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | mapping)
+    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | aggsCount | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => String = i._2.get

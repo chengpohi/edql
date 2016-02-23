@@ -155,7 +155,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |{"name": "hello","age": 22}
           |] """.stripMargin)
       Thread.sleep(2000)
-      //ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"colors":{"terms": {"field": "color"}}""")
+      ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
     println(outContent.toString)
   }
