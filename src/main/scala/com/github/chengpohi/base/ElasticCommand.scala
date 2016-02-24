@@ -49,6 +49,12 @@ object ElasticCommand extends ElasticBase {
     s"reindex from $sourceIndex to $targetIndex"
   }
 
+  def alias(targetIndex: String, sourceIndex: String) = {
+    client.execute {
+      add alias targetIndex on sourceIndex
+    }
+  }
+
   def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[SearchResponse] = {
     client.execute {
       search in indexName / indexType query "*" aggregations aggsJson searchType SearchType.QueryThenFetch size 0
