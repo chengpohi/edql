@@ -2,7 +2,6 @@ package com.github.chengpohi.base
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType
-import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.Future
@@ -12,11 +11,9 @@ import scala.concurrent.Future
  * Created by chengpohi on 1/6/16.
  */
 object ElasticCommand extends ElasticBase {
-  def mappings(indexName: String, indexType: String, typeDefinitions: Iterable[TypedFieldDefinition]) = {
+  def mappings(indexName: String, mapping: String) = {
     client.execute {
-      create index indexName mappings (
-        indexType as typeDefinitions
-        )
+      create index indexName source mapping
     }
   }
 
