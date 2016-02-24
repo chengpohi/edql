@@ -147,24 +147,11 @@ object ELKCommand {
     }
   }
 
-  def buildFieldType(parameters: Seq[String]) = {
-    def generateType(fieldName: String, fieldType: String) = fieldType match {
-      case "string" => fieldName typed StringType
-      case "date" => fieldName typed DateType
-    }
-    parameters match {
-      case Seq(fieldName, fieldSourceType) => generateType(fieldName, fieldSourceType)
-      case Seq(fieldName, fieldSourceType, analyzer) => generateType(fieldName, fieldSourceType) index analyzer
-    }
-  }
-
   def mapping(parameters: Seq[Val]): String = {
     parameters match {
-      case Seq(indexName, indexType, fields) => {
-        val fs = fields.extract[List[List[String]]]
-        val typeDefinitions = fs.map(f => buildFieldType(f))
+      case Seq(indexName, mapping) => {
         val mappings: Future[CreateIndexResponse] =
-          ElasticCommand.mappings(indexName.extract[String], indexType.extract[String], typeDefinitions.toIterable)
+          ElasticCommand.mappings(indexName.extract[String], mapping.toJson)
         val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
         buildCreateIndexResponse(result)
       }
