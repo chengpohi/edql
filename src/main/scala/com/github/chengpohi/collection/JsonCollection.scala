@@ -24,9 +24,9 @@ object JsonCollection {
   }
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
-    override def toJson: String = value.map {
-      case (n, v) => "{\"" + n + "\":" + v.toJson + "}"
-    }.mkString(",")
+    override def toJson: String = "{" + value.map {
+      case (n, v) =>  "\"" + n + "\":" + v.toJson
+    }.mkString(",") + "}"
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
