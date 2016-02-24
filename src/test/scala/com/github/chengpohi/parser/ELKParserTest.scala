@@ -172,8 +172,29 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(2000)
       ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
-    println(outContent.toString)
+    assert(outContent.toString.contains("\"key\":23.0,\"doc_count\":2}"))
   }
+
+    "ELKParser" should "alias index" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run(
+        """bulkIndex "test-parser-name" "test-parser-type" [
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 24},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 25},
+          |{"name": "hello","age": 25},
+          |{"name": "hello","age": 22},
+          |{"name": "hello","age": 22}
+          |] """.stripMargin)
+      Thread.sleep(2000)
+      ELKRunEngine.run("""alias "alias-index" "test-parser-name"""")
+      Thread.sleep(2000)
+      ELKRunEngine.run( """aggsCount "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+    }
+    assert(outContent.toString.contains("\"key\":23.0,\"doc_count\":2}"))
+  }
+
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")
   }

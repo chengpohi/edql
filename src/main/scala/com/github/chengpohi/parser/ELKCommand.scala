@@ -4,6 +4,7 @@ import com.github.chengpohi.base.ElasticCommand
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
@@ -40,6 +41,7 @@ object ELKCommand {
   val gd: Seq[Val] => String = getDocById
   val m: Seq[Val] => String = mapping
   val ac: Seq[Val] => String = aggsCount
+  val al: Seq[Val] => String = alias
 
   def getMapping(parameters: Seq[Val]): String = {
     parameters match {
@@ -153,7 +155,7 @@ object ELKCommand {
         val mappings: Future[CreateIndexResponse] =
           ElasticCommand.mappings(indexName.extract[String], mapping.toJson)
         val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
-        buildCreateIndexResponse(result)
+        buildAcknowledgedResponse(result)
       }
     }
   }
@@ -165,6 +167,17 @@ object ELKCommand {
           ElasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
         val searchResponse: SearchResponse = Await.result(aggsSearch, Duration.Inf)
         buildSearchResponse(searchResponse)
+      }
+    }
+  }
+
+  def alias(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(targetIndex, sourceIndex) => {
+        val eventualAliasesResponse: Future[IndicesAliasesResponse] =
+          ElasticCommand.alias(targetIndex.extract[String], sourceIndex.extract[String])
+        val aliasesResponse: IndicesAliasesResponse = Await.result(eventualAliasesResponse, Duration.Inf)
+        buildAcknowledgedResponse(aliasesResponse)
       }
     }
   }

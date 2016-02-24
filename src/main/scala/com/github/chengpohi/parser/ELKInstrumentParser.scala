@@ -42,7 +42,10 @@ class ELKInstrumentParser extends CollectionParser {
     ("mapping", Some(ELKCommand.m), c))
 
   val aggsCount = P("aggsCount" ~ space ~/ ioParser).map(c =>
-    ("mapping", Some(ELKCommand.ac), c))
+    ("aggsCount", Some(ELKCommand.ac), c))
+
+  val alias = P("alias" ~ space ~/ ioParser).map(c =>
+    ("alias", Some(ELKCommand.al), c))
 
   val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>
     ("extract", ELKCommand.findJSONElements(c.value))
@@ -52,7 +55,7 @@ class ELKInstrumentParser extends CollectionParser {
   )
 
   val instrument = P(space ~ (status | count | delete | query | reindex
-    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | aggsCount | mapping)
+    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | aggsCount | alias | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => String = i._2.get
