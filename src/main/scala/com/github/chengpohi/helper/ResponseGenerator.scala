@@ -1,11 +1,11 @@
 package com.github.chengpohi.helper
 
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -75,8 +75,8 @@ class ResponseGenerator {
     pretty(render(parse(json)))
   }
 
-  def buildCreateIndexResponse(createIndexResponse: CreateIndexResponse): String = {
-    write(("acknowledged", createIndexResponse.isAcknowledged))
+  def buildAcknowledgedResponse(acknowledgedResponse: AcknowledgedResponse): String = {
+    write(("acknowledged", acknowledgedResponse.isAcknowledged))
   }
 
   def buildSearchResponse(searchResponse: SearchResponse): String = {
