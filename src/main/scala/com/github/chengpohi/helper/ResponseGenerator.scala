@@ -21,7 +21,7 @@ class ResponseGenerator {
   val MAPPINGS = new XContentBuilderString("mappings")
   val TOOK = new XContentBuilderString("took")
   val ERRORS = new XContentBuilderString("errors")
-  val ITEMS = new XContentBuilderString("items");
+  val ITEMS = new XContentBuilderString("items")
 
   implicit val formats = DefaultFormats
 

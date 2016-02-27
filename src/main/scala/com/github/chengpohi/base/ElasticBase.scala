@@ -3,20 +3,16 @@ package com.github.chengpohi.base
 import com.github.chengpohi.connector.ElasticClientConnector
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
-import com.sksamuel.elastic4s.source.{JsonDocumentSource, DocumentMap}
+import com.sksamuel.elastic4s.source.{DocumentMap, JsonDocumentSource}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
 import org.elasticsearch.action.bulk.BulkResponse
-
-import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.search.sort.SortOrder.ASC
 
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
  * ElasticBase function
@@ -61,11 +57,11 @@ class ElasticBase {
       f <- fs
     ) yield index into indexName / indexType fields f
     client.execute {
-      bulk (bulkIndexes)
+      bulk(bulkIndexes)
     }
   }
 
-  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, String)], docId: String): Future[IndexResponse] = client.execute {
+  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, AnyRef)], docId: String): Future[IndexResponse] = client.execute {
     index into indexName / indexType fields uf id docId
   }
 
@@ -80,10 +76,23 @@ class ElasticBase {
     index into indexName / indexType doc documentMap id specifyId
   }.await
 
+  def indexJSONById(indexName: String, indexType: String, specifyId: String, json: String): IndexResponse = client.execute {
+    index into indexName / indexType doc new JsonDocumentSource(json) id specifyId
+  }.await
+
+
+  def mustSearchByField(indexName: String, indexType: String, uf: (String, String)) = client.execute {
+    search in indexName / indexType query {
+      bool {
+        must {
+          termQuery(uf)
+        }
+      }
+    }
+  }.await
+
   def getAllDataByIndexTypeWithIndexName(indexName: String, indexType: String): SearchResponse = client.execute {
-    search in indexName / indexType query filteredQuery postFilter matchAllFilter start 0 limit Integer.MAX_VALUE sort (
-      by field "created_at" ignoreUnmapped true order ASC
-      )
+    search in indexName / indexType query filteredQuery postFilter matchAllFilter start 0 limit Integer.MAX_VALUE
   }.await
 
   def getAllDataByIndexType(indexType: String): SearchResponse = client.execute {
