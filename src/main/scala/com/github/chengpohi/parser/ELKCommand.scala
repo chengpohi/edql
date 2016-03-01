@@ -4,6 +4,10 @@ import com.github.chengpohi.base.ElasticCommand
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
+import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
+import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
+import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
+import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
@@ -42,6 +46,10 @@ object ELKCommand {
   val m: Seq[Val] => String = mapping
   val ac: Seq[Val] => String = aggsCount
   val al: Seq[Val] => String = alias
+  val cr: Seq[Val] => String = createRepository
+  val cs: Seq[Val] => String = createSnapshot
+  val ds: Seq[Val] => String = deleteSnapshot
+  val gs: Seq[Val] => String = getSnapshot
 
   def getMapping(parameters: Seq[Val]): String = {
     parameters match {
@@ -189,6 +197,52 @@ object ELKCommand {
         val getResponse: GetResponse = Await.result(ElasticCommand.getDocById(indexName.extract[String],
           indexType.extract[String], id.extract[String]), Duration.Inf)
         buildGetResponse(getResponse)
+      }
+    }
+  }
+
+  def createRepository(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(repositoryName, repositoryType, settings) => {
+        val repositoryResponse: PutRepositoryResponse = Await.result(
+          ElasticCommand.createRepository(repositoryName.extract[String], repositoryType.extract[String],
+            settings.extract[Map[String, String]]), Duration.Inf)
+        buildAcknowledgedResponse(repositoryResponse)
+      }
+    }
+  }
+
+  def createSnapshot(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(snapshotName, repositoryName) => {
+        val createSnapshotResponse: CreateSnapshotResponse = Await.result(
+          ElasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+        buildXContent(createSnapshotResponse)
+      }
+    }
+  }
+
+  def deleteSnapshot(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(snapshotName, repositoryName) => {
+        val deleteSnapshotResponse: DeleteSnapshotResponse = Await.result(
+          ElasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+        buildAcknowledgedResponse(deleteSnapshotResponse)
+      }
+    }
+  }
+
+  def getSnapshot(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(snapshotName, repositoryName) => {
+        val getSnapshotResponse: GetSnapshotsResponse = Await.result(
+          ElasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+        buildXContent(getSnapshotResponse)
+      }
+      case Seq(repositoryName) => {
+        val getSnapshotResponse: GetSnapshotsResponse = Await.result(
+          ElasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String]), Duration.Inf)
+        buildXContent(getSnapshotResponse)
       }
     }
   }

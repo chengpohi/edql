@@ -164,4 +164,22 @@ class ElasticBase {
   def getDocById(indexName: String, indexType: String, docId: String) = client.execute {
     get id docId from s"$indexName/$indexType"
   }
+
+  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, String]) = client.execute {
+    create repository repositoryName `type` repositoryType settings st
+  }
+
+  def createSnapshot(snapshotName: String, repositoryName: String) = client.execute {
+    create snapshot snapshotName in repositoryName
+  }
+  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
+    get snapshot snapshotName from repositoryName
+  }
+  def getAllSnapshotByRepositoryName(repositoryName: String) = client.execute {
+    get snapshot Seq() from repositoryName
+  }
+
+  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
+    delete snapshot snapshotName in repositoryName
+  }
 }
