@@ -25,7 +25,7 @@ object JsonCollection {
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
     override def toJson: String = "{" + value.map {
-      case (n, v) =>  "\"" + n + "\":" + v.toJson
+      case (n, v) => "\"" + n + "\":" + v.toJson
     }.mkString(",") + "}"
   }
 
@@ -61,7 +61,12 @@ object JsonCollection {
 
   implicit class JsonConverter(value: Val) {
     def extract(tag: Type): Any = {
-      if (tag <:< typeOf[List[(_, _)]]) {
+      if (tag <:< typeOf[Map[_, _]]) {
+        val subType2: Type = tag.typeArgs(1)
+        value.asInstanceOf[Obj].value.toList.map(i =>
+          (i._1, i._2.extract(subType2))
+        ).toMap
+      } else if (tag <:< typeOf[List[(_, _)]]) {
         val subType: Type = tag.typeArgs.head
         value.asInstanceOf[Obj].value.toList.map(i =>
           (i._1, i._2.extract(subType.typeArgs(1)))

@@ -175,7 +175,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString.contains("\"key\":23.0,\"doc_count\":2}"))
   }
 
-    "ELKParser" should "alias index" in {
+  "ELKParser" should "alias index" in {
     Console.withOut(outContent) {
       ELKRunEngine.run(
         """bulkIndex "test-parser-name" "test-parser-type" [
@@ -188,11 +188,33 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |{"name": "hello","age": 22}
           |] """.stripMargin)
       Thread.sleep(2000)
-      ELKRunEngine.run("""alias "alias-index" "test-parser-name"""")
+      ELKRunEngine.run( """alias "alias-index" "test-parser-name"""")
       Thread.sleep(2000)
       ELKRunEngine.run( """aggsCount "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
     assert(outContent.toString.contains("\"key\":23.0,\"doc_count\":2}"))
+  }
+
+  "ELKParser" should "create snapshot" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run(
+        """create repository "test_snapshot" "fs" {"compress": "true", "location": "/Users/xiachen/elastic_back_up"} """.stripMargin)
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
+        """create snapshot "snapshot1" "test_snapshot"""".stripMargin)
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
+        """get snapshot "snapshot1" "test_snapshot"""".stripMargin)
+
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
+        """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
+
+    }
+    assert(outContent.toString.contains("{\"snapshots\":[{\"snapshot\":\"snapshot1\",\""))
   }
 
   after {
