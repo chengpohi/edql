@@ -47,6 +47,17 @@ class ELKInstrumentParser extends CollectionParser {
   val alias = P("alias" ~ space ~/ ioParser).map(c =>
     ("alias", Some(ELKCommand.al), c))
 
+  val createRepository = P("create repository" ~ space ~/ ioParser).map(c =>
+    ("createRepository", Some(ELKCommand.cr), c))
+
+  val createSnapshot = P("create snapshot " ~ space ~/ ioParser).map(c =>
+    ("createSnapshot", Some(ELKCommand.cs), c))
+  val deleteSnapshot = P("delete snapshot " ~ space ~/ ioParser).map(c =>
+    ("createSnapshot", Some(ELKCommand.ds), c))
+
+  val getSnapshot = P("get snapshot " ~ space ~/ ioParser).map(c =>
+    ("getSnapshot", Some(ELKCommand.gs), c))
+
   val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>
     ("extract", ELKCommand.findJSONElements(c.value))
   )
@@ -54,8 +65,9 @@ class ELKInstrumentParser extends CollectionParser {
     ("beauty", ELKCommand.beautyJson)
   )
 
-  val instrument = P(space ~ (status | count | delete | query | reindex
-    | index | bulkIndex | createIndex | update | analysis | getMapping | getDocById | aggsCount | alias | mapping)
+  val instrument = P(space ~ (status | deleteSnapshot | count | delete | query | reindex
+    | index | bulkIndex | createIndex | update | analysis | getSnapshot | getMapping | getDocById | aggsCount
+    | createRepository | createSnapshot |  alias | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => String = i._2.get
