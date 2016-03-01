@@ -51,9 +51,5 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
     assert(value1.toJson === """["foo","bar"]""")
 
     assert(value2.toJson === """{"age":[1.0,2.0,3.0,4.0]}""")
-
-    val Parsed.Success(value3, _) = jsonExpr.parse( """[(1, 2),(3, 4)]""")
-    val list3: List[(Int, Int)] = value3.extract[List[(Int, Int)]]
-    assert(list3 === List((1.0, 2.0), (3.0, 4.0)))
   }
 }
