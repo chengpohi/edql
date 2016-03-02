@@ -211,6 +211,21 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(2000)
 
       ELKRunEngine.run(
+        """close index "*"""".stripMargin)
+
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
+        """restore snapshot "snapshot1" "test_snapshot"""".stripMargin)
+
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
+        """open index "*"""".stripMargin)
+
+      Thread.sleep(2000)
+
+      ELKRunEngine.run(
         """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
     }

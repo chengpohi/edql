@@ -8,10 +8,13 @@ import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResp
 import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
+import org.elasticsearch.action.admin.cluster.snapshots.restore.RestoreSnapshotResponse
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 import com.github.chengpohi.collection.JsonCollection._
@@ -50,6 +53,9 @@ object ELKCommand {
   val cs: Seq[Val] => String = createSnapshot
   val ds: Seq[Val] => String = deleteSnapshot
   val gs: Seq[Val] => String = getSnapshot
+  val rs: Seq[Val] => String = restoreSnapshot
+  val clI: Seq[Val] => String = closeIndex
+  val oi: Seq[Val] => String = openIndex
 
   def getMapping(parameters: Seq[Val]): String = {
     parameters match {
@@ -228,6 +234,34 @@ object ELKCommand {
         val deleteSnapshotResponse: DeleteSnapshotResponse = Await.result(
           ElasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
         buildAcknowledgedResponse(deleteSnapshotResponse)
+      }
+    }
+  }
+
+  def restoreSnapshot(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(snapshotName, repositoryName) => {
+        val snapshotResponse: RestoreSnapshotResponse = Await.result(ElasticCommand.restoreSnapshot(snapshotName.extract[String],
+          repositoryName.extract[String]), Duration.Inf)
+        buildXContent(snapshotResponse)
+      }
+    }
+  }
+
+  def closeIndex(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(indexName) => {
+        val closeIndexResponse: CloseIndexResponse = Await.result(ElasticCommand.closeIndex(indexName.extract[String]), Duration.Inf)
+        buildAcknowledgedResponse(closeIndexResponse)
+      }
+    }
+  }
+
+  def openIndex(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(indexName) => {
+        val openIndexResponse: OpenIndexResponse = Await.result(ElasticCommand.openIndex(indexName.extract[String]), Duration.Inf)
+        buildAcknowledgedResponse(openIndexResponse)
       }
     }
   }
