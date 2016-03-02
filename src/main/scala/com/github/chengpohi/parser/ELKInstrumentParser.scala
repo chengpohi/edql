@@ -58,6 +58,15 @@ class ELKInstrumentParser extends CollectionParser {
   val getSnapshot = P("get snapshot " ~ space ~/ ioParser).map(c =>
     ("getSnapshot", Some(ELKCommand.gs), c))
 
+  val restoreSnapshot = P("restore snapshot " ~ space ~/ ioParser).map(c =>
+    ("restoreSnapshot", Some(ELKCommand.rs), c))
+
+  val closeIndex = P("close index" ~ space ~/ ioParser).map(c =>
+    ("closeIndex", Some(ELKCommand.clI), c))
+
+  val openIndex = P("open index" ~ space ~/ ioParser).map(c =>
+    ("openIndex", Some(ELKCommand.oi), c))
+
   val extractJSON = P(space ~ "\\\\" ~ space ~ strOrVar ~ space).map(c =>
     ("extract", ELKCommand.findJSONElements(c.value))
   )
@@ -66,7 +75,8 @@ class ELKInstrumentParser extends CollectionParser {
   )
 
   val instrument = P(space ~ (status | deleteSnapshot | count | delete | query | reindex
-    | index | bulkIndex | createIndex | update | analysis | getSnapshot | getMapping | getDocById | aggsCount
+    | restoreSnapshot | index | bulkIndex | createIndex | closeIndex | openIndex
+    | update | analysis | getSnapshot | getMapping | getDocById | aggsCount
     | createRepository | createSnapshot |  alias | mapping)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {

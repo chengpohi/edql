@@ -11,6 +11,7 @@ import scala.concurrent.Future
  * Created by chengpohi on 1/6/16.
  */
 object ElasticCommand extends ElasticBase {
+
   def mappings(indexName: String, mapping: String) = {
     client.execute {
       create index indexName source mapping
@@ -52,6 +53,25 @@ object ElasticCommand extends ElasticBase {
   def alias(targetIndex: String, sourceIndex: String) = {
     client.execute {
       add alias targetIndex on sourceIndex
+    }
+  }
+
+
+  def restoreSnapshot(snapshotName: String, repositoryName: String) = {
+    client.execute {
+      restore snapshot snapshotName from repositoryName
+    }
+  }
+
+  def closeIndex(indexName: String) = {
+    client.execute {
+      close index indexName
+    }
+  }
+
+  def openIndex(indexName: String) = {
+    client.execute {
+      open index indexName
     }
   }
 
