@@ -152,13 +152,10 @@ class ElasticBase {
     })
   }
 
-  def analysis(analyzer: String, text: String) = {
-    val analyzeResponse = Future {
-      val request = new AnalyzeRequest(text)
-      request.analyzer(analyzer)
-      client.admin.indices().analyze(request).get()
-    }
-    analyzeResponse
+  def analysis(analyzer: String, text: String) = Future {
+    val request = new AnalyzeRequest(text)
+    request.analyzer(analyzer)
+    client.admin.indices().analyze(request).get()
   }
 
   def getDocById(indexName: String, indexType: String, docId: String) = client.execute {
