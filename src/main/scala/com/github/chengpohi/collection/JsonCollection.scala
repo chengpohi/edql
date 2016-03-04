@@ -1,6 +1,5 @@
 package com.github.chengpohi.collection
 
-import scala.collection.generic.CanBuildFrom
 import scala.reflect.runtime.universe._
 
 /**
