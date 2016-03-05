@@ -1,7 +1,7 @@
 package com.github.chengpohi.base
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.SearchType
+import com.sksamuel.elastic4s.{RichSearchResponse, SearchType}
 import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.Future
@@ -27,14 +27,11 @@ object ElasticCommand extends ElasticBase {
   def update(indexName: String, indexType: String, uf: Seq[(String, String)]): String = {
     val res = getAllDataByScan(indexName, Some(indexType))
     bulkUpdateField(indexName, res, indexType, uf)
-    s"update $indexName $indexType ${uf}"
+    """{"isFailure": false}"""
   }
 
-  def countCommand(indexName: String): String = {
-    val resp = client.execute {
-      count from indexName
-    }.await
-    resp.getCount.toString
+  def countCommand(indexName: String): Future[RichSearchResponse] = client.execute {
+    search in indexName size 0
   }
 
   def clusterHealth(): String = {
@@ -45,9 +42,9 @@ object ElasticCommand extends ElasticBase {
   }
 
   def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): String = {
-    val sourceData: Stream[SearchResponse] = getAllDataByScan(sourceIndex)
+    val sourceData: Stream[RichSearchResponse] = getAllDataByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
-    s"reindex from $sourceIndex to $targetIndex"
+    """{"hasErrors": false}"""
   }
 
   def alias(targetIndex: String, sourceIndex: String) = {
@@ -75,7 +72,7 @@ object ElasticCommand extends ElasticBase {
     }
   }
 
-  def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[SearchResponse] = {
+  def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[RichSearchResponse] = {
     client.execute {
       search in indexName / indexType query "*" aggregations aggsJson searchType SearchType.QueryThenFetch size 0
     }
