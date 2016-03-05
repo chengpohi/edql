@@ -2,7 +2,7 @@ name := "elasticshell"
 
 organization := "com.github.chengpohi"
 
-version := "1.0"
+version := "1.1"
 
 scalaVersion := "2.11.3"
 
@@ -22,3 +22,10 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % "3.2.10"
 )
 
+
+assemblyMergeStrategy in assembly := {
+   case PathList("org", "joda", "time", "base", "BaseDateTime.class") => MergeStrategy.first
+   case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+}
