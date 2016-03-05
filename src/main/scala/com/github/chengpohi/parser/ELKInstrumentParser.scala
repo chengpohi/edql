@@ -11,12 +11,15 @@ class ELKInstrumentParser extends CollectionParser {
   import fastparse.all._
 
   val status = P("health").map(s => ("health", Some(ELKCommand.h), Seq(Str(""))))
-  val count = P("count" ~ space ~/ strOrVar).map(c =>
-    ("count", Some(ELKCommand.c), Seq(c)))
-  val delete = P("delete" ~ space ~/ strOrVar ~ space ~ strOrVar.?).map(c =>
-    ("delete", Some(ELKCommand.d), Seq(c._1, c._2.getOrElse(Str("*")))))
-  val query = P("query" ~ space ~/ strOrVar ~ space ~ strOrVar.?).map(c =>
-    ("query", Some(ELKCommand.q), Seq(c._1, c._2.getOrElse(Str("*")))))
+  val count = P("count" ~ space ~/ ioParser).map(c =>
+    ("count", Some(ELKCommand.c), c)
+  )
+  val delete = P("delete" ~ space ~/ ioParser ).map(c =>
+    ("delete", Some(ELKCommand.d), c)
+  )
+  val query = P("query" ~ space ~/ ioParser).map(c =>
+    ("query", Some(ELKCommand.q), c)
+  )
   val reindex = P("reindex" ~ space ~/ ioParser ~/ space).map(
     c => ("reindex", Some(ELKCommand.r), c))
   val index = P("index" ~ space ~/ ioParser ~ space).map(

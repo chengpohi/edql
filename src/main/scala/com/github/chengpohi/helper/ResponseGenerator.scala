@@ -1,10 +1,10 @@
 package com.github.chengpohi.helper
 
+import com.sksamuel.elastic4s.mappings.GetMappingsResult
+import com.sksamuel.elastic4s.{RichGetResponse, BulkResult, RichSearchResponse}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
-import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
-import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
@@ -25,10 +25,10 @@ class ResponseGenerator {
 
   implicit val formats = DefaultFormats
 
-  def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
+  def buildGetMappingResponse(getMappingsResponse: GetMappingsResult): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    getMappingsResponse.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
+    getMappingsResponse.original.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
       builder.startObject(indexEntry.key, XContentBuilder.FieldCaseConversion.NONE)
       builder.startObject(MAPPINGS)
       indexEntry.value.asScala.foreach(typeEntry => {
@@ -50,14 +50,14 @@ class ResponseGenerator {
     builder.bytes().toUtf8
   }
 
-  def buildBulkResponse(bulkResponse: BulkResponse): String = {
+  def buildBulkResponse(bulkResponse: BulkResult): String = {
     write(("hasFailures", bulkResponse.hasFailures))
   }
 
-  def buildGetResponse(getResponse: GetResponse): String = {
+  def buildGetResponse(getResponse: RichGetResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    getResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    getResponse.original.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
   }
@@ -88,11 +88,13 @@ class ResponseGenerator {
     write(("acknowledged", acknowledgedResponse.isAcknowledged))
   }
 
-  def buildSearchResponse(searchResponse: SearchResponse): String = {
+  def buildSearchResponse(searchResponse: RichSearchResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    searchResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    searchResponse.original.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
   }
+
+  def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
 }
