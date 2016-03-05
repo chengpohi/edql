@@ -3,8 +3,6 @@ package com.github.chengpohi
 import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.ELK
 import com.github.chengpohi.parser.ELKParser._
-import org.elasticsearch.indices.IndexMissingException
-
 import scala.io.Source
 
 /**
@@ -22,7 +20,6 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
             val response: String = ins(parameters)
             println(beautyJSON(response))
           } catch {
-            case e: IndexMissingException => println(e.getCause.getLocalizedMessage)
             case e: Exception => println(e.getCause.getLocalizedMessage)
           }
       }

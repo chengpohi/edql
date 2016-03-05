@@ -4,10 +4,8 @@ import com.github.chengpohi.connector.ElasticClientConnector
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s.source.{DocumentMap, JsonDocumentSource}
+import com.sksamuel.elastic4s.{BulkResult, IndexResult, RichSearchResponse}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
-import org.elasticsearch.action.bulk.BulkResponse
-import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.action.search.SearchResponse
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,16 +19,10 @@ import scala.concurrent.{Await, Future}
 class ElasticBase {
   lazy val client = ElasticClientConnector.client
 
-  def deleteIndex(indexName: String): Unit = {
-    client.execute {
-      delete index indexName
-    }.await
-  }
+  private val MAX_ALL_NUMBER: Int = 10000
 
-  def deleteIndexType(indexName: String, indexType: String): Unit = {
-    client.execute {
-      delete mapping indexName / indexType
-    }.await
+  def deleteIndex(indexName: String) = client.execute {
+    delete index indexName
   }
 
   def deleteById(documentId: String, indexName: String, indexType: String): Boolean = client.execute {
@@ -48,11 +40,11 @@ class ElasticBase {
     resp.getId
   }
 
-  def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResponse] = client.execute {
+  def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResult] = client.execute {
     index into indexName / indexType fields fs
   }
 
-  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]): Future[BulkResponse] = {
+  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]): Future[BulkResult] = {
     val bulkIndexes = for (
       f <- fs
     ) yield index into indexName / indexType fields f
@@ -61,7 +53,7 @@ class ElasticBase {
     }
   }
 
-  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, AnyRef)], docId: String): Future[IndexResponse] = client.execute {
+  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, AnyRef)], docId: String): Future[IndexResult] = client.execute {
     index into indexName / indexType fields uf id docId
   }
 
@@ -72,11 +64,11 @@ class ElasticBase {
     resp.getId
   }
 
-  def indexMapById(indexName: String, indexType: String, specifyId: String, documentMap: DocumentMap): IndexResponse = client.execute {
+  def indexMapById(indexName: String, indexType: String, specifyId: String, documentMap: DocumentMap): IndexResult = client.execute {
     index into indexName / indexType doc documentMap id specifyId
   }.await
 
-  def indexJSONById(indexName: String, indexType: String, specifyId: String, json: String): IndexResponse = client.execute {
+  def indexJSONById(indexName: String, indexType: String, specifyId: String, json: String): IndexResult = client.execute {
     index into indexName / indexType doc new JsonDocumentSource(json) id specifyId
   }.await
 
@@ -91,30 +83,31 @@ class ElasticBase {
     }
   }.await
 
-  def getAllDataByIndexTypeWithIndexName(indexName: String, indexType: String): SearchResponse = client.execute {
-    search in indexName / indexType query filteredQuery postFilter matchAllFilter start 0 limit Integer.MAX_VALUE
+
+  def getAllDataByIndexTypeWithIndexName(indexName: String, indexType: String): RichSearchResponse = client.execute {
+    search in indexName / indexType query "*" start 0 limit MAX_ALL_NUMBER
   }.await
 
-  def getAllDataByIndexType(indexType: String): SearchResponse = client.execute {
-    search in "*" / indexType query filteredQuery postFilter matchAllFilter start 0 limit Integer.MAX_VALUE
+  def getAllDataByIndexType(indexType: String): RichSearchResponse = client.execute {
+    search in "*" / indexType query "*" start 0 limit MAX_ALL_NUMBER
   }.await
 
-  def getAllDataByIndexName(indexName: String): SearchResponse = client.execute {
-    search in indexName query filteredQuery postFilter matchAllFilter start 0 limit Integer.MAX_VALUE
+  def getAllDataByIndexName(indexName: String): RichSearchResponse = client.execute {
+    search in indexName query "*" start 0 limit MAX_ALL_NUMBER
   }.await
 
-  def getAllDataByScan(indexName: String, indexType: Option[String] = Some("*")): Stream[SearchResponse] = {
+  def getAllDataByScan(indexName: String, indexType: Option[String] = Some("*")): Stream[RichSearchResponse] = {
     val res = client.execute {
-      search in indexName searchType Scan scroll "10m" size 500
+      search in indexName scroll "10m" size 500 searchType Scan
     }
 
-    def fetch(previous: SearchResponse) = {
+    def fetch(previous: RichSearchResponse) = {
       client.execute {
         search scroll previous.getScrollId
       }
     }
 
-    def toStream(current: Future[SearchResponse]): Stream[SearchResponse] = {
+    def toStream(current: Future[RichSearchResponse]): Stream[RichSearchResponse] = {
       val result = Await.result(current, Duration.Inf)
       result.getScrollId match {
         case null => result #:: Stream.empty
@@ -128,7 +121,7 @@ class ElasticBase {
     override def map = source
   }
 
-  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]) = {
+  def bulkCopyIndex(indexName: String, response: Stream[RichSearchResponse], indexType: String, fields: Seq[String]) = {
     response.foreach(r => {
       client.execute {
         bulk(
@@ -140,7 +133,7 @@ class ElasticBase {
     })
   }
 
-  def bulkUpdateField(indexName: String, response: Stream[SearchResponse], indexType: String, field: Seq[(String, String)]) = {
+  def bulkUpdateField(indexName: String, response: Stream[RichSearchResponse], indexType: String, field: Seq[(String, String)]) = {
     response.foreach(r => {
       client.execute {
         bulk(
@@ -153,8 +146,9 @@ class ElasticBase {
   }
 
   def analysis(analyzer: String, text: String) = Future {
-    val request = new AnalyzeRequest(text)
+    val request = new AnalyzeRequest()
     request.analyzer(analyzer)
+    request.text(text)
     client.admin.indices().analyze(request).get()
   }
 
