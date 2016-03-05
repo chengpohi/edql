@@ -1,5 +1,6 @@
 package com.github.chengpohi
 
+import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.ELK
 import com.github.chengpohi.parser.ELKParser._
 import org.elasticsearch.indices.IndexMissingException
@@ -11,12 +12,15 @@ import scala.io.Source
  * Created by chengpohi on 1/3/16.
  */
 class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, String])]) {
+  val responseGenerator = new ResponseGenerator
+  import responseGenerator._
   def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): Unit = {
     instruments.foreach {
       case i: ELK.Instrument => i.value match {
         case (name, Some(ins), parameters) =>
           try {
-            println(ins(parameters))
+            val response: String = ins(parameters)
+            println(beautyJSON(response))
           } catch {
             case e: IndexMissingException => println(e.getCause.getLocalizedMessage)
             case e: Exception => println(e.getCause.getLocalizedMessage)
