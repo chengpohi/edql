@@ -2,6 +2,7 @@ mapping "chengpohi-tmp" {"mappings":{"bookmark":{"properties":{"created_at":{"ty
 
 index "chengpohi-tmp" "bookmark" {"name":"programming in scala"}
 
-aggsCount "chengpohi-tmp" "bookmark" {"tags":{"terms": {"field": "name_tags"}}}
+aggsCount "chengpohi" "bookmark" {"tags":{"terms": {"field": "name_tags"}}}
+
 
 
