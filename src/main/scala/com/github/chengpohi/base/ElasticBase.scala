@@ -4,7 +4,7 @@ import com.github.chengpohi.connector.ElasticClientConnector
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s.source.{DocumentMap, JsonDocumentSource}
-import com.sksamuel.elastic4s.{BulkResult, IndexResult, RichSearchResponse}
+import com.sksamuel.elastic4s._
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
 
 import scala.collection.JavaConverters._
@@ -73,32 +73,23 @@ class ElasticBase {
   }.await
 
 
-  def mustSearchByField(indexName: String, indexType: String, uf: (String, String)) = client.execute {
-    search in indexName / indexType query {
-      bool {
-        must {
-          termQuery(uf)
-        }
-      }
-    }
-  }.await
-
-
-  def getAllDataByIndexTypeWithIndexName(indexName: String, indexType: String): RichSearchResponse = client.execute {
-    search in indexName / indexType query "*" start 0 limit MAX_ALL_NUMBER
-  }.await
-
-  def queryDataByRawQuery(indexName: String, indexType: String, rawJson: String): Future[RichSearchResponse] = client.execute {
-    search in indexName / indexType rawQuery { rawJson }
+  def getAll(indexName: String, indexType: String): RichSearchResponse = {
+    val indexesAndTypes: String = generateSearchIndexesAndTypes(indexName, indexType)
+    client.execute {
+      search in indexesAndTypes query "*" start 0 limit MAX_ALL_NUMBER
+    }.await
   }
 
-  def getAllDataByIndexType(indexType: String): RichSearchResponse = client.execute {
-    search in "*" / indexType query "*" start 0 limit MAX_ALL_NUMBER
-  }.await
+  def queryDataByRawQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[RichSearchResponse] = client.execute {
+    search in indexName / indexType query {
+      bool {
+        must(
+          terms.map(termQuery(_))
+        )
+      }
+    }
+  }
 
-  def getAllDataByIndexName(indexName: String): RichSearchResponse = client.execute {
-    search in indexName query "*" start 0 limit MAX_ALL_NUMBER
-  }.await
 
   def getAllDataByScan(indexName: String, indexType: Option[String] = Some("*")): Stream[RichSearchResponse] = {
     val res = client.execute {
@@ -167,9 +158,11 @@ class ElasticBase {
   def createSnapshot(snapshotName: String, repositoryName: String) = client.execute {
     create snapshot snapshotName in repositoryName
   }
+
   def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
     get snapshot snapshotName from repositoryName
   }
+
   def getAllSnapshotByRepositoryName(repositoryName: String) = client.execute {
     get snapshot Seq() from repositoryName
   }
@@ -177,4 +170,10 @@ class ElasticBase {
   def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
     delete snapshot snapshotName in repositoryName
   }
+
+  private[this] def generateSearchIndexesAndTypes(indexName: String, indexType: String): String = indexType match {
+    case "*" => indexName
+    case s => indexName + "/" + indexType
+  }
+
 }
