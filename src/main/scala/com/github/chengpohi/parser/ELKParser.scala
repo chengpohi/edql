@@ -29,7 +29,8 @@ object ELKParser extends ELKInstrumentParser{
             instruments += i
         }
       case f: Failure =>
-        println(f)
+        Console.err.println("Invalid Command: " + f.msg)
+        println
     }
     (functions, instruments)
   }
