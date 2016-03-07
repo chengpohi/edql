@@ -14,9 +14,13 @@ class ELKInstrumentParser extends CollectionParser {
   val count = P("count" ~ space ~/ ioParser).map(c =>
     ("count", Some(ELKCommand.c), c)
   )
-  val delete = P("delete" ~ space ~/ ioParser ).map(c =>
+  val delete = P("delete" ~ space ~/ ioParser).map(c =>
     ("delete", Some(ELKCommand.d), c)
   )
+  val termQuery = P("term" ~ space ~ "query" ~ space ~/ ioParser).map(c =>
+    ("query", Some(ELKCommand.q), c)
+  )
+
   val query = P("query" ~ space ~/ ioParser).map(c =>
     ("query", Some(ELKCommand.q), c)
   )
@@ -29,7 +33,7 @@ class ELKInstrumentParser extends CollectionParser {
     c => ("bulkIndex", Some(ELKCommand.bi), c)
   )
   val update = P("update" ~ space ~/ ioParser ~ space).map(c =>
-    ("query", Some(ELKCommand.u), c)
+    ("update", Some(ELKCommand.u), c)
   )
   val createIndex = P("createIndex" ~ space ~/ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
@@ -77,18 +81,20 @@ class ELKInstrumentParser extends CollectionParser {
     ("beauty", ELKCommand.beautyJson)
   )
 
-  val instrument = P(space ~ (status | deleteSnapshot | count | delete | query | reindex
-    | restoreSnapshot | index | bulkIndex | createIndex | closeIndex | openIndex
-    | update | analysis | getSnapshot | getMapping | getDocById | aggsCount
-    | createRepository | createSnapshot |  alias | mapping)
+  val instrument = P(space ~
+    (status
+      | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
+      | query | termQuery | getDocById
+      | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
+      | update | analysis | aggsCount
+      | getMapping | mapping
+      | delete | alias | count)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => String = i._2.get
       val fComponent = (f andThen extractFunction)(_)
       ELK.Instrument(i._1, Some(fComponent), i._3)
     }
-    case _ => {
-      ELK.Instrument((i._1, i._2, i._3))
-    }
+    case _ => ELK.Instrument((i._1, i._2, i._3))
   })
 }
