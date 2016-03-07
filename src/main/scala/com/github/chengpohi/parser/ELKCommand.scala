@@ -104,6 +104,10 @@ object ELKCommand {
       case Seq(indexName, indexType) =>
         buildXContent(ElasticCommand.getAllDataByIndexTypeWithIndexName(indexName.extract[String],
           indexType.extract[String]).original)
+      case Seq(indexName, indexType, queryData) =>
+        val eventualRichSearchResponse: Future[RichSearchResponse] = ElasticCommand.queryDataByRawQuery(indexName.extract[String],
+          indexType.extract[String], queryData.toJson)
+        buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
       case Seq(indexName) =>
         buildXContent(ElasticCommand.getAllDataByIndexName(indexName.extract[String]).original)
     }
