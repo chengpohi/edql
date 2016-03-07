@@ -20,7 +20,9 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
             val response: String = ins(parameters)
             println(beautyJSON(response))
           } catch {
-            case e: Exception => println(e.getCause.getLocalizedMessage)
+            case e: Exception => {
+              println(e.getCause.getLocalizedMessage)
+            }
           }
       }
     }

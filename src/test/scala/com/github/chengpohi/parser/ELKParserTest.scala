@@ -99,6 +99,15 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString.contains( """"name":"hello""""))
   }
 
+  "ELKParser" should "query data by json" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world"} "HJJJJJJH" """)
+      Thread.sleep(3000)
+      ELKRunEngine.run( """query "test-parser-name" "test-parser-type" {"query":{"term":{"name":"Hello"}}}""")
+    }
+    println(outContent.toString)
+  }
+
   "ELKParser" should "set mapping for indexname indextype" in {
     Console.withOut(outContent) {
       ELKRunEngine.run( """mapping "test-mapping" {
@@ -167,7 +176,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(2000)
       ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
-    assert(outContent.toString.contains(""""key":23.0"""))
+    assert(outContent.toString.contains( """"key":23.0"""))
   }
 
   "ELKParser" should "alias index" in {
