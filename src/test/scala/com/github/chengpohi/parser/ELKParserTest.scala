@@ -93,7 +93,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "extract json data" in {
     Console.withOut(outContent) {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
-      Thread.sleep(1000)
+      Thread.sleep(2000)
       ELKRunEngine.run( """query "test-parser-name" \\ "name" """)
     }
     assert(outContent.toString.contains( """"name":"hello""""))
@@ -101,11 +101,12 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "query data by json" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world"} "HJJJJJJH" """)
-      Thread.sleep(3000)
-      ELKRunEngine.run( """query "test-parser-name" "test-parser-type" {"query":{"term":{"name":"Hello"}}}""")
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} "HJJJJJJH" """)
+      Thread.sleep(2000)
+      ELKRunEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
     }
-    println(outContent.toString)
+    assert(outContent.toString.contains("Hello world"))
+    assert(outContent.toString.contains("foo bar"))
   }
 
   "ELKParser" should "set mapping for indexname indextype" in {
