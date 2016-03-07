@@ -88,6 +88,10 @@ class ElasticBase {
     search in indexName / indexType query "*" start 0 limit MAX_ALL_NUMBER
   }.await
 
+  def queryDataByRawQuery(indexName: String, indexType: String, rawJson: String): Future[RichSearchResponse] = client.execute {
+    search in indexName / indexType rawQuery { rawJson }
+  }
+
   def getAllDataByIndexType(indexType: String): RichSearchResponse = client.execute {
     search in "*" / indexType query "*" start 0 limit MAX_ALL_NUMBER
   }.await
