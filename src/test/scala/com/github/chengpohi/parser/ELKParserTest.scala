@@ -14,7 +14,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   val errContent = new ByteArrayOutputStream()
 
   before {
-    ELKRunEngine.run( """ createIndex "test-parser-name" """)
+    ELKRunEngine.run( """ create index "test-parser-name" """)
     outContent.reset()
   }
 
@@ -137,7 +137,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "bulk index docs" in {
     Console.withOut(outContent) {
       ELKRunEngine.run(
-        """bulkIndex "test-parser-name" "test-parser-type" [
+        """bulk index "test-parser-name" "test-parser-type" [
           |{"name": "hello","age": 23},
           |{"name": "hello","age": 23},
           |{"name": "hello","age": 23},
@@ -156,7 +156,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "index newline" in {
     Console.withOut(outContent) {
       ELKRunEngine.run(
-        """bulkIndex "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
+        """bulk index "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
       Thread.sleep(2000)
       ELKRunEngine.run( """ count "test-parser-name" """)
     }
@@ -165,7 +165,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "aggs data" in {
     Console.withOut(outContent) {
       ELKRunEngine.run(
-        """bulkIndex "test-parser-name" "test-parser-type" [
+        """bulk index "test-parser-name" "test-parser-type" [
           |{"name": "hello","age": 23},
           |{"name": "hello","age": 24},
           |{"name": "hello","age": 23},
@@ -175,7 +175,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |{"name": "hello","age": 22}
           |] """.stripMargin)
       Thread.sleep(2000)
-      ELKRunEngine.run( """aggsCount "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+      ELKRunEngine.run( """aggs count "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
     assert(outContent.toString.contains( """"key":23.0"""))
   }
@@ -183,7 +183,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "alias index" in {
     Console.withOut(outContent) {
       ELKRunEngine.run(
-        """bulkIndex "test-parser-name" "test-parser-type" [
+        """bulk index "test-parser-name" "test-parser-type" [
           |{"name": "hello","age": 23},
           |{"name": "hello","age": 24},
           |{"name": "hello","age": 23},
@@ -195,7 +195,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(2000)
       ELKRunEngine.run( """alias "alias-index" "test-parser-name"""")
       Thread.sleep(2000)
-      ELKRunEngine.run( """aggsCount "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+      ELKRunEngine.run( """aggs count "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
     }
     assert(outContent.toString.contains(
       """  "aggregations":{
