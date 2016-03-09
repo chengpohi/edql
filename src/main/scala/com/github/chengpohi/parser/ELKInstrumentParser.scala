@@ -29,13 +29,13 @@ class ELKInstrumentParser extends CollectionParser {
   val index = P("index" ~ space ~/ ioParser ~ space).map(
     c => ("index", Some(ELKCommand.i), c)
   )
-  val bulkIndex = P("bulkIndex" ~ space ~/ ioParser ~ space).map(
+  val bulkIndex = P("bulk index" ~ space ~/ ioParser ~ space).map(
     c => ("bulkIndex", Some(ELKCommand.bi), c)
   )
   val update = P("update" ~ space ~/ ioParser ~ space).map(c =>
     ("update", Some(ELKCommand.u), c)
   )
-  val createIndex = P("createIndex" ~ space ~/ strOrVar).map(
+  val createIndex = P("create index" ~ space ~/ strOrVar).map(
     c => ("createIndex", Some(ELKCommand.ci), Seq(c))
   )
   val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(
@@ -48,7 +48,7 @@ class ELKInstrumentParser extends CollectionParser {
   val mapping = P("mapping" ~ space ~/ ioParser).map(c =>
     ("mapping", Some(ELKCommand.m), c))
 
-  val aggsCount = P("aggsCount" ~ space ~/ ioParser).map(c =>
+  val aggsCount = P("aggs count" ~ space ~/ ioParser).map(c =>
     ("aggsCount", Some(ELKCommand.ac), c))
 
   val alias = P("alias" ~ space ~/ ioParser).map(c =>
