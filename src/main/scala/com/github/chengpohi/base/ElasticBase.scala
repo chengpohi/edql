@@ -1,16 +1,21 @@
 package com.github.chengpohi.base
 
 import com.github.chengpohi.connector.ElasticClientConnector
+import com.github.chengpohi.helper.FutureResponseHelper
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s.source.{DocumentMap, JsonDocumentSource}
 import com.sksamuel.elastic4s._
+import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsResponse, NodesStatsRequest}
+import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
+import org.elasticsearch.action.admin.indices.stats.{IndicesStatsResponse, IndicesStatsRequest}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Promise, Await, Future}
 
 /**
  * ElasticBase function
@@ -170,6 +175,21 @@ class ElasticBase {
   def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
     delete snapshot snapshotName in repositoryName
   }
+
+  def nodeStats = {
+    val f: ActionListener[NodesStatsResponse] => Any = client.admin.cluster.prepareNodesStats().all().execute
+    FutureResponseHelper.buildFuture(f)
+  }
+
+  def indicesStats = {
+    val f: ActionListener[IndicesStatsResponse] => Any = client.admin.indices().prepareStats().all().execute
+    FutureResponseHelper.buildFuture(f)
+  }
+
+  def clusterStats = client.execute {
+    get cluster stats
+  }
+
 
   private[this] def generateSearchIndexesAndTypes(indexName: String, indexType: String): String = indexType match {
     case "*" => indexName

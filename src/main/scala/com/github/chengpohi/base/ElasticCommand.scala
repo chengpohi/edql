@@ -2,6 +2,7 @@ package com.github.chengpohi.base
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{RichSearchResponse, SearchType}
+import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsRequest
 import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.Future

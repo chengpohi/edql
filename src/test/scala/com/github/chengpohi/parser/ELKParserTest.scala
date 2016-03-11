@@ -240,6 +240,26 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString.contains("\"snapshot\":\"snapshot1\","))
   }
 
+  "ELKParser" should "cluster stats" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run("cluster stats")
+    }
+    assert(outContent.toString.contains("cluster_name"))
+  }
+
+  "ELKParser" should "node stats" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run("node stats")
+    }
+    assert(outContent.toString.contains("heap_used_in_bytes"))
+  }
+  "ELKParser" should "indices stats" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run("indices stats")
+    }
+    assert(outContent.toString.contains("indices"))
+  }
+
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")
   }
