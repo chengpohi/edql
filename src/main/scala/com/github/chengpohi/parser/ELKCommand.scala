@@ -6,11 +6,13 @@ import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse, BulkResult}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
+import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
 import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
 import org.elasticsearch.action.admin.cluster.snapshots.restore.RestoreSnapshotResponse
+import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
@@ -18,6 +20,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
+import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.get.GetResponse
 import com.github.chengpohi.collection.JsonCollection._
@@ -38,6 +41,9 @@ object ELKCommand {
   import responseGenerator._
 
   val h: Seq[Val] => String = health
+  val cst: Seq[Val] => String = clusterStats
+  val ist: Seq[Val] => String = indicesStats
+  val nst: Seq[Val] => String = nodeStats
   val c: Seq[Val] => String = count
   val d: Seq[Val] => String = delete
   val q: Seq[Val] => String = query
@@ -76,6 +82,21 @@ object ELKCommand {
         val createResponse = ElasticCommand.createIndex(indexName.extract[String])
         buildAcknowledgedResponse(Await.result(createResponse, Duration.Inf))
     }
+  }
+
+  def clusterStats(parameters: Seq[Val]): String = {
+    val clusterStatsResponse: ClusterStatsResponse = Await.result(ElasticCommand.clusterStats, Duration.Inf)
+    buildXContent(clusterStatsResponse)
+  }
+
+  def indicesStats(parameters: Seq[Val]): String = {
+    val indicesStatsResponse: IndicesStatsResponse = Await.result(ElasticCommand.indicesStats, Duration.Inf)
+    buildXContent(indicesStatsResponse)
+  }
+
+  def nodeStats(parameters: Seq[Val]): String = {
+    val nodesStatsResponse: NodesStatsResponse = Await.result(ElasticCommand.nodeStats, Duration.Inf)
+    buildXContent(nodesStatsResponse)
   }
 
   def health(parameters: Seq[Val]): String = {
