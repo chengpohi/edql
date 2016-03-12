@@ -1,11 +1,10 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.base.ElasticCommand
+import com.github.chengpohi.api.ElasticCommand
+import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
-import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse, BulkResult}
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.mappings.FieldType.{DateType, StringType}
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
+import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
 import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
@@ -18,13 +17,8 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
-import org.elasticsearch.action.bulk.BulkResponse
-import org.elasticsearch.action.get.GetResponse
-import com.github.chengpohi.collection.JsonCollection._
-import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
