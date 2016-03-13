@@ -18,6 +18,10 @@ class ELKInstrumentParser extends CollectionParser {
 
   val nodeStats = P(space ~ "node stats" ~ space).map(s => ("nodeStats", Some(ELKCommand.nst), Seq()))
 
+  val clusterSettings = P(space ~ "cluster settings" ~ space).map(s => ("clusterSettings", Some(ELKCommand.csts), Seq()))
+  val nodeSettings = P(space ~ "node settings" ~ space).map(s => ("nodeSettings", Some(ELKCommand.nsts), Seq()))
+  val indexSettings = P(ioParser ~ space ~ "settings" ~ space).map(s => ("nodeSettings", Some(ELKCommand.insts), s))
+
   val count = P("count" ~ space ~/ ioParser).map(c =>
     ("count", Some(ELKCommand.c), c)
   )
@@ -90,6 +94,7 @@ class ELKInstrumentParser extends CollectionParser {
 
   val instrument = P(space ~
     (health | clusterStats | indicesStats | nodeStats
+      | clusterSettings | nodeSettings | indexSettings
       | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
       | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
