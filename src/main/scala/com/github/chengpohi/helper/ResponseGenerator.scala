@@ -2,8 +2,10 @@ package com.github.chengpohi.helper
 
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
 import com.sksamuel.elastic4s.{RichGetResponse, BulkResult, RichSearchResponse}
+import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
@@ -61,6 +63,33 @@ class ResponseGenerator {
     builder.endObject()
     builder.bytes().toUtf8
   }
+
+  def buildClusterSettingsResponse(response: ClusterUpdateSettingsResponse): String = {
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.startObject("persistent")
+    response.getPersistentSettings.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    builder.endObject()
+
+    builder.startObject("transient")
+    response.getTransientSettings.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    builder.endObject()
+    builder.bytes().toUtf8
+  }
+
+  def buildGetSettingsResponse(response: GetSettingsResponse): String = {
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.startObject()
+    response.getIndexToSettings.asScala.filter(!_.value.getAsMap.isEmpty).foreach(cursor => {
+      builder.startObject(cursor.key, XContentBuilder.FieldCaseConversion.NONE)
+      builder.startObject("settings")
+      cursor.value.toXContent(builder, ToXContent.EMPTY_PARAMS)
+      builder.endObject()
+      builder.endObject()
+    })
+    builder.endObject()
+    builder.bytes().toUtf8
+  }
+
 
   def buildXContent(toXContent: ToXContent): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
