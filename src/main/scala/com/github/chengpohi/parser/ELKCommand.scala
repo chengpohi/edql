@@ -5,8 +5,10 @@ import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
 import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
+import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
+import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
@@ -18,6 +20,7 @@ import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 
 import scala.concurrent.duration.Duration
@@ -38,6 +41,9 @@ object ELKCommand {
   val cst: Seq[Val] => String = clusterStats
   val ist: Seq[Val] => String = indicesStats
   val nst: Seq[Val] => String = nodeStats
+  val csts: Seq[Val] => String = clusterSettings
+  val nsts: Seq[Val] => String = nodeSettings
+  val insts: Seq[Val] => String = indexSettings
   val c: Seq[Val] => String = count
   val d: Seq[Val] => String = delete
   val q: Seq[Val] => String = query
@@ -91,6 +97,25 @@ object ELKCommand {
   def nodeStats(parameters: Seq[Val]): String = {
     val nodesStatsResponse: NodesStatsResponse = Await.result(ElasticCommand.nodeStats, Duration.Inf)
     buildXContent(nodesStatsResponse)
+  }
+
+  def clusterSettings(parameters: Seq[Val]): String = {
+    val clusterUpdateSettingsResponse: ClusterUpdateSettingsResponse = Await.result(ElasticCommand.clusterSettings(), Duration.Inf)
+    buildClusterSettingsResponse(clusterUpdateSettingsResponse)
+  }
+
+  def nodeSettings(parameters: Seq[Val]): String = {
+    val nodesInfoResponse: NodesInfoResponse = Await.result(ElasticCommand.nodesSettings(), Duration.Inf)
+    buildXContent(nodesInfoResponse)
+  }
+
+  def indexSettings(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(indexName) =>  {
+        val getSettingsResponse: GetSettingsResponse = Await.result(ElasticCommand.indexSettings(indexName.extract[String]), Duration.Inf)
+        buildGetSettingsResponse(getSettingsResponse)
+      }
+    }
   }
 
   def health(parameters: Seq[Val]): String = {
