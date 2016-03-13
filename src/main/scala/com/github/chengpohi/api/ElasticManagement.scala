@@ -90,4 +90,12 @@ trait ElasticManagement {
   def countCommand(indexName: String): Future[RichSearchResponse] = client.execute {
     search in indexName size 0
   }
+
+  def clusterSettings() = buildFuture(client.admin.cluster().prepareUpdateSettings().execute)
+
+  def nodesSettings() = buildFuture(client.admin.cluster().prepareNodesInfo().execute)
+
+  def indexSettings(indexName: String) = client.execute {
+    get settings indexName
+  }
 }
