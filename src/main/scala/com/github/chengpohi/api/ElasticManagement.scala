@@ -2,6 +2,7 @@ package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.RichSearchResponse
+import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 
 import scala.concurrent.Future
 
@@ -98,4 +99,6 @@ trait ElasticManagement {
   def indexSettings(indexName: String) = client.execute {
     get settings indexName
   }
+
+  def pendingTasks(): Future[PendingClusterTasksResponse] = buildFuture(client.admin.cluster().preparePendingClusterTasks().execute)
 }

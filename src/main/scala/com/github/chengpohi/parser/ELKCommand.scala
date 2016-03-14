@@ -14,6 +14,7 @@ import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotRes
 import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
 import org.elasticsearch.action.admin.cluster.snapshots.restore.RestoreSnapshotResponse
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
+import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
@@ -44,6 +45,7 @@ object ELKCommand {
   val csts: Seq[Val] => String = clusterSettings
   val nsts: Seq[Val] => String = nodeSettings
   val insts: Seq[Val] => String = indexSettings
+  val pt: Seq[Val] => String = pendingTasks
   val c: Seq[Val] => String = count
   val d: Seq[Val] => String = delete
   val q: Seq[Val] => String = query
@@ -107,6 +109,11 @@ object ELKCommand {
   def nodeSettings(parameters: Seq[Val]): String = {
     val nodesInfoResponse: NodesInfoResponse = Await.result(ElasticCommand.nodesSettings(), Duration.Inf)
     buildXContent(nodesInfoResponse)
+  }
+
+  def pendingTasks(parameters: Seq[Val]): String = {
+    val clusterTasksResponse: PendingClusterTasksResponse = Await.result(ElasticCommand.pendingTasks(), Duration.Inf)
+    buildXContent(clusterTasksResponse)
   }
 
   def indexSettings(parameters: Seq[Val]): String = {
