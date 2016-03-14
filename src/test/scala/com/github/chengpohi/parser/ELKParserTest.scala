@@ -274,10 +274,18 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "retrieve index settings" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run(""""test-parser-name" settings""")
+      ELKRunEngine.run( """"test-parser-name" settings""")
     }
     assert(outContent.toString.contains("test-parser-name"))
   }
+
+  "ELKParser" should "retrieve pending tasks" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """pending tasks""")
+    }
+    assert(outContent.toString.contains(""""tasks":[]"""))
+  }
+
 
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")
