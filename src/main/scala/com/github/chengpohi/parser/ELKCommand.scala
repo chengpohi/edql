@@ -5,6 +5,7 @@ import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
 import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
@@ -45,6 +46,7 @@ object ELKCommand {
   val csts: Seq[Val] => String = clusterSettings
   val nsts: Seq[Val] => String = nodeSettings
   val insts: Seq[Val] => String = indexSettings
+  val ws: Seq[Val] => String = waitForStatus
   val pt: Seq[Val] => String = pendingTasks
   val c: Seq[Val] => String = count
   val d: Seq[Val] => String = delete
@@ -330,6 +332,16 @@ object ELKCommand {
         val getSnapshotResponse: GetSnapshotsResponse = Await.result(
           ElasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String]), Duration.Inf)
         buildXContent(getSnapshotResponse)
+      }
+    }
+  }
+
+  def waitForStatus(parameters: Seq[Val]): String = {
+    parameters match {
+      case Seq(status) => {
+        val healthResponse: ClusterHealthResponse =
+          Await.result(ElasticCommand.waitForStatus(status = Some(status.extract[String])), Duration.Inf)
+        buildXContent(healthResponse)
       }
     }
   }

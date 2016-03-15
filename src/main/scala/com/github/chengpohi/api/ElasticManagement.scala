@@ -2,7 +2,9 @@ package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.RichSearchResponse
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
+import org.elasticsearch.cluster.health.ClusterHealthStatus
 
 import scala.concurrent.Future
 
@@ -101,4 +103,17 @@ trait ElasticManagement {
   }
 
   def pendingTasks(): Future[PendingClusterTasksResponse] = buildFuture(client.admin.cluster().preparePendingClusterTasks().execute)
+
+  def waitForStatus(indexName: Option[String] = Some("*"), status: Option[String] = Some("GREEN"), timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
+    val clusterHealthStatus: ClusterHealthStatus = status match {
+      case Some("GREEN") => ClusterHealthStatus.GREEN
+      case Some("RED") => ClusterHealthStatus.RED
+      case Some("YELLOW") => ClusterHealthStatus.YELLOW
+      case _ => ClusterHealthStatus.GREEN
+    }
+    buildFuture(client.admin.cluster()
+      .prepareHealth(indexName.get)
+      .setTimeout(timeOut.get)
+      .setWaitForStatus(clusterHealthStatus).execute)
+  }
 }
