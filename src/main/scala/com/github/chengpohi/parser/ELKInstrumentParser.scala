@@ -21,7 +21,6 @@ class ELKInstrumentParser extends CollectionParser {
   val clusterSettings = P(space ~ "cluster settings" ~ space).map(s => ("clusterSettings", Some(ELKCommand.csts), Seq()))
   val nodeSettings = P(space ~ "node settings" ~ space).map(s => ("nodeSettings", Some(ELKCommand.nsts), Seq()))
   val indexSettings = P(ioParser ~ space ~ "settings" ~ space).map(s => ("nodeSettings", Some(ELKCommand.insts), s))
-
   val pendingTasks = P("pending tasks").map(s => ("pendingTasks", Some(ELKCommand.pt), Seq()))
   val waitForStatus = P("wait for status" ~ space ~ ioParser).map(s => ("pendingTasks", Some(ELKCommand.ws), s))
 
