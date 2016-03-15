@@ -283,8 +283,26 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Console.withOut(outContent) {
       ELKRunEngine.run( """pending tasks""")
     }
-    assert(outContent.toString.contains(""""tasks":[]"""))
+    assert(outContent.toString.contains( """"tasks":[]"""))
   }
+
+  "ELKParser" should "wait  for status" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run(
+        """bulk index "test-parser-name" "test-parser-type" [
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23},
+          |{"name": "hello","age": 23}
+          |] """.stripMargin)
+      ELKRunEngine.run("""wait for status "YELLOW"""")
+    }
+    assert(outContent.toString.contains("yellow"))
+  }
+
 
 
   after {
