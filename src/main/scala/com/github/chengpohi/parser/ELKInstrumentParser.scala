@@ -23,6 +23,7 @@ class ELKInstrumentParser extends CollectionParser {
   val indexSettings = P(ioParser ~ space ~ "settings" ~ space).map(s => ("nodeSettings", Some(ELKCommand.insts), s))
 
   val pendingTasks = P("pending tasks").map(s => ("pendingTasks", Some(ELKCommand.pt), Seq()))
+  val waitForStatus = P("wait for status" ~ space ~ ioParser).map(s => ("pendingTasks", Some(ELKCommand.ws), s))
 
   val count = P("count" ~ space ~/ ioParser).map(c =>
     ("count", Some(ELKCommand.c), c)
@@ -95,7 +96,7 @@ class ELKInstrumentParser extends CollectionParser {
   )
 
   val instrument = P(space ~
-    (health | clusterStats | indicesStats | nodeStats | pendingTasks
+    (health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings
       | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
