@@ -30,7 +30,6 @@ object ELKParser extends ELKInstrumentParser{
         }
       case f: Failure =>
         Console.err.println("Invalid Command: " + f.msg)
-        println
     }
     (functions, instruments)
   }

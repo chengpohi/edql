@@ -11,7 +11,7 @@ import scala.concurrent.{Future, Promise}
  * Created by chengpohi on 6/28/15.
  */
 trait ElasticBase {
-  val client: ElasticClient
+  implicit val client: ElasticClient
 
   def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
