@@ -10,6 +10,11 @@ object ElasticClientConnector {
   lazy val indexConfig = ConfigFactory.load("application.conf").getConfig("elastic")
   val host: String = indexConfig.getString("host")
   val port: Int = indexConfig.getInt("port")
-  val uri = ElasticsearchClientUri(s"elasticsearch://$host:$port")
-  val client = ElasticClient.transport(uri)
+
+  val client = buildClient(host, port)
+
+  def buildClient(host: String, port: Int) = {
+    val uri = ElasticsearchClientUri(s"elasticsearch://$host:$port")
+    ElasticClient.transport(uri)
+  }
 }

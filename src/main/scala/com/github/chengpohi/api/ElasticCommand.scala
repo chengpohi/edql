@@ -15,5 +15,5 @@ object ElasticCommand extends ElasticManagement
                       with ElasticAnalyzer
                       with ElasticAggs
                       with ElasticBase{
-  lazy val client: ElasticClient = ElasticClientConnector.client
+  implicit val client: ElasticClient = ElasticClientConnector.client
 }
