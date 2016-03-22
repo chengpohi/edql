@@ -29,9 +29,9 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /**
- * elasticservice
- * Created by chengpohi on 1/18/16.
- */
+  * elasticservice
+  * Created by chengpohi on 1/18/16.
+  */
 object ELKCommand {
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
@@ -59,6 +59,7 @@ object ELKCommand {
   val a: Seq[Val] => String = analysis
   val gm: Seq[Val] => String = getMapping
   val gd: Seq[Val] => String = getDocById
+  val clst: Seq[Val] => String = clusterState
   val m: Seq[Val] => String = mapping
   val ac: Seq[Val] => String = aggsCount
   val al: Seq[Val] => String = alias
@@ -86,6 +87,11 @@ object ELKCommand {
         val createResponse = ElasticCommand.createIndex(indexName.extract[String])
         buildAcknowledgedResponse(Await.result(createResponse, Duration.Inf))
     }
+  }
+
+  def clusterState(parameters: Seq[Val]): String = {
+    val eventualClusterStateResponse = ElasticCommand.getIndices
+    buildXContent(Await.result(eventualClusterStateResponse, Duration.Inf).getState)
   }
 
   def clusterStats(parameters: Seq[Val]): String = {
@@ -120,7 +126,7 @@ object ELKCommand {
 
   def indexSettings(parameters: Seq[Val]): String = {
     parameters match {
-      case Seq(indexName) =>  {
+      case Seq(indexName) => {
         val getSettingsResponse: GetSettingsResponse = Await.result(ElasticCommand.indexSettings(indexName.extract[String]), Duration.Inf)
         buildGetSettingsResponse(getSettingsResponse)
       }
