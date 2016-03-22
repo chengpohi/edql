@@ -6,9 +6,9 @@ import com.github.chengpohi.ELKRunEngine
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 /**
- * elasticservice
- * Created by chengpohi on 1/19/16.
- */
+  * elasticservice
+  * Created by chengpohi on 1/19/16.
+  */
 class ELKParserTest extends FlatSpec with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
@@ -111,21 +111,22 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "set mapping for indexname indextype" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """mapping "test-mapping" {
-                          |  "mappings": {
-                          |    "bookmark": {
-                          |      "properties": {
-                          |        "created_at": {
-                          |          "type": "date"
-                          |        },
-                          |        "name": {
-                          |          "type": "string",
-                          |          "index": "not_analyzed"
-                          |        }
-                          |      }
-                          |    }
-                          |  }
-                          |}""".stripMargin('|'))
+      ELKRunEngine.run(
+        """mapping "test-mapping" {
+          |  "mappings": {
+          |    "bookmark": {
+          |      "properties": {
+          |        "created_at": {
+          |          "type": "date"
+          |        },
+          |        "name": {
+          |          "type": "string",
+          |          "index": "not_analyzed"
+          |        }
+          |      }
+          |    }
+          |  }
+          |}""".stripMargin('|'))
       Thread.sleep(1000)
       ELKRunEngine.run( """ "test-mapping" mapping """)
     }
@@ -284,6 +285,13 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       ELKRunEngine.run( """pending tasks""")
     }
     assert(outContent.toString.contains( """"tasks""""))
+  }
+
+  "ELKParser" should "list all indices" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """cluster state""")
+    }
+    assert(outContent.toString.contains("indices"))
   }
 
   "ELKParser" should "wait  for status" in {

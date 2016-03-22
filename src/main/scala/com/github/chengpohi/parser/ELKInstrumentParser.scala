@@ -12,9 +12,13 @@ class ELKInstrumentParser extends CollectionParser {
 
   val health = P("health").map(s => ("health", Some(ELKCommand.h), Seq(Str(""))))
 
+  //memory, jvm, nodes, cpu etc
   val clusterStats = P(space ~ "cluster stats" ~ space).map(s => ("clusterStats", Some(ELKCommand.cst), Seq()))
+  //indices, aliases, restore, snapshots, routing_nodes etc
+  val clusterState = P(space ~ "cluster state" ~ space).map(s => ("clusterState", Some(ELKCommand.clst), Seq()))
 
   val indicesStats = P(space ~ "indices stats" ~ space).map(s => ("indiciesStats", Some(ELKCommand.ist), Seq()))
+
 
   val nodeStats = P(space ~ "node stats" ~ space).map(s => ("nodeStats", Some(ELKCommand.nst), Seq()))
 
@@ -96,7 +100,7 @@ class ELKInstrumentParser extends CollectionParser {
 
   val instrument = P(space ~
     (health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
-      | clusterSettings | nodeSettings | indexSettings
+      | clusterSettings | nodeSettings | indexSettings | clusterState
       | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
       | reindex | index | bulkIndex | createIndex | closeIndex | openIndex

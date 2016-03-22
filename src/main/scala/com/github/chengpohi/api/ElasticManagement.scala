@@ -3,15 +3,16 @@ package com.github.chengpohi.api
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.RichSearchResponse
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
+import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 
 import scala.concurrent.Future
 
 /**
- * elasticshell
- * Created by chengpohi on 3/12/16.
- */
+  * elasticshell
+  * Created by chengpohi on 3/12/16.
+  */
 trait ElasticManagement {
   this: ElasticBase =>
   def nodeStats = {
@@ -52,10 +53,12 @@ trait ElasticManagement {
     }
   }
 
-  def getMapping(indexName: String) = {
-    client.execute {
-      get mapping indexName
-    }
+  def getMapping(indexName: String) = client.execute {
+    get mapping indexName
+  }
+
+  def getIndices: Future[ClusterStateResponse] = {
+    buildFuture(client.admin.cluster().prepareState().execute)
   }
 
   def clusterHealth(): String = {
