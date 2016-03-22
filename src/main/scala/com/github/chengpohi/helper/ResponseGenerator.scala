@@ -1,12 +1,10 @@
 package com.github.chengpohi.helper
 
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
-import com.sksamuel.elastic4s.{RichGetResponse, BulkResult, RichSearchResponse}
+import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
-import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
