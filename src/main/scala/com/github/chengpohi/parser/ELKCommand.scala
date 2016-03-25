@@ -32,10 +32,9 @@ import scala.concurrent.{Await, Future}
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-object ELKCommand {
+class ELKCommand {
   val responseGenerator = new ResponseGenerator
   val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
-
 
   import responseGenerator._
 
@@ -48,7 +47,7 @@ object ELKCommand {
   val insts: Seq[Val] => String = indexSettings
   val ws: Seq[Val] => String = waitForStatus
   val pt: Seq[Val] => String = pendingTasks
-  val c: Seq[Val] => String = count
+  val cn: Seq[Val] => String = count
   val d: Seq[Val] => String = delete
   val q: Seq[Val] => String = query
   val r: Seq[Val] => String = reindex
@@ -59,7 +58,7 @@ object ELKCommand {
   val a: Seq[Val] => String = analysis
   val gm: Seq[Val] => String = getMapping
   val gd: Seq[Val] => String = getDocById
-  val clst: Seq[Val] => String = clusterState
+  val clst: Seq[Val] => String = getIndices
   val m: Seq[Val] => String = mapping
   val ac: Seq[Val] => String = aggsCount
   val al: Seq[Val] => String = alias
@@ -89,7 +88,7 @@ object ELKCommand {
     }
   }
 
-  def clusterState(parameters: Seq[Val]): String = {
+  def getIndices(parameters: Seq[Val]): String = {
     val eventualClusterStateResponse = ElasticCommand.getIndices
     buildXContent(Await.result(eventualClusterStateResponse, Duration.Inf).getState)
   }

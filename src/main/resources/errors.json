@@ -1,0 +1,6 @@
+{
+  "create index": {
+    "help": "",
+    "example": "create index \"index-name\""
+  }
+}

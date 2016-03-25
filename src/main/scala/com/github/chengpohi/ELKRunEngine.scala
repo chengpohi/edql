@@ -2,7 +2,7 @@ package com.github.chengpohi
 
 import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.ELK
-import com.github.chengpohi.parser.ELKParser._
+import com.github.chengpohi.parser.ELKParser
 import scala.io.Source
 
 /**
@@ -30,6 +30,8 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
 }
 
 object ELKRunEngine {
+  val ep = new ELKParser
+  import ep._
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {
       println("usage elk file.elk")
