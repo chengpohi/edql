@@ -4,8 +4,9 @@ import com.sksamuel.elastic4s.{ElasticsearchClientUri, ElasticClient}
 import com.typesafe.config.ConfigFactory
 
 /**
- * Created by chengpohi on 3/19/15.
- */
+*  elasticshell
+*  Created by chengpohi on 3/19/15.
+*/
 object ElasticClientConnector {
   lazy val indexConfig = ConfigFactory.load("application.conf").getConfig("elastic")
   val host: String = indexConfig.getString("host")
