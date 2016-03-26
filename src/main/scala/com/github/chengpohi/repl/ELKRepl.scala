@@ -3,10 +3,7 @@ package com.github.chengpohi.repl
 import java.io.PrintWriter
 
 import com.github.chengpohi.ELKRunEngine
-
-import scala.collection.JavaConversions._
 import jline.console.ConsoleReader
-import jline.console.completer.StringsCompleter
 
 import scala.io.Source
 
@@ -15,12 +12,14 @@ import scala.io.Source
  * Created by chengpohi on 1/27/16.
  */
 object ELKRepl {
-  val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSeq.distinct)
+  val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet)
+  val eLKCompletionHandler = new ELKCompletionHandler
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
     reader.setPrompt("elasticshell>")
     reader.addCompleter(terms)
+    reader.setCompletionHandler(eLKCompletionHandler)
     val out = new PrintWriter(reader.getOutput)
     while (true) {
       val line = reader.readLine()

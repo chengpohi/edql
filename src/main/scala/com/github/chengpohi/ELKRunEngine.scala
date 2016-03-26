@@ -6,7 +6,6 @@ import com.github.chengpohi.parser.ELKParser
 import scala.io.Source
 
 /**
- * scala-parser-combinator
  * Created by chengpohi on 1/3/16.
  */
 class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, String])]) {
