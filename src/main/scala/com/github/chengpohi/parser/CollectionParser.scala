@@ -10,7 +10,7 @@ class CollectionParser {
 
   import fastparse.all._
 
-  val StringChars = NamedFunction(!"\"\\".contains(_: Char), "StringChars")
+  val StringChars = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
   val CollectionChars = NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
   val space = P(CharsWhile(" \r\n".contains(_)).?)
 
@@ -32,7 +32,6 @@ class CollectionParser {
 
   val tuple = P("(" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ ")").map(JsonCollection.Arr(_: _*))
   val array = P("[" ~ jsonExpr.rep(1, sep = space ~ "," ~ space.~/) ~ "]").map(JsonCollection.Arr(_: _*))
-  //val collection = P(space ~ (obj | tuple | array | number | strOrVar) ~ space)
 
   val jsonExpr: P[JsonCollection.Val] = P(
     space ~ (obj | array | tuple | string | `true` | `false` | `null` | number) ~ space
