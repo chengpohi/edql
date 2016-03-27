@@ -1,5 +1,6 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 
 /**
@@ -8,9 +9,14 @@ import com.github.chengpohi.collection.JsonCollection.{Str, Val}
  */
 class ELKInstrumentParser extends CollectionParser {
   val elkCommand = new ELKCommand
+  val parserUtils = new ParserUtils
+
   import elkCommand._
   import fastparse.all._
 
+  val help = P(space ~ strChars.rep(1).! ~ space ~ "?")
+    .map(JsonCollection.Str)
+    .map(s => ("help", Some(parserUtils.help _), Seq(s)))
   val health = P("health").map(s => ("health", Some(h), Seq(Str(""))))
   val count = P("count" ~ space ~/ ioParser).map(c => ("count", Some(cn), c))
   //memory, jvm, nodes, cpu etc
@@ -49,7 +55,7 @@ class ELKInstrumentParser extends CollectionParser {
   val beauty = P(space ~ "beauty" ~ space).map(c => ("beauty", beautyJson))
 
   val instrument = P(space ~
-    (health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
+    (help | health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings | clusterState
       | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
