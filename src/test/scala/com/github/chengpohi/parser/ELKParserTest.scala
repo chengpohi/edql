@@ -310,6 +310,12 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     }
     assert(outContent.toString.contains("yellow"))
   }
+  "ELKParser" should "list help for command" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run("create index ?")
+    }
+    assert(outContent.toString.contains(""""description":"create index by index name""""))
+  }
 
   after {
     ELKRunEngine.run( """ delete "test-parser-name"""")

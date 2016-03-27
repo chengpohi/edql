@@ -11,7 +11,6 @@ import fastparse.core.Parsed.{Failure, Success}
   */
 class ELKParser extends ELKInstrumentParser {
   import fastparse.all._
-  val parserUtils = new ParserUtils
   val methodParameter = P(space ~ "var" ~ space ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
   P(space ~ "function" ~ space ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>
     (f._1, f._2.map(i => i -> "").toMap))
