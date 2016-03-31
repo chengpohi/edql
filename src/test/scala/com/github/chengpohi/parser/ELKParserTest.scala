@@ -31,9 +31,9 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
       Thread.sleep(1000)
       //then
-      ELKRunEngine.run( """ count "test-parser-name" """)
+      ELKRunEngine.run( """ query "test-parser-name" """)
     }
-    assert(outContent.toString.contains("1"))
+    assert(outContent.toString.contains(""""name":"hello""""))
   }
 
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
@@ -44,7 +44,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       //then
       ELKRunEngine.run( """ query "test-parser-name" """)
     }
-    assert(outContent.toString().contains("123"))
+    assert(outContent.toString().contains(""""_id":"123""""))
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
@@ -61,6 +61,19 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     }
     assert(outContent.toString.contains(
       """"name":"hello"""".stripMargin.trim))
+  }
+  "ELKParser" should "delete doc by id" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+
+      Thread.sleep(1000)
+      //then
+      ELKRunEngine.run( """delete "test-parser-name" "test-parser-type" "123" """)
+      Thread.sleep(1000)
+      ELKRunEngine.run( """query "test-parser-name" "test-parser-type"""")
+    }
+    println(outContent.toString)
+    assert(outContent.toString.contains(""""hits":[]"""))
   }
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
@@ -95,7 +108,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "index and get doc by id" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" id "HJJJJJJH" {"name":"hello"} """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}  id "HJJJJJJH"""")
       ELKRunEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
     }
     assert(outContent.toString.contains( """"_id":"hJJJJJJH""""))

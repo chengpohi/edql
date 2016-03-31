@@ -1,6 +1,9 @@
 package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import org.elasticsearch.action.delete.DeleteResponse
+
+import scala.concurrent.Future
 
 /**
  * elasticshell
@@ -13,9 +16,9 @@ trait ElasticDocDeleter {
     delete index indexName
   }
 
-  def deleteById(documentId: String, indexName: String, indexType: String): Boolean = client.execute {
-    delete id documentId from s"$indexName/$indexType"
-  }.await.isFound
+  def deleteById(indexName: String, indexType: String, documentId: String): Future[DeleteResponse] = client.execute {
+    delete id documentId from indexName / indexType
+  }
 
   def createIndex(indexName: String) = client.execute {
     create index indexName

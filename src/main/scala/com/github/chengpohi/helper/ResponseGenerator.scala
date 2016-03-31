@@ -5,6 +5,7 @@ import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
+import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
@@ -14,9 +15,9 @@ import org.json4s.native.Serialization.write
 import scala.collection.JavaConverters._
 
 /**
- * elasticshell
- * Created by chengpohi on 1/26/16.
- */
+  * elasticshell
+  * Created by chengpohi on 1/26/16.
+  */
 class ResponseGenerator {
   val MAPPINGS = new XContentBuilderString("mappings")
   val TOOK = new XContentBuilderString("took")
@@ -113,6 +114,10 @@ class ResponseGenerator {
 
   def buildAcknowledgedResponse(acknowledgedResponse: AcknowledgedResponse): String = {
     write(("acknowledged", acknowledgedResponse.isAcknowledged))
+  }
+
+  def buildIsFound(deleteResponse: DeleteResponse): String = {
+    write(("isFound", deleteResponse.isFound))
   }
 
   def buildSearchResponse(searchResponse: RichSearchResponse): String = {
