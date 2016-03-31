@@ -36,9 +36,20 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString.contains("1"))
   }
 
+  "ELKParser" should "index doc by indexName, indexType, id and fields" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+
+      Thread.sleep(1000)
+      //then
+      ELKRunEngine.run( """ query "test-parser-name" """)
+    }
+    assert(outContent.toString().contains("123"))
+  }
+
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}""")
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
       Thread.sleep(3000)
       ELKRunEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
 
@@ -61,7 +72,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       ELKRunEngine.run( """ query "test-parser-name" """)
     }
     assert(outContent.toString.contains(
-      """"name":"elasticservice"""".stripMargin.trim))
+      """"name"""".stripMargin.trim))
   }
 
   "ELKParser" should "analysis doc by specific analyzer" in {
@@ -84,7 +95,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "index and get doc by id" in {
     Console.withOut(outContent) {
-      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" id "HJJJJJJH" {"name":"hello"} """)
       ELKRunEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
     }
     assert(outContent.toString.contains( """"_id":"hJJJJJJH""""))
