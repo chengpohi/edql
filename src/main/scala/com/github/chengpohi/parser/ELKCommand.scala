@@ -24,6 +24,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
+import org.elasticsearch.action.delete.DeleteResponse
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -149,6 +150,11 @@ class ELKCommand {
       case Seq(indexName) => {
         val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = ElasticCommand.deleteIndex(indexName.extract[String])
         buildAcknowledgedResponse(Await.result(eventualDeleteIndexResponse, Duration.Inf))
+      }
+      case Seq(indexName, indexType, id) => {
+        val eventualDeleteIndexResponse: Future[DeleteResponse] = ElasticCommand.deleteById(indexName.extract[String],
+          indexType.extract[String], id.extract[String])
+        buildIsFound(Await.result(eventualDeleteIndexResponse, Duration.Inf))
       }
     }
   }
