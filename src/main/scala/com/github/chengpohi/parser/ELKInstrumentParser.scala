@@ -35,6 +35,8 @@ class ELKInstrumentParser extends CollectionParser {
   val query = P("query" ~ space ~/ ioParser).map(c => ("query", Some(q), c))
   val reindex = P("reindex" ~ space ~/ ioParser ~/ space).map(c => ("reindex", Some(r), c))
   val index = P("index" ~ space ~/ ioParser ~ space).map(c => ("index", Some(i), c))
+  val indexById = P("index" ~ space ~/ ioParser ~ space ~ "id" ~ space ~ ioParser ~ space).map(c =>
+    ("indexById", Some(i), c._1 ++ c._2))
   val bulkIndex = P("bulk index" ~ space ~/ ioParser ~ space).map(c => ("bulkIndex", Some(bi), c))
   val update = P("update" ~ space ~/ ioParser ~ space).map(c => ("update", Some(u), c))
   val createIndex = P("create index" ~ space ~/ strOrVar).map(c => ("createIndex", Some(ci), Seq(c)))
@@ -59,7 +61,7 @@ class ELKInstrumentParser extends CollectionParser {
       | clusterSettings | nodeSettings | indexSettings | clusterState
       | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
-      | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
+      | reindex | index | indexById | bulkIndex | createIndex | closeIndex | openIndex
       | update | analysis | aggsCount
       | getMapping | mapping
       | delete | alias | count)
