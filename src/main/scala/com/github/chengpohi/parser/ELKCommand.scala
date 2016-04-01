@@ -25,6 +25,7 @@ import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.update.UpdateResponse
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -177,7 +178,14 @@ class ELKCommand {
   def update(parameters: Seq[Val]): String = {
     parameters match {
       case Seq(indexName, indexType, updateFields) => {
-        ElasticCommand.update(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
+        ElasticCommand.updateAllDocs(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
+      }
+      case Seq(indexName, indexType, updateFields, id) => {
+        val eventualUpdateResponse: Future[UpdateResponse] = ElasticCommand.updateById(indexName.extract[String],
+          indexType.extract[String],
+          updateFields.extract[List[(String, String)]],
+          id.extract[String])
+        buildXContent(Await.result(eventualUpdateResponse, Duration.Inf).getShardInfo)
       }
     }
   }
