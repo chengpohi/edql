@@ -5,7 +5,7 @@ This a ***REPL*** for elasticsearch, it uses ***elk*** syntax to interact with *
 Also you can use ***elk*** file to batch execute ***elasticsearch*** commands like shell file.
 
 ## Version
-For now support ***elasticsearch-1.7.1***
+For now support ***elasticsearch-2.2***
 
 ## Installation
 
