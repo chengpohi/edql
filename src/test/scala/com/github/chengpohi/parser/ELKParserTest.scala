@@ -47,6 +47,22 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(outContent.toString().contains(""""_id":"123""""))
   }
 
+  "ELKParser" should "update doc by id and fields" in {
+    Console.withOut(outContent) {
+      ELKRunEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+
+      Thread.sleep(1000)
+
+      ELKRunEngine.run( """update "test-parser-name" "test-parser-type" { "name" : "chengpohi"} id "123"""")
+
+      Thread.sleep(1000)
+      //then
+      ELKRunEngine.run( """ query "test-parser-name" """)
+    }
+    assert(outContent.toString().contains(""""name":"chengpohi""""))
+
+  }
+
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
     Console.withOut(outContent) {
       ELKRunEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
@@ -334,6 +350,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     }
     assert(outContent.toString.contains("yellow"))
   }
+
   "ELKParser" should "list help for command" in {
     Console.withOut(outContent) {
       ELKRunEngine.run("create index ?")

@@ -1,14 +1,10 @@
 package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s._
-import com.sksamuel.elastic4s.source.DocumentMap
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
