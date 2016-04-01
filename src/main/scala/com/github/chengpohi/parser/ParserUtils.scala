@@ -12,13 +12,14 @@ import org.json4s.native.Serialization.write
 class ParserUtils {
   implicit val formats = DefaultFormats
   val instrumentations = ConfigFactory.load("instrumentations.json")
-  def error(parameters: Seq[Val]): String = {
+
+  def error:Seq[Val] => String = parameters => {
     val (errorMsg, input) = (parameters.head.extract[String], parameters(1).extract[String])
     write(Map(("illegal_input", input), ("caused_by", errorMsg)))
   }
 
-  def help(parameters: Seq[Val]): String = {
-    parameters match {
+  def help: Seq[Val] => String = {
+    {
       case Seq(input) =>
         val s = input.extract[String]
         val example: String = instrumentations.getConfig(s.trim).getString("example")

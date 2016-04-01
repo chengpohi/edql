@@ -39,296 +39,252 @@ class ELKCommand {
 
   import responseGenerator._
 
-  def getMapping(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) => {
-        val eventualMappingsResponse: Future[GetMappingsResult] = ElasticCommand.getMapping(indexName.extract[String])
-        val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
-        buildGetMappingResponse(mappings)
-      }
+  def getMapping: Seq[Val] => String = {
+    case Seq(indexName) => {
+      val eventualMappingsResponse: Future[GetMappingsResult] = ElasticCommand.getMapping(indexName.extract[String])
+      val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
+      buildGetMappingResponse(mappings)
     }
   }
 
-  def createIndex(parameters: Seq[Val]): String = {
-    parameters match {
+  def createIndex: Seq[Val] => String = {
+    {
       case Seq(indexName) =>
         val createResponse = ElasticCommand.createIndex(indexName.extract[String])
         buildAcknowledgedResponse(Await.result(createResponse, Duration.Inf))
     }
   }
 
-  def getIndices(parameters: Seq[Val]): String = {
+  def getIndices: Seq[Val] => String = _ => {
     val eventualClusterStateResponse = ElasticCommand.getIndices
     buildXContent(Await.result(eventualClusterStateResponse, Duration.Inf).getState)
   }
 
-  def clusterStats(parameters: Seq[Val]): String = {
+  def clusterStats: Seq[Val] => String = _ => {
     val clusterStatsResponse: ClusterStatsResponse = Await.result(ElasticCommand.clusterStats, Duration.Inf)
     buildXContent(clusterStatsResponse)
   }
 
-  def indicesStats(parameters: Seq[Val]): String = {
+  def indicesStats: Seq[Val] => String = _ => {
     val indicesStatsResponse: IndicesStatsResponse = Await.result(ElasticCommand.indicesStats, Duration.Inf)
     buildXContent(indicesStatsResponse)
   }
 
-  def nodeStats(parameters: Seq[Val]): String = {
+  def nodeStats: Seq[Val] => String = _ => {
     val nodesStatsResponse: NodesStatsResponse = Await.result(ElasticCommand.nodeStats, Duration.Inf)
     buildXContent(nodesStatsResponse)
   }
 
-  def clusterSettings(parameters: Seq[Val]): String = {
+  def clusterSettings: Seq[Val] => String = _ => {
     val clusterUpdateSettingsResponse: ClusterUpdateSettingsResponse = Await.result(ElasticCommand.clusterSettings(), Duration.Inf)
     buildClusterSettingsResponse(clusterUpdateSettingsResponse)
   }
 
-  def nodeSettings(parameters: Seq[Val]): String = {
+  def nodeSettings: Seq[Val] => String = _ => {
     val nodesInfoResponse: NodesInfoResponse = Await.result(ElasticCommand.nodesSettings(), Duration.Inf)
     buildXContent(nodesInfoResponse)
   }
 
-  def pendingTasks(parameters: Seq[Val]): String = {
+  def pendingTasks: Seq[Val] => String = _ => {
     val clusterTasksResponse: PendingClusterTasksResponse = Await.result(ElasticCommand.pendingTasks(), Duration.Inf)
     buildXContent(clusterTasksResponse)
   }
 
-  def indexSettings(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) => {
-        val getSettingsResponse: GetSettingsResponse = Await.result(ElasticCommand.indexSettings(indexName.extract[String]), Duration.Inf)
-        buildGetSettingsResponse(getSettingsResponse)
-      }
+  def indexSettings: Seq[Val] => String = {
+    case Seq(indexName) => {
+      val getSettingsResponse: GetSettingsResponse = Await.result(ElasticCommand.indexSettings(indexName.extract[String]), Duration.Inf)
+      buildGetSettingsResponse(getSettingsResponse)
     }
   }
 
-  def health(parameters: Seq[Val]): String = {
+  def health: Seq[Val] => String = _ => {
     ElasticCommand.clusterHealth()
   }
 
-  def count(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) =>
-        val eventualRichSearchResponse: Future[RichSearchResponse] = ElasticCommand.countCommand(indexName.extract[String])
-        buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
+  def count: Seq[Val] => String = {
+    case Seq(indexName) =>
+      val eventualRichSearchResponse: Future[RichSearchResponse] = ElasticCommand.countCommand(indexName.extract[String])
+      buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
+  }
+
+  def delete: Seq[Val] => String = {
+    case Seq(indexName) => {
+      val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = ElasticCommand.deleteIndex(indexName.extract[String])
+      buildAcknowledgedResponse(Await.result(eventualDeleteIndexResponse, Duration.Inf))
+    }
+    case Seq(indexName, indexType, id) => {
+      val eventualDeleteIndexResponse: Future[DeleteResponse] = ElasticCommand.deleteById(indexName.extract[String],
+        indexType.extract[String], id.extract[String])
+      buildIsFound(Await.result(eventualDeleteIndexResponse, Duration.Inf))
     }
   }
 
-  def delete(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) => {
-        val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = ElasticCommand.deleteIndex(indexName.extract[String])
-        buildAcknowledgedResponse(Await.result(eventualDeleteIndexResponse, Duration.Inf))
-      }
-      case Seq(indexName, indexType, id) => {
-        val eventualDeleteIndexResponse: Future[DeleteResponse] = ElasticCommand.deleteById(indexName.extract[String],
-          indexType.extract[String], id.extract[String])
-        buildIsFound(Await.result(eventualDeleteIndexResponse, Duration.Inf))
-      }
+  def query: Seq[Val] => String = {
+    case Seq(indexName, indexType) =>
+      buildXContent(ElasticCommand.getAll(indexName.extract[String], indexType.extract[String]).original)
+    case Seq(indexName, indexType, queryData) =>
+      val eventualRichSearchResponse: Future[RichSearchResponse] = ElasticCommand.queryDataByRawQuery(
+        indexName.extract[String],
+        indexType.extract[String],
+        queryData.extract[Map[String, String]].toList)
+      buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
+    case Seq(indexName) =>
+      buildXContent(ElasticCommand.getAll(indexName.extract[String], "*").original)
+  }
+
+  def update: Seq[Val] => String = {
+    case Seq(indexName, indexType, updateFields) => {
+      ElasticCommand.updateAllDocs(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
+    }
+    case Seq(indexName, indexType, updateFields, id) => {
+      val eventualUpdateResponse: Future[UpdateResponse] = ElasticCommand.updateById(indexName.extract[String],
+        indexType.extract[String],
+        updateFields.extract[List[(String, String)]],
+        id.extract[String])
+      buildXContent(Await.result(eventualUpdateResponse, Duration.Inf).getShardInfo)
     }
   }
 
-  def query(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType) =>
-        buildXContent(ElasticCommand.getAll(indexName.extract[String], indexType.extract[String]).original)
-      case Seq(indexName, indexType, queryData) =>
-        val eventualRichSearchResponse: Future[RichSearchResponse] = ElasticCommand.queryDataByRawQuery(
-          indexName.extract[String],
-          indexType.extract[String],
-          queryData.extract[Map[String, String]].toList)
-        buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
-      case Seq(indexName) =>
-        buildXContent(ElasticCommand.getAll(indexName.extract[String], "*").original)
+  def reindex: Seq[Val] => String = {
+    case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
+      ElasticCommand.reindex(sourceIndex.extract[String],
+        targetIndex.extract[String], sourceIndexType.extract[String], fields.extract[List[String]])
     }
   }
 
-  def update(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType, updateFields) => {
-        ElasticCommand.updateAllDocs(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
-      }
-      case Seq(indexName, indexType, updateFields, id) => {
-        val eventualUpdateResponse: Future[UpdateResponse] = ElasticCommand.updateById(indexName.extract[String],
-          indexType.extract[String],
-          updateFields.extract[List[(String, String)]],
-          id.extract[String])
-        buildXContent(Await.result(eventualUpdateResponse, Duration.Inf).getShardInfo)
-      }
+  def bulkIndex: Seq[Val] => String = {
+    case Seq(indexName, indexType, fields) => {
+      val bulkResponse =
+        ElasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
+      val br: BulkResult = Await.result(bulkResponse, Duration.Inf)
+      buildBulkResponse(br)
     }
   }
 
-  def reindex(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-        ElasticCommand.reindex(sourceIndex.extract[String],
-          targetIndex.extract[String], sourceIndexType.extract[String], fields.extract[List[String]])
-      }
+  def index: Seq[Val] => String = {
+    case Seq(indexName, indexType, fields) => {
+      val indexResponse =
+        ElasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
+      val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
+      buildIsCreated(created)
+    }
+    case Seq(indexName, indexType, fields, id) => {
+      val indexResponse = ElasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
+        fields.extract[List[(String, String)]], id.extract[String])
+      val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
+      buildIsCreated(created)
     }
   }
 
-  def bulkIndex(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType, fields) => {
-        val bulkResponse =
-          ElasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
-        val br: BulkResult = Await.result(bulkResponse, Duration.Inf)
-        buildBulkResponse(br)
-      }
+  def analysis: Seq[Val] => String = {
+    case Seq(analyzer, doc) => {
+      val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer.extract[String],
+        doc.extract[String]), Duration.Inf)
+      buildAnalyzeResponse(analyzeResponse)
     }
   }
 
-  def index(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType, fields) => {
-        val indexResponse =
-          ElasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
-        val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
-        buildIsCreated(created)
-      }
-      case Seq(indexName, indexType, fields, id) => {
-        val indexResponse = ElasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
-          fields.extract[List[(String, String)]], id.extract[String])
-        val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
-        buildIsCreated(created)
-      }
+  def mapping: Seq[Val] => String = {
+    case Seq(indexName, mapping) => {
+      val mappings: Future[CreateIndexResponse] =
+        ElasticCommand.mappings(indexName.extract[String], mapping.toJson)
+      val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
+      buildAcknowledgedResponse(result)
     }
   }
 
-  def analysis(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(analyzer, doc) => {
-        val analyzeResponse: AnalyzeResponse = Await.result(ElasticCommand.analysis(analyzer.extract[String],
-          doc.extract[String]), Duration.Inf)
-        buildAnalyzeResponse(analyzeResponse)
-      }
+  def aggsCount: Seq[Val] => String = {
+    case Seq(indexName, indexType, rawJson) => {
+      val aggsSearch: Future[RichSearchResponse] =
+        ElasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
+      val searchResponse: RichSearchResponse = Await.result(aggsSearch, Duration.Inf)
+      buildSearchResponse(searchResponse)
     }
   }
 
-  def mapping(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, mapping) => {
-        val mappings: Future[CreateIndexResponse] =
-          ElasticCommand.mappings(indexName.extract[String], mapping.toJson)
-        val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
-        buildAcknowledgedResponse(result)
-      }
-    }
-  }
-
-  def aggsCount(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType, rawJson) => {
-        val aggsSearch: Future[RichSearchResponse] =
-          ElasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
-        val searchResponse: RichSearchResponse = Await.result(aggsSearch, Duration.Inf)
-        buildSearchResponse(searchResponse)
-      }
-    }
-  }
-
-  def alias(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(targetIndex, sourceIndex) => {
-        val eventualAliasesResponse: Future[IndicesAliasesResponse] =
-          ElasticCommand.alias(targetIndex.extract[String], sourceIndex.extract[String])
-        val aliasesResponse: IndicesAliasesResponse = Await.result(eventualAliasesResponse, Duration.Inf)
-        buildAcknowledgedResponse(aliasesResponse)
-      }
+  def alias: Seq[Val] => String = {
+    case Seq(targetIndex, sourceIndex) => {
+      val eventualAliasesResponse: Future[IndicesAliasesResponse] =
+        ElasticCommand.alias(targetIndex.extract[String], sourceIndex.extract[String])
+      val aliasesResponse: IndicesAliasesResponse = Await.result(eventualAliasesResponse, Duration.Inf)
+      buildAcknowledgedResponse(aliasesResponse)
     }
   }
 
 
-  def getDocById(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName, indexType, id) => {
-        val getResponse: RichGetResponse = Await.result(ElasticCommand.getDocById(indexName.extract[String],
-          indexType.extract[String], id.extract[String]), Duration.Inf)
-        buildGetResponse(getResponse)
-      }
+  def getDocById: Seq[Val] => String = {
+    case Seq(indexName, indexType, id) => {
+      val getResponse: RichGetResponse = Await.result(ElasticCommand.getDocById(indexName.extract[String],
+        indexType.extract[String], id.extract[String]), Duration.Inf)
+      buildGetResponse(getResponse)
     }
   }
 
-  def createRepository(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(repositoryName, repositoryType, settings) => {
-        val repositoryResponse: PutRepositoryResponse = Await.result(
-          ElasticCommand.createRepository(repositoryName.extract[String], repositoryType.extract[String],
-            settings.extract[Map[String, String]]), Duration.Inf)
-        buildAcknowledgedResponse(repositoryResponse)
-      }
+  def createRepository: Seq[Val] => String = {
+    case Seq(repositoryName, repositoryType, settings) => {
+      val repositoryResponse: PutRepositoryResponse = Await.result(
+        ElasticCommand.createRepository(repositoryName.extract[String], repositoryType.extract[String],
+          settings.extract[Map[String, String]]), Duration.Inf)
+      buildAcknowledgedResponse(repositoryResponse)
     }
   }
 
-  def createSnapshot(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(snapshotName, repositoryName) => {
-        val createSnapshotResponse: CreateSnapshotResponse = Await.result(
-          ElasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-        buildXContent(createSnapshotResponse)
-      }
+  def createSnapshot: Seq[Val] => String = {
+    case Seq(snapshotName, repositoryName) => {
+      val createSnapshotResponse: CreateSnapshotResponse = Await.result(
+        ElasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+      buildXContent(createSnapshotResponse)
     }
   }
 
-  def deleteSnapshot(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(snapshotName, repositoryName) => {
-        val deleteSnapshotResponse: DeleteSnapshotResponse = Await.result(
-          ElasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-        buildAcknowledgedResponse(deleteSnapshotResponse)
-      }
+  def deleteSnapshot: Seq[Val] => String = {
+    case Seq(snapshotName, repositoryName) => {
+      val deleteSnapshotResponse: DeleteSnapshotResponse = Await.result(
+        ElasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+      buildAcknowledgedResponse(deleteSnapshotResponse)
     }
   }
 
-  def restoreSnapshot(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(snapshotName, repositoryName) => {
-        val snapshotResponse: RestoreSnapshotResponse = Await.result(ElasticCommand.restoreSnapshot(snapshotName.extract[String],
-          repositoryName.extract[String]), Duration.Inf)
-        buildXContent(snapshotResponse)
-      }
+  def restoreSnapshot: Seq[Val] => String = {
+    case Seq(snapshotName, repositoryName) => {
+      val snapshotResponse: RestoreSnapshotResponse = Await.result(ElasticCommand.restoreSnapshot(snapshotName.extract[String],
+        repositoryName.extract[String]), Duration.Inf)
+      buildXContent(snapshotResponse)
     }
   }
 
-  def closeIndex(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) => {
-        val closeIndexResponse: CloseIndexResponse = Await.result(ElasticCommand.closeIndex(indexName.extract[String]), Duration.Inf)
-        buildAcknowledgedResponse(closeIndexResponse)
-      }
+  def closeIndex: Seq[Val] => String = {
+    case Seq(indexName) => {
+      val closeIndexResponse: CloseIndexResponse = Await.result(ElasticCommand.closeIndex(indexName.extract[String]), Duration.Inf)
+      buildAcknowledgedResponse(closeIndexResponse)
     }
   }
 
-  def openIndex(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(indexName) => {
-        val openIndexResponse: OpenIndexResponse = Await.result(ElasticCommand.openIndex(indexName.extract[String]), Duration.Inf)
-        buildAcknowledgedResponse(openIndexResponse)
-      }
+  def openIndex: Seq[Val] => String = {
+    case Seq(indexName) => {
+      val openIndexResponse: OpenIndexResponse = Await.result(ElasticCommand.openIndex(indexName.extract[String]), Duration.Inf)
+      buildAcknowledgedResponse(openIndexResponse)
     }
   }
 
-  def getSnapshot(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(snapshotName, repositoryName) => {
-        val getSnapshotResponse: GetSnapshotsResponse = Await.result(
-          ElasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-        buildXContent(getSnapshotResponse)
-      }
-      case Seq(repositoryName) => {
-        val getSnapshotResponse: GetSnapshotsResponse = Await.result(
-          ElasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String]), Duration.Inf)
-        buildXContent(getSnapshotResponse)
-      }
+  def getSnapshot: Seq[Val] => String = {
+    case Seq(snapshotName, repositoryName) => {
+      val getSnapshotResponse: GetSnapshotsResponse = Await.result(
+        ElasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
+      buildXContent(getSnapshotResponse)
+    }
+    case Seq(repositoryName) => {
+      val getSnapshotResponse: GetSnapshotsResponse = Await.result(
+        ElasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String]), Duration.Inf)
+      buildXContent(getSnapshotResponse)
     }
   }
 
-  def waitForStatus(parameters: Seq[Val]): String = {
-    parameters match {
-      case Seq(status) => {
-        val healthResponse: ClusterHealthResponse =
-          Await.result(ElasticCommand.waitForStatus(status = Some(status.extract[String])), Duration.Inf)
-        buildXContent(healthResponse)
-      }
+  def waitForStatus:Seq[Val] => String = {
+    case Seq(status) => {
+      val healthResponse: ClusterHealthResponse =
+        Await.result(ElasticCommand.waitForStatus(status = Some(status.extract[String])), Duration.Inf)
+      buildXContent(healthResponse)
     }
   }
 
