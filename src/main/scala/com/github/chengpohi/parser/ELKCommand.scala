@@ -36,41 +36,8 @@ import scala.concurrent.{Await, Future}
   */
 class ELKCommand {
   val responseGenerator = new ResponseGenerator
-  val TUPLE = """\(([^(),]+),([^(),]+)\)""".r
 
   import responseGenerator._
-
-  val h: Seq[Val] => String = health
-  val cst: Seq[Val] => String = clusterStats
-  val ist: Seq[Val] => String = indicesStats
-  val nst: Seq[Val] => String = nodeStats
-  val csts: Seq[Val] => String = clusterSettings
-  val nsts: Seq[Val] => String = nodeSettings
-  val insts: Seq[Val] => String = indexSettings
-  val ws: Seq[Val] => String = waitForStatus
-  val pt: Seq[Val] => String = pendingTasks
-  val cn: Seq[Val] => String = count
-  val d: Seq[Val] => String = delete
-  val q: Seq[Val] => String = query
-  val r: Seq[Val] => String = reindex
-  val i: Seq[Val] => String = index
-  val bi: Seq[Val] => String = bulkIndex
-  val u: Seq[Val] => String = update
-  val ci: Seq[Val] => String = createIndex
-  val a: Seq[Val] => String = analysis
-  val gm: Seq[Val] => String = getMapping
-  val gd: Seq[Val] => String = getDocById
-  val clst: Seq[Val] => String = getIndices
-  val m: Seq[Val] => String = mapping
-  val ac: Seq[Val] => String = aggsCount
-  val al: Seq[Val] => String = alias
-  val cr: Seq[Val] => String = createRepository
-  val cs: Seq[Val] => String = createSnapshot
-  val ds: Seq[Val] => String = deleteSnapshot
-  val gs: Seq[Val] => String = getSnapshot
-  val rs: Seq[Val] => String = restoreSnapshot
-  val clI: Seq[Val] => String = closeIndex
-  val oi: Seq[Val] => String = openIndex
 
   def getMapping(parameters: Seq[Val]): String = {
     parameters match {
