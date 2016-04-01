@@ -88,7 +88,6 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
       Thread.sleep(1000)
       ELKRunEngine.run( """query "test-parser-name" "test-parser-type"""")
     }
-    println(outContent.toString)
     assert(outContent.toString.contains(""""hits":[]"""))
   }
 
