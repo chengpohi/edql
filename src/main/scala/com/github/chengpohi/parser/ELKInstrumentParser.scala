@@ -4,9 +4,9 @@ import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 
 /**
- * elasticservice
- * Created by chengpohi on 1/18/16.
- */
+  * elasticservice
+  * Created by chengpohi on 1/18/16.
+  */
 class ELKInstrumentParser extends CollectionParser {
   val elkCommand = new ELKCommand
   val parserUtils = new ParserUtils
@@ -37,7 +37,8 @@ class ELKInstrumentParser extends CollectionParser {
   val index = P("index" ~ space ~/ ioParser ~ space ~ ("id" ~ space ~ ioParser).? ~ space)
     .map(c => ("index", Some(i), c._1 ++ c._2.getOrElse(Seq())))
   val bulkIndex = P("bulk index" ~ space ~/ ioParser ~ space).map(c => ("bulkIndex", Some(bi), c))
-  val update = P("update" ~ space ~/ ioParser ~ space).map(c => ("update", Some(u), c))
+  val update = P("update" ~ space ~/ ioParser ~ space ~ ("id" ~ space ~ ioParser).? ~ space)
+    .map(c => ("update", Some(u), c._1 ++ c._2.getOrElse(Seq())))
   val createIndex = P("create index" ~ space ~/ strOrVar).map(c => ("createIndex", Some(ci), Seq(c)))
   val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(c => ("getMapping", Some(gm), Seq(c)))
   val analysis = P("analysis" ~ space ~/ strOrVar.rep(2, sep = " ")).map(c => ("analysis", Some(a), c))
@@ -58,7 +59,7 @@ class ELKInstrumentParser extends CollectionParser {
   val instrument = P(space ~
     (help | health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings | clusterState
-      | restoreSnapshot | deleteSnapshot  | createSnapshot | getSnapshot | createRepository
+      | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
       | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
       | update | analysis | aggsCount
@@ -67,7 +68,7 @@ class ELKInstrumentParser extends CollectionParser {
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => String = i._2.get
-      val fComponent = (f andThen extractFunction)(_)
+      val fComponent = (f andThen extractFunction) (_)
       ELK.Instrument(i._1, Some(fComponent), i._3)
     }
     case _ => ELK.Instrument((i._1, i._2, i._3))
