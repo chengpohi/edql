@@ -20,8 +20,7 @@ class ELKRunEngine(functions: Map[String, (Seq[ELK.Instrument], Map[String, Stri
             println(beautyJSON(response))
           } catch {
             case e: Exception => {
-              e.printStackTrace()
-              //println(s"\nMethod Name: ${name} \nParameters: ${parameters}\nFull Stacktrace: ${e.getCause.getLocalizedMessage}")
+              println(s"\nMethod Name: ${name} \nParameters: ${parameters}\nFull Stacktrace: ${e.getCause.getLocalizedMessage}")
             }
           }
       }
