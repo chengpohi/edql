@@ -1,13 +1,12 @@
 package com.github.chengpohi.api
 
-import com.github.chengpohi.connector.ElasticClientConnector
 import com.sksamuel.elastic4s.ElasticClient
 
 /**
  * elasticshell
  * Created by chengpohi on 1/6/16.
  */
-object ElasticCommand extends ElasticManagement
+class ElasticCommand(cl: ElasticClient) extends ElasticManagement
                       with ElasticIndexer
                       with ElasticDocUpdater
                       with ElasticDocDeleter
@@ -15,5 +14,5 @@ object ElasticCommand extends ElasticManagement
                       with ElasticAnalyzer
                       with ElasticAggs
                       with ElasticBase{
-  implicit val client: ElasticClient = ElasticClientConnector.client
+  val client: ElasticClient = cl
 }

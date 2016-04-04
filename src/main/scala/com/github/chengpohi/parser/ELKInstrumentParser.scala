@@ -7,10 +7,7 @@ import com.github.chengpohi.collection.JsonCollection.{Str, Val}
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class ELKInstrumentParser extends CollectionParser {
-  val elkCommand = new ELKCommand
-  val parserUtils = new ParserUtils
-
+class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
   import elkCommand._
   import fastparse.all._
 

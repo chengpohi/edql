@@ -3,6 +3,7 @@ package com.github.chengpohi.repl
 import java.io.PrintWriter
 
 import com.github.chengpohi.ELKRunEngine
+import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
 
 import scala.io.Source
@@ -14,6 +15,7 @@ import scala.io.Source
 object ELKRepl {
   val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
+  val elkRunEngine = new ELKRunEngine(ELKCommandRegistry)
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
@@ -24,7 +26,7 @@ object ELKRepl {
     while (true) {
       val line = reader.readLine()
       if (line == "exit") System.exit(0)
-      ELKRunEngine.run(line)
+      elkRunEngine.run(line)
     }
   }
 }
