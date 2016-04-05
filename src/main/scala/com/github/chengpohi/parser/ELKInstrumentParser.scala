@@ -3,11 +3,15 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
 class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
+
   import elkCommand._
   import fastparse.all._
 
@@ -64,8 +68,10 @@ class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) exte
       | delete | alias | count)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
-      val f: Seq[Val] => String = i._2.get
-      val fComponent = (f andThen extractFunction) (_)
+      val f: Seq[Val] => Future[String] = i._2.get
+      val fComponent = (s: Seq[Val]) => {
+        f(s).map(t => extractFunction(t))
+      }
       ELK.Instrument(i._1, Some(fComponent), i._3)
     }
     case _ => ELK.Instrument((i._1, i._2, i._3))
