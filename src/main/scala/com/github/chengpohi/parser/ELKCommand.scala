@@ -4,7 +4,7 @@ import com.github.chengpohi.api.ElasticCommand
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
-import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
+import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse}
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
@@ -27,8 +27,8 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.update.UpdateResponse
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * elasticservice
@@ -37,100 +37,99 @@ import scala.concurrent.{Await, Future}
 class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: ResponseGenerator) {
   import responseGenerator._
 
-  def getMapping: Seq[Val] => String = {
+  def getMapping: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
       val eventualMappingsResponse: Future[GetMappingsResult] = elasticCommand.getMapping(indexName.extract[String])
-      val mappings = Await.result(eventualMappingsResponse, Duration.Inf)
-      buildGetMappingResponse(mappings)
+      eventualMappingsResponse.map(buildGetMappingResponse)
     }
   }
 
-  def createIndex: Seq[Val] => String = {
+  def createIndex: Seq[Val] => Future[String] = {
     {
       case Seq(indexName) =>
         val createResponse = elasticCommand.createIndex(indexName.extract[String])
-        buildAcknowledgedResponse(Await.result(createResponse, Duration.Inf))
+        createResponse.map(buildAcknowledgedResponse)
     }
   }
 
-  def getIndices: Seq[Val] => String = _ => {
-    val eventualClusterStateResponse = elasticCommand.getIndices
-    buildXContent(Await.result(eventualClusterStateResponse, Duration.Inf).getState)
+  def getIndices: Seq[Val] => Future[String] = _ => {
+    val indiceResponse = elasticCommand.getIndices
+    indiceResponse.map(s => buildXContent(s.getState))
   }
 
-  def clusterStats: Seq[Val] => String = _ => {
-    val clusterStatsResponse: ClusterStatsResponse = Await.result(elasticCommand.clusterStats, Duration.Inf)
-    buildXContent(clusterStatsResponse)
+  def clusterStats: Seq[Val] => Future[String] = _ => {
+    val clusterStatsResponse: Future[ClusterStatsResponse] = elasticCommand.clusterStats()
+    clusterStatsResponse.map(buildXContent)
   }
 
-  def indicesStats: Seq[Val] => String = _ => {
-    val indicesStatsResponse: IndicesStatsResponse = Await.result(elasticCommand.indicesStats, Duration.Inf)
-    buildXContent(indicesStatsResponse)
+  def indicesStats: Seq[Val] => Future[String] = _ => {
+    val indicesStatsResponse: Future[IndicesStatsResponse] = elasticCommand.indicesStats()
+    indicesStatsResponse.map(buildXContent)
   }
 
-  def nodeStats: Seq[Val] => String = _ => {
-    val nodesStatsResponse: NodesStatsResponse = Await.result(elasticCommand.nodeStats, Duration.Inf)
-    buildXContent(nodesStatsResponse)
+  def nodeStats: Seq[Val] => Future[String] = _ => {
+    val nodesStatsResponse: Future[NodesStatsResponse] = elasticCommand.nodeStats()
+    nodesStatsResponse.map(s => buildXContent(s))
   }
 
-  def clusterSettings: Seq[Val] => String = _ => {
-    val clusterUpdateSettingsResponse: ClusterUpdateSettingsResponse = Await.result(elasticCommand.clusterSettings(), Duration.Inf)
-    buildClusterSettingsResponse(clusterUpdateSettingsResponse)
+  def clusterSettings: Seq[Val] => Future[String] = _ => {
+    val clusterUpdateSettingsResponse: Future[ClusterUpdateSettingsResponse] = elasticCommand.clusterSettings()
+    clusterUpdateSettingsResponse.map(buildClusterSettingsResponse)
   }
 
-  def nodeSettings: Seq[Val] => String = _ => {
-    val nodesInfoResponse: NodesInfoResponse = Await.result(elasticCommand.nodesSettings(), Duration.Inf)
-    buildXContent(nodesInfoResponse)
+  def nodeSettings: Seq[Val] => Future[String] = _ => {
+    val nodesInfoResponse: Future[NodesInfoResponse] = elasticCommand.nodesSettings()
+    nodesInfoResponse.map(s => buildXContent(s))
   }
 
-  def pendingTasks: Seq[Val] => String = _ => {
-    val clusterTasksResponse: PendingClusterTasksResponse = Await.result(elasticCommand.pendingTasks(), Duration.Inf)
-    buildXContent(clusterTasksResponse)
+  def pendingTasks: Seq[Val] => Future[String] = _ => {
+    val clusterTasksResponse: Future[PendingClusterTasksResponse] = elasticCommand.pendingTasks()
+    clusterTasksResponse.map(s => buildXContent(s))
   }
 
-  def indexSettings: Seq[Val] => String = {
+  def indexSettings: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val getSettingsResponse: GetSettingsResponse = Await.result(elasticCommand.indexSettings(indexName.extract[String]), Duration.Inf)
-      buildGetSettingsResponse(getSettingsResponse)
+      val getSettingsResponse: Future[GetSettingsResponse] = elasticCommand.indexSettings(indexName.extract[String])
+      getSettingsResponse.map(s => buildGetSettingsResponse(s))
     }
   }
 
-  def health: Seq[Val] => String = _ => {
-    elasticCommand.clusterHealth()
+  def health: Seq[Val] => Future[String] = _ => {
+    elasticCommand.clusterHealth().map(s => s.toString)
   }
 
-  def count: Seq[Val] => String = {
+  def count: Seq[Val] => Future[String] = {
     case Seq(indexName) =>
       val eventualRichSearchResponse: Future[RichSearchResponse] = elasticCommand.countCommand(indexName.extract[String])
-      buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
+      eventualRichSearchResponse.map(s => buildXContent(s.original))
   }
 
-  def delete: Seq[Val] => String = {
+  def delete: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
       val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = elasticCommand.deleteIndex(indexName.extract[String])
-      buildAcknowledgedResponse(Await.result(eventualDeleteIndexResponse, Duration.Inf))
+      eventualDeleteIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
     case Seq(indexName, indexType, id) => {
       val eventualDeleteIndexResponse: Future[DeleteResponse] = elasticCommand.deleteById(indexName.extract[String],
         indexType.extract[String], id.extract[String])
-      buildIsFound(Await.result(eventualDeleteIndexResponse, Duration.Inf))
+      eventualDeleteIndexResponse.map(s => buildIsFound(s))
     }
   }
 
-  def query: Seq[Val] => String = {
+  def query: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType) =>
-      buildXContent(elasticCommand.getAll(indexName.extract[String], indexType.extract[String]).original)
+      elasticCommand.getAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s.original))
     case Seq(indexName, indexType, queryData) =>
       val eventualRichSearchResponse: Future[RichSearchResponse] = elasticCommand.queryDataByRawQuery(
         indexName.extract[String],
         indexType.extract[String],
         queryData.extract[Map[String, String]].toList)
-      buildXContent(Await.result(eventualRichSearchResponse, Duration.Inf).original)
+      eventualRichSearchResponse.map(s => buildXContent(s.original))
     case Seq(indexName) =>
-      buildXContent(elasticCommand.getAll(indexName.extract[String], "*").original)
+      elasticCommand.getAll(indexName.extract[String], "*").map(s => buildXContent(s.original))
   }
 
-  def update: Seq[Val] => String = {
+  def update: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, updateFields) => {
       elasticCommand.updateAllDocs(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
     }
@@ -139,150 +138,143 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
         indexType.extract[String],
         updateFields.extract[List[(String, String)]],
         id.extract[String])
-      buildXContent(Await.result(eventualUpdateResponse, Duration.Inf).getShardInfo)
+      eventualUpdateResponse.map(s => buildXContent(s.getShardInfo))
     }
   }
 
-  def reindex: Seq[Val] => String = {
+  def reindex: Seq[Val] => Future[String] = {
     case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
       elasticCommand.reindex(sourceIndex.extract[String],
         targetIndex.extract[String], sourceIndexType.extract[String], fields.extract[List[String]])
     }
   }
 
-  def bulkIndex: Seq[Val] => String = {
+  def bulkIndex: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, fields) => {
       val bulkResponse =
         elasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
-      val br: BulkResult = Await.result(bulkResponse, Duration.Inf)
-      buildBulkResponse(br)
+      bulkResponse.map(s => buildBulkResponse(s))
     }
   }
 
-  def index: Seq[Val] => String = {
+  def index: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, fields) => {
       val indexResponse =
         elasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
-      val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
-      buildIsCreated(created)
+      indexResponse.map(s => buildIsCreated(s.isCreated))
     }
     case Seq(indexName, indexType, fields, id) => {
       val indexResponse = elasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
         fields.extract[List[(String, String)]], id.extract[String])
-      val created: Boolean = Await.result(indexResponse, Duration.Inf).original.isCreated
-      buildIsCreated(created)
+      indexResponse.map(s => buildIsCreated(s.isCreated))
     }
   }
 
-  def analysis: Seq[Val] => String = {
+  def analysis: Seq[Val] => Future[String] = {
     case Seq(analyzer, doc) => {
-      val analyzeResponse: AnalyzeResponse = Await.result(elasticCommand.analysis(analyzer.extract[String],
-        doc.extract[String]), Duration.Inf)
-      buildAnalyzeResponse(analyzeResponse)
+      val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysis(analyzer.extract[String], doc.extract[String])
+      analyzeResponse.map(s => buildAnalyzeResponse(s))
     }
   }
 
-  def mapping: Seq[Val] => String = {
+  def mapping: Seq[Val] => Future[String] = {
     case Seq(indexName, mapping) => {
       val mappings: Future[CreateIndexResponse] =
         elasticCommand.mappings(indexName.extract[String], mapping.toJson)
-      val result: CreateIndexResponse = Await.result(mappings, Duration.Inf)
-      buildAcknowledgedResponse(result)
+      mappings.map(s => buildAcknowledgedResponse(s))
     }
   }
 
-  def aggsCount: Seq[Val] => String = {
+  def aggsCount: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, rawJson) => {
       val aggsSearch: Future[RichSearchResponse] =
         elasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
-      val searchResponse: RichSearchResponse = Await.result(aggsSearch, Duration.Inf)
-      buildSearchResponse(searchResponse)
+      aggsSearch.map(s => buildSearchResponse(s))
     }
   }
 
-  def alias: Seq[Val] => String = {
+  def alias: Seq[Val] => Future[String] = {
     case Seq(targetIndex, sourceIndex) => {
       val eventualAliasesResponse: Future[IndicesAliasesResponse] =
         elasticCommand.alias(targetIndex.extract[String], sourceIndex.extract[String])
-      val aliasesResponse: IndicesAliasesResponse = Await.result(eventualAliasesResponse, Duration.Inf)
-      buildAcknowledgedResponse(aliasesResponse)
+      eventualAliasesResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
 
-  def getDocById: Seq[Val] => String = {
+  def getDocById: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, id) => {
-      val getResponse: RichGetResponse = Await.result(elasticCommand.getDocById(indexName.extract[String],
-        indexType.extract[String], id.extract[String]), Duration.Inf)
-      buildGetResponse(getResponse)
+      val getResponse: Future[RichGetResponse] = elasticCommand.getDocById(indexName.extract[String],
+        indexType.extract[String], id.extract[String])
+      getResponse.map(s => buildGetResponse(s))
     }
   }
 
-  def createRepository: Seq[Val] => String = {
+  def createRepository: Seq[Val] => Future[String] = {
     case Seq(repositoryName, repositoryType, settings) => {
-      val repositoryResponse: PutRepositoryResponse = Await.result(
+      val repositoryResponse: Future[PutRepositoryResponse] =
         elasticCommand.createRepository(repositoryName.extract[String], repositoryType.extract[String],
-          settings.extract[Map[String, String]]), Duration.Inf)
-      buildAcknowledgedResponse(repositoryResponse)
+          settings.extract[Map[String, String]])
+      repositoryResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
-  def createSnapshot: Seq[Val] => String = {
+  def createSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
-      val createSnapshotResponse: CreateSnapshotResponse = Await.result(
-        elasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-      buildXContent(createSnapshotResponse)
+      val createSnapshotResponse: Future[CreateSnapshotResponse] =
+        elasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String])
+      createSnapshotResponse.map(s => buildXContent(s))
     }
   }
 
-  def deleteSnapshot: Seq[Val] => String = {
+  def deleteSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
-      val deleteSnapshotResponse: DeleteSnapshotResponse = Await.result(
-        elasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-      buildAcknowledgedResponse(deleteSnapshotResponse)
+      val deleteSnapshotResponse: Future[DeleteSnapshotResponse] =
+        elasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String])
+      deleteSnapshotResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
-  def restoreSnapshot: Seq[Val] => String = {
+  def restoreSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
-      val snapshotResponse: RestoreSnapshotResponse = Await.result(elasticCommand.restoreSnapshot(snapshotName.extract[String],
-        repositoryName.extract[String]), Duration.Inf)
-      buildXContent(snapshotResponse)
+      val snapshotResponse: Future[RestoreSnapshotResponse] = elasticCommand.restoreSnapshot(snapshotName.extract[String],
+        repositoryName.extract[String])
+      snapshotResponse.map(s => buildXContent(s))
     }
   }
 
-  def closeIndex: Seq[Val] => String = {
+  def closeIndex: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val closeIndexResponse: CloseIndexResponse = Await.result(elasticCommand.closeIndex(indexName.extract[String]), Duration.Inf)
-      buildAcknowledgedResponse(closeIndexResponse)
+      val closeIndexResponse: Future[CloseIndexResponse] = elasticCommand.closeIndex(indexName.extract[String])
+      closeIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
-  def openIndex: Seq[Val] => String = {
+  def openIndex: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val openIndexResponse: OpenIndexResponse = Await.result(elasticCommand.openIndex(indexName.extract[String]), Duration.Inf)
-      buildAcknowledgedResponse(openIndexResponse)
+      val openIndexResponse: Future[OpenIndexResponse] = elasticCommand.openIndex(indexName.extract[String])
+      openIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
-  def getSnapshot: Seq[Val] => String = {
+  def getSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
-      val getSnapshotResponse: GetSnapshotsResponse = Await.result(
-        elasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String]), Duration.Inf)
-      buildXContent(getSnapshotResponse)
+      val getSnapshotResponse: Future[GetSnapshotsResponse] =
+        elasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String])
+      getSnapshotResponse.map(s => buildXContent(s))
     }
     case Seq(repositoryName) => {
-      val getSnapshotResponse: GetSnapshotsResponse = Await.result(
-        elasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String]), Duration.Inf)
-      buildXContent(getSnapshotResponse)
+      val getSnapshotResponse: Future[GetSnapshotsResponse] =
+        elasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String])
+      getSnapshotResponse.map(s => buildXContent(s))
     }
   }
 
-  def waitForStatus:Seq[Val] => String = {
+  def waitForStatus:Seq[Val] => Future[String] = {
     case Seq(status) => {
-      val healthResponse: ClusterHealthResponse =
-        Await.result(elasticCommand.waitForStatus(status = Some(status.extract[String])), Duration.Inf)
-      buildXContent(healthResponse)
+      val healthResponse: Future[ClusterHealthResponse] =
+        elasticCommand.waitForStatus(status = Some(status.extract[String]))
+      healthResponse.map(s => buildXContent(s))
     }
   }
 

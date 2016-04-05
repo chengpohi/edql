@@ -4,6 +4,8 @@ import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 import com.github.chengpohi.parser.ELK.Instrument
 import fastparse.core.Parsed.{Failure, Success}
 
+import scala.concurrent.Future
+
 
 /**
   * scala-parser-combinator
@@ -34,6 +36,6 @@ object ELK {
   sealed trait AST extends Any {
     def value: Any
   }
-  case class Instrument(value: (String, Option[Seq[Val] => String], Seq[Val])) extends AnyVal with AST
+  case class Instrument(value: (String, Option[Seq[Val] => Future[String]], Seq[Val])) extends AnyVal with AST
 }
 
