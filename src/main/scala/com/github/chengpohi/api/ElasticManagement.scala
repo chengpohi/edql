@@ -15,15 +15,15 @@ import scala.concurrent.Future
   */
 trait ElasticManagement {
   this: ElasticBase =>
-  def nodeStats = {
+  def nodeStats() = {
     buildFuture(client.admin.cluster.prepareNodesStats().all().execute)
   }
 
-  def indicesStats = {
+  def indicesStats() = {
     buildFuture(client.admin.indices().prepareStats().all().execute)
   }
 
-  def clusterStats = client.execute {
+  def clusterStats() = client.execute {
     get cluster stats
   }
 
@@ -61,11 +61,8 @@ trait ElasticManagement {
     buildFuture(client.admin.cluster().prepareState().execute)
   }
 
-  def clusterHealth(): String = {
-    val resp = client.execute {
-      get cluster health
-    }.await
-    resp.toString
+  def clusterHealth() = client.execute {
+    get cluster health
   }
 
   def alias(targetIndex: String, sourceIndex: String) = {

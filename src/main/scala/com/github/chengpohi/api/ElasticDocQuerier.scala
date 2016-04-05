@@ -7,6 +7,7 @@ import com.sksamuel.elastic4s._
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * elasticshell
@@ -17,11 +18,11 @@ trait ElasticDocQuerier {
 
   private val MAX_ALL_NUMBER: Int = 10000
 
-  def getAll(indexName: String, indexType: String): RichSearchResponse = {
+  def getAll(indexName: String, indexType: String): Future[RichSearchResponse] = {
     val indexesAndTypes: String = generateSearchIndexesAndTypes(indexName, indexType)
     client.execute {
       search in indexesAndTypes query "*" start 0 limit MAX_ALL_NUMBER
-    }.await
+    }
   }
 
   def queryDataByRawQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[RichSearchResponse] = client.execute {
@@ -69,7 +70,7 @@ trait ElasticDocQuerier {
   }
 
 
-  def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): String = {
+  def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): Future[String] = Future {
     val sourceData: Stream[RichSearchResponse] = getAllDataByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
     """{"hasErrors": false}"""
