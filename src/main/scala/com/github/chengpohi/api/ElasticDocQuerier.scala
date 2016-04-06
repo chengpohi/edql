@@ -18,8 +18,8 @@ trait ElasticDocQuerier {
 
   private val MAX_ALL_NUMBER: Int = 10000
 
-  def getAll(indexName: String, indexType: String): Future[RichSearchResponse] = {
-    val indexesAndTypes: String = generateSearchIndexesAndTypes(indexName, indexType)
+  def queryAll(indexName: String, indexType: String): Future[RichSearchResponse] = {
+    val indexesAndTypes: String = buildIndexNameAndIndexType(indexName, indexType)
     client.execute {
       search in indexesAndTypes query "*" start 0 limit MAX_ALL_NUMBER
     }
@@ -91,7 +91,7 @@ trait ElasticDocQuerier {
     get id docId from s"$indexName/$indexType"
   }
 
-  private[this] def generateSearchIndexesAndTypes(indexName: String, indexType: String): String = indexType match {
+  private[this] def buildIndexNameAndIndexType(indexName: String, indexType: String): String = indexType match {
     case "*" => indexName
     case s => indexName + "/" + indexType
   }
