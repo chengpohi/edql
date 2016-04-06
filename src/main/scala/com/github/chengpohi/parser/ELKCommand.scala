@@ -35,6 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by chengpohi on 1/18/16.
   */
 class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: ResponseGenerator) {
+
   import responseGenerator._
 
   def getMapping: Seq[Val] => Future[String] = {
@@ -118,7 +119,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def query: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType) =>
-      elasticCommand.getAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s.original))
+      elasticCommand.queryAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s.original))
     case Seq(indexName, indexType, queryData) =>
       val eventualRichSearchResponse: Future[RichSearchResponse] = elasticCommand.queryDataByRawQuery(
         indexName.extract[String],
@@ -126,7 +127,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
         queryData.extract[Map[String, String]].toList)
       eventualRichSearchResponse.map(s => buildXContent(s.original))
     case Seq(indexName) =>
-      elasticCommand.getAll(indexName.extract[String], "*").map(s => buildXContent(s.original))
+      elasticCommand.queryAll(indexName.extract[String], "*").map(s => buildXContent(s.original))
   }
 
   def update: Seq[Val] => Future[String] = {
@@ -270,7 +271,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     }
   }
 
-  def waitForStatus:Seq[Val] => Future[String] = {
+  def waitForStatus: Seq[Val] => Future[String] = {
     case Seq(status) => {
       val healthResponse: Future[ClusterHealthResponse] =
         elasticCommand.waitForStatus(status = Some(status.extract[String]))

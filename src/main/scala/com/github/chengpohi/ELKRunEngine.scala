@@ -27,8 +27,7 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
             println(beautyJSON(response))
           } catch {
             case e: Exception => {
-              e.printStackTrace()
-              println(s"\nMethod Name: ${name} \nParameters: ${parameters}\nFull Stacktrace: ${e.getCause.getLocalizedMessage}")
+              println(s"\nMethod Name: ${name} \nParameters: ${parameters}\nFull Stacktrace: ${e.toString}")
             }
           }
       }
