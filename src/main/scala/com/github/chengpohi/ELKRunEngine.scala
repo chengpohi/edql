@@ -19,19 +19,23 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
   import env.responseGenerator._
 
   def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): Unit = {
-    instruments.foreach {
+    val outputs = instruments.map {
       case i: ELK.Instrument => i.value match {
         case (name, Some(ins), parameters) =>
           try {
             val response: String = Await.result(ins(parameters), Duration.Inf)
-            println(beautyJSON(response))
+            beautyJSON(response)
           } catch {
             case e: Exception => {
-              println(s"\nMethod Name: ${name} \nParameters: ${parameters}\nFull Stacktrace: ${e.toString}")
+              s"\nMethod Name: $name \nParameters: $parameters\nFull Stacktrace: ${e.toString}"
             }
           }
+        case (_, None, _) =>
+          s"Unknown Instrument!"
       }
     }
+
+    println(outputs.mkString("\\n"))
   }
 
   def run(source: String): Unit = {
