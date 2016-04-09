@@ -357,7 +357,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "create analyzer" in {
     Console.withOut(outContent) {
-      runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
+      runEngine.run("""create analyzer {"analyzer": {"myAnalyzer": {"type": "pattern", "pattern": "\\s+"}}}""")
       Thread.sleep(1000)
       runEngine.run("""".elasticshell" settings""")
     }
