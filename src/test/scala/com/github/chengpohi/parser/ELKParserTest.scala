@@ -15,8 +15,9 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
   val runEngine: ELKRunEngine = new ELKRunEngine(ELKCommandTestRegistry)
+
   before {
-    runEngine.run(s"""create index ".elasticshell"""")
+    runEngine.run("""create index ".elasticshell"""")
     runEngine.run( """ create index "test-parser-name" """)
     outContent.reset()
   }
@@ -359,13 +360,14 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "create analyzer" in {
     Console.withOut(outContent) {
       runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
+      Thread.sleep(1000)
+      runEngine.run("""".elasticshell" settings""")
     }
-    println(outContent.toString)
+    assert(outContent.toString().contains("myAnalyzer"))
   }
 
   after {
-    runEngine.run( """ delete "test-parser-name"""")
-    runEngine.run( """ delete ".elasticshell"""")
+    runEngine.run( """ delete "*"""")
   }
 }
 
