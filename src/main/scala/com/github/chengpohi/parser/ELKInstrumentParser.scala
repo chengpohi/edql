@@ -15,7 +15,7 @@ class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) exte
   import elkCommand._
   import fastparse.all._
 
-  val help = P(space ~ strChars.rep(1).! ~ space ~ "?")
+  val help = P(space ~ alphaChars.rep(1).! ~ space ~ "?")
     .map(JsonCollection.Str)
     .map(s => ("help", Some(parserUtils.help), Seq(s)))
   val health = P("health").map(s => ("health", Some(elkCommand.health), Seq(Str(""))))
@@ -43,6 +43,7 @@ class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) exte
   val createIndex = P("create index" ~ space ~/ strOrVar).map(c => ("createIndex", Some(elkCommand.createIndex), Seq(c)))
   val getMapping = P(space ~ strOrVar ~ space ~ "mapping").map(c => ("getMapping", Some(elkCommand.getMapping), Seq(c)))
   val analysis = P("analysis" ~ space ~/ strOrVar.rep(2, sep = " ")).map(c => ("analysis", Some(elkCommand.analysis), c))
+  val createAnalyzer = P("create analyzer" ~ space ~/ ioParser).map(c => ("createAnalyzer", Some(elkCommand.createAnalyzer), c))
   val getDocById = P("get" ~ space ~/ strOrVar.rep(3, sep = " ")).map(c => ("getDocById", Some(elkCommand.getDocById), c))
   val mapping = P("mapping" ~ space ~/ ioParser).map(c => ("mapping", Some(elkCommand.mapping), c))
   val aggsCount = P("aggs count" ~ space ~/ ioParser).map(c => ("aggsCount", Some(elkCommand.aggsCount), c))
@@ -63,7 +64,7 @@ class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) exte
       | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
       | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
-      | update | analysis | aggsCount
+      | update | analysis | aggsCount | createAnalyzer
       | getMapping | mapping
       | delete | alias | count)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {

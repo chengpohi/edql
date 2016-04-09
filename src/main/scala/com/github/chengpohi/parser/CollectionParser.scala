@@ -10,11 +10,13 @@ class CollectionParser {
 
   import fastparse.all._
 
-  val StringChars = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
+  val StringChars = NamedFunction(!"\"".contains(_: Char), "StringChars")
+  val AlphaChars = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
   val CollectionChars = NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
   val space = P(CharsWhile(" \r\n".contains(_)).?)
 
   val strChars = P(CharsWhile(StringChars))
+  val alphaChars = P(CharsWhile(AlphaChars))
   val collectionChars = P(CharsWhile(CollectionChars))
   val variableChars = P(CharIn('a' to 'z', 'A' to 'Z'))
   val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(JsonCollection.Str)
