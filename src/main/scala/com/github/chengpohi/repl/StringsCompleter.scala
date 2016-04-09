@@ -5,13 +5,14 @@ import java.util
 import jline.console.completer.Completer
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.Iterable
 import scala.math.min
 
 /**
   * elasticshell
   * Created by chengpohi on 3/25/16.
   */
-class StringsCompleter(completions: Set[String]) extends Completer {
+class StringsCompleter(completions: Set[String], words: Set[String]) extends Completer {
 
   def indentFilter(c: String, buffer: String): Boolean = {
     c.split("\\s+").map(s => s.head).mkString("") == buffer
@@ -33,12 +34,24 @@ class StringsCompleter(completions: Set[String]) extends Completer {
       case false =>
         val filters: Set[String] = completions.filter(c => c.startsWith(buffer))
         val indentFilters: Set[String] = completions.filter(c => indentFilter(c, buffer))
-        candidates.addAll(indentFilters ++ filters)
+        val wordCompleter = termCompeleter(buffer)
+        val strings: Set[String] = indentFilters ++ filters ++ wordCompleter
+        candidates.addAll(strings)
     }
 
     candidates.isEmpty match {
       case true => -1
       case false => 0
+    }
+  }
+
+  def termCompeleter(buffer: String): Set[String] = {
+    val terms: Array[String] = buffer.split("\\s+")
+    val lastWord = terms.last
+    lastWord.length match {
+      case 0 => Set()
+      case _ =>
+        words.filter(c => c.startsWith(lastWord)).map(s => (terms.dropRight(1).mkString(" ") + " " + s).trim)
     }
   }
 }
