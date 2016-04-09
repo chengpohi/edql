@@ -23,6 +23,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.update.UpdateResponse
@@ -175,6 +176,13 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     case Seq(analyzer, doc) => {
       val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysis(analyzer.extract[String], doc.extract[String])
       analyzeResponse.map(s => buildAnalyzeResponse(s))
+    }
+  }
+
+  def createAnalyzer: Seq[Val] => Future[String] = {
+    case Seq(analyzer) => {
+      val analyzeResponse: Future[UpdateSettingsResponse] = elasticCommand.createAnalyzer(analyzer.toJson)
+      analyzeResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 

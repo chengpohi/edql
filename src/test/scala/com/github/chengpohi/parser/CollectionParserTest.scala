@@ -33,6 +33,7 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   "collection" should "parse json" in {
     val Parsed.Success(value, _) = jsonExpr.parse( """{ "name":[1,2,3,4]}""")
     val Parsed.Success(value1, _) = jsonExpr.parse( """{ "user": {"name":"123","age":23}}""")
+    val Parsed.Success(value2, _) = jsonExpr.parse( """{ "user": {"name":"\\s+","age":23}}""")
     assert(value === Obj(("name", Arr(Num(1.0), Num(2.0), Num(3.0), Num(4.0)))))
     assert(value1 === Obj(("user", Obj(("name", Str("123")), ("age", Num(23.0))))))
   }
@@ -52,4 +53,5 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
 
     assert(value2.toJson === """{"age":[1.0,2.0,3.0,4.0]}""")
   }
+
 }

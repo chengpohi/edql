@@ -78,10 +78,8 @@ trait ElasticManagement {
     }
   }
 
-  def closeIndex(indexName: String) = {
-    client.execute {
-      close index indexName
-    }
+  def closeIndex(indexName: String) = client.execute {
+    close index indexName
   }
 
   def openIndex(indexName: String) = {
