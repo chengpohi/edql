@@ -153,5 +153,10 @@
     "help": "",
     "example": "open index \"index-name\"",
     "description": "open index by index-name"
+  },
+  "create analyzer": {
+    "help": "",
+    "example": "create analyzer \"index-name\"",
+    "description": "create analyzer \"index-name\""
   }
 }
