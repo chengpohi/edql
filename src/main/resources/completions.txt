@@ -1,5 +1,3 @@
-term
-query
 term query
 health
 cluster stats
@@ -8,7 +6,6 @@ indices stats
 node stats
 cluster settings
 node settings
-settings
 pending tasks
 wait for status
 count

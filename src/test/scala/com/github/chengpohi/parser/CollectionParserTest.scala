@@ -44,11 +44,11 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "json4s" should "parse array to json" in {
-    val Parsed.Success(value, _) = jsonExpr.parse( """[1,2,3,4]""")
+    val Parsed.Success(value, _) = jsonExpr.parse( """[1, 2, 3,4]""")
     val list1 = value.extract[List[Int]]
     assert(list1 === List(1, 2, 3, 4))
 
-    val Parsed.Success(value1, _) = jsonExpr.parse( """["foo","bar"]""")
+    val Parsed.Success(value1, _) = jsonExpr.parse( """["foo", "bar"]""")
     val list2 = value1.extract[List[String]]
     assert(list2 === List("foo", "bar"))
 
