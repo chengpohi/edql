@@ -147,7 +147,6 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Console.withOut(outContent) {
       runEngine.run(
         """mapping "test-mapping" {
-          |  "mappings": {
           |    "bookmark": {
           |      "properties": {
           |        "created_at": {
@@ -159,8 +158,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |        }
           |      }
           |    }
-          |  }
-          |}""".stripMargin('|'))
+          |  }""".stripMargin('|'))
       Thread.sleep(1000)
       runEngine.run( """ "test-mapping" mapping """)
     }
