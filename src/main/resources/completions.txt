@@ -31,3 +31,4 @@ close index
 open index
 \\
 beauty
+create analyzer

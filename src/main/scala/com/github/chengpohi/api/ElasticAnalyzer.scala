@@ -14,7 +14,7 @@ trait ElasticAnalyzer {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
 
   def analysis(analyzer: String, text: String) =
-    buildFuture(client.admin.indices().prepareAnalyze(text).setAnalyzer(analyzer).execute)
+    buildFuture(client.admin.indices().prepareAnalyze(text).setIndex(ELASTIC_SHELL_INDEX_NAME).setAnalyzer(analyzer).execute)
 
   def createAnalyzer(analyzerSetting: String) = {
     val p = Promise[UpdateSettingsResponse]()
