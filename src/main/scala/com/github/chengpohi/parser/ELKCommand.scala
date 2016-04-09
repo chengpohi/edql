@@ -1,6 +1,7 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.api.ElasticCommand
+import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
@@ -181,7 +182,8 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def createAnalyzer: Seq[Val] => Future[String] = {
     case Seq(analyzer) => {
-      val analyzeResponse: Future[UpdateSettingsResponse] = elasticCommand.createAnalyzer(analyzer.toJson)
+      val analysisSettings = Obj(("analysis", analyzer))
+      val analyzeResponse: Future[UpdateSettingsResponse] = elasticCommand.createAnalyzer(analysisSettings.toJson)
       analyzeResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
