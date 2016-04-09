@@ -14,7 +14,8 @@ import scala.io.Source
   */
 object ELKRepl {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
-  val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet)
+  val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
+    Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
   val elkRunEngine = new ELKRunEngine(ELKCommandRegistry)
 
