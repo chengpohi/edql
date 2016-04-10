@@ -43,6 +43,10 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
     val (functions, instruments) = generateAST(parsed)
     runInstruments(instruments, Map())
   }
+  def run(str: String, parameters: String*): String = {
+    val s = String.format(str, parameters: _*)
+    run(s)
+  }
 }
 
 object ELKRunEngine {
