@@ -147,6 +147,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Console.withOut(outContent) {
       runEngine.run(
         """mapping "test-mapping" {
+          |  "mappings": {
           |    "bookmark": {
           |      "properties": {
           |        "created_at": {
@@ -158,7 +159,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
           |        }
           |      }
           |    }
-          |  }""".stripMargin('|'))
+          |  }
+          |}""".stripMargin('|'))
       Thread.sleep(1000)
       runEngine.run( """ "test-mapping" mapping """)
     }
@@ -357,7 +359,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "create analyzer" in {
     Console.withOut(outContent) {
-      runEngine.run("""create analyzer {"analyzer": {"myAnalyzer": {"type": "pattern", "pattern": "\\s+"}}}""")
+      runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
       Thread.sleep(1000)
       runEngine.run("""".elasticshell" settings""")
     }
@@ -368,4 +370,3 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     runEngine.run( """ delete "*"""")
   }
 }
-
