@@ -101,11 +101,8 @@ class ResponseGenerator {
 
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)
-    val filtered = jObj filterField {
-      case JField(`filterName`, _) => true
-      case _ => false
-    }
-    write(filtered)
+    val result = jObj \\ filterName
+    write(result)
   }
 
   def beautyJSON(json: String): String = {
