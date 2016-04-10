@@ -32,7 +32,7 @@ object ELKRepl {
     while (true) {
       val line = reader.readLine()
       if (line == "exit") System.exit(0)
-      elkRunEngine.run(line)
+      println(elkRunEngine.run(line))
     }
   }
 

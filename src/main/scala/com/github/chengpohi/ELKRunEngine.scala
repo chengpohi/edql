@@ -18,7 +18,7 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
   import env.elkParser._
   import env.responseGenerator._
 
-  def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): Unit = {
+  def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): String = {
     val outputs = instruments.map {
       case i: ELK.Instrument => i.value match {
         case (name, Some(ins), parameters) =>
@@ -35,10 +35,10 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
       }
     }
 
-    println(outputs.mkString("\\n"))
+    outputs.mkString("\\n")
   }
 
-  def run(source: String): Unit = {
+  def run(source: String): String = {
     val parsed = elkParser.parse(source)
     val (functions, instruments) = generateAST(parsed)
     runInstruments(instruments, Map())
@@ -54,7 +54,7 @@ object ELKRunEngine {
       System.exit(0)
     }
     val parseFile: String = Source.fromFile(args(0)).getLines().filter(!_.trim().startsWith("//")).toList.mkString("")
-    runEngine.run(parseFile)
+    println(runEngine.run(parseFile))
   }
 }
 
