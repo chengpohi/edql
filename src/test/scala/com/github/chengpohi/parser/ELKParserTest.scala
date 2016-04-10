@@ -23,347 +23,292 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "get health of elasticsearch" in {
-    Console.withOut(outContent) {
-      runEngine.run("health")
-    }
-    assert(outContent.toString.contains("cluster_name"))
+    val result = runEngine.run("health")
+    assert(result.contains("cluster_name"))
   }
 
   "ELKParser" should "index doc by indexName, indexType, fields" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" }""")
+    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" }""")
 
-      Thread.sleep(1000)
-      //then
-      runEngine.run( """ query "test-parser-name" """)
-    }
-    assert(outContent.toString.contains(""""name":"hello""""))
+    Thread.sleep(1000)
+    //then
+    val result = runEngine.run( """ query "test-parser-name" """)
+    assert(result.contains(""""name":"hello""""))
   }
 
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
 
-      Thread.sleep(1000)
-      //then
-      runEngine.run( """ query "test-parser-name" """)
-    }
-    assert(outContent.toString().contains(""""_id":"123""""))
+    Thread.sleep(1000)
+    //then
+    val result = runEngine.run( """ query "test-parser-name" """)
+    assert(result.contains(""""_id":"123""""))
   }
 
   "ELKParser" should "update doc by id and fields" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
 
-      Thread.sleep(1000)
+    Thread.sleep(1000)
 
-      runEngine.run( """update "test-parser-name" "test-parser-type" { "name" : "chengpohi"} id "123"""")
+    runEngine.run( """update "test-parser-name" "test-parser-type" { "name" : "chengpohi"} id "123"""")
 
-      Thread.sleep(1000)
-      //then
-      runEngine.run( """ query "test-parser-name" """)
-    }
-    assert(outContent.toString().contains(""""name":"chengpohi""""))
+    Thread.sleep(1000)
+    //then
+    val result = runEngine.run( """ query "test-parser-name" """)
+    assert(result.contains(""""name":"chengpohi""""))
 
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
-      Thread.sleep(3000)
-      runEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
+    Thread.sleep(3000)
+    runEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
 
-      Thread.sleep(3000)
+    Thread.sleep(3000)
 
-      runEngine.run( """ query "test-parser-name-reindex" """)
-      runEngine.run( """ delete "test-parser-name-reindex" """)
-      //then
-    }
-    assert(outContent.toString.contains(
+    val result = runEngine.run( """ query "test-parser-name-reindex" """)
+    runEngine.run( """ delete "test-parser-name-reindex" """)
+    //then
+    assert(result.contains(
       """"name":"hello"""".stripMargin.trim))
   }
   "ELKParser" should "delete doc by id" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
 
-      Thread.sleep(1000)
-      //then
-      runEngine.run( """delete "test-parser-name" "test-parser-type" "123" """)
-      Thread.sleep(1000)
-      runEngine.run( """query "test-parser-name" "test-parser-type"""")
-    }
-    assert(outContent.toString.contains(""""hits":[]"""))
+    Thread.sleep(1000)
+    //then
+    runEngine.run( """delete "test-parser-name" "test-parser-type" "123" """)
+    Thread.sleep(1000)
+    val result = runEngine.run( """query "test-parser-name" "test-parser-type"""")
+    assert(result.contains(""""hits":[]"""))
   }
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
-      Thread.sleep(1000)
-      runEngine.run( """update "test-parser-name" "test-parser-type" {"name":"elasticservice"} """)
-      Thread.sleep(3000)
-      runEngine.run( """ query "test-parser-name" """)
-    }
-    assert(outContent.toString.contains(
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
+    Thread.sleep(1000)
+    runEngine.run( """update "test-parser-name" "test-parser-type" {"name":"elasticservice"} """)
+    Thread.sleep(3000)
+    val result = runEngine.run( """ query "test-parser-name" """)
+    assert(result.contains(
       """"name"""".stripMargin.trim))
   }
 
   "ELKParser" should "analysis doc by specific analyzer" in {
-    Console.withOut(outContent) {
-      runEngine.run( """analysis "standard" "foo,bar"""")
-    }
-    assert(outContent.toString.contains(
+    val result = runEngine.run( """analysis "standard" "foo,bar"""")
+    assert(result.contains(
       """"token":"foo","""
     ))
   }
 
   "ELKParser" should "index and get doc by id" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}  id "HJJJJJJH"""")
-      runEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
-    }
-    assert(outContent.toString.contains( """"_id":"hJJJJJJH""""))
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}  id "HJJJJJJH"""")
+    val result = runEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
+    assert(result.contains( """"_id":"hJJJJJJH""""))
   }
 
   "ELKParser" should "extract json data" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
-      Thread.sleep(2000)
-      runEngine.run( """query "test-parser-name" \\ "name" """)
-    }
-    assert(outContent.toString.contains( """"name":"hello""""))
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
+    Thread.sleep(2000)
+    val result = runEngine.run( """query "test-parser-name" \\ "name" """)
+    assert(result.contains( """"name":"hello""""))
   }
 
   "ELKParser" should "query data by json" in {
-    Console.withOut(outContent) {
-      runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} "HJJJJJJH" """)
-      Thread.sleep(2000)
-      runEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
-    }
-    assert(outContent.toString.contains("Hello world"))
-    assert(outContent.toString.contains("foo bar"))
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} "HJJJJJJH" """)
+    Thread.sleep(2000)
+    val result = runEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
+    assert(result.contains("Hello world"))
+    assert(result.contains("foo bar"))
   }
 
   "ELKParser" should "set mapping for indexname indextype" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """mapping "test-mapping" {
-          |  "mappings": {
-          |    "bookmark": {
-          |      "properties": {
-          |        "created_at": {
-          |          "type": "date"
-          |        },
-          |        "name": {
-          |          "type": "string",
-          |          "index": "not_analyzed"
-          |        }
-          |      }
-          |    }
-          |  }
-          |}""".stripMargin('|'))
-      Thread.sleep(1000)
-      runEngine.run( """ "test-mapping" mapping """)
-    }
-    assert(outContent.toString.contains( """"format":"strict_date_optional_time||epoch_millis""""))
-    assert(outContent.toString.contains( """"not_analyzed"""))
-    runEngine.run( """ delete "test-mapping"""")
+    runEngine.run(
+      """mapping "test-mapping" {
+        |  "mappings": {
+        |    "bookmark": {
+        |      "properties": {
+        |        "created_at": {
+        |          "type": "date"
+        |        },
+        |        "name": {
+        |          "type": "string",
+        |          "index": "not_analyzed"
+        |        }
+        |      }
+        |    }
+        |  }
+        |}""".stripMargin('|'))
+    Thread.sleep(1000)
+    val result = runEngine.run( """ "test-mapping" mapping """)
+    assert(result.contains( """"format":"strict_date_optional_time||epoch_millis""""))
+    assert(result.contains( """"not_analyzed"""))
   }
 
   "ELKParser" should "bulk index docs" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """bulk index "test-parser-name" "test-parser-type" [
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23}
-          |] """.stripMargin)
-      Thread.sleep(2000)
-      runEngine.run( """ count "test-parser-name" """)
-    }
-    assert(outContent.toString.contains("7"))
-    assert(outContent.toString.contains("false"))
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run( """ count "test-parser-name" """)
+    assert(result.contains("7"))
+    assert(result.contains("false"))
   }
 
   "ELKParser" should "index newline" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """bulk index "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
-      Thread.sleep(2000)
-      runEngine.run( """ count "test-parser-name" """)
-    }
-    assert(outContent.toString.contains(""))
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run( """ count "test-parser-name" """)
+    assert(result.contains(""))
   }
   "ELKParser" should "aggs data" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """bulk index "test-parser-name" "test-parser-type" [
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 24},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 25},
-          |{"name": "hello","age": 25},
-          |{"name": "hello","age": 22},
-          |{"name": "hello","age": 22}
-          |] """.stripMargin)
-      Thread.sleep(2000)
-      runEngine.run( """aggs count "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
-    }
-    assert(outContent.toString.contains( """"key":23.0"""))
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 24},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 25},
+        |{"name": "hello","age": 25},
+        |{"name": "hello","age": 22},
+        |{"name": "hello","age": 22}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run( """aggs count "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+    assert(result.contains( """"key":23.0"""))
   }
 
   "ELKParser" should "alias index" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """bulk index "test-parser-name" "test-parser-type" [
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 24},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 25},
-          |{"name": "hello","age": 25},
-          |{"name": "hello","age": 22},
-          |{"name": "hello","age": 22}
-          |] """.stripMargin)
-      Thread.sleep(2000)
-      runEngine.run( """alias "alias-index" "test-parser-name"""")
-      Thread.sleep(2000)
-      runEngine.run( """aggs count "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
-    }
-    assert(outContent.toString.contains(
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 24},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 25},
+        |{"name": "hello","age": 25},
+        |{"name": "hello","age": 22},
+        |{"name": "hello","age": 22}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    runEngine.run( """alias "alias-index" "test-parser-name"""")
+    Thread.sleep(2000)
+    val result = runEngine.run( """aggs count "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+    assert(result.contains(
       """  "aggregations":{
         |    "ages":{
         |      "doc_count_error_upper_bound":0,""".stripMargin))
   }
 
   "ELKParser" should "create snapshot" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """create repository "test_snapshot" "fs" {"compress": "true", "location": "./target/elkrepo"} """.stripMargin)
-      Thread.sleep(2000)
+    runEngine.run(
+      """create repository "test_snapshot" "fs" {"compress": "true", "location": "./target/elkrepo"} """.stripMargin)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """create snapshot "snapshot1" "test_snapshot"""".stripMargin)
-      Thread.sleep(2000)
+    runEngine.run(
+      """create snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """get snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    val result = runEngine.run(
+      """get snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-      Thread.sleep(2000)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """close index "*"""".stripMargin)
+    runEngine.run(
+      """close index "*"""".stripMargin)
 
-      Thread.sleep(2000)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """restore snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    runEngine.run(
+      """restore snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-      Thread.sleep(2000)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """close index "*"""".stripMargin)
+    runEngine.run(
+      """close index "*"""".stripMargin)
 
-      Thread.sleep(2000)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """open index "*"""".stripMargin)
+    runEngine.run(
+      """open index "*"""".stripMargin)
 
-      Thread.sleep(2000)
+    Thread.sleep(2000)
 
-      runEngine.run(
-        """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    runEngine.run(
+      """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-    }
-    assert(outContent.toString.contains("\"snapshot\":\"snapshot1\","))
+    assert(result.contains("\"snapshot\":\"snapshot1\","))
   }
 
   "ELKParser" should "cluster stats" in {
-    Console.withOut(outContent) {
-      runEngine.run("cluster stats")
-    }
-    assert(outContent.toString.contains("cluster_name"))
+    val result = runEngine.run("cluster stats")
+    assert(result.contains("cluster_name"))
   }
 
   "ELKParser" should "node stats" in {
-    Console.withOut(outContent) {
-      runEngine.run("node stats")
-    }
-    assert(outContent.toString.contains("heap_used_in_bytes"))
+    val result = runEngine.run("node stats")
+    assert(result.contains("heap_used_in_bytes"))
   }
   "ELKParser" should "indices stats" in {
-    Console.withOut(outContent) {
-      runEngine.run("indices stats")
-    }
-    assert(outContent.toString.contains("indices"))
+    val result = runEngine.run("indices stats")
+    assert(result.contains("indices"))
   }
   /*"ELKParser" should "retrieve cluster settings" in {
     Console.withOut(outContent) {
       runEngine.run("cluster settings")
     }
-    assert(outContent.toString.contains("indices"))
+    assert(result.contains("indices"))
   }*/
   "ELKParser" should "retrieve node settings" in {
-    Console.withOut(outContent) {
-      runEngine.run("node settings")
-    }
-    assert(outContent.toString.contains("transport_address"))
+    val result = runEngine.run("node settings")
+    assert(result.contains("transport_address"))
   }
 
   "ELKParser" should "retrieve index settings" in {
-    Console.withOut(outContent) {
-      runEngine.run( """"test-parser-name" settings""")
-    }
-    assert(outContent.toString.contains("test-parser-name"))
+    val result = runEngine.run( """"test-parser-name" settings""")
+    assert(result.contains("test-parser-name"))
   }
 
   "ELKParser" should "retrieve pending tasks" in {
-    Console.withOut(outContent) {
-      runEngine.run( """pending tasks""")
-    }
-    assert(outContent.toString.contains( """"tasks""""))
+    val result = runEngine.run( """pending tasks""")
+    assert(result.contains( """"tasks""""))
   }
 
   "ELKParser" should "list all indices" in {
-    Console.withOut(outContent) {
-      runEngine.run( """cluster state""")
-    }
-    assert(outContent.toString.contains("indices"))
+    val result = runEngine.run( """cluster state""")
+    assert(result.contains("indices"))
   }
 
   "ELKParser" should "wait  for status" in {
-    Console.withOut(outContent) {
-      runEngine.run(
-        """bulk index "test-parser-name" "test-parser-type" [
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23},
-          |{"name": "hello","age": 23}
-          |] """.stripMargin)
-      runEngine.run("""wait for status "YELLOW"""")
-    }
-    assert(outContent.toString.contains("yellow"))
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23}
+        |] """.stripMargin)
+    val result = runEngine.run("""wait for status "YELLOW"""")
+    assert(result.contains("yellow"))
   }
 
   "ELKParser" should "list help for command" in {
-    Console.withOut(outContent) {
-      runEngine.run("create index ?")
-    }
-    assert(outContent.toString.contains(""""description":"create index by index name""""))
+    val result = runEngine.run("create index ?")
+    assert(result.contains(""""description":"create index by index name""""))
   }
 
   "ELKParser" should "create analyzer" in {
-    Console.withOut(outContent) {
-      runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
-      Thread.sleep(1000)
-      runEngine.run("""".elasticshell" settings""")
-    }
-    assert(outContent.toString().contains("myAnalyzer"))
+    runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
+    Thread.sleep(1000)
+    val result = runEngine.run("""".elasticshell" settings""")
+    assert(result.contains("myAnalyzer"))
   }
 
   after {
