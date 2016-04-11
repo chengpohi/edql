@@ -33,15 +33,22 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   "collection" should "parse json" in {
     val Parsed.Success(value, _) = jsonExpr.parse( """{ "name":[1,2,3,4]}""")
     val Parsed.Success(value1, _) = jsonExpr.parse( """{ "user": {"name":"123","age":23}}""")
-    val Parsed.Success(value2, _) = jsonExpr.parse(
+
+    assert(value === Obj(("name", Arr(Num(1.0), Num(2.0), Num(3.0), Num(4.0)))))
+    assert(value1 === Obj(("user", Obj(("name", Str("123")), ("age", Num(23.0))))))
+  }
+
+  "jVal get" should "get field by name" in {
+     val Parsed.Success(value, _) = jsonExpr.parse(
       """{
         |"user":{
         |"name" : "\\s+" , "age":23
         |}
         |}""".stripMargin)
-    assert(value === Obj(("name", Arr(Num(1.0), Num(2.0), Num(3.0), Num(4.0)))))
-    assert(value1 === Obj(("user", Obj(("name", Str("123")), ("age", Num(23.0))))))
+    assert(value.get("user").get("name") === Str("\\\\s+"))
+    assert(value.get("user").get("age") === Num(23))
   }
+
 
   "json4s" should "parse array to json" in {
     val Parsed.Success(value, _) = jsonExpr.parse( """[1, 2, 3,4]""")

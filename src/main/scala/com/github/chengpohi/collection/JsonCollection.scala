@@ -16,46 +16,65 @@ object JsonCollection {
     def apply(s: java.lang.String): Val = this.asInstanceOf[Obj].value.find(_._1 == s).get._2
 
     def toJson: String
+
+    def get(path: String): Option[Val]
+    def \\ (path: String): Option[Val] = get(path)
   }
 
   case class Str(value: java.lang.String) extends AnyVal with Val {
     override def toJson: String = "\"" + value + "\""
+
+    override def get(path: String): Option[Val] = None
   }
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
     override def toJson: String = "{" + value.map {
       case (n, v) => "\"" + n + "\":" + v.toJson
     }.mkString(",") + "}"
+
+    override def get(path: String): Option[Val] = value.find(p => p._1 == path).map(_._2)
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
     override def toJson: String = "[" + value.map(i => i.toJson).mkString(",") + "]"
+
+    override def get(path: String): Option[Val] = None
   }
 
   case class Tuple(value: Val*) extends AnyVal with Val {
     override def toJson: String = "(" + value.map(i => i.toJson).mkString(",") + ")"
+
+    override def get(path: String): Option[Val] = None
   }
 
   case class Num(value: Double) extends AnyVal with Val {
     override def toJson: String = value.toString
+
+    override def get(path: String): Option[Val] = None
   }
 
   case object False extends Val {
     def value = false
 
     override def toJson: String = value.toString
+
+    override def get(path: String): Option[Val] = None
   }
 
   case object True extends Val {
     def value = true
 
     override def toJson: String = value.toString
+
+    override def get(path: String): Option[Val] = None
   }
 
   case object Null extends Val {
     def value = null
 
     override def toJson: String = value.toString
+
+    override def get(path: String): Option[Val] = None
   }
 
   implicit class JsonConverter(value: Val) {
