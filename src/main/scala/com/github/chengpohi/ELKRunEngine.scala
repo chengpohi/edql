@@ -6,7 +6,7 @@ import com.github.chengpohi.registry.ELKCommandRegistry
 
 import scala.concurrent.Await
 import scala.io.Source
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
@@ -24,7 +24,7 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
         case (name, Some(ins), parameters) =>
           try {
             val response: String = Await.result(ins(parameters), Duration.Inf)
-            beautyJSON(response)
+            Try(beautyJSON(response)).getOrElse(response)
           } catch {
             case e: Exception => {
               s"\nMethod Name: $name \nParameters: $parameters\nFull Stacktrace: ${e.toString}"
