@@ -107,14 +107,14 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "extract json data" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} "HJJJJJJH" """)
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} id "HJJJJJJH" """)
     Thread.sleep(2000)
-    val result = runEngine.run( """query "test-parser-name" \\ "name" """)
-    assert(result.contains( """"name":"hello""""))
+    val result = runEngine.run( """query "test-parser-name" "test-parser-type" \\ "name"""")
+    assert(result.contains( """"hello""""))
   }
 
   "ELKParser" should "query data by json" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} "HJJJJJJH" """)
+    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
     Thread.sleep(2000)
     val result = runEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
     assert(result.contains("Hello world"))

@@ -26,6 +26,8 @@ class ResponseGeneratorTest extends FlatSpec {
         |}
         |}""".stripMargin
     val str = extractJSON(json, "created_at")
-    assert(str == """[{"created_at":1453476425260}]""")
+    val name = extractJSON(json, "name")
+    assert(str === """1453476425260""")
+    assert(name === """"Discuss Elastic"""")
   }
 }
