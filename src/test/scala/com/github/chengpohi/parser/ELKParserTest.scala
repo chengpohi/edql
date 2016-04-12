@@ -311,6 +311,28 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains("myAnalyzer"))
   }
 
+  "ELKParser" should "join query" in {
+    runEngine.run(
+      """bulk index "test-index-name-1" "test-index-type-1" [
+        |{"tip": "hello","_tip_id": "1"},
+        |{"tip": "world","_tip_id": "2"}
+        |] """.stripMargin)
+    runEngine.run(
+      """bulk index "test-index-name" "test-index-type" [
+        |{"name": "test","_tip_id": "1"},
+        |{"name": "foo","_tip_id": "2"},
+        |{"name": "bar","_tip_id": "1"},
+        |{"name": "jack","_tip_id": "2"}
+        |] """.stripMargin)
+    Thread.sleep(1000)
+    val result = runEngine.run(
+      """
+        |query "test-index-name" "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"
+      """.stripMargin)
+    Thread.sleep(1000)
+    assert(result.contains("_test-index-type-1_"))
+  }
+
   after {
     runEngine.run( """ delete "*"""")
   }
