@@ -98,6 +98,10 @@ class ResponseGenerator {
     builder.bytes().toUtf8
   }
 
+  def buildStreamMapTupels(tuples: Stream[Map[String, AnyRef]]): String = {
+    write(tuples)
+  }
+
 
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)

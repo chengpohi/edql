@@ -14,7 +14,7 @@ trait ElasticDocUpdater {
   this: ElasticDocQuerier with ElasticBase =>
   def updateAllDocs(indexName: String, indexType: String, uf: Seq[(String, String)]): Future[String] = {
     Future {
-      val res = getAllDataByScan(indexName, Some(indexType))
+      val res = queryAllByScan(indexName, Some(indexType))
       bulkUpdateField(indexName, res, indexType, uf)
       """{"isFailure": false}"""
     }
