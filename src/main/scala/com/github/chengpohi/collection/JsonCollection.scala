@@ -78,7 +78,7 @@ object JsonCollection {
   }
 
   implicit class JsonConverter(value: Val) {
-    def extract(tag: Type): Any = {
+    private[JsonCollection] def extract(tag: Type): Any = {
       if (tag <:< typeOf[Map[_, _]]) {
         val subType2: Type = tag.typeArgs(1)
         value.asInstanceOf[Obj].value.toList.map(i =>

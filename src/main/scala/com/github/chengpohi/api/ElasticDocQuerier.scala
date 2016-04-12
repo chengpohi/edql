@@ -1,18 +1,17 @@
 package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.SearchType.Scan
 import com.sksamuel.elastic4s._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
- * elasticshell
- * Created by chengpohi on 3/12/16.
- */
+  * elasticshell
+  * Created by chengpohi on 3/12/16.
+  */
 trait ElasticDocQuerier {
   this: ElasticBase =>
 
@@ -32,13 +31,25 @@ trait ElasticDocQuerier {
           terms.map(termQuery(_))
         )
       }
-    }
+    } start 0 limit MAX_ALL_NUMBER
+  }
+
+  def joinQuery(indexName: String, indexType: String, joinIndexName: String, joinIndexType: String, field: String)(implicit maxRetrieveSize: Int = 500) = {
+    val joinAll = queryAllByScan(joinIndexName, Some(joinIndexType))(maxRetrieveSize)
+    joinAll.flatMap(f => {
+      f.hits.map(i => {
+        val fieldValue = i.getSource.get(field).asInstanceOf[String]
+        queryDataByRawQuery(indexName, indexType, List((field, fieldValue)))
+          .map(s => i.sourceAsMap + (s"_${joinIndexType}_"-> s.hits.map(_.sourceAsMap)))
+      })
+    })
   }
 
 
-  def getAllDataByScan(indexName: String, indexType: Option[String] = Some("*")): Stream[RichSearchResponse] = {
+  def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))(implicit maxRetrieveSize: Int = 500): Stream[RichSearchResponse] = {
+    val indexNameAndType = buildIndexNameAndIndexType(indexName, indexType.get)
     val res = client.execute {
-      search in indexName scroll "10m" size 500 searchType Scan
+      search in indexNameAndType scroll "10m" size maxRetrieveSize
     }
 
     def fetch(previous: RichSearchResponse) = {
@@ -71,10 +82,11 @@ trait ElasticDocQuerier {
 
 
   def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): Future[String] = Future {
-    val sourceData: Stream[RichSearchResponse] = getAllDataByScan(sourceIndex)
+    val sourceData: Stream[RichSearchResponse] = queryAllByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
     """{"hasErrors": false}"""
   }
+
   def bulkUpdateField(indexName: String, response: Stream[RichSearchResponse], indexType: String, field: Seq[(String, String)]) = {
     response.foreach(r => {
       client.execute {

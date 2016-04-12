@@ -1,7 +1,6 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.api.ElasticCommand
-import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
@@ -29,14 +28,15 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.update.UpdateResponse
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
 class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: ResponseGenerator) {
+
 
   import responseGenerator._
 
@@ -130,6 +130,9 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
       eventualRichSearchResponse.map(s => buildXContent(s.original))
     case Seq(indexName) =>
       elasticCommand.queryAll(indexName.extract[String], "*").map(s => buildXContent(s.original))
+    case Seq(indexName, indexType, joinIndexName, joinIndexType, field) =>
+      Future.sequence(elasticCommand.joinQuery(indexName.extract[String], indexType.extract[String],
+        joinIndexName.extract[String], joinIndexType.extract[String], field.extract[String])).map(buildStreamMapTupels)
   }
 
   def update: Seq[Val] => Future[String] = {
