@@ -167,12 +167,12 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     case Seq(indexName, indexType, fields) => {
       val indexResponse =
         elasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
-      indexResponse.map(s => buildIsCreated(s.isCreated))
+      indexResponse.map(s => buildIdResponse(s.getId))
     }
     case Seq(indexName, indexType, fields, id) => {
       val indexResponse = elasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
         fields.extract[List[(String, String)]], id.extract[String])
-      indexResponse.map(s => buildIsCreated(s.isCreated))
+      indexResponse.map(s => buildIdResponse(s.getId))
     }
   }
 
