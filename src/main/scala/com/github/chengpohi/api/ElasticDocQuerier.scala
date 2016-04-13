@@ -40,7 +40,7 @@ trait ElasticDocQuerier {
       f.hits.map(i => {
         val fieldValue = i.getSource.get(field).asInstanceOf[String]
         queryDataByRawQuery(indexName, indexType, List((field, fieldValue)))
-          .map(s => i.sourceAsMap + (s"${indexType}"-> s.hits.map(_.sourceAsMap)))
+          .map(s => i.sourceAsMap + ("id" -> i.getId) + (s"${indexType}"-> s.hits.map(t => t.sourceAsMap + ("id" -> t.getId))))
       })
     })
   }
