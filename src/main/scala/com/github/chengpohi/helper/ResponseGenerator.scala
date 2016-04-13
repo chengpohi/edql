@@ -130,4 +130,5 @@ class ResponseGenerator {
   }
 
   def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
+  def buildIdResponse(id: String): String = write(("id", id))
 }
