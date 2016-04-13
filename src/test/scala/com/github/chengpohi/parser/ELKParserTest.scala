@@ -330,7 +330,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |query "test-index-name" "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"
       """.stripMargin)
     Thread.sleep(1000)
-    assert(result.contains("_test-index-type-1_"))
+    assert(result.contains("test-index-type"))
   }
 
   after {
