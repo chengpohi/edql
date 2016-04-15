@@ -1,10 +1,12 @@
 package com.github.chengpohi.repl
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 
 import com.github.chengpohi.ELKRunEngine
 import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
+import jline.console.history.FileHistory
+import jline.internal.Configuration
 
 import scala.io.Source
 
@@ -21,14 +23,13 @@ object ELKRepl {
 
 
   def main(args: Array[String]): Unit = {
-    beforeStart()
-
     val reader = new ConsoleReader()
     reader.setPrompt("elasticshell>")
     reader.addCompleter(terms)
     reader.setCompletionHandler(eLKCompletionHandler)
+    reader.setHistory(new FileHistory(new File(Configuration.getUserHome, ".elasticshell.history")))
+    addShutdownHook(reader)
 
-    val out = new PrintWriter(reader.getOutput)
     while (true) {
       val line = reader.readLine()
       if (line == "exit") System.exit(0)
@@ -36,10 +37,11 @@ object ELKRepl {
     }
   }
 
-  def beforeStart() = {
+  def addShutdownHook(reader: ConsoleReader) = {
     elkRunEngine.run(s"""create index "$ELASTIC_SHELL_INDEX_NAME"""")
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
+        reader.getHistory.asInstanceOf[FileHistory].flush()
         elkRunEngine.run(s"""delete "$ELASTIC_SHELL_INDEX_NAME"""")
       }
     })
