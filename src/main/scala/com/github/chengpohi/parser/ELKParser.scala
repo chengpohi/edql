@@ -12,7 +12,7 @@ import scala.concurrent.Future
   * Created by chengpohi on 12/30/15.
   */
 class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
-  extends ELKInstrumentParser(elkCommand, parserUtils) {
+  extends ELKInstructionParser(elkCommand, parserUtils) {
   import fastparse.all._
   val methodParameter = P(space ~ "var" ~ space ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
   P(space ~ "function" ~ space ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>

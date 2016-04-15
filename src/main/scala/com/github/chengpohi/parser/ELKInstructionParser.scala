@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class ELKInstrumentParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
+class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
 
   import elkCommand._
   import fastparse.all._

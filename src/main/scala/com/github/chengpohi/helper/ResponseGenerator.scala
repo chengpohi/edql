@@ -105,7 +105,7 @@ class ResponseGenerator {
 
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)
-    val result = jObj \\ filterName
+    val result = filterName.split("\\.").foldLeft(jObj) { (o, i) => o \ i }
     write(result)
   }
 
@@ -130,5 +130,6 @@ class ResponseGenerator {
   }
 
   def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
+
   def buildIdResponse(id: String): String = write(("id", id))
 }
