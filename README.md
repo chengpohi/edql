@@ -58,3 +58,11 @@ bin/es
 | restore snapshot | `restore snapshot "snapshot1" "repository_name"`| restore snapshot from repository by snapshot name|
 | delete snapshot | `delete snapshot "snapshot1" "test_snapshot"`| delete snapshot in repository by snapshot name |
 
+## Example
+
+### Use in Scala Project
+
+```
+val elkRunEngine = new ELKRunEngine(ELKCommandRegistry)
+val result: String = elkRunEngine.run("query "*"")
+```
