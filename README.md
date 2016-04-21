@@ -1,25 +1,33 @@
-# ElasticShell
+# Elastic DSL with REPL
 
-## Preface
-This a ***REPL*** for elasticsearch, it uses ***elk*** syntax to interact with ***elasticsearch***, it's more ***BDD***, more easy to use it.
-Also you can use ***elk*** file to batch execute ***elasticsearch*** commands like shell file.
+## Introduction
+This a ***DSL*** for elasticsearch, it uses ***elk*** syntax like `sql` to interact with ***elasticsearch***. 
+
+***Features***
+
+- More BDD
+- Full integrate with ***elasticsearch*** json syntax
+- Like Sql syntax
+- Full JSON response
+- Easier to learn elasticsearch and test you query
 
 ## Version
-For now support ***elasticsearch-2.2***
 
-## Installation
+- *0.1* support ***elasticsearch-2.2***
 
-## conf
+## Use it
+
+### conf
 
 In the ***conf/application.conf***, you can configure your ***elasticsearch host, port and clustername***.
 
-## Start
+### Start
 
 ```
 bin/es
 ```
 
-## Syntax
+### Syntax
 
 
 | Operation                                 | Syntax | Description |
@@ -35,6 +43,7 @@ bin/es
 | term query | `term query "index-name" "index-type" {"name": value}` | term query by index-name  and index-type|
 | get | `get "index-name" "idnex-type" "doc_id"` | get doc by id |
 | analysis | `analysis "standard" "foo,bar"` | analysis text by the specific analyzer |
+| create analyzer | `create analyzer "index-name" {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}` | create analyzer |
 | delete | `delete "index-name"` | delete all by index-name |
 | update | `update "index-name" "index-type" "(field_name, field_value)"` | update or append field by field_name and field_value |
 | mapping | `"test-parser-name" mapping` | get the index's mapping |
