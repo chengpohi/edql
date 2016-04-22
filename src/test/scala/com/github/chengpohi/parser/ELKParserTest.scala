@@ -109,8 +109,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   "ELKParser" should "extract json data" in {
     runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} id "HJJJJJJH" """)
     Thread.sleep(2000)
-    val result = runEngine.run( """query "test-parser-name" "test-parser-type" \\ "name"""")
-    assert(result.contains( """"hello""""))
+    val result = runEngine.run( """query "test-parser-name" "test-parser-type" \\ "hits.hits._source.name"""")
+    assert(result === """"hello"""")
   }
 
   "ELKParser" should "query data by json" in {
@@ -284,7 +284,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains("indices"))
   }
 
-  "ELKParser" should "wait  for status" in {
+  "ELKParser" should "wait for status" in {
     runEngine.run(
       """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
