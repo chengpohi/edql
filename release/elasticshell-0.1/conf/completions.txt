@@ -1,0 +1,31 @@
+term query
+health
+cluster stats
+cluster state
+indices stats
+node stats
+cluster settings
+node settings
+pending tasks
+wait for status
+count
+delete
+reindex
+index
+bulk index
+update
+create index
+mapping
+analysis
+aggs count
+alias
+create repository
+create snapshot
+delete snapshot
+get snapshot
+restore snapshot
+close index
+open index
+\\
+beauty
+create analyzer
