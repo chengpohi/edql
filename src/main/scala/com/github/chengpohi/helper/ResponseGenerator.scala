@@ -1,11 +1,12 @@
 package com.github.chengpohi.helper
 
 import com.sksamuel.elastic4s.mappings.GetMappingsResult
-import com.sksamuel.elastic4s.{BulkResult, RichGetResponse, RichSearchResponse}
+import com.sksamuel.elastic4s.{BulkResult, RichGetResponse}
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
 import org.json4s._
@@ -121,10 +122,10 @@ class ResponseGenerator {
     write(("isFound", deleteResponse.isFound))
   }
 
-  def buildSearchResponse(searchResponse: RichSearchResponse): String = {
+  def buildSearchResponse(searchResponse: SearchResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    searchResponse.original.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    searchResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
   }
