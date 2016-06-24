@@ -13,7 +13,7 @@ import scala.concurrent.{Future, Promise}
 trait ElasticBase {
   val client: ElasticClient
 
-  def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
+  private[this] def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
     f(new ActionListener[A] {
       def onFailure(e: Throwable): Unit = p.tryFailure(e)
@@ -26,6 +26,10 @@ trait ElasticBase {
 
   case class MapSource(source: Map[String, AnyRef]) extends DocumentMap {
     override def map = source
+  }
+
+  object ActionFuture {
+    def apply[A, Q](f: ActionListener[A] => Q): Future[A] = buildFuture(f)
   }
 
 }

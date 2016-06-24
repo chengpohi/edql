@@ -26,6 +26,7 @@ import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -201,7 +202,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def aggsCount: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, rawJson) => {
-      val aggsSearch: Future[RichSearchResponse] =
+      val aggsSearch: Future[SearchResponse] =
         elasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
       aggsSearch.map(s => buildSearchResponse(s))
     }

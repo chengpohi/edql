@@ -181,6 +181,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |] """.stripMargin)
     Thread.sleep(2000)
     val result = runEngine.run( """aggs count "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
+    println(result)
     assert(result.contains( """"key":23.0"""))
   }
 

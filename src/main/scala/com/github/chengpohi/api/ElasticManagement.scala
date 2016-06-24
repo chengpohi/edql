@@ -3,8 +3,12 @@ package com.github.chengpohi.api
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.RichSearchResponse
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
+import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
+import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
+import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
+import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 
 import scala.concurrent.Future
@@ -15,12 +19,12 @@ import scala.concurrent.Future
   */
 trait ElasticManagement {
   this: ElasticBase =>
-  def nodeStats() = {
-    buildFuture(client.admin.cluster.prepareNodesStats().all().execute)
+  def nodeStats(): Future[NodesStatsResponse] = ActionFuture {
+    client.admin.cluster.prepareNodesStats().all().execute
   }
 
-  def indicesStats() = {
-    buildFuture(client.admin.indices().prepareStats().all().execute)
+  def indicesStats(): Future[IndicesStatsResponse] = ActionFuture {
+    client.admin.indices().prepareStats().all().execute
   }
 
   def clusterStats() = client.execute {
@@ -57,8 +61,8 @@ trait ElasticManagement {
     get mapping indexName
   }
 
-  def getIndices: Future[ClusterStateResponse] = {
-    buildFuture(client.admin.cluster().prepareState().execute)
+  def getIndices: Future[ClusterStateResponse] = ActionFuture {
+    client.admin.cluster().prepareState().execute
   }
 
   def clusterHealth() = client.execute {
@@ -92,15 +96,22 @@ trait ElasticManagement {
     search in indexName size 0
   }
 
-  def clusterSettings() = buildFuture(client.admin.cluster().prepareUpdateSettings().execute)
+  def clusterSettings: Future[ClusterUpdateSettingsResponse] = ActionFuture {
+    client.admin.cluster().prepareUpdateSettings().execute
+  }
 
-  def nodesSettings() = buildFuture(client.admin.cluster().prepareNodesInfo().execute)
+
+  def nodesSettings: Future[NodesInfoResponse] = ActionFuture {
+    client.admin.cluster().prepareNodesInfo().execute
+  }
 
   def indexSettings(indexName: String) = client.execute {
     get settings indexName
   }
 
-  def pendingTasks(): Future[PendingClusterTasksResponse] = buildFuture(client.admin.cluster().preparePendingClusterTasks().execute)
+  def pendingTasks(): Future[PendingClusterTasksResponse] = ActionFuture {
+    client.admin.cluster().preparePendingClusterTasks().execute
+  }
 
   def waitForStatus(indexName: Option[String] = Some("*"), status: Option[String] = Some("GREEN"), timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
     val clusterHealthStatus: ClusterHealthStatus = status match {
@@ -109,9 +120,11 @@ trait ElasticManagement {
       case Some("YELLOW") => ClusterHealthStatus.YELLOW
       case _ => ClusterHealthStatus.GREEN
     }
-    buildFuture(client.admin.cluster()
-      .prepareHealth(indexName.get)
-      .setTimeout(timeOut.get)
-      .setWaitForStatus(clusterHealthStatus).execute)
+    ActionFuture {
+      client.admin.cluster()
+        .prepareHealth(indexName.get)
+        .setTimeout(timeOut.get)
+        .setWaitForStatus(clusterHealthStatus).execute
+    }
   }
 }
