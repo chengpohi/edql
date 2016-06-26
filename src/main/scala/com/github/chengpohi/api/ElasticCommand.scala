@@ -17,4 +17,5 @@ class ElasticCommand(cl: ElasticClient) extends ElasticManagement
                       with ElasticBase{
   val client: ElasticClient = cl
   val cluster: ClusterAdminClient = client.admin.cluster()
+  val indices = client.admin.indices()
 }
