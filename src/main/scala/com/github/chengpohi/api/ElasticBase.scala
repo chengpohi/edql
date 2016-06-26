@@ -2,8 +2,8 @@ package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.source.DocumentMap
-import org.elasticsearch.action.{ActionListener, ActionResponse}
-import org.elasticsearch.client.ClusterAdminClient
+import org.elasticsearch.action.ActionListener
+import org.elasticsearch.client.{ClusterAdminClient, IndicesAdminClient}
 
 import scala.concurrent.{Future, Promise}
 
@@ -14,6 +14,7 @@ import scala.concurrent.{Future, Promise}
 trait ElasticBase {
   val client: ElasticClient
   val cluster: ClusterAdminClient
+  val indices: IndicesAdminClient
 
   private[this] def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
@@ -24,7 +25,6 @@ trait ElasticBase {
     })
     p.future
   }
-
 
   abstract class ActionRequest[A] {
     def execute: ActionListener[A] => Unit
