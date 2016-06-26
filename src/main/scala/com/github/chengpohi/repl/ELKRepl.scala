@@ -1,6 +1,6 @@
 package com.github.chengpohi.repl
 
-import java.io.{File, PrintWriter}
+import java.io.File
 
 import com.github.chengpohi.ELKRunEngine
 import com.github.chengpohi.registry.ELKCommandRegistry
