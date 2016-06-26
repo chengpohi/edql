@@ -2,7 +2,7 @@ package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.source.DocumentMap
-import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.{ActionListener, ActionResponse}
 import org.elasticsearch.client.ClusterAdminClient
 
 import scala.concurrent.{Future, Promise}
@@ -26,6 +26,10 @@ trait ElasticBase {
   }
 
 
+  abstract class ActionRequest[A] {
+    def execute: ActionListener[A] => Unit
+  }
+
   case class MapSource(source: Map[String, AnyRef]) extends DocumentMap {
     override def map = source
   }
@@ -34,4 +38,7 @@ trait ElasticBase {
     def apply[A, Q](f: ActionListener[A] => Q): Future[A] = buildFuture(f)
   }
 
+  object ElasticExecutor {
+    def apply[A](f: ActionRequest[A]): Future[A] = buildFuture(f.execute)
+  }
 }

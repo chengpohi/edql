@@ -1,5 +1,6 @@
 package com.github.chengpohi.api
 
+import com.github.chengpohi.api.dsl.ManageDSL
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.RichSearchResponse
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
@@ -16,7 +17,6 @@ import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.common.settings.Settings
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -25,10 +25,10 @@ import scala.concurrent.Future
   * elasticshell
   * Created by chengpohi on 3/12/16.
   */
-trait ElasticManagement {
+trait ElasticManagement extends ManageDSL{
   this: ElasticBase =>
-  def nodeStats: Future[NodesStatsResponse] = ActionFuture {
-    cluster prepareNodesStats() all() execute
+  def nodeStats: Future[NodesStatsResponse] = ElasticExecutor {
+    node stats NodeType.ALL flag FlagType.ALL
   }
 
   def indicesStats: Future[IndicesStatsResponse] = ActionFuture {
@@ -36,7 +36,7 @@ trait ElasticManagement {
   }
 
   def clusterStats: Future[ClusterStatsResponse] = ActionFuture {
-    client.client.admin().cluster().prepareClusterStats().execute
+    client.client.admin().cluster().prepareClusterStats.execute
   }
 
   def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = {
