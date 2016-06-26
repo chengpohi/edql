@@ -1,6 +1,7 @@
 package com.github.chengpohi.api
 
 import com.sksamuel.elastic4s.ElasticClient
+import org.elasticsearch.client.ClusterAdminClient
 
 /**
  * elasticshell
@@ -15,4 +16,5 @@ class ElasticCommand(cl: ElasticClient) extends ElasticManagement
                       with ElasticAggs
                       with ElasticBase{
   val client: ElasticClient = cl
+  val cluster: ClusterAdminClient = client.admin.cluster()
 }

@@ -3,15 +3,17 @@ package com.github.chengpohi.api
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.source.DocumentMap
 import org.elasticsearch.action.ActionListener
+import org.elasticsearch.client.ClusterAdminClient
 
 import scala.concurrent.{Future, Promise}
 
 /**
- * ElasticBase function
- * Created by chengpohi on 6/28/15.
- */
+  * ElasticBase function
+  * Created by chengpohi on 6/28/15.
+  */
 trait ElasticBase {
   val client: ElasticClient
+  val cluster: ClusterAdminClient
 
   private[this] def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()

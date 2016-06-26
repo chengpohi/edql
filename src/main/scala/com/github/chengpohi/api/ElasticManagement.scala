@@ -5,12 +5,20 @@ import com.sksamuel.elastic4s.RichSearchResponse
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
+import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryResponse
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
+import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
+import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
+import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
+import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
+import org.elasticsearch.common.settings.Settings
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 /**
@@ -20,41 +28,44 @@ import scala.concurrent.Future
 trait ElasticManagement {
   this: ElasticBase =>
   def nodeStats: Future[NodesStatsResponse] = ActionFuture {
-    client.admin.cluster.prepareNodesStats().all().execute
+    cluster prepareNodesStats() all() execute
   }
 
   def indicesStats: Future[IndicesStatsResponse] = ActionFuture {
     client.admin.indices().prepareStats().all().execute
   }
 
-  def clusterStats = client.execute {
-    get cluster stats
+  def clusterStats: Future[ClusterStatsResponse] = ActionFuture {
+    client.client.admin().cluster().prepareClusterStats().execute
   }
 
-  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, String]) = client.execute {
-    create repository repositoryName `type` repositoryType settings st
-  }
-
-  def createSnapshot(snapshotName: String, repositoryName: String) = client.execute {
-    create snapshot snapshotName in repositoryName
-  }
-
-  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
-    get snapshot snapshotName from repositoryName
-  }
-
-  def getAllSnapshotByRepositoryName(repositoryName: String) = client.execute {
-    get snapshot Seq() from repositoryName
-  }
-
-  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String) = client.execute {
-    delete snapshot snapshotName in repositoryName
-  }
-
-  def mappings(indexName: String, mapping: String) = {
-    client.execute {
-      create index indexName source mapping
+  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = {
+    ActionFuture {
+      client.client.admin().cluster().preparePutRepository(repositoryName)
+        .setType(repositoryType)
+        .setSettings(st.asJava)
+        .execute
     }
+  }
+
+  def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = ActionFuture {
+    client.client.admin().cluster().prepareCreateSnapshot(repositoryName, snapshotName).execute
+  }
+
+  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[GetSnapshotsResponse] = ActionFuture {
+    client.client.admin().cluster().prepareGetSnapshots(repositoryName).setSnapshots(snapshotName).execute
+  }
+
+  def getAllSnapshotByRepositoryName(repositoryName: String): Future[GetSnapshotsResponse] = ActionFuture {
+    client.client.admin().cluster().prepareGetSnapshots(repositoryName).execute
+  }
+
+  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[DeleteSnapshotResponse] = ActionFuture {
+    client.client.admin().cluster().prepareDeleteSnapshot(repositoryName, snapshotName).execute
+  }
+
+  def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = ActionFuture {
+    client.client.admin().indices().prepareCreate(indexName).setSource(mapping).execute
   }
 
   def getMapping(indexName: String) = client.execute {

@@ -1,7 +1,6 @@
 package com.github.chengpohi.parser
 
 import java.io.ByteArrayOutputStream
-import java.nio.file.{Files, Paths}
 
 import com.github.chengpohi.ELKRunEngine
 import com.github.chengpohi.helper.ELKCommandTestRegistry
