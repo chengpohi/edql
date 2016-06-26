@@ -31,8 +31,8 @@ trait ElasticManagement extends ManageDSL{
     node stats NodeType.ALL flag FlagType.ALL
   }
 
-  def indicesStats: Future[IndicesStatsResponse] = ActionFuture {
-    client.admin.indices().prepareStats().all().execute
+  def indicesStats: Future[IndicesStatsResponse] = ElasticExecutor {
+    indice stats NodeType.ALL flag FlagType.ALL
   }
 
   def clusterStats: Future[ClusterStatsResponse] = ActionFuture {
