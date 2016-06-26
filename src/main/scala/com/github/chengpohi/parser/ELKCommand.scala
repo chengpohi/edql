@@ -62,32 +62,32 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
   }
 
   def clusterStats: Seq[Val] => Future[String] = _ => {
-    val clusterStatsResponse: Future[ClusterStatsResponse] = elasticCommand.clusterStats()
+    val clusterStatsResponse: Future[ClusterStatsResponse] = elasticCommand.clusterStats
     clusterStatsResponse.map(buildXContent)
   }
 
   def indicesStats: Seq[Val] => Future[String] = _ => {
-    val indicesStatsResponse: Future[IndicesStatsResponse] = elasticCommand.indicesStats()
+    val indicesStatsResponse: Future[IndicesStatsResponse] = elasticCommand.indicesStats
     indicesStatsResponse.map(buildXContent)
   }
 
   def nodeStats: Seq[Val] => Future[String] = _ => {
-    val nodesStatsResponse: Future[NodesStatsResponse] = elasticCommand.nodeStats()
+    val nodesStatsResponse: Future[NodesStatsResponse] = elasticCommand.nodeStats
     nodesStatsResponse.map(s => buildXContent(s))
   }
 
   def clusterSettings: Seq[Val] => Future[String] = _ => {
-    val clusterUpdateSettingsResponse: Future[ClusterUpdateSettingsResponse] = elasticCommand.clusterSettings()
+    val clusterUpdateSettingsResponse: Future[ClusterUpdateSettingsResponse] = elasticCommand.clusterSettings
     clusterUpdateSettingsResponse.map(buildClusterSettingsResponse)
   }
 
   def nodeSettings: Seq[Val] => Future[String] = _ => {
-    val nodesInfoResponse: Future[NodesInfoResponse] = elasticCommand.nodesSettings()
+    val nodesInfoResponse: Future[NodesInfoResponse] = elasticCommand.nodesSettings
     nodesInfoResponse.map(s => buildXContent(s))
   }
 
   def pendingTasks: Seq[Val] => Future[String] = _ => {
-    val clusterTasksResponse: Future[PendingClusterTasksResponse] = elasticCommand.pendingTasks()
+    val clusterTasksResponse: Future[PendingClusterTasksResponse] = elasticCommand.pendingTasks
     clusterTasksResponse.map(s => buildXContent(s))
   }
 
@@ -99,7 +99,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
   }
 
   def health: Seq[Val] => Future[String] = _ => {
-    elasticCommand.clusterHealth().map(s => s.toString)
+    elasticCommand.clusterHealth.map(s => s.toString)
   }
 
   def count: Seq[Val] => Future[String] = {
