@@ -251,6 +251,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "node stats" in {
     val result = runEngine.run("node stats")
+    println(result)
     assert(result.contains("heap_used_in_bytes"))
   }
   "ELKParser" should "indices stats" in {
