@@ -4,6 +4,7 @@ import com.sksamuel.elastic4s.mappings.GetMappingsResult
 import com.sksamuel.elastic4s.{BulkResult, RichGetResponse}
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.search.SearchResponse
@@ -27,10 +28,10 @@ class ResponseGenerator {
 
   implicit val formats = DefaultFormats
 
-  def buildGetMappingResponse(getMappingsResponse: GetMappingsResult): String = {
+  def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    getMappingsResponse.original.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
+    getMappingsResponse.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
       builder.startObject(indexEntry.key, XContentBuilder.FieldCaseConversion.NONE)
       builder.startObject(MAPPINGS)
       indexEntry.value.asScala.foreach(typeEntry => {
