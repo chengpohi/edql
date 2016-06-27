@@ -21,6 +21,7 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
@@ -43,7 +44,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def getMapping: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val eventualMappingsResponse: Future[GetMappingsResult] = elasticCommand.getMapping(indexName.extract[String])
+      val eventualMappingsResponse: Future[GetMappingsResponse] = elasticCommand.getMapping(indexName.extract[String])
       eventualMappingsResponse.map(buildGetMappingResponse)
     }
   }
@@ -104,8 +105,8 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def count: Seq[Val] => Future[String] = {
     case Seq(indexName) =>
-      val eventualRichSearchResponse: Future[RichSearchResponse] = elasticCommand.countCommand(indexName.extract[String])
-      eventualRichSearchResponse.map(s => buildXContent(s.original))
+      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.countCommand(indexName.extract[String])
+      eventualRichSearchResponse.map(s => buildXContent(s))
   }
 
   def delete: Seq[Val] => Future[String] = {
