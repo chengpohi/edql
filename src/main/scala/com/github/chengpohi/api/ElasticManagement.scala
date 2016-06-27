@@ -1,8 +1,6 @@
 package com.github.chengpohi.api
 
 import com.github.chengpohi.api.dsl.ManageDSL
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.RichSearchResponse
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
@@ -16,17 +14,16 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 /**
   * elasticshell
   * Created by chengpohi on 3/12/16.
   */
-trait ElasticManagement extends ManageDSL{
-  this: ElasticBase =>
+trait ElasticManagement extends ManageDSL {
   def nodeStats: Future[NodesStatsResponse] = ElasticExecutor {
     node stats NodeType.ALL flag FlagType.ALL
   }
@@ -35,93 +32,80 @@ trait ElasticManagement extends ManageDSL{
     indice stats NodeType.ALL flag FlagType.ALL
   }
 
-  def clusterStats: Future[ClusterStatsResponse] = ActionFuture {
-    client.client.admin().cluster().prepareClusterStats.execute
+  def clusterStats: Future[ClusterStatsResponse] = ElasticExecutor {
+    cluster stats
   }
 
-  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = {
-    ActionFuture {
-      client.client.admin().cluster().preparePutRepository(repositoryName)
-        .setType(repositoryType)
-        .setSettings(st.asJava)
-        .execute
-    }
+  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = ElasticExecutor {
+    create repository repositoryName `type` repositoryType settings st
   }
 
-  def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = ActionFuture {
-    client.client.admin().cluster().prepareCreateSnapshot(repositoryName, snapshotName).execute
+  def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = ElasticExecutor {
+    create snapshot snapshotName in repositoryName
   }
 
-  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[GetSnapshotsResponse] = ActionFuture {
-    client.client.admin().cluster().prepareGetSnapshots(repositoryName).setSnapshots(snapshotName).execute
+  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[GetSnapshotsResponse] = ElasticExecutor {
+    get snapshot snapshotName from repositoryName
   }
 
-  def getAllSnapshotByRepositoryName(repositoryName: String): Future[GetSnapshotsResponse] = ActionFuture {
-    client.client.admin().cluster().prepareGetSnapshots(repositoryName).execute
+  def getAllSnapshotByRepositoryName(repositoryName: String): Future[GetSnapshotsResponse] = ElasticExecutor {
+    get snapshot "*" from repositoryName
   }
 
-  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[DeleteSnapshotResponse] = ActionFuture {
-    client.client.admin().cluster().prepareDeleteSnapshot(repositoryName, snapshotName).execute
+  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[DeleteSnapshotResponse] = ElasticExecutor {
+    delete snapshot snapshotName from repositoryName
   }
 
-  def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = ActionFuture {
-    client.client.admin().indices().prepareCreate(indexName).setSource(mapping).execute
+  def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = ElasticExecutor {
+    create index indexName mappings mapping
   }
 
-  def getMapping(indexName: String) = client.execute {
+  def getMapping(indexName: String) = ElasticExecutor {
     get mapping indexName
   }
 
-  def getIndices: Future[ClusterStateResponse] = ActionFuture {
-    client.admin.cluster().prepareState().execute
+  def getIndices: Future[ClusterStateResponse] = ElasticExecutor {
+    cluster state
   }
 
-  def clusterHealth = client.execute {
-    get cluster health
+  def clusterHealth = ElasticExecutor {
+    cluster health
   }
 
-  def alias(targetIndex: String, sourceIndex: String) = {
-    client.execute {
-      add alias targetIndex on sourceIndex
-    }
+  def alias(targetIndex: String, sourceIndex: String) = ElasticExecutor {
+    add alias targetIndex on sourceIndex
   }
 
-
-  def restoreSnapshot(snapshotName: String, repositoryName: String) = {
-    client.execute {
-      restore snapshot snapshotName from repositoryName
-    }
+  def restoreSnapshot(snapshotName: String, repositoryName: String) = ElasticExecutor {
+    restore snapshot snapshotName from repositoryName
   }
 
-  def closeIndex(indexName: String) = client.execute {
+  def closeIndex(indexName: String) = ElasticExecutor {
     close index indexName
   }
 
-  def openIndex(indexName: String) = {
-    client.execute {
-      open index indexName
-    }
+  def openIndex(indexName: String) = ElasticExecutor {
+    open index indexName
   }
 
-  def countCommand(indexName: String): Future[RichSearchResponse] = client.execute {
+  def countCommand(indexName: String): Future[SearchResponse] = ElasticExecutor {
     search in indexName size 0
   }
 
-  def clusterSettings: Future[ClusterUpdateSettingsResponse] = ActionFuture {
-    client.admin.cluster().prepareUpdateSettings().execute
+  def clusterSettings: Future[ClusterUpdateSettingsResponse] = ElasticExecutor {
+    cluster settings
   }
 
-
-  def nodesSettings: Future[NodesInfoResponse] = ActionFuture {
-    client.admin.cluster().prepareNodesInfo().execute
+  def nodesSettings: Future[NodesInfoResponse] = ElasticExecutor {
+    node info
   }
 
-  def indexSettings(indexName: String) = client.execute {
+  def indexSettings(indexName: String) = ElasticExecutor {
     get settings indexName
   }
 
-  def pendingTasks: Future[PendingClusterTasksResponse] = ActionFuture {
-    client.admin.cluster().preparePendingClusterTasks().execute
+  def pendingTasks: Future[PendingClusterTasksResponse] = ElasticExecutor {
+    pending tasks
   }
 
   def waitForStatus(indexName: Option[String] = Some("*"), status: Option[String] = Some("GREEN"), timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
@@ -131,11 +115,9 @@ trait ElasticManagement extends ManageDSL{
       case Some("YELLOW") => ClusterHealthStatus.YELLOW
       case _ => ClusterHealthStatus.GREEN
     }
-    ActionFuture {
-      client.admin.cluster()
-        .prepareHealth(indexName.get)
-        .setTimeout(timeOut.get)
-        .setWaitForStatus(clusterHealthStatus).execute
+
+    ElasticExecutor {
+      waiting index indexName.get timeout timeOut.get status clusterHealthStatus
     }
   }
 }

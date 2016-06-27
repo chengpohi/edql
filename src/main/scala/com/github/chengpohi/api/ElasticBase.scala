@@ -13,8 +13,8 @@ import scala.concurrent.{Future, Promise}
   */
 trait ElasticBase {
   val client: ElasticClient
-  val cluster: ClusterAdminClient
-  val indices: IndicesAdminClient
+  val clusterClient: ClusterAdminClient
+  val indicesClient: IndicesAdminClient
 
   private[this] def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
