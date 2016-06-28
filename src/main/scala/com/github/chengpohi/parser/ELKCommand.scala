@@ -180,7 +180,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def analysis: Seq[Val] => Future[String] = {
     case Seq(analyzer, doc) => {
-      val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysis(analyzer.extract[String], doc.extract[String])
+      val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysiser(analyzer.extract[String], doc.extract[String])
       analyzeResponse.map(s => buildAnalyzeResponse(s))
     }
   }

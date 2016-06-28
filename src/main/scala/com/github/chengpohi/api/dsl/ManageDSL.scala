@@ -12,6 +12,7 @@ import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
 import org.elasticsearch.action.search.SearchRequestBuilder
 
@@ -19,7 +20,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder
   * elasticshell
   * Created by chengpohi on 6/26/16.
   */
-trait ManageDSL extends DSLDefinition {
+trait ManageDSL extends DSLDefinition with DeleterDSL{
   case object node {
     def stats(nodeIds: List[String]) = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds: _*)
@@ -43,6 +44,11 @@ trait ManageDSL extends DSLDefinition {
     def stats(indiceType: NodeType) = {
       val prepareNodesStats: IndicesStatsRequestBuilder = indicesClient.prepareStats(indiceType.value: _*)
       IndicesStatsRequestDefinition(prepareNodesStats)
+    }
+
+    def update(indexName: String) = {
+      val clusterUpdateSettingsRequestBuilder: UpdateSettingsRequestBuilder = indicesClient.prepareUpdateSettings(indexName)
+      UpdateSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder)
     }
   }
 
@@ -99,12 +105,6 @@ trait ManageDSL extends DSLDefinition {
     def settings(indexName: String) = {
       val getSettingsRequestBuilder: GetSettingsRequestBuilder = indicesClient.prepareGetSettings(indexName)
       GetSettingsRequestDefinition(getSettingsRequestBuilder)
-    }
-  }
-
-  case object delete {
-    def snapshot(snapshotName: String) = {
-      DeleteSnapshotDefinition(snapshotName)
     }
   }
 
