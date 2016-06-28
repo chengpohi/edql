@@ -108,6 +108,11 @@ trait ElasticManagement extends ManageDSL {
     pending tasks
   }
 
+
+  def createIndex(indexName: String) = ElasticExecutor {
+    create index indexName
+  }
+
   def waitForStatus(indexName: Option[String] = Some("*"), status: Option[String] = Some("GREEN"), timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
     val clusterHealthStatus: ClusterHealthStatus = status match {
       case Some("GREEN") => ClusterHealthStatus.GREEN
