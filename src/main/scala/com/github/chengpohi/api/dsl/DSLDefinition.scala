@@ -15,14 +15,19 @@ import org.elasticsearch.action.admin.cluster.state.{ClusterStateRequestBuilder,
 import org.elasticsearch.action.admin.cluster.stats.{ClusterStatsRequestBuilder, ClusterStatsResponse}
 import org.elasticsearch.action.admin.cluster.tasks.{PendingClusterTasksRequestBuilder, PendingClusterTasksResponse}
 import org.elasticsearch.action.admin.indices.alias.{IndicesAliasesRequestBuilder, IndicesAliasesResponse}
+import org.elasticsearch.action.admin.indices.analyze.{AnalyzeRequestBuilder, AnalyzeResponse}
 import org.elasticsearch.action.admin.indices.close.{CloseIndexRequestBuilder, CloseIndexResponse}
 import org.elasticsearch.action.admin.indices.create.{CreateIndexRequestBuilder, CreateIndexResponse}
+import org.elasticsearch.action.admin.indices.delete.{DeleteIndexRequestBuilder, DeleteIndexResponse}
 import org.elasticsearch.action.admin.indices.mapping.get.{GetMappingsRequestBuilder, GetMappingsResponse}
 import org.elasticsearch.action.admin.indices.open.{OpenIndexRequestBuilder, OpenIndexResponse}
 import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
+import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
-import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
+import org.elasticsearch.action.delete.{DeleteRequestBuilder, DeleteResponse}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchType}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
+import org.elasticsearch.index.query.QueryBuilder
 
 import scala.collection.JavaConverters._
 
@@ -30,7 +35,7 @@ import scala.collection.JavaConverters._
   * elasticshell
   * Created by chengpohi on 6/28/16.
   */
-trait DSLDefinition extends ElasticBase with DSLExecutor{
+trait DSLDefinition extends ElasticBase with DSLExecutor {
   abstract class FlagType
   case object FlagType {
     case object ALL extends FlagType
@@ -86,6 +91,14 @@ trait DSLDefinition extends ElasticBase with DSLExecutor{
 
   case class ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder) extends ActionRequest[ClusterUpdateSettingsResponse] {
     override def execute: (ActionListener[ClusterUpdateSettingsResponse]) => Unit = clusterUpdateSettingsRequestBuilder.execute
+  }
+
+  case class UpdateSettingsRequestDefinition(updateSettingsRequestBuilder: UpdateSettingsRequestBuilder) extends ActionRequest[UpdateSettingsResponse] {
+    def settings(st: String) = {
+      updateSettingsRequestBuilder.setSettings(st)
+      this
+    }
+    override def execute: (ActionListener[UpdateSettingsResponse]) => Unit = updateSettingsRequestBuilder.execute
   }
 
   case class PutRepositoryDefinition(putRepositoryRequestBuilder: PutRepositoryRequestBuilder) extends ActionRequest[PutRepositoryResponse] {
@@ -180,6 +193,26 @@ trait DSLDefinition extends ElasticBase with DSLExecutor{
       searchRequestBuilder.setSize(i)
       this
     }
+
+    def `type`(indexType: String) = {
+      searchRequestBuilder.setTypes(indexType)
+      this
+    }
+
+    def searchType(searchType: SearchType) = {
+      searchRequestBuilder.setSearchType(searchType)
+      this
+    }
+
+    def query(query: QueryBuilder) = {
+      searchRequestBuilder.setQuery(query)
+      this
+    }
+
+    def aggregations(aggregations: String) = {
+      searchRequestBuilder.setAggregations(aggregations.getBytes("UTF-8"))
+      this
+    }
     override def execute: (ActionListener[SearchResponse]) => Unit = searchRequestBuilder.execute
   }
 
@@ -190,4 +223,40 @@ trait DSLDefinition extends ElasticBase with DSLExecutor{
   case class OpenIndexRequestDefinition(openIndexRequestBuilder: OpenIndexRequestBuilder) extends ActionRequest[OpenIndexResponse] {
     override def execute: (ActionListener[OpenIndexResponse]) => Unit = openIndexRequestBuilder.execute
   }
+
+  case class AnalyzeRequestDefinition(analyzeRequestBuilder: AnalyzeRequestBuilder) extends ActionRequest[AnalyzeResponse] {
+    def in(indexName: String) = {
+      analyzeRequestBuilder.setIndex(indexName)
+      this
+    }
+
+    def analyzer(analyzer: String) = {
+      analyzeRequestBuilder.setAnalyzer(analyzer)
+      this
+    }
+
+    override def execute: (ActionListener[AnalyzeResponse]) => Unit = analyzeRequestBuilder.execute
+  }
+
+  case class DeleteIndexRequestDefinition(deleteIndexRequestBuilder: DeleteIndexRequestBuilder) extends ActionRequest[DeleteIndexResponse] {
+    override def execute: (ActionListener[DeleteIndexResponse]) => Unit = deleteIndexRequestBuilder.execute
+  }
+
+  case class IndexPath(indexName: String, indexType: String)
+
+  object DSLHelper {
+    implicit class IndexNameAndIndexType(indexName: String) {
+      def /(indexType: String) = {
+        IndexPath(indexName, indexType)
+      }
+    }
+  }
+  case class DeleteRequestDefinition(deleteRequestBuilder: DeleteRequestBuilder) extends ActionRequest[DeleteResponse] {
+    def id(documentId: String) = {
+      deleteRequestBuilder.setId(documentId)
+      this
+    }
+    override def execute: (ActionListener[DeleteResponse]) => Unit = deleteRequestBuilder.execute
+  }
+
 }
