@@ -27,6 +27,7 @@ import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 
@@ -123,15 +124,15 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def query: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType) =>
-      elasticCommand.queryAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s.original))
+      elasticCommand.queryAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s))
     case Seq(indexName, indexType, queryData) =>
-      val eventualRichSearchResponse: Future[RichSearchResponse] = elasticCommand.queryDataByRawQuery(
+      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.queryDataByRawQuery(
         indexName.extract[String],
         indexType.extract[String],
         queryData.extract[Map[String, String]].toList)
-      eventualRichSearchResponse.map(s => buildXContent(s.original))
+      eventualRichSearchResponse.map(s => buildXContent(s))
     case Seq(indexName) =>
-      elasticCommand.queryAll(indexName.extract[String], "*").map(s => buildXContent(s.original))
+      elasticCommand.queryAll(indexName.extract[String], "*").map(s => buildXContent(s))
     case Seq(indexName, indexType, joinIndexName, joinIndexType, field) =>
       Future.sequence(elasticCommand.joinQuery(indexName.extract[String], indexType.extract[String],
         joinIndexName.extract[String], joinIndexType.extract[String], field.extract[String])).map(buildStreamMapTupels)
@@ -220,7 +221,7 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def getDocById: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, id) => {
-      val getResponse: Future[RichGetResponse] = elasticCommand.getDocById(indexName.extract[String],
+      val getResponse: Future[GetResponse] = elasticCommand.getDocById(indexName.extract[String],
         indexType.extract[String], id.extract[String])
       getResponse.map(s => buildGetResponse(s))
     }
