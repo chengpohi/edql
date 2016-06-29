@@ -25,9 +25,12 @@ import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBu
 import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
 import org.elasticsearch.action.delete.{DeleteRequestBuilder, DeleteResponse}
-import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchType}
+import org.elasticsearch.action.get.{GetRequestBuilder, GetResponse}
+import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
+import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.index.query.QueryBuilder
+import org.elasticsearch.index.query.{BoolQueryBuilder, MatchAllQueryBuilder, QueryBuilder, QueryBuilders, QueryStringQueryBuilder, TermQueryBuilder}
 
 import scala.collection.JavaConverters._
 
@@ -188,6 +191,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
     override def execute: (ActionListener[CloseIndexResponse]) => Unit = closeIndexRequestBuilder.execute
   }
 
+  case class SearchScrollRequestDefinition(searchScrollRequestBuilder: SearchScrollRequestBuilder) extends ActionRequest[SearchResponse] {
+    override def execute: (ActionListener[SearchResponse]) => Unit = searchScrollRequestBuilder.execute
+  }
+
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends ActionRequest[SearchResponse] {
     def size(i: Int) = {
       searchRequestBuilder.setSize(i)
@@ -204,8 +211,40 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
+    def query(query: String) = {
+      val queryString: QueryBuilder = query match {
+        case "*" => {
+          searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_AND_FETCH)
+          QueryBuilders.matchAllQuery()
+        }
+        case _ => QueryBuilders.queryStringQuery(query)
+      }
+      searchRequestBuilder.setQuery(queryString)
+      this
+    }
+
     def query(query: QueryBuilder) = {
       searchRequestBuilder.setQuery(query)
+      this
+    }
+
+    def from(s: Int) = {
+      searchRequestBuilder.setFrom(s)
+      this
+    }
+
+    def must(terms: List[(String, AnyRef)]) = {
+      val boolQuery: BoolQueryBuilder = QueryBuilders.boolQuery()
+      terms.foreach(term => {
+        val termQuery: TermQueryBuilder = QueryBuilders.termQuery(term._1, term._2)
+        boolQuery.must(termQuery)
+      })
+      searchRequestBuilder.setQuery(boolQuery)
+      this
+    }
+
+    def scroll(s: String) = {
+      searchRequestBuilder.setScroll(s)
       this
     }
 
@@ -213,6 +252,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       searchRequestBuilder.setAggregations(aggregations.getBytes("UTF-8"))
       this
     }
+
     override def execute: (ActionListener[SearchResponse]) => Unit = searchRequestBuilder.execute
   }
 
@@ -257,6 +297,44 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
     override def execute: (ActionListener[DeleteResponse]) => Unit = deleteRequestBuilder.execute
+  }
+
+  case class UpdateRequestDefinition(documentId: String) extends ActionRequest[UpdateResponse] {
+    var updateRequestBuilder: UpdateRequestBuilder = null
+    def in(indexPath: IndexPath) = {
+      updateRequestBuilder = client.client.prepareUpdate(indexPath.indexName, indexPath.indexType, documentId)
+      this
+    }
+
+    def doc(fields: Seq[(String, String)]) = {
+      updateRequestBuilder.setDoc(fields.toMap.asJava)
+      this
+    }
+    def docAsUpsert(fields: Seq[(String, String)]) = {
+      updateRequestBuilder.setDocAsUpsert(true)
+      updateRequestBuilder.setDoc(fields.toMap.asJava)
+      this
+    }
+    override def execute: (ActionListener[UpdateResponse]) => Unit = updateRequestBuilder.execute
+  }
+
+  case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends ActionRequest[IndexResponse] {
+    def doc(fields: Map[String, AnyRef]) = {
+      indexRequestBuilder.setSource(fields.asJava)
+      this
+    }
+    override def execute: (ActionListener[IndexResponse]) => Unit = indexRequestBuilder.execute
+  }
+
+  case class GetRequestDefinition(documentId: String) extends ActionRequest[GetResponse] {
+    var getRequestBuilder: GetRequestBuilder = null
+
+    def from(indexPath: IndexPath) = {
+      getRequestBuilder = client.client.prepareGet(indexPath.indexName, indexPath.indexType, documentId)
+      this
+    }
+
+    override def execute: (ActionListener[GetResponse]) => Unit = getRequestBuilder.execute
   }
 
 }

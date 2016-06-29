@@ -7,6 +7,7 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
@@ -57,10 +58,10 @@ class ResponseGenerator {
     write(("hasFailures", bulkResponse.hasFailures))
   }
 
-  def buildGetResponse(getResponse: RichGetResponse): String = {
+  def buildGetResponse(getResponse: GetResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    getResponse.original.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    getResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
   }
@@ -100,7 +101,7 @@ class ResponseGenerator {
     builder.bytes().toUtf8
   }
 
-  def buildStreamMapTupels(tuples: Stream[Map[String, AnyRef]]): String = {
+  def buildStreamMapTupels(tuples: Stream[scala.collection.mutable.Map[String, Object]]): String = {
     write(tuples)
   }
 
