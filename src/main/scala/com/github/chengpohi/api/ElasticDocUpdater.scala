@@ -1,17 +1,15 @@
 package com.github.chengpohi.api
 
-
-import com.sksamuel.elastic4s.ElasticDsl._
-
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * elasticshell
   * Created by chengpohi on 3/12/16.
   */
 trait ElasticDocUpdater {
-  this: ElasticDocQuerier with ElasticBase =>
+  this: ElasticDocQuerier =>
+  import DSLHelper._
   def updateAllDocs(indexName: String, indexType: String, uf: Seq[(String, String)]): Future[String] = {
     Future {
       val res = queryAllByScan(indexName, Some(indexType))
@@ -20,7 +18,7 @@ trait ElasticDocUpdater {
     }
   }
 
-  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String) = client.execute {
+  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String) = ElasticExecutor{
     update id documentId in indexName / indexType docAsUpsert uf
   }
 }

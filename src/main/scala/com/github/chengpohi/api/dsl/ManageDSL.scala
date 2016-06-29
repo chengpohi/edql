@@ -14,13 +14,12 @@ import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
-import org.elasticsearch.action.search.SearchRequestBuilder
 
 /**
   * elasticshell
   * Created by chengpohi on 6/26/16.
   */
-trait ManageDSL extends DSLDefinition with DeleterDSL{
+trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
   case object node {
     def stats(nodeIds: List[String]) = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds: _*)
@@ -87,27 +86,6 @@ trait ManageDSL extends DSLDefinition with DeleterDSL{
   }
 
 
-  case object get {
-    def repository(repositoryName: String) = {
-      val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
-      PutRepositoryDefinition(putRepository)
-    }
-
-    def snapshot(snapshotName: String) = {
-      GetSnapshotDefinition(snapshotName)
-    }
-
-    def mapping(indexName: String) = {
-      val mappingsRequestBuilder: GetMappingsRequestBuilder = indicesClient.prepareGetMappings(indexName)
-      GetMappingDefinition(mappingsRequestBuilder)
-    }
-
-    def settings(indexName: String) = {
-      val getSettingsRequestBuilder: GetSettingsRequestBuilder = indicesClient.prepareGetSettings(indexName)
-      GetSettingsRequestDefinition(getSettingsRequestBuilder)
-    }
-  }
-
   case object add {
     def alias(targetIndex: String) = {
       AddAliasRequestDefinition(targetIndex)
@@ -132,12 +110,6 @@ trait ManageDSL extends DSLDefinition with DeleterDSL{
     }
   }
 
-  case object search {
-    def in(indexName: String) = {
-      val searchRequestBuilder: SearchRequestBuilder = client.client.prepareSearch(indexName)
-      SearchRequestDefinition(searchRequestBuilder)
-    }
-  }
 
   case object pending {
     def tasks = {
