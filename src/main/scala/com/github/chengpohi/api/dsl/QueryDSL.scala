@@ -3,14 +3,13 @@ package com.github.chengpohi.api.dsl
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryRequestBuilder
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
-import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollRequestBuilder}
 
 /**
   * elasticshell
   * Created by chengpohi on 6/29/16.
   */
-trait QueryDSL extends DSLDefinition {
+trait QueryDSL extends DSLDefinition with IndexerDSL{
   case object get {
     def repository(repositoryName: String) = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
@@ -52,13 +51,6 @@ trait QueryDSL extends DSLDefinition {
     def scroll(s: String) = {
       val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.client.prepareSearchScroll(s)
       SearchScrollRequestDefinition(searchScrollRequestBuilder)
-    }
-  }
-
-  case object index {
-    def into(indexPath: IndexPath) = {
-      val indexRequestBuilder: IndexRequestBuilder = client.client.prepareIndex(indexPath.indexName, indexPath.indexType)
-      IndexRequestDefinition(indexRequestBuilder)
     }
   }
 

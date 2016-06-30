@@ -9,9 +9,7 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateRequestBuilder
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksRequestBuilder
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
 
