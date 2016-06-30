@@ -3,8 +3,6 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.api.ElasticCommand
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
-import com.sksamuel.elastic4s.mappings.GetMappingsResult
-import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse}
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
@@ -39,7 +37,6 @@ import scala.concurrent.Future
   * Created by chengpohi on 1/18/16.
   */
 class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: ResponseGenerator) {
-
 
   import responseGenerator._
 
@@ -160,9 +157,10 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
 
   def bulkIndex: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, fields) => {
-      val bulkResponse =
-        elasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
-      bulkResponse.map(s => buildBulkResponse(s))
+      elasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
+      Future {
+        buildIsCreated(true)
+      }
     }
   }
 
@@ -217,7 +215,6 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
       eventualAliasesResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
-
 
   def getDocById: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, id) => {

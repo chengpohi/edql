@@ -1,54 +1,55 @@
 package com.github.chengpohi.api
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s._
-import com.sksamuel.elastic4s.source.{DocumentMap, JsonDocumentSource}
+import com.github.chengpohi.api.dsl.IndexerDSL
+import org.elasticsearch.action.index.IndexResponse
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
- * elasticshell
- * Created by chengpohi on 3/12/16.
- */
-trait ElasticIndexer {
-  this: ElasticBase =>
+  * elasticshell
+  * Created by chengpohi on 3/12/16.
+  */
+trait ElasticIndexer extends IndexerDSL {
 
-  def indexMap(indexName: String, indexType: String, docuemntMap: DocumentMap): String = {
-    val resp = client.execute {
+  import DSLHelper._
+
+  def indexMap(indexName: String, indexType: String, docuemntMap: Map[String, AnyRef]): String = {
+    val resp: Future[IndexResponse] = ElasticExecutor {
       index into indexName / indexType doc docuemntMap
-    }.await
-    resp.getId
+    }
+    Await.result(resp, Duration.Inf).getId
   }
 
-  def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResult] = client.execute {
+  def indexField(indexName: String, indexType: String, fs: Seq[(String, String)]): Future[IndexResponse] = ElasticExecutor {
     index into indexName / indexType fields fs
   }
 
-  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]): Future[BulkResult] = {
-    val bulkIndexes = for (
-      f <- fs
-    ) yield index into indexName / indexType fields f
-    client.execute {
-      bulk(bulkIndexes)
-    }
+  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]) = {
+    fs.foreach(f => {
+      ElasticExecutor {
+        index into indexName / indexType fields f
+      }
+    })
+    "true"
   }
 
-  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, AnyRef)], docId: String): Future[IndexResult] = client.execute {
+  def indexFieldById(indexName: String, indexType: String, uf: Seq[(String, AnyRef)], docId: String): Future[IndexResponse] = ElasticExecutor {
     index into indexName / indexType fields uf id docId
   }
 
   def indexJSON(indexName: String, indexType: String, json: String): String = {
-    val resp = client.execute {
-      index into indexName / indexType doc new JsonDocumentSource(json)
-    }.await
-    resp.getId
+    val resp = ElasticExecutor {
+      index into indexName / indexType doc json
+    }
+    Await.result(resp, Duration.Inf).getId
   }
 
-  def indexMapById(indexName: String, indexType: String, specifyId: String, documentMap: DocumentMap): IndexResult = client.execute {
+  def indexMapById(indexName: String, indexType: String, specifyId: String, documentMap: Map[String, AnyRef]): Future[IndexResponse] = ElasticExecutor {
     index into indexName / indexType doc documentMap id specifyId
-  }.await
+  }
 
-  def indexJSONById(indexName: String, indexType: String, specifyId: String, json: String): IndexResult = client.execute {
-    index into indexName / indexType doc new JsonDocumentSource(json) id specifyId
-  }.await
+  def indexJSONById(indexName: String, indexType: String, specifyId: String, json: String): Future[IndexResponse] = ElasticExecutor {
+    index into indexName / indexType doc json id specifyId
+  }
 }
