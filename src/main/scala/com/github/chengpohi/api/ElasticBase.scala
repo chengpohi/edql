@@ -1,9 +1,7 @@
 package com.github.chengpohi.api
 
-import com.sksamuel.elastic4s._
-import com.sksamuel.elastic4s.source.DocumentMap
 import org.elasticsearch.action.ActionListener
-import org.elasticsearch.client.{ClusterAdminClient, IndicesAdminClient}
+import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient}
 
 import scala.concurrent.{Future, Promise}
 
@@ -12,7 +10,7 @@ import scala.concurrent.{Future, Promise}
   * Created by chengpohi on 6/28/15.
   */
 trait ElasticBase {
-  val client: ElasticClient
+  val client: Client
   val clusterClient: ClusterAdminClient
   val indicesClient: IndicesAdminClient
 
@@ -24,10 +22,6 @@ trait ElasticBase {
       def onResponse(resp: A): Unit = p.trySuccess(resp)
     })
     p.future
-  }
-
-  case class MapSource(source: Map[String, AnyRef]) extends DocumentMap {
-    override def map = source
   }
 
   object ActionFuture {

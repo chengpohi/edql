@@ -1,13 +1,12 @@
 package com.github.chengpohi.api
 
-import com.sksamuel.elastic4s.ElasticClient
-import org.elasticsearch.client.ClusterAdminClient
+import org.elasticsearch.client.{Client, ClusterAdminClient}
 
 /**
  * elasticshell
  * Created by chengpohi on 1/6/16.
  */
-class ElasticCommand(cl: ElasticClient) extends ElasticManagement
+class ElasticCommand(cl: Client) extends ElasticManagement
                       with ElasticIndexer
                       with ElasticDocUpdater
                       with ElasticDocDeleter
@@ -15,7 +14,7 @@ class ElasticCommand(cl: ElasticClient) extends ElasticManagement
                       with ElasticAnalyzer
                       with ElasticAggs
                       with ElasticBase{
-  val client: ElasticClient = cl
+  val client: Client = cl
   val clusterClient: ClusterAdminClient = client.admin.cluster()
   val indicesClient = client.admin.indices()
 }

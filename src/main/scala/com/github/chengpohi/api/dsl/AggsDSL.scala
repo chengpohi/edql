@@ -10,7 +10,7 @@ import org.elasticsearch.index.query.QueryBuilders
 trait AggsDSL extends DSLDefinition {
   case object aggs {
     def count(indexPath: IndexPath) = {
-      val searchRequestBuilder: SearchRequestBuilder = client.client.prepareSearch(indexPath.indexName)
+      val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexPath.indexName)
       searchRequestBuilder.setTypes(indexPath.indexType)
       searchRequestBuilder.setSize(0)
       searchRequestBuilder.setQuery(QueryBuilders.matchAllQuery() )
