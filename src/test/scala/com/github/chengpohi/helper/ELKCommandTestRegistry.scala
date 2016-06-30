@@ -1,11 +1,9 @@
 package com.github.chengpohi.helper
 
-import java.nio.file.{Files, Paths}
-
 import com.github.chengpohi.api.ElasticCommand
 import com.github.chengpohi.parser.{ELKCommand, ELKParser, ParserUtils}
-import com.sksamuel.elastic4s.ElasticClient
 import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.node.NodeBuilder
 
 /**
   * elasticshell
@@ -22,7 +20,8 @@ object ELKCommandTestRegistry {
     .put("action.operate_all_indices", "true")
     .put("path.home", "./target/elkdata")
     .build()
-  private[this] val client = ElasticClient.local(settings)
+  val node = NodeBuilder.nodeBuilder().local(true).data(true).settings(settings).node()
+  private[this] val client = node.client()
   private[this] val elasticCommand = new ElasticCommand(client)
   val responseGenerator = new ResponseGenerator
   private[this] val elkCommand = new ELKCommand(elasticCommand, responseGenerator)

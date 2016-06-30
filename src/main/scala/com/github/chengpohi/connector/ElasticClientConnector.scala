@@ -1,8 +1,11 @@
 package com.github.chengpohi.connector
 
-import com.sksamuel.elastic4s.{ElasticClient, ElasticsearchClientUri}
+import java.net.InetSocketAddress
+
 import com.typesafe.config.ConfigFactory
+import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
   * elasticshell
@@ -19,8 +22,6 @@ object ElasticClientConnector {
 
   val client = buildClient(settings, host, port)
 
-  def buildClient(settings: Settings, host: String, port: Int) = {
-    val uri = ElasticsearchClientUri(s"elasticsearch://$host:$port")
-    ElasticClient.transport(settings, uri)
-  }
+  def buildClient(settings: Settings, host: String, port: Int) =
+    TransportClient.builder.settings(settings).build().addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
 }

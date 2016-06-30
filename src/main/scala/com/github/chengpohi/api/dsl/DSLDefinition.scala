@@ -302,7 +302,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   case class UpdateRequestDefinition(documentId: String) extends ActionRequest[UpdateResponse] {
     var updateRequestBuilder: UpdateRequestBuilder = null
     def in(indexPath: IndexPath) = {
-      updateRequestBuilder = client.client.prepareUpdate(indexPath.indexName, indexPath.indexType, documentId)
+      updateRequestBuilder = client.prepareUpdate(indexPath.indexName, indexPath.indexType, documentId)
       this
     }
 
@@ -345,7 +345,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
     var getRequestBuilder: GetRequestBuilder = null
 
     def from(indexPath: IndexPath) = {
-      getRequestBuilder = client.client.prepareGet(indexPath.indexName, indexPath.indexType, documentId)
+      getRequestBuilder = client.prepareGet(indexPath.indexName, indexPath.indexType, documentId)
       this
     }
 

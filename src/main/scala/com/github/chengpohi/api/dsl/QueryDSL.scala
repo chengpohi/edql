@@ -37,26 +37,26 @@ trait QueryDSL extends DSLDefinition with IndexerDSL{
 
   case object search {
     def in(indexName: String) = {
-      val searchRequestBuilder: SearchRequestBuilder = client.client.prepareSearch(indexName)
+      val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexName)
       SearchRequestDefinition(searchRequestBuilder)
     }
 
     def in(indexPath: IndexPath) = {
       val searchRequestBuilder: SearchRequestBuilder = indexPath.indexType match {
-        case "*" => client.client.prepareSearch(indexPath.indexName)
-        case _ => client.client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
+        case "*" => client.prepareSearch(indexPath.indexName)
+        case _ => client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
       }
       SearchRequestDefinition(searchRequestBuilder)
     }
     def scroll(s: String) = {
-      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.client.prepareSearchScroll(s)
+      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(s)
       SearchScrollRequestDefinition(searchScrollRequestBuilder)
     }
   }
 
   case object update {
     def id(documentId: String) = {
-      client.client.prepareUpdate()
+      client.prepareUpdate()
       UpdateRequestDefinition(documentId)
     }
   }
