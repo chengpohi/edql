@@ -323,7 +323,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |{"name": "bar","_tip_id": "1"},
         |{"name": "jack","_tip_id": "2"}
         |] """.stripMargin)
-    Thread.sleep(1000)
+    Thread.sleep(2000)
     val result = runEngine.run(
       """
         |query "test-index-name" "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"

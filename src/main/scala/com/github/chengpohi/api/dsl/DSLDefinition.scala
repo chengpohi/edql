@@ -30,7 +30,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.index.query.{BoolQueryBuilder, MatchAllQueryBuilder, QueryBuilder, QueryBuilders, QueryStringQueryBuilder, TermQueryBuilder}
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
 
 import scala.collection.JavaConverters._
 
@@ -321,6 +321,21 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends ActionRequest[IndexResponse] {
     def doc(fields: Map[String, AnyRef]) = {
       indexRequestBuilder.setSource(fields.asJava)
+      this
+    }
+
+    def doc(fields: String) = {
+      indexRequestBuilder.setSource(fields)
+      this
+    }
+
+    def id(documentId: String) = {
+      indexRequestBuilder.setId(documentId)
+      this
+    }
+
+    def fields(fs: Seq[(String, AnyRef)]) = {
+      indexRequestBuilder.setSource(fs.toMap.asJava)
       this
     }
     override def execute: (ActionListener[IndexResponse]) => Unit = indexRequestBuilder.execute
