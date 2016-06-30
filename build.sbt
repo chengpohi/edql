@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.0",
   "com.lihaoyi" %% "fastparse" % "0.3.4",
   "jline" % "jline" % "2.12",
-  "com.sksamuel.elastic4s" % "elastic4s-core_2.11" % "2.2.0",
+  "org.elasticsearch" % "elasticsearch" % "2.3.3",
   "org.json4s" %% "json4s-native" % "3.2.10",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
 )

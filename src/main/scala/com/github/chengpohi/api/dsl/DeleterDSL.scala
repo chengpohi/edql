@@ -15,7 +15,7 @@ trait DeleterDSL extends DSLDefinition {
     }
 
     def in(indexPath: IndexPath) = {
-      val deleteRequestBuilder: DeleteRequestBuilder = client.client.prepareDelete().setIndex(indexPath.indexName).setType(indexPath.indexType)
+      val deleteRequestBuilder: DeleteRequestBuilder = client.prepareDelete().setIndex(indexPath.indexName).setType(indexPath.indexType)
       DeleteRequestDefinition(deleteRequestBuilder)
     }
 

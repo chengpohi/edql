@@ -1,7 +1,6 @@
 package com.github.chengpohi.helper
 
-import com.sksamuel.elastic4s.mappings.GetMappingsResult
-import com.sksamuel.elastic4s.{BulkResult, RichGetResponse}
+import com.sksamuel.elastic4s.BulkResult
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
