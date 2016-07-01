@@ -1,6 +1,5 @@
 package com.github.chengpohi.helper
 
-import com.sksamuel.elastic4s.BulkResult
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
@@ -51,10 +50,6 @@ class ResponseGenerator {
     analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
     builder.bytes().toUtf8
-  }
-
-  def buildBulkResponse(bulkResponse: BulkResult): String = {
-    write(("hasFailures", bulkResponse.hasFailures))
   }
 
   def buildGetResponse(getResponse: GetResponse): String = {
