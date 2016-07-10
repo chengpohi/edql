@@ -20,6 +20,7 @@ import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
@@ -196,6 +197,14 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     case Seq(indexName, mapping) => {
       val mappings: Future[CreateIndexResponse] =
         elasticCommand.mappings(indexName.extract[String], mapping.toJson)
+      mappings.map(s => buildAcknowledgedResponse(s))
+    }
+  }
+
+  def updateMapping: Seq[Val] => Future[String] = {
+    case Seq(indexName, indexType, mapping) => {
+      val mappings: Future[PutMappingResponse] =
+        elasticCommand.updateMappings(indexName.extract[String], indexType.extract[String], mapping.toJson)
       mappings.map(s => buildAcknowledgedResponse(s))
     }
   }

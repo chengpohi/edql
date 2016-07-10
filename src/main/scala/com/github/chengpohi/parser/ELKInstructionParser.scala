@@ -39,6 +39,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val index = P("index" ~ space ~/ ioParser ~ space ~ ("id" ~ space ~ ioParser).? ~ space)
     .map(c => ("index", Some(elkCommand.index), c._1 ++ c._2.getOrElse(Seq())))
   val bulkIndex = P("bulk index" ~ space ~/ ioParser ~ space).map(c => ("bulkIndex", Some(elkCommand.bulkIndex), c))
+  val updateMapping = P("update mapping" ~ space ~/ ioParser).map(c => ("umapping", Some(elkCommand.updateMapping), c))
   val update = P("update" ~ space ~/ ioParser ~ space ~ ("id" ~ space ~ ioParser).? ~ space)
     .map(c => ("update", Some(elkCommand.update), c._1 ++ c._2.getOrElse(Seq())))
   val createIndex = P("create index" ~ space ~/ strOrVar).map(c => ("createIndex", Some(elkCommand.createIndex), Seq(c)))
@@ -65,7 +66,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
       | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | query | termQuery | getDocById
       | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
-      | update | analysis | aggsCount | createAnalyzer
+      | updateMapping |  update | analysis | aggsCount | createAnalyzer
       | getMapping | mapping
       | delete | alias | count)
     ~ space ~ (extractJSON).? ~ space).map(i => i._4 match {

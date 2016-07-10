@@ -2,6 +2,7 @@ package com.github.chengpohi.api.dsl
 
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryRequestBuilder
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuilder
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollRequestBuilder}
 
@@ -56,8 +57,14 @@ trait QueryDSL extends DSLDefinition with IndexerDSL{
 
   case object update {
     def id(documentId: String) = {
-      client.prepareUpdate()
       UpdateRequestDefinition(documentId)
+    }
+
+    def index(indexPath: IndexPath) = {
+      val putMappingRequestBuilder: PutMappingRequestBuilder = indicesClient
+        .preparePutMapping(indexPath.indexName)
+        .setType(indexPath.indexType)
+      PutMappingRequestDefinition(putMappingRequestBuilder)
     }
   }
 }
