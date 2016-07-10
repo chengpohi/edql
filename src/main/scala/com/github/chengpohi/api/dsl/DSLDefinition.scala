@@ -20,6 +20,7 @@ import org.elasticsearch.action.admin.indices.close.{CloseIndexRequestBuilder, C
 import org.elasticsearch.action.admin.indices.create.{CreateIndexRequestBuilder, CreateIndexResponse}
 import org.elasticsearch.action.admin.indices.delete.{DeleteIndexRequestBuilder, DeleteIndexResponse}
 import org.elasticsearch.action.admin.indices.mapping.get.{GetMappingsRequestBuilder, GetMappingsResponse}
+import org.elasticsearch.action.admin.indices.mapping.put.{PutMappingRequestBuilder, PutMappingResponse}
 import org.elasticsearch.action.admin.indices.open.{OpenIndexRequestBuilder, OpenIndexResponse}
 import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
 import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
@@ -159,6 +160,14 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
 
   case class GetMappingDefinition(getMappingsRequestBuilder: GetMappingsRequestBuilder) extends ActionRequest[GetMappingsResponse] {
     override def execute: (ActionListener[GetMappingsResponse]) => Unit = getMappingsRequestBuilder.execute
+  }
+
+  case class PutMappingRequestDefinition(putMappingRequestBuilder: PutMappingRequestBuilder) extends ActionRequest[PutMappingResponse] {
+    def mapping(m: String) = {
+      putMappingRequestBuilder.setSource(m)
+      this
+    }
+    override def execute: (ActionListener[PutMappingResponse]) => Unit = putMappingRequestBuilder.execute
   }
 
   case class ClusterStateRequestDefinition(clusterStateRequestBuilder: ClusterStateRequestBuilder) extends ActionRequest[ClusterStateResponse] {

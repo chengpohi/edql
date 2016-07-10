@@ -143,6 +143,25 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains( """"not_analyzed"""))
   }
 
+
+  "ELKParser" should "update mapping" in {
+    runEngine.run("""update mapping "test-parser-name" "bookmark" {
+        |      "properties": {
+        |        "created_at": {
+        |          "type": "date"
+        |        },
+        |        "name": {
+        |          "type": "string",
+        |          "index": "not_analyzed"
+        |        }
+        |      }
+        |}""".stripMargin('|'))
+    Thread.sleep(2000)
+    val result = runEngine.run(""""test-parser-name" mapping \\ "test-parser-name.mappings.bookmark.properties.name.index" """)
+    assert(result === "\"not_analyzed\"")
+  }
+
+
   "ELKParser" should "bulk index docs" in {
     runEngine.run(
       """bulk index "test-parser-name" "test-parser-type" [
