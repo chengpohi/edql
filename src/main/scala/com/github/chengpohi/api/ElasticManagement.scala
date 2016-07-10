@@ -13,6 +13,7 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
@@ -24,6 +25,7 @@ import scala.concurrent.Future
   * Created by chengpohi on 3/12/16.
   */
 trait ElasticManagement extends ManageDSL {
+  import DSLHelper._
   def nodeStats: Future[NodesStatsResponse] = ElasticExecutor {
     node stats NodeType.ALL flag FlagType.ALL
   }
@@ -58,6 +60,10 @@ trait ElasticManagement extends ManageDSL {
 
   def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = ElasticExecutor {
     create index indexName mappings mapping
+  }
+
+  def updateMappings(indexName: String, indexType: String, mapping: String): Future[PutMappingResponse] = ElasticExecutor {
+    update index indexName / indexType mapping mapping
   }
 
   def getMapping(indexName: String) = ElasticExecutor {
