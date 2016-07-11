@@ -1,6 +1,5 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Arr, Num, Obj, Str}
 import fastparse.core.Parsed
 import org.scalatest.{BeforeAndAfter, FlatSpec}

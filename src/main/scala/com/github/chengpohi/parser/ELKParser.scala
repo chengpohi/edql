@@ -3,6 +3,7 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 import com.github.chengpohi.parser.ELK.Instrument
 import fastparse.core.Parsed.{Failure, Success}
+import fastparse.noApi._
 
 import scala.concurrent.Future
 
@@ -13,12 +14,12 @@ import scala.concurrent.Future
   */
 class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
   extends ELKInstructionParser(elkCommand, parserUtils) {
-  import fastparse.all._
-  val methodParameter = P(space ~ "var" ~ space ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
-  P(space ~ "function" ~ space ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ space ~ "{" ~ space).map(f =>
+  import WhitespaceApi._
+  val methodParameter = P("var" ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
+  P("function" ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ "{" ).map(f =>
     (f._1, f._2.map(i => i -> "").toMap))
 
-  val elkParser: P[Seq[ELK.AST]] = P(space ~ instrument.rep ~ End)
+  val elkParser: P[Seq[ELK.AST]] = P(WL0 ~ instrument.rep ~ End)
 
   def generateAST(parsed: Parsed[Seq[ELK.AST]]): (Map[String, (Seq[ELK.Instrument], Map[String, String])], Seq[ELK.Instrument]) = {
     var functions = Map[String, (Seq[ELK.Instrument], Map[String, String])]()
