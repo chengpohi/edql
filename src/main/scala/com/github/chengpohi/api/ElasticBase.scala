@@ -17,7 +17,7 @@ trait ElasticBase {
   private[this] def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
     f(new ActionListener[A] {
-      def onFailure(e: Throwable): Unit = p.tryFailure(e)
+      def onFailure(e: Exception): Unit = p.tryFailure(e)
 
       def onResponse(resp: A): Unit = p.trySuccess(resp)
     })

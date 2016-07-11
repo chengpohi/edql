@@ -12,7 +12,7 @@ import scala.concurrent.Future
   */
 trait ElasticAggs extends AggsDSL{
   import DSLHelper._
-  def aggsSearch(indexName: String, indexType: String, aggsJson: String): Future[SearchResponse] = ElasticExecutor {
-    aggs count indexName / indexType aggregations aggsJson
+  def aggsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = ElasticExecutor {
+    aggs in indexName / indexType avg name
   }
 }

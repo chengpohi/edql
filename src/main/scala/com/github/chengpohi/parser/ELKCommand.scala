@@ -210,9 +210,9 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
   }
 
   def aggsCount: Seq[Val] => Future[String] = {
-    case Seq(indexName, indexType, rawJson) => {
+    case Seq(indexName, indexType, name) => {
       val aggsSearch: Future[SearchResponse] =
-        elasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], rawJson.toJson)
+        elasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], name.extract[String])
       aggsSearch.map(s => buildSearchResponse(s))
     }
   }
