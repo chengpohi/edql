@@ -8,6 +8,8 @@ scalaVersion := "2.11.8"
 
 unmanagedBase := baseDirectory.value / "lib"
 
+resolvers += Resolver.mavenLocal
+
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
@@ -17,8 +19,9 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.0",
   "com.lihaoyi" %% "fastparse" % "0.3.4",
   "jline" % "jline" % "2.12",
-  "org.elasticsearch" % "elasticsearch" % "2.3.3",
+  "org.elasticsearch" % "elasticsearch" % "5.0.0-alpha5-SNAPSHOT",
   "org.json4s" %% "json4s-native" % "3.2.10",
+  "log4j" % "log4j" % "1.2.17",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
 )
 

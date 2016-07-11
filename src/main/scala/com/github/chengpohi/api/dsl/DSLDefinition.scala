@@ -32,6 +32,7 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, Se
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
+import org.elasticsearch.search.aggregations.AggregationBuilders
 
 import scala.collection.JavaConverters._
 
@@ -257,8 +258,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    def aggregations(aggregations: String) = {
-      searchRequestBuilder.setAggregations(aggregations.getBytes("UTF-8"))
+    def avg(name: String) = {
+      searchRequestBuilder.addAggregation(AggregationBuilders.avg(name).field(name))
       this
     }
 

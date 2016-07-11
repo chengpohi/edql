@@ -20,19 +20,14 @@ import scala.collection.JavaConverters._
   * Created by chengpohi on 1/26/16.
   */
 class ResponseGenerator {
-  val MAPPINGS = new XContentBuilderString("mappings")
-  val TOOK = new XContentBuilderString("took")
-  val ERRORS = new XContentBuilderString("errors")
-  val ITEMS = new XContentBuilderString("items")
-
   implicit val formats = DefaultFormats
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
-    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    val builder = XContentFactory.jsonBuilder()
     builder.startObject()
     getMappingsResponse.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
-      builder.startObject(indexEntry.key, XContentBuilder.FieldCaseConversion.NONE)
-      builder.startObject(MAPPINGS)
+      builder.startObject(indexEntry.key)
+      builder.startObject("mappings")
       indexEntry.value.asScala.foreach(typeEntry => {
         builder.field(typeEntry.key)
         builder.map(typeEntry.value.sourceAsMap())
@@ -41,7 +36,7 @@ class ResponseGenerator {
       builder.endObject()
     })
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildAnalyzeResponse(analyzeResponse: AnalyzeResponse): String = {
@@ -49,7 +44,7 @@ class ResponseGenerator {
     builder.startObject()
     analyzeResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildGetResponse(getResponse: GetResponse): String = {
@@ -57,7 +52,7 @@ class ResponseGenerator {
     builder.startObject()
     getResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildClusterSettingsResponse(response: ClusterUpdateSettingsResponse): String = {
@@ -69,21 +64,20 @@ class ResponseGenerator {
     builder.startObject("transient")
     response.getTransientSettings.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildGetSettingsResponse(response: GetSettingsResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
     response.getIndexToSettings.asScala.filter(!_.value.getAsMap.isEmpty).foreach(cursor => {
-      builder.startObject(cursor.key, XContentBuilder.FieldCaseConversion.NONE)
       builder.startObject("settings")
       cursor.value.toXContent(builder, ToXContent.EMPTY_PARAMS)
       builder.endObject()
       builder.endObject()
     })
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
 
@@ -92,7 +86,7 @@ class ResponseGenerator {
     builder.startObject()
     toXContent.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildStreamMapTupels(tuples: Stream[scala.collection.mutable.Map[String, Object]]): String = {
@@ -123,7 +117,7 @@ class ResponseGenerator {
     builder.startObject()
     searchResponse.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
-    builder.bytes().toUtf8
+    builder.string()
   }
 
   def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
