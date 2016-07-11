@@ -48,7 +48,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val createAnalyzer = P("create analyzer" ~/ ioParser).map(c => ("createAnalyzer", Some(elkCommand.createAnalyzer), c))
   val getDocById = P("get" ~/ strOrVar.rep(3)).map(c => ("getDocById", Some(elkCommand.getDocById), c))
   val mapping = P("mapping" ~/ ioParser).map(c => ("mapping", Some(elkCommand.mapping), c))
-  val aggsCount = P("aggs count" ~/ ioParser).map(c => ("aggsCount", Some(elkCommand.aggsCount), c))
+  val aggsCount = P("aggs in" ~/ ioParser ~/ "avg" ~/ ioParser).map(c => ("aggsCount", Some(elkCommand.aggsCount), c._1 ++ c._2))
   val alias = P("alias" ~/ ioParser).map(c => ("alias", Some(elkCommand.alias), c))
   val createRepository = P("create repository" ~/ ioParser).map(c => ("createRepository", Some(elkCommand.createRepository), c))
   val createSnapshot = P("create snapshot " ~/ ioParser).map(c => ("createSnapshot", Some(elkCommand.createSnapshot), c))

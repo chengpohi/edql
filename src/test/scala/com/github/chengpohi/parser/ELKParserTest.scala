@@ -121,7 +121,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "set mapping for indexname indextype" in {
-    runEngine.run(
+    val r = runEngine.run(
       """mapping "test-mapping" {
         |  "mappings": {
         |    "bookmark": {
@@ -138,9 +138,9 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |  }
         |}""".stripMargin('|'))
     Thread.sleep(1000)
-    val result = runEngine.run( """ "test-mapping" mapping """)
-    assert(result.contains( """"format":"strict_date_optional_time||epoch_millis""""))
-    assert(result.contains( """"not_analyzed"""))
+    val result = runEngine.run( """"test-mapping" mapping""")
+    assert(result.contains( """"type":"date""""))
+    assert(result.contains( """"keyword"""))
   }
 
 
@@ -198,8 +198,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |{"name": "hello","age": 22}
         |] """.stripMargin)
     Thread.sleep(2000)
-    val result = runEngine.run( """aggs count "test-parser-name" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
-    assert(result.contains( """"key":23.0"""))
+    val result = runEngine.run( """aggs in "test-parser-name" "test-parser-type" avg "age"""")
+    assert(result.contains( """23"""))
   }
 
   "ELKParser" should "alias index" in {
@@ -216,11 +216,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Thread.sleep(2000)
     runEngine.run( """alias "alias-index" "test-parser-name"""")
     Thread.sleep(2000)
-    val result = runEngine.run( """aggs count "alias-index" "test-parser-type" {"ages":{"terms": {"field": "age"}}}""")
-    assert(result.contains(
-      """  "aggregations":{
-        |    "ages":{
-        |      "doc_count_error_upper_bound":0,""".stripMargin))
+    val result = runEngine.run( """aggs in "alias-index" "test-parser-type"  avg "age"""")
+    assert(result.contains("23"))
   }
 
   "ELKParser" should "create snapshot" in {

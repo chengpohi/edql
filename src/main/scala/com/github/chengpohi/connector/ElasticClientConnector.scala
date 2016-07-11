@@ -14,7 +14,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
 object ElasticClientConnector {
   lazy val indexConfig = ConfigFactory.load("application.conf").getConfig("elastic")
   val clusterName: String = indexConfig.getString("cluster.name")
-  val settings = Settings.settingsBuilder()
+  val settings = Settings.builder()
     .put("cluster.name", clusterName)
     .build()
   val host: String = indexConfig.getString("host")
