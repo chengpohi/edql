@@ -31,7 +31,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
     Thread.sleep(1000)
     //then
-    val result = runEngine.run( """ query "test-parser-name" """)
+    val result = runEngine.run( """query "test-parser-name" """)
     assert(result.contains(""""name":"hello""""))
   }
 
