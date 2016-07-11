@@ -4,7 +4,7 @@ organization := "com.github.chengpohi"
 
 version := "0.1"
 
-scalaVersion := "2.11.3"
+scalaVersion := "2.11.8"
 
 unmanagedBase := baseDirectory.value / "lib"
 
