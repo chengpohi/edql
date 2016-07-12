@@ -1,0 +1,12 @@
+delete "test-index"
+mapping "test-index" {"mappings": {"web": {"properties": {"created_at": {"type": "date"}, "name": {"type": "string", "analyzer": "english"}}}}}
+"test-index" mapping
+index "test-index" "web" {"name":"programming in scala", "title": "test title"}
+index "test-index" "web" {"name":"programming in java", "title": "java title"}
+index "test-index" "web" {"name":"programming in C#", "title": "c# title"}
+index "test-index" "web" {"name":"programming in F#", "title": "F# title"}
+index "test-index" "web" {"name":"programming in C", "title": "C title"}
+term query "test-index" "web" {"name": "java"}
+term query "test-index" "web" {"name": "program", "title": "java"}
+term query "test-index" "web" {"name": "in"}
+
