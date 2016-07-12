@@ -109,9 +109,9 @@
     "example": "get \"index-name\" \"index-type\" \"doc-id\"",
     "description": "get doc by id"
   },
-  "aggs count": {
+  "aggs in": {
     "help": "",
-    "example": "aggs count index-name index-type {\"ages\":{\"terms\": {\"field\": \"age\"}}}",
+    "example": "aggs in index-name index-type {\"ages\":{\"terms\": {\"field\": \"age\"}}}",
     "description": "aggs "
   },
   "alias": {

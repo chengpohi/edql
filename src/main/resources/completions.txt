@@ -17,7 +17,7 @@ update
 create index
 mapping
 analysis
-aggs count
+aggs in
 alias
 create repository
 create snapshot

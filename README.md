@@ -39,7 +39,7 @@ bin/es
 | count             | `count "index-name" ` | count the size of index |
 | query | `query "index-name"` | query all by index-name |
 | query | `query "index-name" "index-type" ` | query all data by index-name  and index-type|
-| aggsCount | `"aggs count "index-name" "index-type" {"agg_name":{"terms": {"field": "field_name"}}}` | query all data by index-name  and index-type|
+| aggsCount | `"aggs in "index-name" "index-type" {"agg_name":{"terms": {"field": "field_name"}}}` | query all data by index-name  and index-type|
 | term query | `term query "index-name" "index-type" {"name": value}` | term query by index-name  and index-type|
 | get | `get "index-name" "idnex-type" "doc_id"` | get doc by id |
 | analysis | `analysis "standard" "foo,bar"` | analysis text by the specific analyzer |
