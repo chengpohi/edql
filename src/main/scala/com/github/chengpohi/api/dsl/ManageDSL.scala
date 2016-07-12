@@ -24,7 +24,7 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
       NodeStatsRequestDefinition(prepareNodesStats)
     }
     def stats(nodeIds: NodeType) = {
-      val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds.value: _*)
+      val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats()
       NodeStatsRequestDefinition(prepareNodesStats)
     }
     def info = {

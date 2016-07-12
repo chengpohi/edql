@@ -71,6 +71,7 @@ class ResponseGenerator {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
     response.getIndexToSettings.asScala.filter(!_.value.getAsMap.isEmpty).foreach(cursor => {
+      builder.startObject(cursor.key)
       builder.startObject("settings")
       cursor.value.toXContent(builder, ToXContent.EMPTY_PARAMS)
       builder.endObject()
