@@ -27,93 +27,93 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "index doc by indexName, indexType, fields" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" }""")
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" }""")
 
     Thread.sleep(1000)
     //then
-    val result = runEngine.run( """query "test-parser-name" """)
+    val result = runEngine.run( """search in "test-parser-name" """)
     assert(result.contains(""""name":"hello""""))
   }
 
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
     Thread.sleep(1000)
     //then
-    val result = runEngine.run( """ query "test-parser-name" """)
+    val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(""""_id":"123""""))
   }
 
   "ELKParser" should "update doc by id and fields" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
     Thread.sleep(1000)
 
-    runEngine.run( """update "test-parser-name" "test-parser-type" { "name" : "chengpohi"} id "123"""")
+    runEngine.run( """update on "test-parser-name" / "test-parser-type" fields { "name" : "chengpohi"} id "123"""")
 
     Thread.sleep(1000)
     //then
-    val result = runEngine.run( """ query "test-parser-name" """)
+    val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(""""name":"chengpohi""""))
 
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
     Thread.sleep(3000)
-    runEngine.run( """reindex "test-parser-name" "test-parser-name-reindex" "test-parser-type" ["name"]""")
+    runEngine.run( """reindex into "test-parser-name" / "test-parser-name-reindex" from "test-parser-type" fields ["name"]""")
 
     Thread.sleep(3000)
 
-    val result = runEngine.run( """ query "test-parser-name-reindex" """)
-    runEngine.run( """ delete "test-parser-name-reindex" """)
+    val result = runEngine.run( """ search in "test-parser-name-reindex" """)
+    runEngine.run( """ delete index "test-parser-name-reindex" """)
     //then
     assert(result.contains(
       """"name":"hello"""".stripMargin.trim))
   }
   "ELKParser" should "delete doc by id" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" { "name" : "hello", "ppp":"fff" } id "123"""")
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
     Thread.sleep(1000)
     //then
-    runEngine.run( """delete "test-parser-name" "test-parser-type" "123" """)
+    runEngine.run( """delete from "test-parser-name" / "test-parser-type" id "123" """)
     Thread.sleep(1000)
-    val result = runEngine.run( """query "test-parser-name" "test-parser-type"""")
+    val result = runEngine.run( """search in "test-parser-name" / "test-parser-type"""")
     assert(result.contains(""""hits":[]"""))
   }
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} """)
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
     Thread.sleep(1000)
-    runEngine.run( """update "test-parser-name" "test-parser-type" {"name":"elasticservice"} """)
+    runEngine.run( """update on "test-parser-name" / "test-parser-type" fields {"name":"elasticservice"} """)
     Thread.sleep(3000)
-    val result = runEngine.run( """ query "test-parser-name" """)
+    val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(
       """"name"""".stripMargin.trim))
   }
 
   "ELKParser" should "analysis doc by specific analyzer" in {
-    val result = runEngine.run( """analysis "standard" "foo,bar"""")
+    val result = runEngine.run( """analysis "foo,bar" by "standard"""")
     assert(result.contains(
       """"token":"foo","""
     ))
   }
 
   "ELKParser" should "index and get doc by id" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"}  id "HJJJJJJH"""")
-    val result = runEngine.run( """get "test-parser-name" "test-parser-type" "hJJJJJJH"""")
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"}  id "HJJJJJJH"""")
+    val result = runEngine.run( """get from "test-parser-name" / "test-parser-type" id "hJJJJJJH"""")
     assert(result.contains( """"_id":"hJJJJJJH""""))
   }
 
   "ELKParser" should "extract json data" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"hello"} id "HJJJJJJH" """)
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} id "HJJJJJJH" """)
     Thread.sleep(2000)
-    val result = runEngine.run( """query "test-parser-name" "test-parser-type" \\ "hits.hits._source.name"""")
+    val result = runEngine.run( """search in "test-parser-name" / "test-parser-type" \\ "hits.hits._source.name"""")
     assert(result === """"hello"""")
   }
 
-  "ELKParser" should "query data by json" in {
-    runEngine.run( """index "test-parser-name" "test-parser-type" {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
+  "ELKParser" should "search data by json" in {
+    runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
     Thread.sleep(2000)
     val result = runEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
     assert(result.contains("Hello world"))
@@ -327,7 +327,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains("myAnalyzer"))
   }
 
-  "ELKParser" should "join query" in {
+  "ELKParser" should "join search" in {
     runEngine.run(
       """bulk index "test-index-name-1" "test-index-type-1" [
         |{"tip": "hello","_tip_id": "1"},
@@ -343,13 +343,13 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Thread.sleep(2000)
     val result = runEngine.run(
       """
-        |query "test-index-name" "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"
+        |search in "test-index-name" / "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"
       """.stripMargin)
     Thread.sleep(1000)
     assert(result.contains("test-index-type"))
   }
 
   after {
-    runEngine.run( """ delete "*"""")
+    runEngine.run( """ delete index "*"""")
   }
 }
