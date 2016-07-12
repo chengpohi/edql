@@ -4,14 +4,15 @@ import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 import fastparse.noApi._
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
 class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
+
   import WhitespaceApi._
   import elkCommand._
 
@@ -31,22 +32,32 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val indexSettings = P(ioParser ~ "settings").map(s => ("nodeSettings", Some(elkCommand.indexSettings), s))
   val pendingTasks = P("pending tasks").map(s => ("pendingTasks", Some(elkCommand.pendingTasks), Seq()))
   val waitForStatus = P("wait for status" ~ ioParser).map(s => ("pendingTasks", Some(elkCommand.waitForStatus), s))
-  val delete = P("delete" ~/ ioParser).map(c => ("delete", Some(elkCommand.delete), c))
+  val deleteDoc = P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
+    .map(c => ("delete", Some(elkCommand.delete), Seq(c._1, c._2, c._3)))
+  val deleteIndex = P("delete" ~ "index" ~/ strOrVar).map(c => ("delete", Some(elkCommand.delete), Seq(c)))
+
   val termQuery = P("term" ~ "query" ~/ ioParser).map(c => ("termQuery", Some(elkCommand.query), c))
-  val query = P("query" ~/ ioParser ~ joinQuery.?).map(c => ("query", Some(elkCommand.query), c._1 ++ c._2.getOrElse(Seq())))
-  val joinQuery = P("join" ~ ioParser ~ "by" ~ ioParser).map(c => c._1 ++ c._2)
-  val reindex = P("reindex" ~/ ioParser).map(c => ("reindex", Some(elkCommand.reindex), c))
-  val index = P("index" ~/ ioParser ~ ("id" ~ ioParser).?)
-    .map(c => ("index", Some(elkCommand.index), c._1 ++ c._2.getOrElse(Seq())))
+  val search = P("search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar ~ joinSearch.?).?)
+    .map(c => c._2 match {
+      case None => ("query", Some(elkCommand.query), Seq(c._1))
+      case Some((f, None)) => ("query", Some(elkCommand.query), Seq(c._1, f))
+      case Some((f, Some(t))) => ("query", Some(elkCommand.query), Seq(c._1, f) ++ t)
+    })
+  val joinSearch = P("join" ~ ioParser ~ "by" ~ ioParser).map(c => c._1 ++ c._2)
+  val reindex = P("reindex" ~ "into" ~ strOrVar ~ "/" ~/ strOrVar ~ "from" ~/ strOrVar ~ "fields" ~/ jsonExpr)
+    .map(c => ("reindex", Some(elkCommand.reindex), Seq(c._1, c._2, c._3, c._4)))
+  val index = P("index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "fields" ~ jsonExpr ~ ("id" ~ strOrVar).?)
+    .map(c => ("index", Some(elkCommand.index), Seq(c._1, c._2, c._3) ++ c._4.toSeq))
   val bulkIndex = P("bulk index" ~/ ioParser).map(c => ("bulkIndex", Some(elkCommand.bulkIndex), c))
   val updateMapping = P("update mapping" ~/ ioParser).map(c => ("umapping", Some(elkCommand.updateMapping), c))
-  val update = P("update" ~/ ioParser ~ ("id" ~ ioParser).?)
-    .map(c => ("update", Some(elkCommand.update), c._1 ++ c._2.getOrElse(Seq())))
-  val createIndex = P("create index" ~/ strOrVar).map(c => ("createIndex", Some(elkCommand.createIndex), Seq(c)))
+  val update = P("update" ~ "on" ~/ strOrVar ~ "/" ~ strOrVar ~ "fields" ~/ jsonExpr ~ ("id" ~ strOrVar).?)
+    .map(c => ("update", Some(elkCommand.update), Seq(c._1, c._2, c._3) ++ c._4.toSeq))
+  val createIndex = P("create" ~ "index" ~/ strOrVar).map(c => ("createIndex", Some(elkCommand.createIndex), Seq(c)))
   val getMapping = P(strOrVar ~ "mapping").map(c => ("getMapping", Some(elkCommand.getMapping), Seq(c)))
-  val analysis = P("analysis" ~/ strOrVar.rep(2)).map(c => ("analysis", Some(elkCommand.analysis), c))
+  val analysis = P("analysis" ~/ strOrVar ~/ "by" ~/ strOrVar).map(c => ("analysis", Some(elkCommand.analysis), Seq(c._1, c._2)))
   val createAnalyzer = P("create analyzer" ~/ ioParser).map(c => ("createAnalyzer", Some(elkCommand.createAnalyzer), c))
-  val getDocById = P("get" ~/ strOrVar.rep(3)).map(c => ("getDocById", Some(elkCommand.getDocById), c))
+  val getDocById = P("get" ~ "from"~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~/ strOrVar)
+    .map(c => ("getDocById", Some(elkCommand.getDocById), Seq(c._1, c._2, c._3)))
   val mapping = P("mapping" ~/ ioParser).map(c => ("mapping", Some(elkCommand.mapping), c))
   val aggsCount = P("aggs in" ~/ ioParser ~/ "avg" ~/ ioParser).map(c => ("aggsCount", Some(elkCommand.aggsCount), c._1 ++ c._2))
   val alias = P("alias" ~/ ioParser).map(c => ("alias", Some(elkCommand.alias), c))
@@ -61,14 +72,15 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
   val instrument = P((help | health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
-      | clusterSettings | nodeSettings | indexSettings | clusterState
-      | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
-      | query | termQuery | getDocById
-      | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
-      | updateMapping | update | analysis | aggsCount | createAnalyzer
-      | getMapping | mapping
-      | delete | alias | count)
-      ~ (extractJSON).?).map(i => i._4 match {
+    | clusterSettings | nodeSettings | indexSettings | clusterState
+    | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
+    | deleteDoc | deleteIndex
+    | search | termQuery | getDocById
+    | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
+    | updateMapping | update | analysis | aggsCount | createAnalyzer
+    | getMapping | mapping
+    | alias | count)
+    ~ (extractJSON).?).map(i => i._4 match {
     case Some((name, extractFunction)) if i._2.isDefined => {
       val f: Seq[Val] => Future[String] = i._2.get
       val fComponent = (s: Seq[Val]) => {
