@@ -13,7 +13,7 @@ import org.elasticsearch.node.Node
 object ELKCommandTestRegistry {
   private[this] val settings: Settings = Settings.builder()
     .put("http.enabled", "false")
-    .put("cluster.name", "test")
+    .put("cluster.name", "distribution_run")
     .put("path.repo", "./target/elkrepo")
     .put("action.destructive_requires_name", "false")
     .put("path.home", "./target/elkdata")
