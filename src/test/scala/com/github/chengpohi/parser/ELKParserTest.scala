@@ -157,8 +157,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |      }
         |}""".stripMargin('|'))
     Thread.sleep(2000)
-    val result = runEngine.run(""""test-parser-name" mapping \\ "test-parser-name.mappings.bookmark.properties.name.index" """)
-    assert(result === "\"not_analyzed\"")
+    val result = runEngine.run(""""test-parser-name" mapping \\ "test-parser-name.mappings.bookmark.properties.name.type" """)
+    assert(result === "\"keyword\"")
   }
 
 
@@ -262,13 +262,14 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
   "ELKParser" should "cluster stats" in {
     val result = runEngine.run("cluster stats")
-    assert(result.contains("cluster_name"))
+    assert(result.contains("timestamp"))
   }
 
   "ELKParser" should "node stats" in {
     val result = runEngine.run("node stats")
-    assert(result.contains("heap_used_in_bytes"))
+    assert(result.contains("nodes"))
   }
+
   "ELKParser" should "indices stats" in {
     val result = runEngine.run("indices stats")
     assert(result.contains("indices"))
