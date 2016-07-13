@@ -31,7 +31,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
+import org.elasticsearch.index.query.{BoolQueryBuilder, MatchQueryBuilder, MultiTermQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
 import org.elasticsearch.search.aggregations.AggregationBuilders
 
 import scala.collection.JavaConverters._
@@ -250,6 +250,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
         boolQuery.must(termQuery)
       })
       searchRequestBuilder.setQuery(boolQuery)
+      this
+    }
+
+    def `match`(m: (String, AnyRef)) = {
+      val matchQueryBuilder: MatchQueryBuilder = QueryBuilders.matchQuery(m._1, m._2)
+      searchRequestBuilder.setQuery(matchQueryBuilder)
       this
     }
 

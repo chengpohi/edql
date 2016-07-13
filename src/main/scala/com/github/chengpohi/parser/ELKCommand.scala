@@ -120,11 +120,21 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     }
   }
 
+  def matchQuery: Seq[Val] => Future[String] = {
+    case Seq(indexName, indexType, queryData) => {
+      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.matchQuery(
+        indexName.extract[String],
+        indexType.extract[String],
+        queryData.extract[Map[String, String]].toList.head)
+      eventualRichSearchResponse.map(s => buildXContent(s))
+    }
+  }
+
   def query: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType) =>
       elasticCommand.queryAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s))
     case Seq(indexName, indexType, queryData) =>
-      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.queryDataByRawQuery(
+      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.termQuery(
         indexName.extract[String],
         indexType.extract[String],
         queryData.extract[Map[String, String]].toList)

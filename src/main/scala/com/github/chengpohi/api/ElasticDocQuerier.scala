@@ -23,7 +23,12 @@ trait ElasticDocQuerier extends QueryDSL {
     }
   }
 
-  def queryDataByRawQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[SearchResponse] = {
+  def matchQuery(indexName: String, indexType: String, m: (String, String)): Future[SearchResponse] = {
+    ElasticExecutor {
+      search in indexName / indexType `match` m from 0 size MAX_ALL_NUMBER
+    }
+  }
+  def termQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[SearchResponse] = {
     ElasticExecutor {
       search in indexName / indexType must terms from 0 size MAX_ALL_NUMBER
     }
@@ -34,7 +39,7 @@ trait ElasticDocQuerier extends QueryDSL {
     joinAll.flatMap(f => {
       f.getHits.asScala.map(i => {
         val fieldValue = i.getSource.get(field).asInstanceOf[String]
-        queryDataByRawQuery(indexName, indexType, List((field, fieldValue)))
+        termQuery(indexName, indexType, List((field, fieldValue)))
           .map(s => i.sourceAsMap.asScala + ("id" -> i.getId) + (s"${indexType}" ->
             s.getHits.asScala.map(t => t.sourceAsMap.asScala + ("id" -> t.getId))))
       })
