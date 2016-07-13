@@ -55,7 +55,6 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     //then
     val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(""""name":"chengpohi""""))
-
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
@@ -145,7 +144,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
 
 
   "ELKParser" should "update mapping" in {
-    runEngine.run("""update mapping "test-parser-name" "bookmark" {
+    runEngine.run(
+      """update mapping "test-parser-name" "bookmark" {
         |      "properties": {
         |        "created_at": {
         |          "type": "date"
@@ -327,6 +327,18 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains("myAnalyzer"))
   }
 
+  "ELKParser" should "multi search" in {
+    runEngine.run(
+      """bulk index "test-index-name" "test-index-type" [
+        |{"name": "test","title":"foo bar","_tip_id": "1"},
+        |{"name": "foo","title": "hello world","_tip_id": "2"},
+        |{"name": "bar","title": "test po","_tip_id": "1"},
+        |{"name": "jack","title": "mnb", "_tip_id": "2"}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run("""search in "test-index-name" / "test-index-type" match {"title": "foo"} """)
+    println(result)
+  }
   "ELKParser" should "join search" in {
     runEngine.run(
       """bulk index "test-index-name-1" "test-index-type-1" [
