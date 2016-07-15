@@ -71,8 +71,8 @@
   },
   "query": {
     "help": "",
-    "example": "query \"index-name\"",
-    "description": "query all data by index-name"
+    "example": "search in \"index-name\"",
+    "description": "search all data by index-name"
   },
   "reindex": {
     "help": "",
@@ -81,7 +81,7 @@
   },
   "index": {
     "help": "",
-    "example": "index \"index-name\" \"index-type\" {\"name\": \"value2\"}",
+    "example": "index into \"index-name\" / \"index-type\" fields {\"name\": \"value2\"}",
     "description": "index by index name with index type with doc"
   },
   "bulk index": {
@@ -91,7 +91,7 @@
   },
   "update": {
     "help": "",
-    "example": "update \"index-name\" \"index-type\" {\"name\":\"value1\"}",
+    "example": "update on \"index-name\" / \"index-type\" fields {\"name\":\"value1\"} id docId",
     "description": "update index-name index-type with key value"
   },
   "mapping": {
