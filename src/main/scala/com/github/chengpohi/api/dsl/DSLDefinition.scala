@@ -269,6 +269,11 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
+    def term(name: String) = {
+      searchRequestBuilder.addAggregation(AggregationBuilders.terms(name).field(name).size(Integer.MAX_VALUE))
+      this
+    }
+
     override def execute: (ActionListener[SearchResponse]) => Unit = searchRequestBuilder.execute
   }
 
