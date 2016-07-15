@@ -186,7 +186,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     val result = runEngine.run( """ count "test-parser-name" """)
     assert(result.contains(""))
   }
-  "ELKParser" should "aggs data" in {
+  "ELKParser" should "aggs avg" in {
     runEngine.run(
       """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
@@ -198,8 +198,40 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |{"name": "hello","age": 22}
         |] """.stripMargin)
     Thread.sleep(2000)
-    val result = runEngine.run( """aggs in "test-parser-name" "test-parser-type" avg "age"""")
+    val result = runEngine.run( """aggs in "test-parser-name" / "test-parser-type" avg "age"""")
     assert(result.contains( """23"""))
+  }
+
+  "ELKParser" should "aggs terms" in {
+    val p=  runEngine.run(
+      """mapping "test-index2" {
+        |  "mappings": {
+        |    "test-parser-type": {
+        |      "properties": {
+        |        "title": {
+        |          "type": "string",
+        |          "analyzer": "english",
+        |          "fielddata": {
+        |            "format": "enabled"
+        |          }
+        |        }
+        |      }
+        |    }
+        |  }
+        |}""".stripMargin('|'))
+    println(p)
+    Thread.sleep(2000)
+    runEngine.run(
+      """bulk index "test-index2" "test-parser-type" [
+        |{"title": "programming in java"},
+        |{"title": "programming in scala"},
+        |{"title": "programming in c++"},
+        |{"title": "programming in c"},
+        |{"title": "programming in camel"}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run( """aggs in "test-index2" / "test-parser-type" term "title"""")
+    println(result)
   }
 
   "ELKParser" should "alias index" in {

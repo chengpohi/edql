@@ -63,7 +63,10 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val getDocById = P("get" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~/ strOrVar)
     .map(c => ("getDocById", Some(elkCommand.getDocById), Seq(c._1, c._2, c._3)))
   val mapping = P("mapping" ~/ ioParser).map(c => ("mapping", Some(elkCommand.mapping), c))
-  val aggsCount = P("aggs in" ~/ ioParser ~/ "avg" ~/ ioParser).map(c => ("aggsCount", Some(elkCommand.aggsCount), c._1 ++ c._2))
+  val avgAggs = P("avg" ~/ strOrVar).map(c => ("avgAggs", elkCommand.aggsCount, Seq(c)))
+  val termsAggs = P("term" ~/ strOrVar).map(c => ("termAggs", elkCommand.aggsTerm, Seq(c)))
+  val aggs = P("aggs in" ~/ strOrVar ~ "/" ~ strOrVar ~/ (avgAggs | termsAggs))
+    .map(c => (c._3._1, Some(c._3._2), Seq(c._1, c._2) ++ c._3._3))
   val alias = P("alias" ~/ ioParser).map(c => ("alias", Some(elkCommand.alias), c))
   val createRepository = P("create repository" ~/ ioParser).map(c => ("createRepository", Some(elkCommand.createRepository), c))
   val createSnapshot = P("create snapshot " ~/ ioParser).map(c => ("createSnapshot", Some(elkCommand.createSnapshot), c))
@@ -81,7 +84,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
     | deleteDoc | deleteIndex
     | search | termQuery | getDocById
     | reindex | index | bulkIndex | createIndex | closeIndex | openIndex
-    | updateMapping | update | analysis | aggsCount | createAnalyzer
+    | updateMapping | update | analysis | aggs | createAnalyzer
     | getMapping | mapping
     | alias | count)
     ~ (extractJSON).?).map(i => i._4 match {
