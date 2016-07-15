@@ -13,7 +13,7 @@ delete
 reindex
 index
 bulk index
-update
+update on
 create index
 mapping
 analysis
@@ -29,3 +29,4 @@ open index
 \\
 beauty
 create analyzer
+search in
