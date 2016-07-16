@@ -211,15 +211,20 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |        "title": {
         |          "type": "string",
         |          "analyzer": "english",
-        |          "fielddata": {
-        |            "format": "enabled"
+        |          "fields": {
+        |            "tags": {
+        |             "type": "string",
+        |             "analyzer": "english",
+        |             "fielddata": {
+        |               "format": "enabled"
+        |             }
+        |            }
         |          }
         |        }
         |      }
         |    }
         |  }
         |}""".stripMargin('|'))
-    println(p)
     Thread.sleep(2000)
     runEngine.run(
       """bulk index "test-index2" "test-parser-type" [
@@ -230,8 +235,8 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
         |{"title": "programming in camel"}
         |] """.stripMargin)
     Thread.sleep(2000)
-    val result = runEngine.run( """aggs in "test-index2" / "test-parser-type" term "title"""")
-    println(result)
+    val result = runEngine.run( """aggs in "test-index2" / "test-parser-type" term "title.tags"""")
+    assert(result.contains(""""key":"java""""))
   }
 
   "ELKParser" should "alias index" in {
