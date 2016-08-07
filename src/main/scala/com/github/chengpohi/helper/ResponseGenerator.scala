@@ -110,7 +110,7 @@ class ResponseGenerator {
   }
 
   def buildIsFound(deleteResponse: DeleteResponse): String = {
-    write(("isFound", deleteResponse.isFound))
+    write(("isFound", deleteResponse.status()))
   }
 
   def buildSearchResponse(searchResponse: SearchResponse): String = {
