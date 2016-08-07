@@ -3,9 +3,9 @@ package com.github.chengpohi.connector
 import java.net.InetSocketAddress
 
 import com.typesafe.config.ConfigFactory
-import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
   * elasticshell
