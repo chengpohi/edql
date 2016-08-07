@@ -22,6 +22,8 @@ object ElasticClientConnector {
 
   val client = buildClient(settings, host, port)
 
-  def buildClient(settings: Settings, host: String, port: Int) =
-    TransportClient.builder.settings(settings).build().addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+  def buildClient(settings: Settings, host: String, port: Int) = {
+    val client = new PreBuiltTransportClient(settings)
+    client.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+  }
 }
