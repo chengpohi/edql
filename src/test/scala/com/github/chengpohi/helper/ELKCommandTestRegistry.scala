@@ -17,6 +17,7 @@ object ELKCommandTestRegistry {
     .put("path.repo", "./target/elkrepo")
     .put("action.destructive_requires_name", "false")
     .put("path.home", "./target/elkdata")
+    .put("transport.type", "local")
     .build()
   val node = new Node(settings).start()
   private[this] val client = node.client()
