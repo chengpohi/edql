@@ -23,8 +23,8 @@ class NLPTest extends FlatSpec with ShouldMatchers{
   it should "calculate strings ngram" in {
     val str: List[String] = List("hello", "world", "foo", "bar")
     val result = str.unigram.toList
-    assert(result ==  List(List("hello"), List("world"), List("foo"), List("bar")))
+    assert(result ===  List(List("hello"), List("world"), List("foo"), List("bar")))
     val result2 = str.bigram.toList
-    assert(result2 ==  List(List("hello", "world"), List("world", "foo"), List("foo", "bar")))
+    assert(result2 === List(List("hello", "world"), List("world", "foo"), List("foo", "bar")))
   }
 }
