@@ -29,8 +29,8 @@ libraryDependencies ++= Seq(
   "org.scalanlp" %% "breeze-viz" % "0.12",
   "org.elasticsearch" % "elasticsearch" % "5.0.0-alpha5-SNAPSHOT",
   "org.elasticsearch.client" % "transport" % "5.0.0-alpha5-SNAPSHOT",
-  "org.json4s" %% "json4s-native" % "3.2.10",
   "log4j" % "log4j" % "1.2.17",
+  "org.json4s" %% "json4s-native" % "3.2.10",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
 )
 
