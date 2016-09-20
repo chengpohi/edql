@@ -18,6 +18,7 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
@@ -25,7 +26,9 @@ import scala.concurrent.Future
   * Created by chengpohi on 3/12/16.
   */
 trait ElasticManagement extends ManageDSL {
+
   import DSLHelper._
+
   def nodeStats: Future[NodesStatsResponse] = ElasticExecutor {
     node stats NodeType.ALL flag FlagType.ALL
   }
@@ -78,6 +81,11 @@ trait ElasticManagement extends ManageDSL {
     cluster health
   }
 
+  def shutdown = Future {
+    client.close()
+    "shutdown"
+  }
+
   def alias(targetIndex: String, sourceIndex: String) = ElasticExecutor {
     add alias targetIndex on sourceIndex
   }
@@ -113,7 +121,6 @@ trait ElasticManagement extends ManageDSL {
   def pendingTasks: Future[PendingClusterTasksResponse] = ElasticExecutor {
     pending tasks
   }
-
 
   def createIndex(indexName: String) = ElasticExecutor {
     create index indexName

@@ -20,6 +20,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
     .map(JsonCollection.Str)
     .map(s => ("help", Some(parserUtils.help), Seq(s)))
   val health = P("health").map(s => ("health", Some(elkCommand.health), Seq(Str(""))))
+  val shutdown = P("shutdown").map(s => ("shutdown", Some(elkCommand.shutdown), Seq(Str(""))))
   val count = P("count" ~/ ioParser).map(c => ("count", Some(elkCommand.count), c))
   //memory, jvm, nodes, cpu etc
   val clusterStats = P("cluster stats").map(s => ("clusterStats", Some(elkCommand.clusterStats), Seq()))
@@ -78,7 +79,7 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", findJSONElements(c.value)))
   val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
-  val instrument = P((help | health | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
+  val instrument = P((help | health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
     | clusterSettings | nodeSettings | indexSettings | clusterState
     | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
     | deleteDoc | deleteIndex
