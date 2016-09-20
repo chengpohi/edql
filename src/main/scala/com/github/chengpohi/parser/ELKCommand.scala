@@ -102,6 +102,10 @@ class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: Resp
     elasticCommand.clusterHealth.map(s => s.toString)
   }
 
+  def shutdown: Seq[Val] => Future[String] = _ => {
+    elasticCommand.shutdown
+  }
+
   def count: Seq[Val] => Future[String] = {
     case Seq(indexName) =>
       val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.countCommand(indexName.extract[String])
