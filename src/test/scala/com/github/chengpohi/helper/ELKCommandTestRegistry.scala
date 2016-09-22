@@ -1,6 +1,6 @@
 package com.github.chengpohi.helper
 
-import com.github.chengpohi.api.ElasticCommand
+import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.parser.{ELKCommand, ELKParser, ParserUtils}
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.node.Node
@@ -20,8 +20,8 @@ object ELKCommandTestRegistry {
     .put("transport.type", "local")
     .build()
   val node = new Node(settings).start()
-  private[this] val client = node.client()
-  private[this] val elasticCommand = new ElasticCommand(client)
+  val client = node.client()
+  private[this] val elasticCommand = new ElasticDSL(client)
   val responseGenerator = new ResponseGenerator
   private[this] val elkCommand = new ELKCommand(elasticCommand, responseGenerator)
   private[this] val parserUtils = new ParserUtils

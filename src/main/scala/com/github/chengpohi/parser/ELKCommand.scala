@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.ElasticCommand
+import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
@@ -37,7 +37,7 @@ import scala.concurrent.Future
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class ELKCommand(val elasticCommand: ElasticCommand, val responseGenerator: ResponseGenerator) {
+class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: ResponseGenerator) {
 
   import responseGenerator._
 
