@@ -4,6 +4,7 @@ import java.net.InetSocketAddress
 import java.nio.file.Paths
 
 import com.typesafe.config.ConfigFactory
+import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.node.Node
@@ -23,7 +24,7 @@ object ElasticClientConnector {
     case true => buildLocalClient()
   }
 
-  def buildLocalClient() = {
+  def buildLocalClient(): Client = {
     val settings: Settings = Settings.builder()
       .loadFromPath(Paths.get(getClass.getResource("/local.yml").toURI))
       .build()
@@ -31,7 +32,7 @@ object ElasticClientConnector {
     node.client()
   }
 
-  def buildRemoteClient() = {
+  def buildRemoteClient(): Client = {
     val settings = Settings.builder()
       .put("cluster.name", clusterName)
       .build()

@@ -12,55 +12,55 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollReques
   */
 trait QueryDSL extends DSLDefinition with IndexerDSL{
   case object get {
-    def repository(repositoryName: String) = {
+    def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
       PutRepositoryDefinition(putRepository)
     }
 
-    def snapshot(snapshotName: String) = {
+    def snapshot(snapshotName: String): GetSnapshotDefinition = {
       GetSnapshotDefinition(snapshotName)
     }
 
-    def mapping(indexName: String) = {
+    def mapping(indexName: String): GetMappingDefinition = {
       val mappingsRequestBuilder: GetMappingsRequestBuilder = indicesClient.prepareGetMappings(indexName)
       GetMappingDefinition(mappingsRequestBuilder)
     }
 
-    def settings(indexName: String) = {
+    def settings(indexName: String): GetSettingsRequestDefinition = {
       val getSettingsRequestBuilder: GetSettingsRequestBuilder = indicesClient.prepareGetSettings(indexName)
       GetSettingsRequestDefinition(getSettingsRequestBuilder)
     }
 
-    def id(documentId: String) = {
+    def id(documentId: String): GetRequestDefinition = {
       GetRequestDefinition(documentId)
     }
   }
 
   case object search {
-    def in(indexName: String) = {
+    def in(indexName: String): SearchRequestDefinition = {
       val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexName)
       SearchRequestDefinition(searchRequestBuilder)
     }
 
-    def in(indexPath: IndexPath) = {
+    def in(indexPath: IndexPath): SearchRequestDefinition = {
       val searchRequestBuilder: SearchRequestBuilder = indexPath.indexType match {
         case "*" => client.prepareSearch(indexPath.indexName)
         case _ => client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
       }
       SearchRequestDefinition(searchRequestBuilder)
     }
-    def scroll(s: String) = {
+    def scroll(s: String): SearchScrollRequestDefinition = {
       val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(s)
       SearchScrollRequestDefinition(searchScrollRequestBuilder)
     }
   }
 
   case object update {
-    def id(documentId: String) = {
+    def id(documentId: String): UpdateRequestDefinition = {
       UpdateRequestDefinition(documentId)
     }
 
-    def index(indexPath: IndexPath) = {
+    def index(indexPath: IndexPath): PutMappingRequestDefinition = {
       val putMappingRequestBuilder: PutMappingRequestBuilder = indicesClient
         .preparePutMapping(indexPath.indexName)
         .setType(indexPath.indexType)

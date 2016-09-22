@@ -1,5 +1,7 @@
 package com.github.chengpohi.api
 
+import org.elasticsearch.action.update.UpdateResponse
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -18,7 +20,7 @@ trait ElasticDocUpdater {
     }
   }
 
-  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String) = DSL{
+  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String): Future[UpdateResponse] = DSL{
     update id documentId in indexName / indexType docAsUpsert uf
   }
 }

@@ -1,6 +1,7 @@
 package com.github.chengpohi.api
 
 import com.github.chengpohi.api.dsl.DeleterDSL
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.delete.DeleteResponse
 
 import scala.concurrent.Future
@@ -13,7 +14,7 @@ trait ElasticDocDeleter extends DeleterDSL {
 
   import DSLHelper._
 
-  def deleteIndex(indexName: String) = DSL {
+  def deleteIndex(indexName: String): Future[DeleteIndexResponse] = DSL {
     delete index indexName
   }
 

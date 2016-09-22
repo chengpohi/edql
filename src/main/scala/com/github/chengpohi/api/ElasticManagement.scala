@@ -9,11 +9,17 @@ import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResp
 import org.elasticsearch.action.admin.cluster.snapshots.create.CreateSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotResponse
 import org.elasticsearch.action.admin.cluster.snapshots.get.GetSnapshotsResponse
+import org.elasticsearch.action.admin.cluster.snapshots.restore.RestoreSnapshotResponse
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksResponse
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
+import org.elasticsearch.action.admin.indices.close.CloseIndexResponse
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
+import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.cluster.health.ClusterHealthStatus
@@ -42,7 +48,7 @@ trait ElasticManagement extends ManageDSL {
   }
 
   def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = DSL {
-    create repository repositoryName `type` repositoryType settings st
+    create repository repositoryName tpe repositoryType settings st
   }
 
   def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = DSL {
@@ -69,7 +75,7 @@ trait ElasticManagement extends ManageDSL {
     update index indexName / indexType mapping mapping
   }
 
-  def getMapping(indexName: String) = DSL {
+  def getMapping(indexName: String): Future[GetMappingsResponse] = DSL {
     get mapping indexName
   }
 
@@ -77,28 +83,28 @@ trait ElasticManagement extends ManageDSL {
     cluster state
   }
 
-  def clusterHealth = DSL {
+  def clusterHealth: Future[ClusterHealthResponse] = DSL {
     cluster health
   }
 
-  def shutdown = Future {
+  def shutdown: Future[String] = Future {
     client.close()
     "shutdown"
   }
 
-  def alias(targetIndex: String, sourceIndex: String) = DSL {
+  def alias(targetIndex: String, sourceIndex: String): Future[IndicesAliasesResponse] = DSL {
     add alias targetIndex on sourceIndex
   }
 
-  def restoreSnapshot(snapshotName: String, repositoryName: String) = DSL {
+  def restoreSnapshot(snapshotName: String, repositoryName: String): Future[RestoreSnapshotResponse] = DSL {
     restore snapshot snapshotName from repositoryName
   }
 
-  def closeIndex(indexName: String) = DSL {
+  def closeIndex(indexName: String): Future[CloseIndexResponse] = DSL {
     close index indexName
   }
 
-  def openIndex(indexName: String) = DSL {
+  def openIndex(indexName: String): Future[OpenIndexResponse] = DSL {
     open index indexName
   }
 
@@ -114,7 +120,7 @@ trait ElasticManagement extends ManageDSL {
     node info
   }
 
-  def indexSettings(indexName: String) = DSL {
+  def indexSettings(indexName: String): Future[GetSettingsResponse] = DSL {
     get settings indexName
   }
 
@@ -122,11 +128,13 @@ trait ElasticManagement extends ManageDSL {
     pending tasks
   }
 
-  def createIndex(indexName: String) = DSL {
+  def createIndex(indexName: String): Future[CreateIndexResponse] = DSL {
     create index indexName
   }
 
-  def waitForStatus(indexName: Option[String] = Some("*"), status: Option[String] = Some("GREEN"), timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
+  def waitForStatus(indexName: Option[String] = Some("*"),
+                    status: Option[String] = Some("GREEN"),
+                    timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
     val clusterHealthStatus: ClusterHealthStatus = status match {
       case Some("GREEN") => ClusterHealthStatus.GREEN
       case Some("RED") => ClusterHealthStatus.RED

@@ -9,12 +9,12 @@ import org.elasticsearch.index.query.QueryBuilders
   */
 trait AggsDSL extends DSLDefinition {
   case object aggs {
-    def in(indexPath: IndexPath) = {
+    def in(indexPath: IndexPath): SearchRequestDefinition = {
       val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexPath.indexName)
       searchRequestBuilder.setTypes(indexPath.indexType)
       searchRequestBuilder.setSize(0)
-      searchRequestBuilder.setQuery(QueryBuilders.matchAllQuery() )
-      searchRequestBuilder.setSearchType(SearchType.QUERY_THEN_FETCH )
+      searchRequestBuilder.setQuery(QueryBuilders.matchAllQuery())
+      searchRequestBuilder.setSearchType(SearchType.QUERY_THEN_FETCH)
       SearchRequestDefinition(searchRequestBuilder)
     }
   }
