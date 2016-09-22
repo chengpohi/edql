@@ -18,18 +18,18 @@ trait ElasticDocQuerier extends QueryDSL {
   import DSLHelper._
 
   def queryAll(indexName: String, indexType: String): Future[SearchResponse] = {
-    ElasticExecutor {
+    DSL {
       search in indexName / indexType query "*" from 0 size MAX_ALL_NUMBER
     }
   }
 
   def matchQuery(indexName: String, indexType: String, m: (String, String)): Future[SearchResponse] = {
-    ElasticExecutor {
+    DSL {
       search in indexName / indexType `match` m from 0 size MAX_ALL_NUMBER
     }
   }
   def termQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[SearchResponse] = {
-    ElasticExecutor {
+    DSL {
       search in indexName / indexType must terms from 0 size MAX_ALL_NUMBER
     }
   }
@@ -47,12 +47,12 @@ trait ElasticDocQuerier extends QueryDSL {
   }
 
   def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))(implicit maxRetrieveSize: Int = 500): Stream[SearchResponse] = {
-    val res = ElasticExecutor {
+    val res = DSL {
       search in indexName / indexType.get scroll "10m" size maxRetrieveSize
     }
 
     def fetch(previous: SearchResponse) = {
-      ElasticExecutor {
+      DSL {
         search scroll previous.getScrollId
       }
     }
@@ -70,7 +70,7 @@ trait ElasticDocQuerier extends QueryDSL {
   def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]) = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s => ElasticExecutor {
+        s => DSL {
           index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
         }
       }
@@ -86,14 +86,14 @@ trait ElasticDocQuerier extends QueryDSL {
   def bulkUpdateField(indexName: String, response: Stream[SearchResponse], indexType: String, field: Seq[(String, String)]) = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s => ElasticExecutor {
+        s => DSL {
           update id s.getId doc field in indexName / indexType
         }
       }
     })
   }
 
-  def getDocById(indexName: String, indexType: String, docId: String) = ElasticExecutor {
+  def getDocById(indexName: String, indexType: String, docId: String) = DSL {
     get id docId from indexName / indexType
   }
 }

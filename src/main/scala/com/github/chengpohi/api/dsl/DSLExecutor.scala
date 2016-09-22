@@ -23,7 +23,7 @@ trait DSLExecutor {
     p.future
   }
 
-  object ElasticExecutor {
+  object DSL {
     def apply[A](f: ActionRequest[A]): Future[A] = buildFuture(f.execute)
   }
 }
