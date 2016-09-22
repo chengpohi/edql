@@ -18,7 +18,7 @@ trait ElasticDocUpdater {
     }
   }
 
-  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String) = ElasticExecutor{
+  def updateById(indexName: String, indexType: String, uf: Seq[(String, String)], documentId: String) = DSL{
     update id documentId in indexName / indexType docAsUpsert uf
   }
 }

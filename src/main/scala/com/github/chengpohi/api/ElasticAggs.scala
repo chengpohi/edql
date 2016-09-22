@@ -13,10 +13,10 @@ trait ElasticAggs extends AggsDSL {
 
   import DSLHelper._
 
-  def aggsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = ElasticExecutor {
+  def aggsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = DSL {
     aggs in indexName / indexType avg name
   }
-  def termsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = ElasticExecutor {
+  def termsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = DSL {
     aggs in indexName / indexType term name
   }
 }
