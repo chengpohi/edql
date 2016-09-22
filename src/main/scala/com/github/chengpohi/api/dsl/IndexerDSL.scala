@@ -8,7 +8,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder
   */
 trait IndexerDSL extends DSLDefinition{
   case object index {
-    def into(indexPath: IndexPath) = {
+    def into(indexPath: IndexPath): IndexRequestDefinition = {
       val indexRequestBuilder: IndexRequestBuilder = client.prepareIndex(indexPath.indexName, indexPath.indexType)
       IndexRequestDefinition(indexRequestBuilder)
     }

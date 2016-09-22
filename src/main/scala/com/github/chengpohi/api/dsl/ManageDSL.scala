@@ -19,90 +19,90 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
   */
 trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
   case object node {
-    def stats(nodeIds: List[String]) = {
+    def stats(nodeIds: List[String]): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds: _*)
       NodeStatsRequestDefinition(prepareNodesStats)
     }
-    def stats(nodeIds: NodeType) = {
+    def stats(nodeIds: NodeType): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats()
       NodeStatsRequestDefinition(prepareNodesStats)
     }
-    def info = {
+    def info: NodeInfoRequestDefinition = {
       val prepareNodesStats: NodesInfoRequestBuilder = clusterClient.prepareNodesInfo()
       NodeInfoRequestDefinition(prepareNodesStats)
     }
   }
 
   case object indice {
-    def stats(nodeIds: List[String]) = {
+    def stats(nodeIds: List[String]): IndicesStatsRequestDefinition = {
       val prepareNodesStats: IndicesStatsRequestBuilder = indicesClient.prepareStats(nodeIds: _ *)
       IndicesStatsRequestDefinition(prepareNodesStats)
     }
-    def stats(indiceType: NodeType) = {
+    def stats(indiceType: NodeType): IndicesStatsRequestDefinition = {
       val prepareNodesStats: IndicesStatsRequestBuilder = indicesClient.prepareStats(indiceType.value: _*)
       IndicesStatsRequestDefinition(prepareNodesStats)
     }
 
-    def update(indexName: String) = {
+    def update(indexName: String): UpdateSettingsRequestDefinition = {
       val clusterUpdateSettingsRequestBuilder: UpdateSettingsRequestBuilder = indicesClient.prepareUpdateSettings(indexName)
       UpdateSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder)
     }
   }
 
   case object cluster {
-    def stats = {
+    def stats: ClusterStatsRequestDefinition = {
       val prepareNodesStats: ClusterStatsRequestBuilder = clusterClient.prepareClusterStats()
       ClusterStatsRequestDefinition(prepareNodesStats)
     }
 
-    def state = {
+    def state: ClusterStateRequestDefinition = {
       val stateRequestBuilder: ClusterStateRequestBuilder = clusterClient.prepareState()
       ClusterStateRequestDefinition(stateRequestBuilder)
     }
-    def health = {
+    def health: ClusterHealthRequestDefinition = {
       val clusterHealthRequestBuilder: ClusterHealthRequestBuilder = clusterClient.prepareHealth()
       ClusterHealthRequestDefinition(clusterHealthRequestBuilder)
     }
 
-    def settings = {
+    def settings: ClusterSettingsRequestDefinition = {
       val clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder = clusterClient.prepareUpdateSettings()
       ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder)
     }
   }
 
   case object create {
-    def repository(repositoryName: String) = {
+    def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
       PutRepositoryDefinition(putRepository)
     }
 
-    def snapshot(snapshotName: String) = {
+    def snapshot(snapshotName: String): CreateSnapshotDefinition = {
       CreateSnapshotDefinition(snapshotName)
     }
 
-    def index(indexName: String) = CreateIndexDefinition(indicesClient.prepareCreate(indexName))
+    def index(indexName: String): CreateIndexDefinition = CreateIndexDefinition(indicesClient.prepareCreate(indexName))
   }
 
 
   case object add {
-    def alias(targetIndex: String) = {
+    def alias(targetIndex: String): AddAliasRequestDefinition = {
       AddAliasRequestDefinition(targetIndex)
     }
   }
 
   case object restore {
-    def snapshot(snapshotName: String) = RestoreSnapshotRequestDefinition(snapshotName)
+    def snapshot(snapshotName: String): RestoreSnapshotRequestDefinition = RestoreSnapshotRequestDefinition(snapshotName)
   }
 
   case object close {
-    def index(indexName: String) = {
+    def index(indexName: String): CloseIndexRequestDefinition = {
       val closeIndexRequestBuilder: CloseIndexRequestBuilder = indicesClient.prepareClose(indexName)
       CloseIndexRequestDefinition(closeIndexRequestBuilder)
     }
   }
 
   case object open {
-    def index(indexName: String) = {
+    def index(indexName: String): OpenIndexRequestDefinition = {
       val openIndexRequestBuilder: OpenIndexRequestBuilder = indicesClient.prepareOpen(indexName)
       OpenIndexRequestDefinition(openIndexRequestBuilder)
     }
@@ -110,14 +110,14 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
 
 
   case object pending {
-    def tasks = {
+    def tasks: PendingClusterTasksDefinition = {
       val pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder = clusterClient.preparePendingClusterTasks()
       PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder)
     }
   }
 
   case object waiting {
-    def index(indexName: String) = {
+    def index(indexName: String): ClusterHealthRequestDefinition = {
       val prepareHealth: ClusterHealthRequestBuilder = clusterClient.prepareHealth(indexName)
       ClusterHealthRequestDefinition(prepareHealth)
     }

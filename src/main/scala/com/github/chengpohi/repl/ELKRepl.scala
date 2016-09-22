@@ -37,7 +37,7 @@ object ELKRepl {
     }
   }
 
-  def addShutdownHook(reader: ConsoleReader) = {
+  def addShutdownHook(reader: ConsoleReader): Unit = {
     elkRunEngine.run(s"""create index "$ELASTIC_SHELL_INDEX_NAME"""")
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {

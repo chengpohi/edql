@@ -54,7 +54,7 @@ object JsonCollection {
   }
 
   case object False extends Val {
-    def value = false
+    def value: Boolean = false
 
     override def toJson: String = value.toString
 
@@ -62,7 +62,7 @@ object JsonCollection {
   }
 
   case object True extends Val {
-    def value = true
+    def value: Boolean = true
 
     override def toJson: String = value.toString
 
@@ -70,7 +70,7 @@ object JsonCollection {
   }
 
   case object Null extends Val {
-    def value = null
+    def value: Option[Nothing] = None
 
     override def toJson: String = value.toString
 
