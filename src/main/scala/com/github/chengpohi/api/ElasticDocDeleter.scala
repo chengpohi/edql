@@ -13,11 +13,11 @@ trait ElasticDocDeleter extends DeleterDSL {
 
   import DSLHelper._
 
-  def deleteIndex(indexName: String) = ElasticExecutor {
+  def deleteIndex(indexName: String) = DSL {
     delete index indexName
   }
 
-  def deleteById(indexName: String, indexType: String, documentId: String): Future[DeleteResponse] = ElasticExecutor {
+  def deleteById(indexName: String, indexType: String, documentId: String): Future[DeleteResponse] = DSL {
     delete in indexName / indexType id documentId
   }
 }

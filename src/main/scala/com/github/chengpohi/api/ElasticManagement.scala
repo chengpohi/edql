@@ -29,55 +29,55 @@ trait ElasticManagement extends ManageDSL {
 
   import DSLHelper._
 
-  def nodeStats: Future[NodesStatsResponse] = ElasticExecutor {
+  def nodeStats: Future[NodesStatsResponse] = DSL {
     node stats NodeType.ALL flag FlagType.ALL
   }
 
-  def indicesStats: Future[IndicesStatsResponse] = ElasticExecutor {
+  def indicesStats: Future[IndicesStatsResponse] = DSL {
     indice stats NodeType.ALL flag FlagType.ALL
   }
 
-  def clusterStats: Future[ClusterStatsResponse] = ElasticExecutor {
+  def clusterStats: Future[ClusterStatsResponse] = DSL {
     cluster stats
   }
 
-  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = ElasticExecutor {
+  def createRepository(repositoryName: String, repositoryType: String, st: Map[String, AnyRef]): Future[PutRepositoryResponse] = DSL {
     create repository repositoryName `type` repositoryType settings st
   }
 
-  def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = ElasticExecutor {
+  def createSnapshot(snapshotName: String, repositoryName: String): Future[CreateSnapshotResponse] = DSL {
     create snapshot snapshotName in repositoryName
   }
 
-  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[GetSnapshotsResponse] = ElasticExecutor {
+  def getSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[GetSnapshotsResponse] = DSL {
     get snapshot snapshotName from repositoryName
   }
 
-  def getAllSnapshotByRepositoryName(repositoryName: String): Future[GetSnapshotsResponse] = ElasticExecutor {
+  def getAllSnapshotByRepositoryName(repositoryName: String): Future[GetSnapshotsResponse] = DSL {
     get snapshot "*" from repositoryName
   }
 
-  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[DeleteSnapshotResponse] = ElasticExecutor {
+  def deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName: String, repositoryName: String): Future[DeleteSnapshotResponse] = DSL {
     delete snapshot snapshotName from repositoryName
   }
 
-  def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = ElasticExecutor {
+  def mappings(indexName: String, mapping: String): Future[CreateIndexResponse] = DSL {
     create index indexName mappings mapping
   }
 
-  def updateMappings(indexName: String, indexType: String, mapping: String): Future[PutMappingResponse] = ElasticExecutor {
+  def updateMappings(indexName: String, indexType: String, mapping: String): Future[PutMappingResponse] = DSL {
     update index indexName / indexType mapping mapping
   }
 
-  def getMapping(indexName: String) = ElasticExecutor {
+  def getMapping(indexName: String) = DSL {
     get mapping indexName
   }
 
-  def getIndices: Future[ClusterStateResponse] = ElasticExecutor {
+  def getIndices: Future[ClusterStateResponse] = DSL {
     cluster state
   }
 
-  def clusterHealth = ElasticExecutor {
+  def clusterHealth = DSL {
     cluster health
   }
 
@@ -86,43 +86,43 @@ trait ElasticManagement extends ManageDSL {
     "shutdown"
   }
 
-  def alias(targetIndex: String, sourceIndex: String) = ElasticExecutor {
+  def alias(targetIndex: String, sourceIndex: String) = DSL {
     add alias targetIndex on sourceIndex
   }
 
-  def restoreSnapshot(snapshotName: String, repositoryName: String) = ElasticExecutor {
+  def restoreSnapshot(snapshotName: String, repositoryName: String) = DSL {
     restore snapshot snapshotName from repositoryName
   }
 
-  def closeIndex(indexName: String) = ElasticExecutor {
+  def closeIndex(indexName: String) = DSL {
     close index indexName
   }
 
-  def openIndex(indexName: String) = ElasticExecutor {
+  def openIndex(indexName: String) = DSL {
     open index indexName
   }
 
-  def countCommand(indexName: String): Future[SearchResponse] = ElasticExecutor {
+  def countCommand(indexName: String): Future[SearchResponse] = DSL {
     search in indexName size 0
   }
 
-  def clusterSettings: Future[ClusterUpdateSettingsResponse] = ElasticExecutor {
+  def clusterSettings: Future[ClusterUpdateSettingsResponse] = DSL {
     cluster settings
   }
 
-  def nodesSettings: Future[NodesInfoResponse] = ElasticExecutor {
+  def nodesSettings: Future[NodesInfoResponse] = DSL {
     node info
   }
 
-  def indexSettings(indexName: String) = ElasticExecutor {
+  def indexSettings(indexName: String) = DSL {
     get settings indexName
   }
 
-  def pendingTasks: Future[PendingClusterTasksResponse] = ElasticExecutor {
+  def pendingTasks: Future[PendingClusterTasksResponse] = DSL {
     pending tasks
   }
 
-  def createIndex(indexName: String) = ElasticExecutor {
+  def createIndex(indexName: String) = DSL {
     create index indexName
   }
 
@@ -134,7 +134,7 @@ trait ElasticManagement extends ManageDSL {
       case _ => ClusterHealthStatus.GREEN
     }
 
-    ElasticExecutor {
+    DSL {
       waiting index indexName.get timeout timeOut.get status clusterHealthStatus
     }
   }

@@ -18,7 +18,7 @@ class DSLTest extends FlatSpec with ShouldMatchers {
   import dsl._
 
   it should "search all empty index" in {
-    val res = ElasticExecutor {
+    val res = DSL {
       search in "*"
     }
     val result: SearchResponse = Await.result(res, Duration.Inf)
