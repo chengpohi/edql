@@ -6,7 +6,7 @@ import org.elasticsearch.client.{Client, ClusterAdminClient}
  * elasticshell
  * Created by chengpohi on 1/6/16.
  */
-class ElasticCommand(cl: Client) extends ElasticManagement
+class ElasticDSL(cl: Client) extends ElasticManagement
                       with ElasticIndexer
                       with ElasticDocUpdater
                       with ElasticDocDeleter
