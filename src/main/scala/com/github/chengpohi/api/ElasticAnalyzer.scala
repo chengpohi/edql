@@ -20,7 +20,8 @@ trait ElasticAnalyzer extends  AnalyzeDSL with ElasticManagement {
       analysis text analyzeText in ELASTIC_SHELL_INDEX_NAME analyzer a
     }
 
-  def createAnalyzer(analyzerSetting: String) = {
+  // TODO need to refactor
+  def createAnalyzer(analyzerSetting: String): Future[UpdateSettingsResponse] = {
     val p = Promise[UpdateSettingsResponse]()
     closeIndex(ELASTIC_SHELL_INDEX_NAME) onSuccess {
       case _ =>

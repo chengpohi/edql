@@ -1,9 +1,11 @@
 package com.github.chengpohi.api
 
 import com.github.chengpohi.api.dsl.QueryDSL
+import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -14,6 +16,7 @@ import scala.concurrent.{Await, Future}
   */
 trait ElasticDocQuerier extends QueryDSL {
   private val MAX_ALL_NUMBER: Int = 10000
+  private val MAX_RETRIEVE_SIZE: Int = 500
 
   import DSLHelper._
 
@@ -25,7 +28,7 @@ trait ElasticDocQuerier extends QueryDSL {
 
   def matchQuery(indexName: String, indexType: String, m: (String, String)): Future[SearchResponse] = {
     DSL {
-      search in indexName / indexType `match` m from 0 size MAX_ALL_NUMBER
+      search in indexName / indexType mth m from 0 size MAX_ALL_NUMBER
     }
   }
   def termQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[SearchResponse] = {
@@ -34,7 +37,8 @@ trait ElasticDocQuerier extends QueryDSL {
     }
   }
 
-  def joinQuery(indexName: String, indexType: String, joinIndexName: String, joinIndexType: String, field: String)(implicit maxRetrieveSize: Int = 500) = {
+  def joinQuery(indexName: String, indexType: String, joinIndexName: String, joinIndexType: String, field: String)
+               (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[Future[mutable.Map[String, AnyRef]]] = {
     val joinAll = queryAllByScan(joinIndexName, Some(joinIndexType))(maxRetrieveSize)
     joinAll.flatMap(f => {
       f.getHits.asScala.map(i => {
@@ -46,7 +50,8 @@ trait ElasticDocQuerier extends QueryDSL {
     })
   }
 
-  def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))(implicit maxRetrieveSize: Int = 500): Stream[SearchResponse] = {
+  def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))
+                    (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[SearchResponse] = {
     val res = DSL {
       search in indexName / indexType.get scroll "10m" size maxRetrieveSize
     }
@@ -59,15 +64,15 @@ trait ElasticDocQuerier extends QueryDSL {
 
     def toStream(current: Future[SearchResponse]): Stream[SearchResponse] = {
       val result = Await.result(current, Duration.Inf)
-      result.getScrollId match {
-        case null => result #:: Stream.empty
-        case _ => result #:: toStream(fetch(result))
+      result.getScrollId.isEmpty match {
+        case false => result #:: Stream.empty
+        case true => result #:: toStream(fetch(result))
       }
     }
     toStream(res)
   }
 
-  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]) = {
+  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]): Unit = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
         s => DSL {
@@ -83,7 +88,8 @@ trait ElasticDocQuerier extends QueryDSL {
     """{"hasErrors": false}"""
   }
 
-  def bulkUpdateField(indexName: String, response: Stream[SearchResponse], indexType: String, field: Seq[(String, String)]) = {
+  def bulkUpdateField(indexName: String, response: Stream[SearchResponse],
+                      indexType: String, field: Seq[(String, String)]): Unit = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
         s => DSL {
@@ -93,7 +99,7 @@ trait ElasticDocQuerier extends QueryDSL {
     })
   }
 
-  def getDocById(indexName: String, indexType: String, docId: String) = DSL {
+  def getDocById(indexName: String, indexType: String, docId: String): Future[GetResponse] = DSL {
     get id docId from indexName / indexType
   }
 }

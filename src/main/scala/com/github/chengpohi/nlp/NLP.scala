@@ -15,8 +15,8 @@ object NLP {
   }
 
   implicit class Words[K <: String](it: Seq[K]) {
-    def unigram = ngram(1)
-    def bigram = ngram(2)
+    def unigram: Stream[Seq[K]] = ngram(1)
+    def bigram: Stream[Seq[K]] = ngram(2)
     def ngram(n: Int): Stream[Seq[K]] = it.sliding(n).toStream
   }
 }

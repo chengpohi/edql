@@ -31,7 +31,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.index.query.{BoolQueryBuilder, MatchQueryBuilder, MultiTermQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
+import org.elasticsearch.index.query.{BoolQueryBuilder, MatchQueryBuilder, QueryBuilder, QueryBuilders, TermQueryBuilder}
 import org.elasticsearch.search.aggregations.AggregationBuilders
 
 import scala.collection.JavaConverters._
@@ -56,7 +56,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class NodeStatsRequestDefinition(nodesStatsRequestBuilder: NodesStatsRequestBuilder) extends ActionRequest[NodesStatsResponse] {
-    def flag(f: FlagType) = {
+    def flag(f: FlagType): NodeStatsRequestDefinition = {
       nodesStatsRequestBuilder.all()
       this
     }
@@ -68,7 +68,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class IndicesStatsRequestDefinition(indicesStatsRequestBuilder: IndicesStatsRequestBuilder) extends ActionRequest[IndicesStatsResponse] {
-    def flag(f: FlagType) = {
+    def flag(f: FlagType): IndicesStatsRequestDefinition = {
       indicesStatsRequestBuilder.all().execute()
       this
     }
@@ -81,12 +81,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class ClusterHealthRequestDefinition(clusterHealthRequestBuilder: ClusterHealthRequestBuilder) extends ActionRequest[ClusterHealthResponse] {
-    def timeout(time: String) = {
+    def timeout(time: String): ClusterHealthRequestDefinition = {
       clusterHealthRequestBuilder.setTimeout(time)
       this
     }
 
-    def status(clusterHealth: ClusterHealthStatus) = {
+    def status(clusterHealth: ClusterHealthStatus): ClusterHealthRequestDefinition = {
       clusterHealthRequestBuilder.setWaitForStatus(clusterHealth)
       this
     }
@@ -94,12 +94,13 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
     override def execute: (ActionListener[ClusterHealthResponse]) => Unit = clusterHealthRequestBuilder.execute
   }
 
-  case class ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder) extends ActionRequest[ClusterUpdateSettingsResponse] {
+  case class ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder)
+    extends ActionRequest[ClusterUpdateSettingsResponse] {
     override def execute: (ActionListener[ClusterUpdateSettingsResponse]) => Unit = clusterUpdateSettingsRequestBuilder.execute
   }
 
   case class UpdateSettingsRequestDefinition(updateSettingsRequestBuilder: UpdateSettingsRequestBuilder) extends ActionRequest[UpdateSettingsResponse] {
-    def settings(st: String) = {
+    def settings(st: String): UpdateSettingsRequestDefinition = {
       updateSettingsRequestBuilder.setSettings(st)
       this
     }
@@ -107,12 +108,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class PutRepositoryDefinition(putRepositoryRequestBuilder: PutRepositoryRequestBuilder) extends ActionRequest[PutRepositoryResponse] {
-    def `type`(`type`: String) = {
+    def tpe(`type`: String): PutRepositoryDefinition = {
       putRepositoryRequestBuilder.setType(`type`)
       this
     }
 
-    def settings(st: Map[String, AnyRef]) = {
+    def settings(st: Map[String, AnyRef]): PutRepositoryDefinition = {
       putRepositoryRequestBuilder.setSettings(st.asJava)
       this
     }
@@ -121,8 +122,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class CreateSnapshotDefinition(snapshotName: String) extends ActionRequest[CreateSnapshotResponse] {
-    var createSnapshotRequestBuilder: CreateSnapshotRequestBuilder = null
-    def in(repositoryName: String) = {
+    var createSnapshotRequestBuilder: CreateSnapshotRequestBuilder = _
+    def in(repositoryName: String): CreateSnapshotDefinition = {
       createSnapshotRequestBuilder = clusterClient.prepareCreateSnapshot(repositoryName, snapshotName)
       this
     }
@@ -130,7 +131,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends ActionRequest[CreateIndexResponse] {
-    def mappings(m: String) = {
+    def mappings(m: String): CreateIndexDefinition = {
       createIndexRequestBuilder.setSource(m)
       this
     }
@@ -138,8 +139,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class GetSnapshotDefinition(snapshotName: String) extends ActionRequest[GetSnapshotsResponse] {
-    var getSnapshotsRequestBuilder: GetSnapshotsRequestBuilder = null
-    def from(repositoryName: String) = {
+    var getSnapshotsRequestBuilder: GetSnapshotsRequestBuilder = _
+    def from(repositoryName: String): GetSnapshotDefinition = {
       getSnapshotsRequestBuilder = snapshotName match {
         case "*" => clusterClient.prepareGetSnapshots(repositoryName).setSnapshots(snapshotName)
         case _ => clusterClient.prepareGetSnapshots(repositoryName)
@@ -151,8 +152,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class DeleteSnapshotDefinition(snapshotName: String) extends ActionRequest[DeleteSnapshotResponse] {
-    var deleteSnapshotRequestBuilder: DeleteSnapshotRequestBuilder = null
-    def from(repositoryName: String) = {
+    var deleteSnapshotRequestBuilder: DeleteSnapshotRequestBuilder = _
+    def from(repositoryName: String): DeleteSnapshotDefinition = {
       deleteSnapshotRequestBuilder = clusterClient.prepareDeleteSnapshot(repositoryName, snapshotName)
       this
     }
@@ -164,7 +165,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class PutMappingRequestDefinition(putMappingRequestBuilder: PutMappingRequestBuilder) extends ActionRequest[PutMappingResponse] {
-    def mapping(m: String) = {
+    def mapping(m: String): PutMappingRequestDefinition = {
       putMappingRequestBuilder.setSource(m)
       this
     }
@@ -180,8 +181,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class AddAliasRequestDefinition(targetAlias: String) extends ActionRequest[IndicesAliasesResponse] {
-    var indicesAliasesRequestBuilder: IndicesAliasesRequestBuilder = null
-    def on(sourceIndex: String) = {
+    var indicesAliasesRequestBuilder: IndicesAliasesRequestBuilder = _
+    def on(sourceIndex: String): AddAliasRequestDefinition = {
       indicesAliasesRequestBuilder = indicesClient.prepareAliases().addAlias(sourceIndex, targetAlias)
       this
     }
@@ -189,8 +190,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class RestoreSnapshotRequestDefinition(snapshotName: String) extends ActionRequest[RestoreSnapshotResponse] {
-    var restoreSnapshotRequestBuilder: RestoreSnapshotRequestBuilder = null
-    def from(repositoryName: String) = {
+    var restoreSnapshotRequestBuilder: RestoreSnapshotRequestBuilder = _
+    def from(repositoryName: String): RestoreSnapshotRequestDefinition = {
       restoreSnapshotRequestBuilder = clusterClient.prepareRestoreSnapshot(repositoryName, snapshotName)
       this
     }
@@ -206,22 +207,22 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends ActionRequest[SearchResponse] {
-    def size(i: Int) = {
+    def size(i: Int): SearchRequestDefinition = {
       searchRequestBuilder.setSize(i)
       this
     }
 
-    def `type`(indexType: String) = {
+    def tpe(indexType: String): SearchRequestDefinition = {
       searchRequestBuilder.setTypes(indexType)
       this
     }
 
-    def searchType(searchType: SearchType) = {
+    def searchType(searchType: SearchType): SearchRequestDefinition = {
       searchRequestBuilder.setSearchType(searchType)
       this
     }
 
-    def query(query: String) = {
+    def query(query: String): SearchRequestDefinition = {
       val queryString: QueryBuilder = query match {
         case "*" => {
           searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_AND_FETCH)
@@ -233,17 +234,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    def query(query: QueryBuilder) = {
+    def query(query: QueryBuilder): SearchRequestDefinition = {
       searchRequestBuilder.setQuery(query)
       this
     }
 
-    def from(s: Int) = {
+    def from(s: Int): SearchRequestDefinition = {
       searchRequestBuilder.setFrom(s)
       this
     }
 
-    def must(terms: List[(String, AnyRef)]) = {
+    def must(terms: List[(String, AnyRef)]): SearchRequestDefinition = {
       val boolQuery: BoolQueryBuilder = QueryBuilders.boolQuery()
       terms.foreach(term => {
         val termQuery: TermQueryBuilder = QueryBuilders.termQuery(term._1, term._2)
@@ -253,23 +254,23 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    def `match`(m: (String, AnyRef)) = {
+    def mth(m: (String, AnyRef)): SearchRequestDefinition = {
       val matchQueryBuilder: MatchQueryBuilder = QueryBuilders.matchQuery(m._1, m._2)
       searchRequestBuilder.setQuery(matchQueryBuilder)
       this
     }
 
-    def scroll(s: String) = {
+    def scroll(s: String): SearchRequestDefinition = {
       searchRequestBuilder.setScroll(s)
       this
     }
 
-    def avg(name: String) = {
+    def avg(name: String): SearchRequestDefinition = {
       searchRequestBuilder.addAggregation(AggregationBuilders.avg(name).field(name))
       this
     }
 
-    def term(name: String) = {
+    def term(name: String): SearchRequestDefinition = {
       searchRequestBuilder.addAggregation(AggregationBuilders.terms(name).field(name).size(Integer.MAX_VALUE))
       this
     }
@@ -277,7 +278,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
     override def execute: (ActionListener[SearchResponse]) => Unit = searchRequestBuilder.execute
   }
 
-  case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder) extends ActionRequest[PendingClusterTasksResponse] {
+  case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
+    extends ActionRequest[PendingClusterTasksResponse] {
     override def execute: (ActionListener[PendingClusterTasksResponse]) => Unit = pendingClusterTasksRequestBuilder.execute
   }
 
@@ -286,12 +288,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class AnalyzeRequestDefinition(analyzeRequestBuilder: AnalyzeRequestBuilder) extends ActionRequest[AnalyzeResponse] {
-    def in(indexName: String) = {
+    def in(indexName: String): AnalyzeRequestDefinition = {
       analyzeRequestBuilder.setIndex(indexName)
       this
     }
 
-    def analyzer(analyzer: String) = {
+    def analyzer(analyzer: String): AnalyzeRequestDefinition = {
       analyzeRequestBuilder.setAnalyzer(analyzer)
       this
     }
@@ -307,13 +309,13 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
 
   object DSLHelper {
     implicit class IndexNameAndIndexType(indexName: String) {
-      def /(indexType: String) = {
+      def /(indexType: String): IndexPath = {
         IndexPath(indexName, indexType)
       }
     }
   }
   case class DeleteRequestDefinition(deleteRequestBuilder: DeleteRequestBuilder) extends ActionRequest[DeleteResponse] {
-    def id(documentId: String) = {
+    def id(documentId: String): DeleteRequestDefinition = {
       deleteRequestBuilder.setId(documentId)
       this
     }
@@ -321,17 +323,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class UpdateRequestDefinition(documentId: String) extends ActionRequest[UpdateResponse] {
-    var updateRequestBuilder: UpdateRequestBuilder = null
-    def in(indexPath: IndexPath) = {
+    var updateRequestBuilder: UpdateRequestBuilder = _
+    def in(indexPath: IndexPath): UpdateRequestDefinition = {
       updateRequestBuilder = client.prepareUpdate(indexPath.indexName, indexPath.indexType, documentId)
       this
     }
 
-    def doc(fields: Seq[(String, String)]) = {
+    def doc(fields: Seq[(String, String)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDoc(fields.toMap.asJava)
       this
     }
-    def docAsUpsert(fields: Seq[(String, String)]) = {
+    def docAsUpsert(fields: Seq[(String, String)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDocAsUpsert(true)
       updateRequestBuilder.setDoc(fields.toMap.asJava)
       this
@@ -340,22 +342,22 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends ActionRequest[IndexResponse] {
-    def doc(fields: Map[String, AnyRef]) = {
+    def doc(fields: Map[String, AnyRef]): IndexRequestDefinition = {
       indexRequestBuilder.setSource(fields.asJava)
       this
     }
 
-    def doc(fields: String) = {
+    def doc(fields: String): IndexRequestDefinition = {
       indexRequestBuilder.setSource(fields)
       this
     }
 
-    def id(documentId: String) = {
+    def id(documentId: String): IndexRequestDefinition = {
       indexRequestBuilder.setId(documentId)
       this
     }
 
-    def fields(fs: Seq[(String, AnyRef)]) = {
+    def fields(fs: Seq[(String, AnyRef)]): IndexRequestDefinition = {
       indexRequestBuilder.setSource(fs.toMap.asJava)
       this
     }
@@ -363,9 +365,9 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class GetRequestDefinition(documentId: String) extends ActionRequest[GetResponse] {
-    var getRequestBuilder: GetRequestBuilder = null
+    var getRequestBuilder: GetRequestBuilder = _
 
-    def from(indexPath: IndexPath) = {
+    def from(indexPath: IndexPath): GetRequestDefinition = {
       getRequestBuilder = client.prepareGet(indexPath.indexName, indexPath.indexType, documentId)
       this
     }

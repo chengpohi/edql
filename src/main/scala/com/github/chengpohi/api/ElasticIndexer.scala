@@ -25,7 +25,7 @@ trait ElasticIndexer extends IndexerDSL {
     index into indexName / indexType fields fs
   }
 
-  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]) = {
+  def bulkIndex(indexName: String, indexType: String, fs: Seq[Seq[(String, String)]]): String = {
     fs.foreach(f => {
       DSL {
         index into indexName / indexType fields f
