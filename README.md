@@ -1,19 +1,7 @@
 # Elastic DSL with REPL
 
 ## Introduction
-This a ***DSL*** for elasticsearch, it uses ***elk*** syntax like `sql` to interact with ***elasticsearch***. 
-
-***Features***
-
-- More BDD
-- Full integrate with ***elasticsearch*** json syntax
-- Like Sql syntax
-- Full JSON response
-- Easier to learn elasticsearch and test you query
-
-## Version
-
-- *0.1* support ***elasticsearch-2.2***
+It is a **DSL** for elasticsearch. Have fun :)
 
 ## Use it
 
@@ -58,11 +46,3 @@ bin/es
 | restore snapshot | `restore snapshot "snapshot1" "repository_name"`| restore snapshot from repository by snapshot name|
 | delete snapshot | `delete snapshot "snapshot1" "test_snapshot"`| delete snapshot in repository by snapshot name |
 
-## Example
-
-### Use in Scala Project
-
-```
-val elkRunEngine = new ELKRunEngine(ELKCommandRegistry)
-val result: String = elkRunEngine.run("query "*"")
-```
