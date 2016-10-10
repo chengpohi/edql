@@ -342,7 +342,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   }
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends ActionRequest[IndexResponse] {
-    def doc(fields: Map[String, AnyRef]): IndexRequestDefinition = {
+    def doc(fields: Map[String, Any]): IndexRequestDefinition = {
       indexRequestBuilder.setSource(fields.asJava)
       this
     }
@@ -357,7 +357,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    def fields(fs: Seq[(String, AnyRef)]): IndexRequestDefinition = {
+    def fields(fs: Seq[(String, Any)]): IndexRequestDefinition = {
       indexRequestBuilder.setSource(fs.toMap.asJava)
       this
     }
