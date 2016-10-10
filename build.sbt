@@ -2,7 +2,7 @@ name := "elasticshell"
 
 organization := "com.github.chengpohi"
 
-version := "0.2-snapshot"
+version := "0.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
