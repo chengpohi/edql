@@ -11,10 +11,10 @@ import com.github.chengpohi.parser.{ELKCommand, ELKParser, ParserUtils}
   */
 
 object ELKCommandRegistry {
-  private[this] val elasticCommand = new ElasticDSL(client)
-  private[this] val elkCommand = new ELKCommand(elasticCommand, responseGenerator)
-  private[this] val parserUtils = new ParserUtils
-  val elkParser = new ELKParser(elkCommand, parserUtils)
   val client = ElasticClientConnector.client
   val responseGenerator = new ResponseGenerator
+  val elasticCommand = new ElasticDSL(client)
+  val elkCommand = new ELKCommand(elasticCommand, responseGenerator)
+  val parserUtils = new ParserUtils
+  val elkParser = new ELKParser(elkCommand, parserUtils)
 }
