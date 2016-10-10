@@ -14,7 +14,7 @@ trait ElasticIndexer extends IndexerDSL {
 
   import DSLHelper._
 
-  def indexMap(indexName: String, indexType: String, docuemntMap: Map[String, AnyRef]): String = {
+  def indexMap(indexName: String, indexType: String, docuemntMap: Map[String, Any]): String = {
     val resp: Future[IndexResponse] = DSL {
       index into indexName / indexType doc docuemntMap
     }
