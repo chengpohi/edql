@@ -25,7 +25,6 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.1",
   "org.scalaz" %% "scalaz-effect" % "7.2.1",
   "org.scalanlp" %% "breeze" % "0.12",
-  "org.scalanlp" %% "breeze-natives" % "0.12",
   "org.scalanlp" %% "breeze-viz" % "0.12",
   "org.elasticsearch" % "elasticsearch" % "5.0.0-alpha5-SNAPSHOT",
   "org.elasticsearch.client" % "transport" % "5.0.0-alpha5-SNAPSHOT",
