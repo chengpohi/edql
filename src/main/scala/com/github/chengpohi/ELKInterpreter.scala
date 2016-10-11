@@ -13,7 +13,7 @@ import scala.concurrent.duration.Duration
 /**
   * Created by chengpohi on 1/3/16.
   */
-class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: ResponseGenerator}) {
+class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: ResponseGenerator}) {
 
   import env.elkParser._
   import env.responseGenerator._
@@ -49,8 +49,8 @@ class ELKRunEngine(env: {val elkParser: ELKParser; val responseGenerator: Respon
   }
 }
 
-object ELKRunEngine {
-  private val runEngine: ELKRunEngine = new ELKRunEngine(ELKCommandRegistry)
+object ELKInterpreter {
+  private val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandRegistry)
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {
