@@ -17,9 +17,9 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 object ElasticClientConnector {
   lazy val indexConfig = ConfigFactory.load("application.conf").getConfig("elastic")
   val clusterName: String = indexConfig.getString("cluster.name")
-  val isLocal: Boolean = indexConfig.getBoolean("local")
+  val isStandalone: Boolean = indexConfig.getBoolean("standalone")
 
-  val client = isLocal match {
+  val client = isStandalone match {
     case false => buildRemoteClient()
     case true => buildLocalClient()
   }
