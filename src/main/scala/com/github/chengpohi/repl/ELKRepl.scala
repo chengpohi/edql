@@ -2,7 +2,7 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.ELKInterpreter$
+import com.github.chengpohi.{ELKInterpreter, ELKInterpreter$}
 import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
