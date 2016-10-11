@@ -2,7 +2,7 @@ package com.github.chengpohi.parser
 
 import java.io.ByteArrayOutputStream
 
-import com.github.chengpohi.ELKRunEngine
+import com.github.chengpohi.ELKInterpreter$
 import com.github.chengpohi.helper.ELKCommandTestRegistry
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
@@ -13,7 +13,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec}
 class ELKParserTest extends FlatSpec with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
-  val runEngine: ELKRunEngine = new ELKRunEngine(ELKCommandTestRegistry)
+  val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandTestRegistry)
 
   before {
     runEngine.run("""create index ".elasticshell"""")
