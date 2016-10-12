@@ -5,6 +5,7 @@ import java.nio.file.Paths
 
 import com.typesafe.config.ConfigFactory
 import org.elasticsearch.client.Client
+import org.elasticsearch.common.network.NetworkModule
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.node.Node
@@ -35,14 +36,16 @@ object ElasticClientConnector {
 
   def buildRemoteClient(): Client = {
     val settings = Settings.builder()
-      .put("client.transport.ignore_cluster_name", true)
-      .put("transport.type", Netty3Plugin.NETTY_TRANSPORT_NAME)
+      .put("node.name", "elasticshell")
+      .put("cluster.name", clusterName)
+      .put(NetworkModule.TRANSPORT_TYPE_KEY, Netty3Plugin.NETTY_TRANSPORT_NAME)
       .build()
 
     val host: String = indexConfig.getString("host")
     val port: Int = indexConfig.getInt("port")
 
     val client = new PreBuiltTransportClient(settings)
-    client.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+      .addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+    client
   }
 }
