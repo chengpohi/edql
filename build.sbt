@@ -16,7 +16,7 @@ ivyScala := ivyScala.value map {
 
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
 
-val elkDenedpencies = Seq(
+val elkDependencies = Seq(
   "org.apache.lucene" % "lucene-analyzers-common" % "6.2.0",
   "org.apache.lucene" % "lucene-backward-codecs" % "6.2.0",
   "org.apache.lucene" % "lucene-grouping" % "6.2.0",
@@ -53,10 +53,9 @@ libraryDependencies ++= Seq(
   "org.elasticsearch.client" % "transport" % "5.0.0-rc1",
   "org.json4s" %% "json4s-native" % "3.2.10",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
-
 )
 
-libraryDependencies ++= elkDenedpencies
+libraryDependencies ++= elkDependencies
 
 
 assemblyMergeStrategy in assembly := {
