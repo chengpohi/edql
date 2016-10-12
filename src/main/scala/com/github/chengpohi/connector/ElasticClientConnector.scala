@@ -8,6 +8,7 @@ import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.node.Node
+import org.elasticsearch.transport.Netty3Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
@@ -34,8 +35,10 @@ object ElasticClientConnector {
 
   def buildRemoteClient(): Client = {
     val settings = Settings.builder()
-      .put("cluster.name", clusterName)
+      .put("client.transport.ignore_cluster_name", true)
+      .put("transport.type", Netty3Plugin.NETTY_TRANSPORT_NAME)
       .build()
+
     val host: String = indexConfig.getString("host")
     val port: Int = indexConfig.getInt("port")
 
