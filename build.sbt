@@ -16,6 +16,28 @@ ivyScala := ivyScala.value map {
 
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
 
+val elkDenedpencies = Seq(
+  "org.apache.lucene" % "lucene-analyzers-common" % "6.2.0",
+  "org.apache.lucene" % "lucene-backward-codecs" % "6.2.0",
+  "org.apache.lucene" % "lucene-grouping" % "6.2.0",
+  "org.apache.lucene" % "lucene-highlighter" % "6.2.0",
+  "org.apache.lucene" % "lucene-join" % "6.2.0",
+  "org.apache.lucene" % "lucene-memory" % "6.2.0",
+  "org.apache.lucene" % "lucene-misc" % "6.2.0",
+  "org.apache.lucene" % "lucene-queries" % "6.2.0",
+  "org.apache.lucene" % "lucene-queryparser" % "6.2.0",
+  "org.apache.lucene" % "lucene-sandbox" % "6.2.0",
+  "org.apache.lucene" % "lucene-spatial" % "6.2.0",
+  "org.apache.lucene" % "lucene-spatial-extras" % "6.2.0",
+  "org.apache.lucene" % "lucene-spatial3d" % "6.2.0",
+  "org.apache.lucene" % "lucene-suggest" % "6.2.0",
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "io.netty" % "netty-transport" % "4.1.5.Final",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % "2.8.1",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.8.1",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.1"
+)
+
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test",
   "com.typesafe" % "config" % "1.3.0",
@@ -28,12 +50,13 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-1.2-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-core" % "2.7",
-  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
-  "io.netty" % "netty-transport" % "4.1.5.Final",
   "org.elasticsearch.client" % "transport" % "5.0.0-rc1",
   "org.json4s" %% "json4s-native" % "3.2.10",
-  "org.json4s" %% "json4s-jackson" %"3.2.10"
+  "org.json4s" %% "json4s-jackson" % "3.2.10"
+
 )
+
+libraryDependencies ++= elkDenedpencies
 
 
 assemblyMergeStrategy in assembly := {
