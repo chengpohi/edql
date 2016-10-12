@@ -21,16 +21,20 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.0",
   "com.lihaoyi" %% "fastparse" % "0.3.4",
   "jline" % "jline" % "2.12",
-  "com.chuusai" %% "shapeless" % "2.3.1",
   "org.scalaz" %% "scalaz-core" % "7.2.1",
   "org.scalaz" %% "scalaz-effect" % "7.2.1",
   "org.scalanlp" %% "breeze" % "0.12",
   "org.scalanlp" %% "breeze-viz" % "0.12",
-  "org.elasticsearch" % "elasticsearch" % "5.0.0-alpha5-SNAPSHOT",
-  "org.elasticsearch.client" % "transport" % "5.0.0-alpha5-SNAPSHOT",
-  "log4j" % "log4j" % "1.2.17",
+  "org.apache.logging.log4j" % "log4j-1.2-api" % "2.7",
+  "org.apache.logging.log4j" % "log4j-api" % "2.7",
+  "org.apache.logging.log4j" % "log4j-core" % "2.7",
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "io.netty" % "netty-transport" % "4.1.5.Final",
+  "org.apache.lucene" % "lucene-queries" % "6.2.1",
+  "org.elasticsearch" % "elasticsearch" % "5.0.0-rc1",
+  "org.elasticsearch.client" % "transport" % "5.0.0-rc1",
   "org.json4s" %% "json4s-native" % "3.2.10",
-  "org.json4s" %% "json4s-jackson" % "3.2.10"
+  "org.json4s" %% "json4s-jackson" %"3.2.10"
 )
 
 

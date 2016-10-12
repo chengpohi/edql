@@ -2,7 +2,7 @@ package com.github.chengpohi.parser
 
 import java.io.ByteArrayOutputStream
 
-import com.github.chengpohi.ELKInterpreter$
+import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.helper.ELKCommandTestRegistry
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
