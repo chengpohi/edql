@@ -2,7 +2,7 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.{ELKInterpreter, ELKInterpreter$}
+import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
@@ -20,7 +20,6 @@ object ELKRepl {
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
   val elkRunEngine = new ELKInterpreter(ELKCommandRegistry)
-
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
