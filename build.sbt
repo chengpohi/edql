@@ -30,8 +30,6 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-core" % "2.7",
   "org.apache.httpcomponents" % "httpclient" % "4.5.2",
   "io.netty" % "netty-transport" % "4.1.5.Final",
-  "org.apache.lucene" % "lucene-queries" % "6.2.1",
-  "org.elasticsearch" % "elasticsearch" % "5.0.0-rc1",
   "org.elasticsearch.client" % "transport" % "5.0.0-rc1",
   "org.json4s" %% "json4s-native" % "3.2.10",
   "org.json4s" %% "json4s-jackson" %"3.2.10"
