@@ -14,9 +14,11 @@ import scala.concurrent.Future
   */
 class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
   extends ELKInstructionParser(elkCommand, parserUtils) {
+
   import WhitespaceApi._
+
   val methodParameter = P("var" ~ variableChars.rep.! ~ ",".?).map(s => "$" + s)
-  P("function" ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ "{" ).map(f =>
+  P("function" ~/ variableChars.rep.! ~ "(" ~ methodParameter.rep ~ ")" ~ "{").map(f =>
     (f._1, f._2.map(i => i -> "").toMap))
 
   val elkParser: P[Seq[ELK.AST]] = P(WL0 ~ instrument.rep ~ End)
@@ -27,16 +29,19 @@ class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
       case Success(f, state) => f map {
         case i: ELK.Instrument => i
       }
-      case f: Failure => Seq(Instrument(("error", Some(parserUtils.error), Seq(Str(f.msg), Str(f.extra.input)))))
+      case Failure(_, _, t) => Seq(Instrument(("error", Some(parserUtils.error), Seq(Str(t.traced.trace), Str(t.traced.trace)))))
     }
     (functions, instruments)
   }
 }
 
 object ELK {
+
   sealed trait AST extends Any {
     def value: Any
   }
+
   case class Instrument(value: (String, Option[Seq[Val] => Future[String]], Seq[Val])) extends AnyVal with AST
+
 }
 
