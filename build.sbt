@@ -2,7 +2,7 @@ name := "elasticshell"
 
 organization := "com.github.chengpohi"
 
-version := "0.2-SNAPSHOT"
+version := "0.2.1-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
@@ -41,7 +41,7 @@ val elkDependencies = Seq(
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test",
   "com.typesafe" % "config" % "1.3.0",
-  "com.lihaoyi" %% "fastparse" % "0.3.4",
+  "com.lihaoyi" %% "fastparse" % "0.4.1",
   "jline" % "jline" % "2.12",
   "org.scalaz" %% "scalaz-core" % "7.2.1",
   "org.scalaz" %% "scalaz-effect" % "7.2.1",
