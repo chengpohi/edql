@@ -19,5 +19,4 @@ project/plugins/project/
 *~
 project/target/*
 lib/*
-release/*
 local/
