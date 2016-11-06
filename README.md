@@ -3,6 +3,15 @@
 ## Introduction
 It is a **DSL** for elasticsearch. Have fun :)
 
+## Install
+
+Go to the [release folder](https://github.com/chengpohi/elasticshell/tree/master/release), choose a version and download.
+
+| Version | Elasticsearch Version |
+|-------------------------------------------|----------------|
+| 0.2.1             | 5.0.0 |
+
+
 ## Use it
 
 ### conf
