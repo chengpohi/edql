@@ -19,6 +19,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     runEngine.run("""create index ".elasticshell"""")
     runEngine.run( """ create index "test-parser-name" """)
     outContent.reset()
+    Thread.sleep(1000)
   }
 
   "ELKParser" should "get health of elasticsearch" in {
@@ -392,7 +393,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Thread.sleep(2000)
     val result = runEngine.run(
       """
-        |search in "test-index-name" / "test-index-type" join "test-index-name-1" "test-index-type-1" by "_tip_id"
+        |search in "test-index-name" / "test-index-type" join "test-index-name-1" / "test-index-type-1" by "_tip_id"
       """.stripMargin)
     Thread.sleep(1000)
     assert(result.contains("test-index-type"))
