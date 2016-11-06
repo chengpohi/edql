@@ -17,7 +17,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
   * Created by chengpohi on 3/19/15.
   */
 object ElasticClientConnector {
-  lazy val indexConfig = ConfigFactory.load("application.conf").getConfig("elastic")
+  lazy val indexConfig = ConfigFactory.load("elastic.conf").getConfig("elastic")
   val clusterName: String = indexConfig.getString("cluster.name")
   val isStandalone: Boolean = indexConfig.getBoolean("standalone")
 
