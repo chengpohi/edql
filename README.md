@@ -7,7 +7,7 @@ It is a **DSL** for elasticsearch. Have fun :)
 
 ### conf
 
-In the ***conf/application.conf***, you can configure your ***elasticsearch host, port and clustername***.
+In the ***conf/elastic.conf***, you can configure your ***elasticsearch host, port and clustername***.
 
 ### Start
 
