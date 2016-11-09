@@ -6,9 +6,9 @@ import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 
 /**
- * elasticshell
- * Created by chengpohi on 2/1/16.
- */
+  * elasticshell
+  * Created by chengpohi on 2/1/16.
+  */
 class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   val collectionParser = new CollectionParser
 
@@ -38,14 +38,16 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "jVal get" should "get field by name" in {
-     val Parsed.Success(value, _) = jsonExpr.parse(
+    val Parsed.Success(value, _) = jsonExpr.parse(
       """{
         |"user":{
         |"name" : "\\s+" , "age":23
         |}
         |}""".stripMargin)
-    assert(value.get("user").get("name") === Str("\\\\s+"))
+    assert(value.get("user").get("name") === Str("\\s+"))
     assert(value.get("user").get("age") === Num(23))
+    val Parsed.Success(value2, _) = jsonExpr.parse("""{"name" : "hello\n\nworld", "ppp":"fff"}""".stripMargin)
+    assert(value2.get("name").get === Str("hello\n\nworld"))
   }
 
 

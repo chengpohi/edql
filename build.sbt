@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-core" % "2.7",
   "org.elasticsearch.client" % "transport" % "5.0.0",
   "org.json4s" %% "json4s-native" % "3.2.10",
+  "org.apache.commons" % "commons-lang3" % "3.5",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
 )
 
@@ -48,4 +49,6 @@ compileScalaStyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).
 (scalastyleConfig in Test) := file("project/scalastyle-test-config.xml")
 
 (compile in Compile) <<= (compile in Compile) dependsOn compileScalaStyle
-(test in Test) := {(test in Test) dependsOn compileScalaStyle}
+(test in Test) := {
+  (test in Test) dependsOn compileScalaStyle
+}
