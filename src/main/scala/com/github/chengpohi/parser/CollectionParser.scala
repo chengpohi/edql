@@ -1,14 +1,15 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.collection.JsonCollection
-
 import fastparse.noApi._
+import org.apache.commons.lang3.StringEscapeUtils
 
 /**
- * elasticshell
- * Created by chengpohi on 2/1/16.
- */
-class CollectionParser extends Basic{
+  * elasticshell
+  * Created by chengpohi on 2/1/16.
+  */
+class CollectionParser extends Basic {
+
   import WhitespaceApi._
 
   val StringChars = NamedFunction(!"\"".contains(_: Char), "StringChars")
@@ -19,7 +20,13 @@ class CollectionParser extends Basic{
   val alphaChars = P(CharsWhile(AlphaChars))
   val collectionChars = P(CharsWhile(CollectionChars))
   val variableChars = P(CharIn('a' to 'z', 'A' to 'Z'))
-  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(JsonCollection.Str)
+
+  val hexDigit = P(CharIn('0' to '9', 'a' to 'f', 'A' to 'F'))
+  val unicodeEscape = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
+  val escape = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
+  val string =
+    P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+
   val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   val strOrVar = P(string | variable)
