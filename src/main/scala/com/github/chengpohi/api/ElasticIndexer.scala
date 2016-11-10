@@ -12,7 +12,7 @@ import scala.concurrent.{Await, Future}
   */
 trait ElasticIndexer extends IndexerDSL {
 
-  import DSLHelper._
+
 
   def indexMap(indexName: String, indexType: String, docuemntMap: Map[String, Any]): String = {
     val resp: Future[IndexResponse] = DSL {

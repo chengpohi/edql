@@ -33,8 +33,6 @@ import scala.concurrent.Future
   */
 trait ElasticManagement extends ManageDSL {
 
-  import DSLHelper._
-
   def nodeStats: Future[NodesStatsResponse] = DSL {
     node stats NodeType.ALL flag FlagType.ALL
   }
