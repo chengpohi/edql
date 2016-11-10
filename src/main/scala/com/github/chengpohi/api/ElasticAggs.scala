@@ -11,8 +11,6 @@ import scala.concurrent.Future
   */
 trait ElasticAggs extends AggsDSL {
 
-  import DSLHelper._
-
   def aggsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = DSL {
     aggs in indexName / indexType avg name
   }

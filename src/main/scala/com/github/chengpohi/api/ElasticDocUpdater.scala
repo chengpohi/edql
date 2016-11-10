@@ -11,7 +11,7 @@ import scala.concurrent.Future
   */
 trait ElasticDocUpdater {
   this: ElasticDocQuerier =>
-  import DSLHelper._
+
   def updateAllDocs(indexName: String, indexType: String, uf: Seq[(String, String)]): Future[String] = {
     Future {
       val res = queryAllByScan(indexName, Some(indexType))

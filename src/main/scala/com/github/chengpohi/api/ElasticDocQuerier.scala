@@ -18,7 +18,7 @@ trait ElasticDocQuerier extends QueryDSL {
   private val MAX_ALL_NUMBER: Int = 10000
   private val MAX_RETRIEVE_SIZE: Int = 500
 
-  import DSLHelper._
+
 
   def queryAll(indexName: String, indexType: String): Future[SearchResponse] = {
     DSL {

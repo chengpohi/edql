@@ -12,7 +12,7 @@ import scala.concurrent.Future
   */
 trait ElasticDocDeleter extends DeleterDSL {
 
-  import DSLHelper._
+
 
   def deleteIndex(indexName: String): Future[DeleteIndexResponse] = DSL {
     delete index indexName

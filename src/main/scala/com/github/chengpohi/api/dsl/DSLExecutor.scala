@@ -1,6 +1,6 @@
 package com.github.chengpohi.api.dsl
 
-import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 
 import scala.concurrent.{Future, Promise}
 
@@ -9,6 +9,7 @@ import scala.concurrent.{Future, Promise}
   * Created by chengpohi on 6/28/16.
   */
 trait DSLExecutor {
+
   abstract class ActionRequest[A] {
     def execute: Future[A]
   }
@@ -23,7 +24,18 @@ trait DSLExecutor {
     p.future
   }
 
+  implicit def buildFuture[A](f: ListenableActionFuture[A]): Future[A] = {
+    val p = Promise[A]()
+    f.addListener(new ActionListener[A] {
+      def onFailure(e: Exception): Unit = p.tryFailure(e)
+
+      def onResponse(resp: A): Unit = p.trySuccess(resp)
+    })
+    p.future
+  }
+
   object DSL {
     def apply[A](f: ActionRequest[A]): Future[A] = f.execute
   }
+
 }

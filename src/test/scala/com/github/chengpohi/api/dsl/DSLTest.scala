@@ -16,13 +16,20 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   val dsl = ELKCommandTestRegistry.elasticdsl
 
   import dsl._
-  import DSLHelper._
 
   before {
     DSL {
       create index "testindex"
     }
   }
+
+  it should "parse response to json" in {
+    val res = DSL {
+      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+    }.await
+    res.toJson should not be empty
+  }
+
 
   it should "index nest map" in {
     DSL {
