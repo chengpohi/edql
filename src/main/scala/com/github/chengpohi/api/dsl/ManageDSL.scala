@@ -17,7 +17,7 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
   * elasticshell
   * Created by chengpohi on 6/26/16.
   */
-trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
+trait ManageDSL extends DSLContext with DeleterDSL with QueryDSL{
   case object node {
     def stats(nodeIds: List[String]): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds: _*)

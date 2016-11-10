@@ -7,7 +7,7 @@ import org.elasticsearch.index.query.QueryBuilders
   * elasticshell
   * Created by chengpohi on 6/26/16.
   */
-trait AggsDSL extends DSLDefinition {
+trait AggsDSL extends DSLContext {
   case object aggs {
     def in(indexPath: IndexPath): SearchRequestDefinition = {
       val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexPath.indexName)
