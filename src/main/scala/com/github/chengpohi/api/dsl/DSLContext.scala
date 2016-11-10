@@ -1,7 +1,10 @@
 package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.helper.ResponseGenerator
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.action.search.SearchResponse
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -21,6 +24,18 @@ trait DSLContext extends DSLDefinition {
 
     implicit object IndexResponseMonoid extends Monoid[IndexResponse] {
       override def toJson(a: IndexResponse): String = responseGenerator.buildXContent(a)
+    }
+
+    implicit object DeleteIndexResponseMonoid extends Monoid[DeleteIndexResponse] {
+      override def toJson(a: DeleteIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
+    }
+
+    implicit object CreateIndexResponseMonoid extends Monoid[CreateIndexResponse] {
+      override def toJson(a: CreateIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
+    }
+
+    implicit object SearchResponseMonoid extends Monoid[SearchResponse] {
+      override def toJson(a: SearchResponse): String = responseGenerator.buildXContent(a)
     }
 
   }
@@ -57,5 +72,6 @@ trait DSLContext extends DSLDefinition {
       IndexPath(indexName, indexType)
     }
   }
+
 }
 
