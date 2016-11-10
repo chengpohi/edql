@@ -28,7 +28,7 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
     DSL {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
     } andThen {
-      case Success(f) => {
+      case Success(f) =>
         Thread.sleep(3000)
         DSL {
           search in "testindex"
@@ -39,7 +39,6 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
             assert(source.get(0) === "world")
             assert(source.get(1) === "foobar")
         }
-      }
     }
   }
 

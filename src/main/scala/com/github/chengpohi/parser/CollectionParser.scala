@@ -24,8 +24,10 @@ class CollectionParser extends Basic {
   val hexDigit = P(CharIn('0' to '9', 'a' to 'f', 'A' to 'F'))
   val unicodeEscape = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
   val escape = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
-  val string =
-    P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+  //val string =
+    //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+
 
   val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)

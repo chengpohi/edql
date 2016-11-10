@@ -37,6 +37,7 @@ import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 /**
   * elasticshell
@@ -71,11 +72,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[NodesStatsResponse]) => Unit = nodesStatsRequestBuilder.execute
+    override def execute: Future[NodesStatsResponse] = {
+      val f: ActionListener[NodesStatsResponse] => Unit = nodesStatsRequestBuilder.execute
+      f
+    }
   }
 
   case class NodeInfoRequestDefinition(nodesInfoRequestBuilder: NodesInfoRequestBuilder) extends ActionRequest[NodesInfoResponse] {
-    override def execute: (ActionListener[NodesInfoResponse]) => Unit = nodesInfoRequestBuilder.execute
+    override def execute: Future[NodesInfoResponse] = {
+      val f: ActionListener[NodesInfoResponse] => Unit = nodesInfoRequestBuilder.execute
+      f
+    }
   }
 
   case class IndicesStatsRequestDefinition(indicesStatsRequestBuilder: IndicesStatsRequestBuilder) extends ActionRequest[IndicesStatsResponse] {
@@ -84,11 +91,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[IndicesStatsResponse]) => Unit = indicesStatsRequestBuilder.execute
+    override def execute: Future[IndicesStatsResponse] = {
+      val f: ActionListener[IndicesStatsResponse] => Unit = indicesStatsRequestBuilder.execute
+      f
+    }
   }
 
   case class ClusterStatsRequestDefinition(clusterStatsRequestBuilder: ClusterStatsRequestBuilder) extends ActionRequest[ClusterStatsResponse] {
-    override def execute: (ActionListener[ClusterStatsResponse]) => Unit = clusterStatsRequestBuilder.execute
+    override def execute: Future[ClusterStatsResponse] = {
+      val f: ActionListener[ClusterStatsResponse] => Unit = clusterStatsRequestBuilder.execute
+      f
+    }
   }
 
   case class ClusterHealthRequestDefinition(clusterHealthRequestBuilder: ClusterHealthRequestBuilder) extends ActionRequest[ClusterHealthResponse] {
@@ -102,12 +115,18 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[ClusterHealthResponse]) => Unit = clusterHealthRequestBuilder.execute
+    override def execute: Future[ClusterHealthResponse] = {
+      val f: ActionListener[ClusterHealthResponse] => Unit = clusterHealthRequestBuilder.execute
+      f
+    }
   }
 
   case class ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder)
     extends ActionRequest[ClusterUpdateSettingsResponse] {
-    override def execute: (ActionListener[ClusterUpdateSettingsResponse]) => Unit = clusterUpdateSettingsRequestBuilder.execute
+    override def execute: Future[ClusterUpdateSettingsResponse] = {
+      val f: ActionListener[ClusterUpdateSettingsResponse] => Unit = clusterUpdateSettingsRequestBuilder.execute
+      f
+    }
   }
 
   case class UpdateSettingsRequestDefinition(updateSettingsRequestBuilder: UpdateSettingsRequestBuilder) extends ActionRequest[UpdateSettingsResponse] {
@@ -116,7 +135,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[UpdateSettingsResponse]) => Unit = updateSettingsRequestBuilder.execute
+    override def execute: Future[UpdateSettingsResponse] = {
+      val f: ActionListener[UpdateSettingsResponse] => Unit = updateSettingsRequestBuilder.execute
+      f
+    }
   }
 
   case class PutRepositoryDefinition(putRepositoryRequestBuilder: PutRepositoryRequestBuilder) extends ActionRequest[PutRepositoryResponse] {
@@ -130,7 +152,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[PutRepositoryResponse]) => Unit = putRepositoryRequestBuilder.execute
+    override def execute: Future[PutRepositoryResponse] = {
+      val f: ActionListener[PutRepositoryResponse] => Unit = putRepositoryRequestBuilder.execute
+      f
+    }
   }
 
   case class CreateSnapshotDefinition(snapshotName: String) extends ActionRequest[CreateSnapshotResponse] {
@@ -141,7 +166,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[CreateSnapshotResponse]) => Unit = createSnapshotRequestBuilder.execute
+    override def execute: Future[CreateSnapshotResponse] = {
+      val f: ActionListener[CreateSnapshotResponse] => Unit = createSnapshotRequestBuilder.execute
+      f
+    }
   }
 
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends ActionRequest[CreateIndexResponse] {
@@ -150,7 +178,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[CreateIndexResponse]) => Unit = createIndexRequestBuilder.execute
+    override def execute: Future[CreateIndexResponse] = {
+      val f: ActionListener[CreateIndexResponse] => Unit = createIndexRequestBuilder.execute
+      f
+    }
   }
 
   case class GetSnapshotDefinition(snapshotName: String) extends ActionRequest[GetSnapshotsResponse] {
@@ -164,7 +195,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[GetSnapshotsResponse]) => Unit = getSnapshotsRequestBuilder.execute
+    override def execute: Future[GetSnapshotsResponse] = {
+      val f: ActionListener[GetSnapshotsResponse] => Unit = getSnapshotsRequestBuilder.execute
+      f
+    }
   }
 
   case class DeleteSnapshotDefinition(snapshotName: String) extends ActionRequest[DeleteSnapshotResponse] {
@@ -175,11 +209,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[DeleteSnapshotResponse]) => Unit = deleteSnapshotRequestBuilder.execute
+    override def execute: Future[DeleteSnapshotResponse] = {
+      val f: ActionListener[DeleteSnapshotResponse] => Unit = deleteSnapshotRequestBuilder.execute
+      f
+    }
   }
 
   case class GetMappingDefinition(getMappingsRequestBuilder: GetMappingsRequestBuilder) extends ActionRequest[GetMappingsResponse] {
-    override def execute: (ActionListener[GetMappingsResponse]) => Unit = getMappingsRequestBuilder.execute
+    override def execute: Future[GetMappingsResponse] = {
+      val f: ActionListener[GetMappingsResponse] => Unit = getMappingsRequestBuilder.execute
+      f
+    }
   }
 
   case class PutMappingRequestDefinition(putMappingRequestBuilder: PutMappingRequestBuilder) extends ActionRequest[PutMappingResponse] {
@@ -188,15 +228,24 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[PutMappingResponse]) => Unit = putMappingRequestBuilder.execute
+    override def execute: Future[PutMappingResponse] = {
+      val f: ActionListener[PutMappingResponse] => Unit = putMappingRequestBuilder.execute
+      f
+    }
   }
 
   case class ClusterStateRequestDefinition(clusterStateRequestBuilder: ClusterStateRequestBuilder) extends ActionRequest[ClusterStateResponse] {
-    override def execute: (ActionListener[ClusterStateResponse]) => Unit = clusterStateRequestBuilder.execute
+    override def execute: Future[ClusterStateResponse] = {
+      val f: ActionListener[ClusterStateResponse] => Unit = clusterStateRequestBuilder.execute
+      f
+    }
   }
 
   case class GetSettingsRequestDefinition(getSettingsRequestBuilder: GetSettingsRequestBuilder) extends ActionRequest[GetSettingsResponse] {
-    override def execute: (ActionListener[GetSettingsResponse]) => Unit = getSettingsRequestBuilder.execute
+    override def execute: Future[GetSettingsResponse] = {
+      val f: ActionListener[GetSettingsResponse] => Unit = getSettingsRequestBuilder.execute
+      f
+    }
   }
 
   case class AddAliasRequestDefinition(targetAlias: String) extends ActionRequest[IndicesAliasesResponse] {
@@ -207,7 +256,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[IndicesAliasesResponse]) => Unit = indicesAliasesRequestBuilder.execute
+    override def execute: Future[IndicesAliasesResponse] = {
+      val f: ActionListener[IndicesAliasesResponse] => Unit = indicesAliasesRequestBuilder.execute
+      f
+    }
   }
 
   case class RestoreSnapshotRequestDefinition(snapshotName: String) extends ActionRequest[RestoreSnapshotResponse] {
@@ -218,18 +270,40 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[RestoreSnapshotResponse]) => Unit = restoreSnapshotRequestBuilder.execute
+    override def execute: Future[RestoreSnapshotResponse] = {
+      val f: ActionListener[RestoreSnapshotResponse] => Unit = restoreSnapshotRequestBuilder.execute
+      f
+    }
   }
 
   case class CloseIndexRequestDefinition(closeIndexRequestBuilder: CloseIndexRequestBuilder) extends ActionRequest[CloseIndexResponse] {
-    override def execute: (ActionListener[CloseIndexResponse]) => Unit = closeIndexRequestBuilder.execute
+    override def execute: Future[CloseIndexResponse] = {
+      val f: ActionListener[CloseIndexResponse] => Unit = closeIndexRequestBuilder.execute
+      f
+    }
   }
 
   case class SearchScrollRequestDefinition(searchScrollRequestBuilder: SearchScrollRequestBuilder) extends ActionRequest[SearchResponse] {
-    override def execute: (ActionListener[SearchResponse]) => Unit = searchScrollRequestBuilder.execute
+    override def execute: Future[SearchResponse] = {
+      val f: ActionListener[SearchResponse] => Unit = searchScrollRequestBuilder.execute
+      f
+    }
   }
 
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends ActionRequest[SearchResponse] {
+    var _joinSearchRequestBuilder: Option[SearchRequestBuilder] = None
+    var _joinField: Option[String] = None
+
+    def join(indexPath: IndexPath): SearchRequestDefinition = {
+      _joinSearchRequestBuilder = Some(client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType))
+      this
+    }
+
+    def by(field: String): SearchRequestDefinition = {
+      _joinField = Some(field)
+      this
+    }
+
     def size(i: Int): SearchRequestDefinition = {
       searchRequestBuilder.setSize(i)
       this
@@ -298,16 +372,25 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[SearchResponse]) => Unit = searchRequestBuilder.execute
+    override def execute: Future[SearchResponse] = {
+      val f: ActionListener[SearchResponse] => Unit = searchRequestBuilder.execute
+      f
+    }
   }
 
   case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
     extends ActionRequest[PendingClusterTasksResponse] {
-    override def execute: (ActionListener[PendingClusterTasksResponse]) => Unit = pendingClusterTasksRequestBuilder.execute
+    override def execute: Future[PendingClusterTasksResponse] = {
+      val f: ActionListener[PendingClusterTasksResponse] => Unit = pendingClusterTasksRequestBuilder.execute
+      f
+    }
   }
 
   case class OpenIndexRequestDefinition(openIndexRequestBuilder: OpenIndexRequestBuilder) extends ActionRequest[OpenIndexResponse] {
-    override def execute: (ActionListener[OpenIndexResponse]) => Unit = openIndexRequestBuilder.execute
+    override def execute: Future[OpenIndexResponse] = {
+      val f: ActionListener[OpenIndexResponse] => Unit = openIndexRequestBuilder.execute
+      f
+    }
   }
 
   case class AnalyzeRequestDefinition(analyzeRequestBuilder: AnalyzeRequestBuilder) extends ActionRequest[AnalyzeResponse] {
@@ -321,11 +404,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[AnalyzeResponse]) => Unit = analyzeRequestBuilder.execute
+    override def execute: Future[AnalyzeResponse] = {
+      val f: ActionListener[AnalyzeResponse] => Unit = analyzeRequestBuilder.execute
+      f
+    }
   }
 
   case class DeleteIndexRequestDefinition(deleteIndexRequestBuilder: DeleteIndexRequestBuilder) extends ActionRequest[DeleteIndexResponse] {
-    override def execute: (ActionListener[DeleteIndexResponse]) => Unit = deleteIndexRequestBuilder.execute
+    override def execute: Future[DeleteIndexResponse] = {
+      val f: ActionListener[DeleteIndexResponse] => Unit = deleteIndexRequestBuilder.execute
+      f
+    }
   }
 
   case class IndexPath(indexName: String, indexType: String)
@@ -346,7 +435,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[DeleteResponse]) => Unit = deleteRequestBuilder.execute
+    override def execute: Future[DeleteResponse] = {
+      val f: ActionListener[DeleteResponse] => Unit = deleteRequestBuilder.execute
+      f
+    }
   }
 
   case class UpdateRequestDefinition(documentId: String) extends ActionRequest[UpdateResponse] {
@@ -362,13 +454,21 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
+    def doc(fields: String): UpdateRequestDefinition = {
+      updateRequestBuilder.setDoc(fields)
+      this
+    }
+
     def docAsUpsert(fields: Seq[(String, String)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDocAsUpsert(true)
       updateRequestBuilder.setDoc(fields.toMap.asJava)
       this
     }
 
-    override def execute: (ActionListener[UpdateResponse]) => Unit = updateRequestBuilder.execute
+    override def execute: Future[UpdateResponse] = {
+      val f: ActionListener[UpdateResponse] => Unit = updateRequestBuilder.execute
+      f
+    }
   }
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends ActionRequest[IndexResponse] {
@@ -393,7 +493,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[IndexResponse]) => Unit = indexRequestBuilder.execute
+    override def execute: Future[IndexResponse] = {
+      val f: ActionListener[IndexResponse] => Unit = indexRequestBuilder.execute
+      f
+    }
   }
 
   case class GetRequestDefinition(documentId: String) extends ActionRequest[GetResponse] {
@@ -404,7 +507,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    override def execute: (ActionListener[GetResponse]) => Unit = getRequestBuilder.execute
+    override def execute: Future[GetResponse] = {
+      val f: ActionListener[GetResponse] => Unit = getRequestBuilder.execute
+      f
+    }
   }
 
 }

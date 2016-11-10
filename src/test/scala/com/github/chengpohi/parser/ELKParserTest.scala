@@ -359,7 +359,7 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "ELKParser" should "create analyzer" in {
-    runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\\s+"}}}""")
+    runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\s+"}}}""")
     Thread.sleep(1000)
     val result = runEngine.run("""".elasticshell" settings""")
     assert(result.contains("myAnalyzer"))

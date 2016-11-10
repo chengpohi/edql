@@ -10,10 +10,10 @@ import scala.concurrent.{Future, Promise}
   */
 trait DSLExecutor {
   abstract class ActionRequest[A] {
-    def execute: ActionListener[A] => Unit
+    def execute: Future[A]
   }
 
-  def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
+  implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
     f(new ActionListener[A] {
       def onFailure(e: Exception): Unit = p.tryFailure(e)
@@ -24,6 +24,6 @@ trait DSLExecutor {
   }
 
   object DSL {
-    def apply[A](f: ActionRequest[A]): Future[A] = buildFuture(f.execute)
+    def apply[A](f: ActionRequest[A]): Future[A] = f.execute
   }
 }
