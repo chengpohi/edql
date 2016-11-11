@@ -1,6 +1,7 @@
 package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.api.ElasticBase
+import com.github.chengpohi.collection.JsonCollection.Val
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
 import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
 import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
@@ -32,6 +33,7 @@ import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.write
 
@@ -272,6 +274,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends ActionRequest[SearchResponse] {
     var _joinSearchRequestBuilder: Option[SearchRequestBuilder] = None
     var _joinField: Option[String] = None
+    var _dateHistogramAggregationBuilder: DateHistogramAggregationBuilder = _
 
     def join(indexPath: IndexPath): SearchRequestDefinition = {
       _joinSearchRequestBuilder = Some(client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType))
@@ -346,12 +349,42 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
+    def hist(name: String): SearchRequestDefinition = {
+      _dateHistogramAggregationBuilder = AggregationBuilders.dateHistogram(name)
+      this
+    }
+
+    def interval(_internalval: String): SearchRequestDefinition = {
+      val interval: DateHistogramInterval = _internalval.toLowerCase() match {
+        case "week" => DateHistogramInterval.WEEK
+        case "hour" => DateHistogramInterval.HOUR
+        case "second" => DateHistogramInterval.SECOND
+        case "month" => DateHistogramInterval.MONTH
+        case "year" => DateHistogramInterval.YEAR
+        case "day" => DateHistogramInterval.DAY
+        case "quarter" => DateHistogramInterval.QUARTER
+        case "minute" => DateHistogramInterval.MINUTE
+      }
+      _dateHistogramAggregationBuilder.dateHistogramInterval(interval)
+      this
+    }
+
+    def field(_name: String): SearchRequestDefinition = {
+      _dateHistogramAggregationBuilder.field(_name)
+      this
+    }
+
     def term(name: String): SearchRequestDefinition = {
       searchRequestBuilder.addAggregation(AggregationBuilders.terms(name).field(name).size(Integer.MAX_VALUE))
       this
     }
 
-    override def execute: Future[SearchResponse] = searchRequestBuilder.execute
+    override def execute: Future[SearchResponse] = {
+      if (_dateHistogramAggregationBuilder != null) {
+        searchRequestBuilder.addAggregation(_dateHistogramAggregationBuilder)
+      }
+      searchRequestBuilder.execute
+    }
   }
 
   case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
