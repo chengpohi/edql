@@ -14,6 +14,7 @@ trait ElasticAggs extends AggsDSL {
   def aggsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = DSL {
     aggs in indexName / indexType avg name
   }
+
   def termsSearch(indexName: String, indexType: String, name: String): Future[SearchResponse] = DSL {
     aggs in indexName / indexType term name
   }

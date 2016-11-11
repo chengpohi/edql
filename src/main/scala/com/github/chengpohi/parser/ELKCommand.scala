@@ -40,6 +40,7 @@ import scala.concurrent.Future
 class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: ResponseGenerator) {
 
   import responseGenerator._
+  import elasticCommand._
 
   def getMapping: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
@@ -235,6 +236,15 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
     case Seq(indexName, indexType, name) => {
       val aggsSearch: Future[SearchResponse] =
         elasticCommand.termsSearch(indexName.extract[String], indexType.extract[String], name.extract[String])
+      aggsSearch.map(s => buildSearchResponse(s))
+    }
+  }
+
+  def histAggs: Seq[Val] => Future[String] = {
+    case Seq(indexName, indexType, name, _interval, _field) => {
+      val aggsSearch: Future[SearchResponse] = DSL {
+        aggs in indexName.extract[String] / indexType.extract[String] hist name.extract[String] interval _interval.extract[String] field _field.extract[String]
+      }
       aggsSearch.map(s => buildSearchResponse(s))
     }
   }
