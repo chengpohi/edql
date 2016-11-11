@@ -203,8 +203,24 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     assert(result.contains( """23"""))
   }
 
+  "ELKParser" should "hist aggs" in {
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello1","created_at": 1478844495882},
+        |{"name": "hello2","created_at": 1478844595882},
+        |{"name": "hello3","created_at": 1478844695882},
+        |{"name": "hello4","created_at": 1478844795882},
+        |{"name": "hello5","created_at": 1478844895882},
+        |{"name": "hello6","created_at": 1478844995882},
+        |{"name": "hello7","created_at": 1598846395882}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val result = runEngine.run( """aggs in "test-parser-name" / "test-parser-type" hist "test" interval "day" field "created_at"""")
+    assert(result.contains( """aggregations"""))
+  }
+
   "ELKParser" should "aggs terms" in {
-    val p=  runEngine.run(
+    val p = runEngine.run(
       """mapping "test-index2" {
         |  "mappings": {
         |    "test-parser-type": {
