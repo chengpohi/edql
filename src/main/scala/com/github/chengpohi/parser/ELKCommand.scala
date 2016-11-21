@@ -1,5 +1,7 @@
 package com.github.chengpohi.parser
 
+import java.nio.file.{Files, Paths}
+
 import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection._
 import com.github.chengpohi.helper.ResponseGenerator
@@ -30,6 +32,7 @@ import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -309,6 +312,23 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
     case Seq(indexName) => {
       val openIndexResponse: Future[OpenIndexResponse] = elasticCommand.openIndex(indexName.extract[String])
       openIndexResponse.map(s => buildAcknowledgedResponse(s))
+    }
+  }
+
+  def dumpIndex: Seq[Val] => Future[String] = {
+    case Seq(indexName, fileName) => {
+      val _fileName = fileName.extract[String]
+      val path = Paths.get(_fileName)
+      val searchResponse = DSL {
+        search in indexName.extract[String]
+      }
+      searchResponse.map(f => {
+        val res = f.getHits.asScala.map(i => {
+          s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
+        })
+        Files.write(path, res.asJava)
+        path.toUri.toString
+      })
     }
   }
 
