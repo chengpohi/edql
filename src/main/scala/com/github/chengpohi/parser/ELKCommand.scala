@@ -360,5 +360,5 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def beautyJson(): String => String = {
     beautyJSON
   }
-  implicit def valToString(v: Val): String = v
+  implicit def valToString(v: Val): String = v.extract[String]
 }
