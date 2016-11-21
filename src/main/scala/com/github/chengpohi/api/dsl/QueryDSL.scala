@@ -10,7 +10,7 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollReques
   * elasticshell
   * Created by chengpohi on 6/29/16.
   */
-trait QueryDSL extends DSLContext with IndexerDSL{
+trait QueryDSL extends DSLDefinition with IndexerDSL{
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)

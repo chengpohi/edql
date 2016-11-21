@@ -1,6 +1,6 @@
 package com.github.chengpohi.api
 
-import com.github.chengpohi.api.dsl.DSLContext
+import com.github.chengpohi.api.dsl.DSLDefinition
 import org.elasticsearch.client.{Client, ClusterAdminClient}
 
 import scala.concurrent.duration.Duration
@@ -17,7 +17,7 @@ class ElasticDSL(cl: Client) extends ElasticManagement
                       with ElasticDocQuerier
                       with ElasticAnalyzer
                       with ElasticAggs
-                      with ElasticBase with DSLContext{
+                      with ElasticBase with DSLDefinition{
   val client: Client = cl
   val clusterClient: ClusterAdminClient = client.admin.cluster()
   val indicesClient = client.admin.indices()

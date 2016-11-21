@@ -3,6 +3,7 @@ package com.github.chengpohi.api.dsl
 import java.util
 
 import com.github.chengpohi.helper.ELKCommandTestRegistry
+import org.elasticsearch.action.search.SearchResponse
 import org.scalatest.{BeforeAndAfter, FlatSpec, ShouldMatchers}
 
 /**
@@ -16,6 +17,9 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
   before {
     DSL {
+      delete index "*"
+    }.await
+    DSL {
       create index "testindex"
     }.await
   }
@@ -25,6 +29,19 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
     }.await
     res.toJson should not be empty
+  }
+  it should "scroll search to json" in {
+    DSL {
+      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+    }.await
+    DSL {
+      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+    }.await
+    val res = DSL {
+      search in "testindex" size 1 scroll "10m"
+    }.await
+    val result = res.take(5).toList
+    result.size should be(2)
   }
 
 
