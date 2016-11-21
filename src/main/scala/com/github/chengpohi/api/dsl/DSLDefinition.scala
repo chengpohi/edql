@@ -1,7 +1,6 @@
 package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.api.ElasticBase
-import com.github.chengpohi.collection.JsonCollection.Val
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
 import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
 import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
@@ -39,12 +38,13 @@ import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * elasticshell
   * Created by chengpohi on 6/28/16.
   */
-trait DSLDefinition extends ElasticBase with DSLExecutor {
+trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
   implicit val formats = DefaultFormats
 
   abstract class FlagType
@@ -339,9 +339,9 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       this
     }
 
-    def scroll(s: String): SearchRequestDefinition = {
+    def scroll(s: String): ScrollSearchRequestDefinition = {
       searchRequestBuilder.setScroll(s)
-      this
+      ScrollSearchRequestDefinition(this)
     }
 
     def avg(name: String): SearchRequestDefinition = {
@@ -387,6 +387,26 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
     }
   }
 
+
+  case class ScrollSearchRequestDefinition(searchRequestDefinition: SearchRequestDefinition) extends ActionRequest[Stream[SearchResponse]] {
+    private def fetch(previous: String) = {
+      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(previous)
+      val searchRequestDefinition = SearchScrollRequestDefinition(searchScrollRequestBuilder)
+      searchRequestDefinition.execute.await
+    }
+
+    private def toStream(current: SearchResponse): Stream[SearchResponse] = {
+      Option(current.getScrollId) match {
+        case None => current #:: Stream.empty
+        case Some(scrollId) => current #:: toStream(fetch(scrollId))
+      }
+    }
+
+    override def execute: Future[Stream[SearchResponse]] = {
+      searchRequestDefinition.execute.map(head => toStream(head))
+    }
+  }
+
   case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
     extends ActionRequest[PendingClusterTasksResponse] {
     override def execute: Future[PendingClusterTasksResponse] = {
@@ -421,8 +441,6 @@ trait DSLDefinition extends ElasticBase with DSLExecutor {
       deleteIndexRequestBuilder.execute
     }
   }
-
-  case class IndexPath(indexName: String, indexType: String)
 
 
   case class DeleteRequestDefinition(deleteRequestBuilder: DeleteRequestBuilder) extends ActionRequest[DeleteResponse] {

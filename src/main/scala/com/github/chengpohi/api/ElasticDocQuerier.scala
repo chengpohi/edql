@@ -19,7 +19,6 @@ trait ElasticDocQuerier extends QueryDSL {
   private val MAX_RETRIEVE_SIZE: Int = 500
 
 
-
   def queryAll(indexName: String, indexType: String): Future[SearchResponse] = {
     DSL {
       search in indexName / indexType query "*" from 0 size MAX_ALL_NUMBER
@@ -31,6 +30,7 @@ trait ElasticDocQuerier extends QueryDSL {
       search in indexName / indexType mth m from 0 size MAX_ALL_NUMBER
     }
   }
+
   def termQuery(indexName: String, indexType: String, terms: List[(String, String)]): Future[SearchResponse] = {
     DSL {
       search in indexName / indexType must terms from 0 size MAX_ALL_NUMBER
@@ -52,32 +52,18 @@ trait ElasticDocQuerier extends QueryDSL {
 
   def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))
                     (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[SearchResponse] = {
-    val res = DSL {
-      search in indexName / indexType.get scroll "10m" size maxRetrieveSize
-    }
-
-    def fetch(previous: SearchResponse) = {
-      DSL {
-        search scroll previous.getScrollId
-      }
-    }
-
-    def toStream(current: Future[SearchResponse]): Stream[SearchResponse] = {
-      val result = Await.result(current, Duration.Inf)
-      result.getScrollId.isEmpty match {
-        case false => result #:: Stream.empty
-        case true => result #:: toStream(fetch(result))
-      }
-    }
-    toStream(res)
+    DSL {
+      search in indexName / indexType.get size maxRetrieveSize scroll "10m"
+    }.await
   }
 
   def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]): Unit = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s => DSL {
-          index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
-        }
+        s =>
+          DSL {
+            index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
+          }
       }
     })
   }
@@ -92,9 +78,10 @@ trait ElasticDocQuerier extends QueryDSL {
                       indexType: String, field: Seq[(String, String)]): Unit = {
     response.foreach(r => {
       r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s => DSL {
-          update id s.getId doc field in indexName / indexType
-        }
+        s =>
+          DSL {
+            update id s.getId doc field in indexName / indexType
+          }
       }
     })
   }

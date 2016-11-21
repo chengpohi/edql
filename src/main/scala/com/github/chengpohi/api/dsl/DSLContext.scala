@@ -38,7 +38,7 @@ import scala.concurrent.{Await, Future}
   * Created by xiachen on 10/11/2016.
   */
 
-trait DSLContext extends DSLDefinition {
+trait DSLContext {
   val responseGenerator = new ResponseGenerator
 
   trait Monoid[A] {
@@ -159,6 +159,13 @@ trait DSLContext extends DSLDefinition {
       override def toJson(a: GetResponse): String = responseGenerator.buildXContent(a)
     }
 
+    implicit object StreamSearchResponseMonoid extends Monoid[Stream[SearchResponse]] {
+      override def toJson(a: Stream[SearchResponse]): String = {
+        val s = a.map(s => s.toJson)
+        responseGenerator.buildStream(s)
+      }
+    }
+
   }
 
   trait MonoidOp[A] {
@@ -199,6 +206,6 @@ trait DSLContext extends DSLDefinition {
       IndexPath(indexName.extract[String], indexType.extract[String])
     }
   }
-
+  case class IndexPath(indexName: String, indexType: String)
 }
 
