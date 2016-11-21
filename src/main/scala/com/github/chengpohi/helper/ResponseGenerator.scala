@@ -94,6 +94,10 @@ class ResponseGenerator {
     write(tuples)
   }
 
+  def buildStream(s: Stream[String]): String = {
+    write(s)
+  }
+
 
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)

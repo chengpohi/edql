@@ -7,7 +7,7 @@ import org.elasticsearch.action.delete.DeleteRequestBuilder
   * elasticshell
   * Created by chengpohi on 6/28/16.
   */
-trait DeleterDSL extends DSLContext {
+trait DeleterDSL extends DSLDefinition {
   case object delete {
     def index(indexName: String): DeleteIndexRequestDefinition = {
       val deleteIndexRequestBuilder: DeleteIndexRequestBuilder = indicesClient.prepareDelete(indexName)
