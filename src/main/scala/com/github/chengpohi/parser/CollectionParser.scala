@@ -25,14 +25,22 @@ class CollectionParser extends Basic {
   val unicodeEscape = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
   val escape = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
   //val string =
-    //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+  //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
   val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
 
   val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   val strOrVar = P(string | variable)
-  val number = P(CharIn('0' to '9').rep(1)).!.map(x => JsonCollection.Num(x.toDouble))
+  val Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
+  val digits = P(CharsWhile(Digits))
+  val exponent = P(CharIn("eE") ~ CharIn("+-").? ~ digits)
+  val fractional = P("." ~ digits)
+  val integral = P("0" | CharIn('1' to '9') ~ digits.?)
+
+  val number = P(CharIn("+-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
+    x => JsonCollection.Num(x.toDouble)
+  )
   val pair = P(string.map(_.value) ~/ ":" ~/ jsonExpr)
   val obj = P("{" ~/ pair.rep(sep = ",".~/) ~ "}").map(JsonCollection.Obj(_: _*))
 

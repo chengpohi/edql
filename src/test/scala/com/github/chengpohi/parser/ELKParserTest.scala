@@ -1,16 +1,20 @@
 package com.github.chengpohi.parser
 
 import java.io.ByteArrayOutputStream
+import java.net.URI
+import java.nio.file.{Files, Paths}
 
 import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.scalatest.{BeforeAndAfter, FlatSpec}
+import org.scalatest.{BeforeAndAfter, FlatSpec, ShouldMatchers}
+
+import scala.io.Source
 
 /**
   * elasticservice
   * Created by chengpohi on 1/19/16.
   */
-class ELKParserTest extends FlatSpec with BeforeAndAfter {
+class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
   val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandTestRegistry)
@@ -217,6 +221,31 @@ class ELKParserTest extends FlatSpec with BeforeAndAfter {
     Thread.sleep(2000)
     val result = runEngine.run( """aggs in "test-parser-name" / "test-parser-type" hist "test" interval "day" field "created_at"""")
     assert(result.contains( """aggregations"""))
+  }
+  "ELKParser" should "dump index" in {
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello1","created_at": 1478844495882},
+        |{"name": "hello2","created_at": 1478844595882},
+        |{"name": "hello3","created_at": 1478844695882},
+        |{"name": "hello4","created_at": 1478844795882},
+        |{"name": "hello5","created_at": 1478844895882},
+        |{"name": "hello6","created_at": 1478844995882},
+        |{"name": "hello7","created_at": 1598846395882}
+        |] """.stripMargin)
+    Thread.sleep(2000)
+    val uri = runEngine.run( """dump index "test-parser-name" > "dump.txt"""")
+    val u: URI = new URI(uri)
+    Source
+      .fromFile(Paths.get(u).toFile)
+      .getLines()
+      .foreach(s => {
+        runEngine.run(s)
+      })
+    Thread.sleep(2000)
+    val result = runEngine.run( """count "test-parser-name"""")
+    result should contain inOrder('1', '4')
+    Files.delete(Paths.get(u))
   }
 
   "ELKParser" should "aggs terms" in {
