@@ -47,7 +47,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
 
   def getMapping: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val eventualMappingsResponse: Future[GetMappingsResponse] = elasticCommand.getMapping(indexName.extract[String])
+      val eventualMappingsResponse: Future[GetMappingsResponse] = elasticCommand.getMapping(indexName)
       eventualMappingsResponse.map(buildGetMappingResponse)
     }
   }
@@ -55,7 +55,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def createIndex: Seq[Val] => Future[String] = {
     {
       case Seq(indexName) =>
-        val createResponse = elasticCommand.createIndex(indexName.extract[String])
+        val createResponse = elasticCommand.createIndex(indexName)
         createResponse.map(buildAcknowledgedResponse)
     }
   }
@@ -97,7 +97,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
 
   def indexSettings: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val getSettingsResponse: Future[GetSettingsResponse] = elasticCommand.indexSettings(indexName.extract[String])
+      val getSettingsResponse: Future[GetSettingsResponse] = elasticCommand.indexSettings(indexName)
       getSettingsResponse.map(s => buildGetSettingsResponse(s))
     }
   }
@@ -112,18 +112,18 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
 
   def count: Seq[Val] => Future[String] = {
     case Seq(indexName) =>
-      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.countCommand(indexName.extract[String])
+      val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.countCommand(indexName)
       eventualRichSearchResponse.map(s => buildXContent(s))
   }
 
   def delete: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = elasticCommand.deleteIndex(indexName.extract[String])
+      val eventualDeleteIndexResponse: Future[DeleteIndexResponse] = elasticCommand.deleteIndex(indexName)
       eventualDeleteIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
     case Seq(indexName, indexType, id) => {
-      val eventualDeleteIndexResponse: Future[DeleteResponse] = elasticCommand.deleteById(indexName.extract[String],
-        indexType.extract[String], id.extract[String])
+      val eventualDeleteIndexResponse: Future[DeleteResponse] = elasticCommand.deleteById(indexName,
+        indexType, id)
       eventualDeleteIndexResponse.map(s => buildIsFound(s))
     }
   }
@@ -131,8 +131,8 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def matchQuery: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, queryData) => {
       val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.matchQuery(
-        indexName.extract[String],
-        indexType.extract[String],
+        indexName,
+        indexType,
         queryData.extract[Map[String, String]].toList.head)
       eventualRichSearchResponse.map(s => buildXContent(s))
     }
@@ -140,43 +140,43 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
 
   def query: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType) =>
-      elasticCommand.queryAll(indexName.extract[String], indexType.extract[String]).map(s => buildXContent(s))
+      elasticCommand.queryAll(indexName, indexType).map(s => buildXContent(s))
     case Seq(indexName, indexType, queryData) =>
       val eventualRichSearchResponse: Future[SearchResponse] = elasticCommand.termQuery(
-        indexName.extract[String],
-        indexType.extract[String],
+        indexName,
+        indexType,
         queryData.extract[Map[String, String]].toList)
       eventualRichSearchResponse.map(s => buildXContent(s))
     case Seq(indexName) =>
-      elasticCommand.queryAll(indexName.extract[String], "*").map(s => buildXContent(s))
+      elasticCommand.queryAll(indexName, "*").map(s => buildXContent(s))
     case Seq(indexName, indexType, joinIndexName, joinIndexType, field) =>
-      Future.sequence(elasticCommand.joinQuery(indexName.extract[String], indexType.extract[String],
-        joinIndexName.extract[String], joinIndexType.extract[String], field.extract[String])).map(buildStreamMapTupels)
+      Future.sequence(elasticCommand.joinQuery(indexName, indexType,
+        joinIndexName, joinIndexType, field)).map(buildStreamMapTupels)
   }
 
   def update: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, updateFields) => {
-      elasticCommand.updateAllDocs(indexName.extract[String], indexType.extract[String], updateFields.extract[List[(String, String)]])
+      elasticCommand.updateAllDocs(indexName, indexType, updateFields.extract[List[(String, String)]])
     }
     case Seq(indexName, indexType, updateFields, id) => {
-      val eventualUpdateResponse: Future[UpdateResponse] = elasticCommand.updateById(indexName.extract[String],
-        indexType.extract[String],
+      val eventualUpdateResponse: Future[UpdateResponse] = elasticCommand.updateById(indexName,
+        indexType,
         updateFields.extract[List[(String, String)]],
-        id.extract[String])
+        id)
       eventualUpdateResponse.map(s => buildXContent(s.getShardInfo))
     }
   }
 
   def reindex: Seq[Val] => Future[String] = {
     case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-      elasticCommand.reindex(sourceIndex.extract[String],
-        targetIndex.extract[String], sourceIndexType.extract[String], fields.extract[List[String]])
+      elasticCommand.reindex(sourceIndex,
+        targetIndex, sourceIndexType, fields.extract[List[String]])
     }
   }
 
   def bulkIndex: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, fields) => {
-      elasticCommand.bulkIndex(indexName.extract[String], indexType.extract[String], fields.extract[List[List[(String, String)]]])
+      elasticCommand.bulkIndex(indexName, indexType, fields.extract[List[List[(String, String)]]])
       Future {
         buildIsCreated(true)
       }
@@ -186,19 +186,19 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def index: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, fields) => {
       val indexResponse =
-        elasticCommand.indexField(indexName.extract[String], indexType.extract[String], fields.extract[List[(String, String)]])
+        elasticCommand.indexField(indexName, indexType, fields.extract[List[(String, String)]])
       indexResponse.map(s => buildIdResponse(s.getId))
     }
     case Seq(indexName, indexType, fields, id) => {
-      val indexResponse = elasticCommand.indexFieldById(indexName.extract[String], indexType.extract[String],
-        fields.extract[List[(String, String)]], id.extract[String])
+      val indexResponse = elasticCommand.indexFieldById(indexName, indexType,
+        fields.extract[List[(String, String)]], id)
       indexResponse.map(s => buildIdResponse(s.getId))
     }
   }
 
   def analysis: Seq[Val] => Future[String] = {
     case Seq(doc, analyzer) => {
-      val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysiser(analyzer.extract[String], doc.extract[String])
+      val analyzeResponse: Future[AnalyzeResponse] = elasticCommand.analysiser(analyzer, doc)
       analyzeResponse.map(s => buildAnalyzeResponse(s))
     }
   }
@@ -214,7 +214,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def mapping: Seq[Val] => Future[String] = {
     case Seq(indexName, mapping) => {
       val mappings: Future[CreateIndexResponse] =
-        elasticCommand.mappings(indexName.extract[String], mapping.toJson)
+        elasticCommand.mappings(indexName, mapping.toJson)
       mappings.map(s => buildAcknowledgedResponse(s))
     }
   }
@@ -222,7 +222,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def updateMapping: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, mapping) => {
       val mappings: Future[PutMappingResponse] =
-        elasticCommand.updateMappings(indexName.extract[String], indexType.extract[String], mapping.toJson)
+        elasticCommand.updateMappings(indexName, indexType, mapping.toJson)
       mappings.map(s => buildAcknowledgedResponse(s))
     }
   }
@@ -230,7 +230,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def aggsCount: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, name) => {
       val aggsSearch: Future[SearchResponse] =
-        elasticCommand.aggsSearch(indexName.extract[String], indexType.extract[String], name.extract[String])
+        elasticCommand.aggsSearch(indexName, indexType, name)
       aggsSearch.map(s => buildSearchResponse(s))
     }
   }
@@ -238,7 +238,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def aggsTerm: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, name) => {
       val aggsSearch: Future[SearchResponse] =
-        elasticCommand.termsSearch(indexName.extract[String], indexType.extract[String], name.extract[String])
+        elasticCommand.termsSearch(indexName, indexType, name)
       aggsSearch.map(s => buildSearchResponse(s))
     }
   }
@@ -246,7 +246,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def histAggs: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, name, _interval, _field) => {
       val aggsSearch: Future[SearchResponse] = DSL {
-        aggs in indexName.extract[String] / indexType.extract[String] hist name.extract[String] interval _interval.extract[String] field _field.extract[String]
+        aggs in indexName / indexType hist name interval _interval field _field
       }
       aggsSearch.map(s => buildSearchResponse(s))
     }
@@ -255,15 +255,15 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def alias: Seq[Val] => Future[String] = {
     case Seq(targetIndex, sourceIndex) => {
       val eventualAliasesResponse: Future[IndicesAliasesResponse] =
-        elasticCommand.alias(targetIndex.extract[String], sourceIndex.extract[String])
+        elasticCommand.alias(targetIndex, sourceIndex)
       eventualAliasesResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
   def getDocById: Seq[Val] => Future[String] = {
     case Seq(indexName, indexType, id) => {
-      val getResponse: Future[GetResponse] = elasticCommand.getDocById(indexName.extract[String],
-        indexType.extract[String], id.extract[String])
+      val getResponse: Future[GetResponse] = elasticCommand.getDocById(indexName,
+        indexType, id)
       getResponse.map(s => buildGetResponse(s))
     }
   }
@@ -271,7 +271,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def createRepository: Seq[Val] => Future[String] = {
     case Seq(repositoryName, repositoryType, settings) => {
       val repositoryResponse: Future[PutRepositoryResponse] =
-        elasticCommand.createRepository(repositoryName.extract[String], repositoryType.extract[String],
+        elasticCommand.createRepository(repositoryName, repositoryType,
           settings.extract[Map[String, String]])
       repositoryResponse.map(s => buildAcknowledgedResponse(s))
     }
@@ -280,7 +280,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def createSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
       val createSnapshotResponse: Future[CreateSnapshotResponse] =
-        elasticCommand.createSnapshot(snapshotName.extract[String], repositoryName.extract[String])
+        elasticCommand.createSnapshot(snapshotName, repositoryName)
       createSnapshotResponse.map(s => buildXContent(s))
     }
   }
@@ -288,39 +288,39 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def deleteSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
       val deleteSnapshotResponse: Future[DeleteSnapshotResponse] =
-        elasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String])
+        elasticCommand.deleteSnapshotBySnapshotNameAndRepositoryName(snapshotName, repositoryName)
       deleteSnapshotResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
   def restoreSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
-      val snapshotResponse: Future[RestoreSnapshotResponse] = elasticCommand.restoreSnapshot(snapshotName.extract[String],
-        repositoryName.extract[String])
+      val snapshotResponse: Future[RestoreSnapshotResponse] = elasticCommand.restoreSnapshot(snapshotName,
+        repositoryName)
       snapshotResponse.map(s => buildXContent(s))
     }
   }
 
   def closeIndex: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val closeIndexResponse: Future[CloseIndexResponse] = elasticCommand.closeIndex(indexName.extract[String])
+      val closeIndexResponse: Future[CloseIndexResponse] = elasticCommand.closeIndex(indexName)
       closeIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
   def openIndex: Seq[Val] => Future[String] = {
     case Seq(indexName) => {
-      val openIndexResponse: Future[OpenIndexResponse] = elasticCommand.openIndex(indexName.extract[String])
+      val openIndexResponse: Future[OpenIndexResponse] = elasticCommand.openIndex(indexName)
       openIndexResponse.map(s => buildAcknowledgedResponse(s))
     }
   }
 
   def dumpIndex: Seq[Val] => Future[String] = {
     case Seq(indexName, fileName) => {
-      val _fileName = fileName.extract[String]
+      val _fileName = fileName
       val path = Paths.get(_fileName)
       val searchResponse = DSL {
-        search in indexName.extract[String]
+        search in indexName
       }
       searchResponse.map(f => {
         val res = f.getHits.asScala.map(i => {
@@ -335,12 +335,12 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def getSnapshot: Seq[Val] => Future[String] = {
     case Seq(snapshotName, repositoryName) => {
       val getSnapshotResponse: Future[GetSnapshotsResponse] =
-        elasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName.extract[String], repositoryName.extract[String])
+        elasticCommand.getSnapshotBySnapshotNameAndRepositoryName(snapshotName, repositoryName)
       getSnapshotResponse.map(s => buildXContent(s))
     }
     case Seq(repositoryName) => {
       val getSnapshotResponse: Future[GetSnapshotsResponse] =
-        elasticCommand.getAllSnapshotByRepositoryName(repositoryName.extract[String])
+        elasticCommand.getAllSnapshotByRepositoryName(repositoryName)
       getSnapshotResponse.map(s => buildXContent(s))
     }
   }
@@ -348,7 +348,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def waitForStatus: Seq[Val] => Future[String] = {
     case Seq(status) => {
       val healthResponse: Future[ClusterHealthResponse] =
-        elasticCommand.waitForStatus(status = Some(status.extract[String]))
+        elasticCommand.waitForStatus(status = Some(status))
       healthResponse.map(s => buildXContent(s))
     }
   }
@@ -360,4 +360,5 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def beautyJson(): String => String = {
     beautyJSON
   }
+  implicit def valToString(v: Val): String = v
 }
