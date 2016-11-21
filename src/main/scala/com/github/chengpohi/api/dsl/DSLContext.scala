@@ -1,5 +1,6 @@
 package com.github.chengpohi.api.dsl
 
+import com.github.chengpohi.collection.JsonCollection.Val
 import com.github.chengpohi.helper.ResponseGenerator
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
@@ -190,6 +191,12 @@ trait DSLContext extends DSLDefinition {
   implicit class IndexNameAndIndexType(indexName: String) {
     def /(indexType: String): IndexPath = {
       IndexPath(indexName, indexType)
+    }
+  }
+
+  implicit class IndexNameAndIndexTypeVal(indexName: Val) {
+    def /(indexType: Val): IndexPath = {
+      IndexPath(indexName.extract[String], indexType.extract[String])
     }
   }
 
