@@ -77,7 +77,8 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val restoreSnapshot = P("restore snapshot " ~/ ioParser).map(c => ("restoreSnapshot", Some(elkCommand.restoreSnapshot), c))
   val closeIndex = P("close index" ~/ ioParser).map(c => ("closeIndex", Some(elkCommand.closeIndex), c))
   val openIndex = P("open index" ~/ ioParser).map(c => ("openIndex", Some(elkCommand.openIndex), c))
-  val dumpIndex = P("dump index" ~/ strOrVar ~/ ">" ~/ strOrVar).map(c => ("dumpIndex", Some(elkCommand.dumpIndex), Seq(c._1, c._2)))
+  val dumpIndex = P("dump index" ~/ strOrVar ~/ ">" ~/ strChars.rep(1).!)
+    .map(c => ("dumpIndex", Some(elkCommand.dumpIndex), Seq(c._1, JsonCollection.Str(c._2))))
   val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", findJSONElements(c.value)))
   val beauty = P("beauty").map(c => ("beauty", beautyJson))
 

@@ -234,7 +234,7 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello7","created_at": 1598846395882}
         |] """.stripMargin)
     Thread.sleep(2000)
-    val uri = runEngine.run( """dump index "test-parser-name" > "dump.txt"""")
+    val uri = runEngine.run( """dump index "test-parser-name" > dump.txt""")
     val u: URI = new URI(uri)
     Source
       .fromFile(Paths.get(u).toFile)

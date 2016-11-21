@@ -320,7 +320,7 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
       val _fileName = fileName
       val path = Paths.get(_fileName)
       val searchResponse = DSL {
-        search in indexName
+        search in indexName size Integer.MAX_VALUE
       }
       searchResponse.map(f => {
         val res = f.getHits.asScala.map(i => {
