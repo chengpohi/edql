@@ -438,7 +438,7 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
     Thread.sleep(2000)
     val result = runEngine.run(
       """
-        |search in "test-index-name" / "test-index-type" join "test-index-name-1" / "test-index-type-1" by "_tip_id"
+        |search in "test-index-name-1" / "test-index-type-1" join "test-index-name" / "test-index-type" by "_tip_id"
       """.stripMargin)
     Thread.sleep(1000)
     assert(result.contains("test-index-type"))

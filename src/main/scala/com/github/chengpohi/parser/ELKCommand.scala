@@ -1,6 +1,7 @@
 package com.github.chengpohi.parser
 
-import java.nio.file.{Files, Paths}
+import java.io.{BufferedWriter, FileWriter}
+import java.nio.file.Paths
 
 import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection._
@@ -150,8 +151,8 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
     case Seq(indexName) =>
       elasticCommand.queryAll(indexName, "*").map(s => buildXContent(s))
     case Seq(indexName, indexType, joinIndexName, joinIndexType, field) =>
-      Future.sequence(elasticCommand.joinQuery(indexName, indexType,
-        joinIndexName, joinIndexType, field)).map(buildStreamMapTupels)
+      elasticCommand.joinQuery(indexName, indexType,
+        joinIndexName, joinIndexType, field).map(buildStreamMapTupels)
   }
 
   def update: Seq[Val] => Future[String] = {
@@ -319,14 +320,20 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
     case Seq(indexName, fileName) => {
       val _fileName = fileName
       val path = Paths.get(_fileName)
+      val writer: BufferedWriter = new BufferedWriter(new FileWriter(_fileName))
       val searchResponse = DSL {
-        search in indexName size Integer.MAX_VALUE
+        search in indexName query "*" size 20 scroll "10m"
       }
-      searchResponse.map(f => {
-        val res = f.getHits.asScala.map(i => {
-          s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
+      searchResponse.map(j => {
+        j.foreach(f => {
+          f.getHits.asScala.map(i => {
+            s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
+          }).foreach(l => {
+            writer.write(l + System.lineSeparator())
+          })
         })
-        Files.write(path, res.asJava)
+        writer.flush()
+        writer.close()
         path.toUri.toString
       })
     }
@@ -360,5 +367,6 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
   def beautyJson(): String => String = {
     beautyJSON
   }
+
   implicit def valToString(v: Val): String = v.extract[String]
 }
