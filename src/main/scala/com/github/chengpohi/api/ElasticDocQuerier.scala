@@ -5,10 +5,8 @@ import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 /**
   * elasticshell
@@ -38,16 +36,10 @@ trait ElasticDocQuerier extends QueryDSL {
   }
 
   def joinQuery(indexName: String, indexType: String, joinIndexName: String, joinIndexType: String, field: String)
-               (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[Future[mutable.Map[String, AnyRef]]] = {
-    val joinAll = queryAllByScan(joinIndexName, Some(joinIndexType))(maxRetrieveSize)
-    joinAll.flatMap(f => {
-      f.getHits.asScala.map(i => {
-        val fieldValue = i.getSource.get(field).asInstanceOf[String]
-        termQuery(indexName, indexType, List((field, fieldValue)))
-          .map(s => i.sourceAsMap.asScala + ("id" -> i.getId) + (s"${indexType}" ->
-            s.getHits.asScala.map(t => t.sourceAsMap.asScala + ("id" -> t.getId))))
-      })
-    })
+               (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Future[Stream[Map[String, AnyRef]]] = {
+    DSL {
+      search in indexName / indexType size maxRetrieveSize scroll "10m" join joinIndexName / joinIndexType by field
+    }
   }
 
   def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))

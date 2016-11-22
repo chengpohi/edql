@@ -90,7 +90,7 @@ class ResponseGenerator {
     builder.string()
   }
 
-  def buildStreamMapTupels(tuples: Stream[scala.collection.mutable.Map[String, Object]]): String = {
+  def buildStreamMapTupels(tuples: Stream[Map[String, Object]]): String = {
     write(tuples)
   }
 
