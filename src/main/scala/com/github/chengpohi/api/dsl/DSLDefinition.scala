@@ -391,7 +391,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
   case class ScrollSearchRequestDefinition(searchRequestDefinition: SearchRequestDefinition) extends ActionRequest[Stream[SearchResponse]] {
     private def fetch(previous: String) = {
-      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(previous)
+      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(previous).setScroll("10m")
       val searchRequestDefinition = SearchScrollRequestDefinition(searchScrollRequestBuilder)
       searchRequestDefinition.execute.await
     }
