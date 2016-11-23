@@ -133,15 +133,8 @@ trait ElasticManagement extends ManageDSL {
   def waitForStatus(indexName: Option[String] = Some("*"),
                     status: Option[String] = Some("GREEN"),
                     timeOut: Option[String] = Some("100s")): Future[ClusterHealthResponse] = {
-    val clusterHealthStatus: ClusterHealthStatus = status match {
-      case Some("GREEN") => ClusterHealthStatus.GREEN
-      case Some("RED") => ClusterHealthStatus.RED
-      case Some("YELLOW") => ClusterHealthStatus.YELLOW
-      case _ => ClusterHealthStatus.GREEN
-    }
-
     DSL {
-      waiting index indexName.get timeout timeOut.get status clusterHealthStatus
+      waiting index indexName.get timeout timeOut.get status status.get
     }
   }
 }
