@@ -1,3 +1,5 @@
+import sbt.Package.ManifestAttributes
+
 name := "elasticshell"
 
 organization := "com.github.chengpohi"
@@ -52,3 +54,14 @@ compileScalaStyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).
 (test in Test) := {
   (test in Test) dependsOn compileScalaStyle
 }
+packageOptions := Seq(ManifestAttributes(
+  ("Change", "253032b"),
+  ("Branch", "253032b4a7818992af360097e3ddc1475fa7b044"),
+  ("X-Compile-Target-JDK", "1.8"),
+  ("X-Compile-Source-JDK", "1.8"),
+  ("Branch", "253032b4a7818992af360097e3ddc1475fa7b044"),
+  ("X-Compile-Elasticsearch-Version", "5.0.0"),
+  ("X-Compile-Lucene-Version", "6.2.0"),
+  ("X-Compile-Elasticsearch-Snapshot", "false"),
+  ("Build-Date", System.currentTimeMillis().toString)
+))
