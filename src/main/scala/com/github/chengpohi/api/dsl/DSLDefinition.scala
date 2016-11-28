@@ -110,9 +110,9 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
     def status(status: String): ClusterHealthRequestDefinition = {
       val clusterHealthStatus: ClusterHealthStatus = status match {
-        case Some("GREEN") => ClusterHealthStatus.GREEN
-        case Some("RED") => ClusterHealthStatus.RED
-        case Some("YELLOW") => ClusterHealthStatus.YELLOW
+        case "GREEN" => ClusterHealthStatus.GREEN
+        case "RED" => ClusterHealthStatus.RED
+        case "YELLOW" => ClusterHealthStatus.YELLOW
         case _ => ClusterHealthStatus.GREEN
       }
       clusterHealthRequestBuilder.setWaitForStatus(clusterHealthStatus)
