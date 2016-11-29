@@ -2,14 +2,19 @@ package com.github.chengpohi.connector
 
 import java.net.InetSocketAddress
 import java.nio.file.Paths
+import java.util
+import java.util.Collections
 
 import com.typesafe.config.ConfigFactory
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.network.NetworkModule
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.node.Node
-import org.elasticsearch.transport.Netty3Plugin
+import org.elasticsearch.index.reindex.ReindexPlugin
+import org.elasticsearch.percolator.PercolatorPlugin
+import org.elasticsearch.plugins.Plugin
+import org.elasticsearch.script.mustache.MustachePlugin
+import org.elasticsearch.transport.{Netty3Plugin, Netty4Plugin}
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
@@ -30,8 +35,18 @@ object ElasticClientConnector {
     val settings: Settings = Settings.builder()
       .loadFromPath(Paths.get(getClass.getResource("/local.yml").toURI))
       .build()
-    val node = new Node(settings).start()
-    node.client()
+
+    val plugins =
+      Collections.unmodifiableList(
+        util.Arrays.asList(
+          classOf[Netty3Plugin],
+          classOf[Netty4Plugin],
+          classOf[ReindexPlugin],
+          classOf[PercolatorPlugin],
+          classOf[MustachePlugin]))
+    val clientNode: ClientNode = new ClientNode(settings, plugins.asInstanceOf[util.List[Class[_  <: Plugin]]])
+    clientNode.start()
+    clientNode.client()
   }
 
   def buildRemoteClient(): Client = {
