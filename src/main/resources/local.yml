@@ -1,5 +1,4 @@
 http.enabled: false
-cluster.name: elasticshell
 path.repo: ./local/
 action.destructive_requires_name: false
 path.home: ./local/
