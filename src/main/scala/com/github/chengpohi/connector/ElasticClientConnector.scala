@@ -34,6 +34,7 @@ object ElasticClientConnector {
   def buildLocalClient(): Client = {
     val settings: Settings = Settings.builder()
       .loadFromPath(Paths.get(getClass.getResource("/local.yml").toURI))
+      .put("cluster.name", clusterName)
       .build()
 
     val plugins =
@@ -44,7 +45,7 @@ object ElasticClientConnector {
           classOf[ReindexPlugin],
           classOf[PercolatorPlugin],
           classOf[MustachePlugin]))
-    val clientNode: ClientNode = new ClientNode(settings, plugins.asInstanceOf[util.List[Class[_  <: Plugin]]])
+    val clientNode: ClientNode = new ClientNode(settings, plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
     clientNode.start()
     clientNode.client()
   }
