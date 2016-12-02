@@ -69,6 +69,21 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
     assert(source.get(1) === "foobar")
   }
 
+  it should "get doc by id" in {
+    val _id: String = "1234"
+    DSL {
+      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar")) id _id
+    }.await
+
+    Thread.sleep(2000)
+
+    val result = DSL {
+      search in "testindex" / "testmap" where id equal _id
+    }.await
+
+    result.getId should be(_id)
+  }
+
   after {
     DSL {
       delete index "*"

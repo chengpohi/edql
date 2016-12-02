@@ -79,6 +79,6 @@ trait ElasticDocQuerier extends QueryDSL {
   }
 
   def getDocById(indexName: String, indexType: String, docId: String): Future[GetResponse] = DSL {
-    get id docId from indexName / indexType
+    search in indexName / indexType where id equal docId
   }
 }

@@ -10,7 +10,8 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollReques
   * elasticshell
   * Created by chengpohi on 6/29/16.
   */
-trait QueryDSL extends DSLDefinition with IndexerDSL{
+trait QueryDSL extends DSLDefinition with IndexerDSL {
+
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
@@ -30,10 +31,6 @@ trait QueryDSL extends DSLDefinition with IndexerDSL{
       val getSettingsRequestBuilder: GetSettingsRequestBuilder = indicesClient.prepareGetSettings(indexName)
       GetSettingsRequestDefinition(getSettingsRequestBuilder)
     }
-
-    def id(documentId: String): GetRequestDefinition = {
-      GetRequestDefinition(documentId)
-    }
   }
 
   case object search {
@@ -49,6 +46,7 @@ trait QueryDSL extends DSLDefinition with IndexerDSL{
       }
       SearchRequestDefinition(searchRequestBuilder)
     }
+
     def scroll(s: String): SearchScrollRequestDefinition = {
       val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(s)
       SearchScrollRequestDefinition(searchScrollRequestBuilder)
@@ -67,4 +65,5 @@ trait QueryDSL extends DSLDefinition with IndexerDSL{
       PutMappingRequestDefinition(putMappingRequestBuilder)
     }
   }
+
 }
