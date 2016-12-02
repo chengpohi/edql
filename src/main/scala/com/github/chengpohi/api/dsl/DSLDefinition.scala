@@ -68,6 +68,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
   }
 
+  trait AttrType
+
+  case object id extends AttrType
+
   case class NodeStatsRequestDefinition(nodesStatsRequestBuilder: NodesStatsRequestBuilder) extends ActionRequest[NodesStatsResponse] {
     def flag(f: FlagType): NodeStatsRequestDefinition = {
       nodesStatsRequestBuilder.all()
@@ -291,6 +295,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     def by(field: String): SearchRequestDefinition = {
       _joinField = Some(field)
       this
+    }
+
+    def where(attrType: AttrType): GetRequestDefinition = {
+      val index: String = searchRequestBuilder.request().indices().head
+      val tpe: String = searchRequestBuilder.request().types().head
+      GetRequestDefinition(client.prepareGet().setIndex(index).setType(tpe))
     }
 
     def size(i: Int): SearchRequestDefinition = {
@@ -557,11 +567,10 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     }
   }
 
-  case class GetRequestDefinition(documentId: String) extends ActionRequest[GetResponse] {
-    var getRequestBuilder: GetRequestBuilder = _
+  case class GetRequestDefinition(getRequestBuilder: GetRequestBuilder) extends ActionRequest[GetResponse] {
 
-    def from(indexPath: IndexPath): GetRequestDefinition = {
-      getRequestBuilder = client.prepareGet(indexPath.indexName, indexPath.indexType, documentId)
+    def equal(_id: String): GetRequestDefinition = {
+      getRequestBuilder.setId(_id)
       this
     }
 
