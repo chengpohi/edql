@@ -77,11 +77,16 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
     Thread.sleep(2000)
 
-    val result = DSL {
+    val result1 = DSL {
       search in "testindex" / "testmap" where id equal _id
     }.await
 
-    result.getId should be(_id)
+    val result2 = DSL {
+      search in "testindex" / "testmap" where id equal "7893"
+    }.await
+
+    result1.getId should be(_id)
+    result2.isExists should be(false)
   }
 
   after {
