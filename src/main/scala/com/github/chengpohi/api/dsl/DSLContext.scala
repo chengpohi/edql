@@ -30,6 +30,7 @@ import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
+import org.elasticsearch.search.SearchHit
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -166,6 +167,17 @@ trait DSLContext {
       }
     }
 
+    implicit object SearchHitMonoid extends Monoid[SearchHit] {
+      override def toJson(a: SearchHit): String = responseGenerator.buildXContent(a)
+    }
+
+    implicit object StreamSearchHitMonoid extends Monoid[Stream[SearchHit]] {
+      override def toJson(a: Stream[SearchHit]): String = {
+        val s = a.map(s => s.toJson)
+        responseGenerator.buildStream(s)
+      }
+    }
+
   }
 
   trait MonoidOp[A] {
@@ -206,6 +218,8 @@ trait DSLContext {
       IndexPath(indexName.extract[String], indexType.extract[String])
     }
   }
+
   case class IndexPath(indexName: String, indexType: String)
+
 }
 

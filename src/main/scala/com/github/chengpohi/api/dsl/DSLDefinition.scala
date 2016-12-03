@@ -31,6 +31,7 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, Se
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.index.query._
+import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.json4s.DefaultFormats
@@ -405,31 +406,31 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
   }
 
 
-  case class ScrollSearchRequestDefinition(searchRequestDefinition: SearchRequestDefinition) extends ActionRequest[Stream[SearchResponse]] {
+  case class ScrollSearchRequestDefinition(searchRequestDefinition: SearchRequestDefinition) extends ActionRequest[Stream[SearchHit]] {
     private def fetch(previous: String) = {
       val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(previous).setScroll("10m")
       val searchRequestDefinition = SearchScrollRequestDefinition(searchScrollRequestBuilder)
-      searchRequestDefinition.execute.await
+      searchRequestDefinition.execute.await.getHits.getHits.toStream
     }
 
-    private def toStream(scrollId: String): Stream[SearchResponse] = {
-      val fetch1: SearchResponse = fetch(scrollId)
-      fetch1.getHits.getHits.length match {
+    private def toStream(scrollId: String): Stream[SearchHit] = {
+      val fetch1: Stream[SearchHit] = fetch(scrollId)
+      fetch1.length match {
         case 0 => Stream.empty
-        case i => fetch1 #:: toStream(scrollId)
+        case i => fetch1 #::: toStream(scrollId)
       }
     }
 
-    private def head(searchResponse: SearchResponse): Stream[SearchResponse] = {
+    private def head(searchResponse: SearchResponse): Stream[SearchHit] = {
       val scrollId = searchResponse.getScrollId
-      searchResponse #:: toStream(scrollId)
+      searchResponse.getHits.getHits.toStream #::: toStream(scrollId)
     }
 
     def join(indexPath: IndexPath): JoinSearchRequestDefinition = {
       JoinSearchRequestDefinition(this, indexPath)
     }
 
-    override def execute: Future[Stream[SearchResponse]] = {
+    override def execute: Future[Stream[SearchHit]] = {
       searchRequestDefinition.execute.map(h => head(h))
     }
   }
@@ -444,20 +445,20 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     }
 
     override def execute: Future[Stream[Map[String, AnyRef]]] = {
-      val result: Future[Stream[SearchResponse]] = scrollSearchRequestDefinition.execute
+      val result: Future[Stream[SearchHit]] = scrollSearchRequestDefinition.execute
       result.map(s => {
-        s.flatMap(j => {
-          j.getHits.asScala.flatMap(i => {
-            val fieldValue = i.getSource.get(_field).asInstanceOf[String]
-            val searchRequestBuilder =
-              client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
-            SearchRequestDefinition(searchRequestBuilder).must(List((_field, fieldValue))).scroll("10m")
-              .execute.await.map(t => {
-              val doc: mutable.Map[String, AnyRef] =
-                i.sourceAsMap.asScala + ("id" -> i.getId) +
-                  (s"${indexPath.indexType}" -> t.getHits.asScala.map(p => p.sourceAsMap.asScala + ("id" -> p.getId)))
-              doc.toMap
-            })
+        s.flatMap(i => {
+          val fieldValue = i.getSource.get(_field).asInstanceOf[String]
+          val searchRequestBuilder =
+            client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
+          SearchRequestDefinition(searchRequestBuilder).must(List((_field, fieldValue))).scroll("10m")
+            .execute.await.map(t => {
+            val fields: mutable.Map[String, AnyRef] = t.sourceAsMap.asScala + ("id" -> t.getId)
+            val doc: mutable.Map[String, AnyRef] =
+              i.sourceAsMap.asScala +
+                ("id" -> i.getId) +
+                (s"${indexPath.indexType}" -> fields)
+            doc.toMap
           })
         })
       })
