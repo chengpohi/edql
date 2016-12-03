@@ -26,5 +26,9 @@ object ELKCommandTestRegistry {
   private[this] val elkCommand = new ELKCommand(elasticdsl, responseGenerator)
   private[this] val parserUtils = new ParserUtils
   val elkParser = new ELKParser(elkCommand, parserUtils)
+  import elasticdsl._
+  DSL {
+    delete index "*"
+  }.await
 }
 

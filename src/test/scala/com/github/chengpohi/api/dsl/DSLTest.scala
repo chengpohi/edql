@@ -3,24 +3,23 @@ package com.github.chengpohi.api.dsl
 import java.util
 
 import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.elasticsearch.action.search.SearchResponse
-import org.scalatest.{BeforeAndAfter, FlatSpec, ShouldMatchers}
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 /**
   * elasticshell
   * Created by chengpohi on 9/22/16.
   */
-class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
+class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   val dsl = ELKCommandTestRegistry.elasticdsl
 
   import dsl._
 
   before {
     DSL {
-      delete index "*"
+      create index "testindex"
     }.await
     DSL {
-      create index "testindex"
+      refresh index "testindex"
     }.await
   }
 
@@ -28,7 +27,7 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
     val res = DSL {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
     }.await
-    res.toJson should not be empty
+    res.toJson.isEmpty should be(false)
   }
 
   it should "scroll search to json" in {
@@ -44,7 +43,10 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
     }.await
 
-    Thread.sleep(3000)
+    DSL {
+      refresh index "testindex"
+    }.await
+
     val res = DSL {
       search in "testindex" / "testmap" size 1 scroll "1m"
     }.await
@@ -53,15 +55,16 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
     result.size should be(3)
   }
 
-
   it should "index nest map" in {
     DSL {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
     }.await
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "testindex"
+    }.await
     val result = DSL {
-      search in "testindex"
+      search in "testindex" / "testmap"
     }.await
     val source: util.ArrayList[String] = result.getHits.getAt(0).getSource.get("Hello").asInstanceOf[util.ArrayList[String]]
     assert(source.size() === 2)
@@ -71,11 +74,14 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
   it should "get doc by id" in {
     val _id: String = "1234"
+
     DSL {
       index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar")) id _id
-    }.await
+    }
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "testindex"
+    }.await
 
     val result1 = DSL {
       search in "testindex" / "testmap" where id equal _id
@@ -92,6 +98,6 @@ class DSLTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   after {
     DSL {
       delete index "*"
-    }.await
+    }
   }
 }

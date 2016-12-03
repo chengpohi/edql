@@ -19,7 +19,8 @@ ivyScala := ivyScala.value map {
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
 
 libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "org.scalactic" %% "scalactic" % "3.0.1",
   "com.typesafe" % "config" % "1.3.0",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "jline" % "jline" % "2.12",
@@ -65,3 +66,6 @@ packageOptions := Seq(ManifestAttributes(
   ("X-Compile-Elasticsearch-Snapshot", "false"),
   ("Build-Date", System.currentTimeMillis().toString)
 ))
+
+parallelExecution in ThisBuild := false
+parallelExecution in Test := false

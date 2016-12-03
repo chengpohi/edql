@@ -18,9 +18,11 @@ import org.elasticsearch.action.admin.indices.analyze.{AnalyzeRequestBuilder, An
 import org.elasticsearch.action.admin.indices.close.{CloseIndexRequestBuilder, CloseIndexResponse}
 import org.elasticsearch.action.admin.indices.create.{CreateIndexRequestBuilder, CreateIndexResponse}
 import org.elasticsearch.action.admin.indices.delete.{DeleteIndexRequestBuilder, DeleteIndexResponse}
+import org.elasticsearch.action.admin.indices.flush.FlushResponse
 import org.elasticsearch.action.admin.indices.mapping.get.{GetMappingsRequestBuilder, GetMappingsResponse}
 import org.elasticsearch.action.admin.indices.mapping.put.{PutMappingRequestBuilder, PutMappingResponse}
 import org.elasticsearch.action.admin.indices.open.{OpenIndexRequestBuilder, OpenIndexResponse}
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
 import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
 import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
@@ -577,6 +579,20 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
     override def execute: Future[GetResponse] = {
       getRequestBuilder.execute
+    }
+  }
+
+  case class RefreshRequestDefinition(indices: String) extends ActionRequest[RefreshResponse] {
+    override def execute: Future[RefreshResponse] = {
+      val sleep: Long = 2000
+      Thread.sleep(sleep)
+      client.admin().indices().prepareFlush().execute.flatMap(i =>
+        indices match {
+          case "*" => client.admin().indices().prepareRefresh().execute
+          case _ => client.admin().indices().prepareRefresh(indices).execute
+        }
+      )
+
     }
   }
 
