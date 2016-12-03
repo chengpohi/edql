@@ -325,12 +325,10 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
         search in indexName query "*" size 20 scroll "10m"
       }
       searchResponse.map(j => {
-        j.foreach(f => {
-          f.getHits.asScala.map(i => {
-            s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
-          }).foreach(l => {
-            writer.write(l + System.lineSeparator())
-          })
+        j.map(i => {
+          s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
+        }).foreach(l => {
+          writer.write(l + System.lineSeparator())
         })
         writer.flush()
         writer.close()

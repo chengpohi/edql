@@ -3,6 +3,7 @@ package com.github.chengpohi.api
 import com.github.chengpohi.api.dsl.QueryDSL
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.search.SearchHit
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,39 +44,34 @@ trait ElasticDocQuerier extends QueryDSL {
   }
 
   def queryAllByScan(indexName: String, indexType: Option[String] = Some("*"))
-                    (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[SearchResponse] = {
+                    (implicit maxRetrieveSize: Int = MAX_RETRIEVE_SIZE): Stream[SearchHit] = {
     DSL {
       search in indexName / indexType.get size maxRetrieveSize scroll "10m"
     }.await
   }
 
-  def bulkCopyIndex(indexName: String, response: Stream[SearchResponse], indexType: String, fields: Seq[String]): Unit = {
-    response.foreach(r => {
-      r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s =>
-          DSL {
-            index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
-          }
+  def bulkCopyIndex(indexName: String, response: Stream[SearchHit], indexType: String, fields: Seq[String]): Unit = {
+    response.filter(s => s.getType == indexType || indexType == "*").foreach(s => {
+      DSL {
+        index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
       }
     })
   }
 
   def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): Future[String] = Future {
-    val sourceData: Stream[SearchResponse] = queryAllByScan(sourceIndex)
+    val sourceData: Stream[SearchHit] = queryAllByScan(sourceIndex)
     bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
     """{"hasErrors": false}"""
   }
 
-  def bulkUpdateField(indexName: String, response: Stream[SearchResponse],
+  def bulkUpdateField(indexName: String, response: Stream[SearchHit],
                       indexType: String, field: Seq[(String, String)]): Unit = {
-    response.foreach(r => {
-      r.getHits.getHits.filter(s => s.getType == indexType || indexType == "*").map {
-        s =>
-          DSL {
-            update id s.getId doc field in indexName / indexType
-          }
-      }
-    })
+    response.filter(s => s.getType == indexType || indexType == "*").map {
+      s =>
+        DSL {
+          update id s.getId doc field in indexName / indexType
+        }
+    }
   }
 
   def getDocById(indexName: String, indexType: String, docId: String): Future[GetResponse] = DSL {
