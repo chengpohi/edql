@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/chengpohi/elasticshell.svg)](https://travis-ci.org/chengpohi/elasticshell)
+
 # Elastic DSL with REPL
 
 ## Introduction
