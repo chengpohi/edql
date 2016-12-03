@@ -22,6 +22,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
@@ -169,6 +170,10 @@ trait DSLContext {
 
     implicit object SearchHitMonoid extends Monoid[SearchHit] {
       override def toJson(a: SearchHit): String = responseGenerator.buildXContent(a)
+    }
+
+    implicit object RefreshResponseMonoid extends Monoid[RefreshResponse] {
+      override def toJson(a: RefreshResponse): String =  a.toString
     }
 
     implicit object StreamSearchHitMonoid extends Monoid[Stream[SearchHit]] {

@@ -6,7 +6,7 @@ import java.nio.file.{Files, Paths}
 
 import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.scalatest.{BeforeAndAfter, FlatSpec, ShouldMatchers}
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.io.Source
 
@@ -14,16 +14,20 @@ import scala.io.Source
   * elasticservice
   * Created by chengpohi on 1/19/16.
   */
-class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
+class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
   val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandTestRegistry)
+
+  import ELKCommandTestRegistry.elasticdsl._
 
   before {
     runEngine.run("""create index ".elasticshell"""")
     runEngine.run( """ create index "test-parser-name" """)
     outContent.reset()
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
   }
 
   "ELKParser" should "get health of elasticsearch" in {
@@ -34,7 +38,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "index doc by indexName, indexType, fields" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" }""")
 
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     //then
     val result = runEngine.run( """search in "test-parser-name" """)
     assert(result.contains(""""name":"hello""""))
@@ -43,7 +49,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     //then
     val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(""""_id":"123""""))
@@ -52,11 +60,15 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "update doc by id and fields" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run( """update on "test-parser-name" / "test-parser-type" fields { "name" : "chengpohi"} id "123"""")
 
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     //then
     val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(""""name":"chengpohi""""))
@@ -64,13 +76,17 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
-    Thread.sleep(3000)
+    DSL {
+      refresh index "*"
+    }.await
+
     runEngine.run( """reindex into "test-parser-name" / "test-parser-name-reindex" from "test-parser-type" fields ["name"]""")
 
-    Thread.sleep(3000)
+    DSL {
+      refresh index "*"
+    }.await
 
     val result = runEngine.run( """ search in "test-parser-name-reindex" """)
-    runEngine.run( """ delete index "test-parser-name-reindex" """)
     //then
     assert(result.contains(
       """"name":"hello"""".stripMargin.trim))
@@ -78,19 +94,27 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "delete doc by id" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
 
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     //then
     runEngine.run( """delete from "test-parser-name" / "test-parser-type" id "123" """)
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """search in "test-parser-name" / "test-parser-type"""")
     assert(result.contains(""""hits":[]"""))
   }
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     runEngine.run( """update on "test-parser-name" / "test-parser-type" fields {"name":"elasticservice"} """)
-    Thread.sleep(3000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """ search in "test-parser-name" """)
     assert(result.contains(
       """"name"""".stripMargin.trim))
@@ -111,14 +135,18 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
   "ELKParser" should "extract json data" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} id "HJJJJJJH" """)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """search in "test-parser-name" / "test-parser-type" \\ "hits.hits._source.name"""")
     assert(result === """"hello"""")
   }
 
   "ELKParser" should "search data by json" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """term query "test-parser-name" "test-parser-type" {"name":"hello", "text": "foo"}""")
     assert(result.contains("Hello world"))
     assert(result.contains("foo bar"))
@@ -141,7 +169,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |    }
         |  }
         |}""".stripMargin('|'))
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """"test-mapping" mapping""")
     assert(result.contains( """"type":"date""""))
     assert(result.contains( """"keyword"""))
@@ -161,7 +191,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |        }
         |      }
         |}""".stripMargin('|'))
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run(""""test-parser-name" mapping \\ "test-parser-name.mappings.bookmark.properties.name.type" """)
     assert(result === "\"keyword\"")
   }
@@ -178,7 +210,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """ count "test-parser-name" """)
     assert(result.contains("7"))
     assert(result.contains("false"))
@@ -187,7 +221,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "index newline" in {
     runEngine.run(
       """bulk index "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """ count "test-parser-name" """)
     assert(result.contains(""))
   }
@@ -202,7 +238,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello","age": 22},
         |{"name": "hello","age": 22}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """aggs in "test-parser-name" / "test-parser-type" avg "age"""")
     assert(result.contains( """23"""))
   }
@@ -218,7 +256,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello6","created_at": 1478844995882},
         |{"name": "hello7","created_at": 1598846395882}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """aggs in "test-parser-name" / "test-parser-type" hist "test" interval "day" field "created_at"""")
     assert(result.contains( """aggregations"""))
   }
@@ -233,7 +273,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello6","created_at": 1478844995882},
         |{"name": "hello7","created_at": 1598846395882}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val uri = runEngine.run( """dump index "test-parser-name" > dump.txt""")
     val u: URI = new URI(uri)
     Source
@@ -242,7 +284,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
       .foreach(s => {
         runEngine.run(s)
       })
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """count "test-parser-name"""")
     result should contain inOrder('1', '4')
     Files.delete(Paths.get(u))
@@ -271,7 +315,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |    }
         |  }
         |}""".stripMargin('|'))
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     runEngine.run(
       """bulk index "test-index2" "test-parser-type" [
         |{"title": "programming in java"},
@@ -280,7 +326,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"title": "programming in c"},
         |{"title": "programming in camel"}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """aggs in "test-index2" / "test-parser-type" term "title.tags"""")
     assert(result.contains(""""key":"java""""))
   }
@@ -296,9 +344,13 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "hello","age": 22},
         |{"name": "hello","age": 22}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     runEngine.run( """alias "alias-index" "test-parser-name"""")
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run( """aggs in "alias-index" "test-parser-type"  avg "age"""")
     assert(result.contains("23"))
   }
@@ -306,36 +358,50 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
   "ELKParser" should "create snapshot" in {
     runEngine.run(
       """create repository "test_snapshot" "fs" {"compress": "true", "location": "./target/elkrepo"} """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """create snapshot "snapshot1" "test_snapshot"""".stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     val result = runEngine.run(
       """get snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """close index "*"""".stripMargin)
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """restore snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """close index "*"""".stripMargin)
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """open index "*"""".stripMargin)
 
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
 
     runEngine.run(
       """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
@@ -405,7 +471,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
 
   "ELKParser" should "create analyzer" in {
     runEngine.run("""create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\s+"}}}""")
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run("""".elasticshell" settings""")
     assert(result.contains("myAnalyzer"))
   }
@@ -418,7 +486,9 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "bar","title": "test po","_tip_id": "1"},
         |{"name": "jack","title": "mnb", "_tip_id": "2"}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run("""search in "test-index-name" / "test-index-type" match {"title": "foo"} """)
     println(result)
   }
@@ -435,12 +505,16 @@ class ELKParserTest extends FlatSpec with ShouldMatchers with BeforeAndAfter {
         |{"name": "bar","_tip_id": "1"},
         |{"name": "jack","_tip_id": "2"}
         |] """.stripMargin)
-    Thread.sleep(2000)
+    DSL {
+      refresh index "*"
+    }.await
     val result = runEngine.run(
       """
         |search in "test-index-name-1" / "test-index-type-1" join "test-index-name" / "test-index-type" by "_tip_id"
       """.stripMargin)
-    Thread.sleep(1000)
+    DSL {
+      refresh index "*"
+    }.await
     assert(result.contains("test-index-type"))
   }
 

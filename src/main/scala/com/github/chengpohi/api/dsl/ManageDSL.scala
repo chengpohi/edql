@@ -17,16 +17,19 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
   * elasticshell
   * Created by chengpohi on 6/26/16.
   */
-trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
+trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
+
   case object node {
     def stats(nodeIds: List[String]): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats(nodeIds: _*)
       NodeStatsRequestDefinition(prepareNodesStats)
     }
+
     def stats(nodeIds: NodeType): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder = clusterClient.prepareNodesStats()
       NodeStatsRequestDefinition(prepareNodesStats)
     }
+
     def info: NodeInfoRequestDefinition = {
       val prepareNodesStats: NodesInfoRequestBuilder = clusterClient.prepareNodesInfo()
       NodeInfoRequestDefinition(prepareNodesStats)
@@ -38,6 +41,7 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
       val prepareNodesStats: IndicesStatsRequestBuilder = indicesClient.prepareStats(nodeIds: _ *)
       IndicesStatsRequestDefinition(prepareNodesStats)
     }
+
     def stats(indiceType: NodeType): IndicesStatsRequestDefinition = {
       val prepareNodesStats: IndicesStatsRequestBuilder = indicesClient.prepareStats(indiceType.value: _*)
       IndicesStatsRequestDefinition(prepareNodesStats)
@@ -59,6 +63,7 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
       val stateRequestBuilder: ClusterStateRequestBuilder = clusterClient.prepareState()
       ClusterStateRequestDefinition(stateRequestBuilder)
     }
+
     def health: ClusterHealthRequestDefinition = {
       val clusterHealthRequestBuilder: ClusterHealthRequestBuilder = clusterClient.prepareHealth()
       ClusterHealthRequestDefinition(clusterHealthRequestBuilder)
@@ -122,4 +127,11 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL{
       ClusterHealthRequestDefinition(prepareHealth)
     }
   }
+
+  case object refresh {
+    def index(indices: String): RefreshRequestDefinition = {
+      RefreshRequestDefinition(indices)
+    }
+  }
+
 }
