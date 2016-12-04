@@ -1,12 +1,14 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.api.dsl.Definition
 import com.github.chengpohi.collection.JsonCollection.Val
 import com.typesafe.config.ConfigFactory
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.write
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
   * elasticshell
@@ -16,11 +18,19 @@ class ParserUtils {
   implicit val formats = DefaultFormats
   val instrumentations = ConfigFactory.load("instrumentations.json")
 
-  def error:Seq[Val] => Future[String] = parameters => {
-    Future {
-      val (errorMsg, input) = (parameters.head.extract[String], parameters(1).extract[String])
-      write(Map(("illegal_input", input), ("caused_by", errorMsg)))
+  case class ParserErrorDefinition(parameters: Seq[Val]) extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val (errorMsg, input) = (parameters.head.extract[String], parameters(1).extract[String])
+        write(Map(("illegal_input", input), ("caused_by", errorMsg)))
+      }
     }
+
+    override def json: String = Await.result(execute, Duration.Inf)
+  }
+
+  def error: Seq[Val] => ParserErrorDefinition = parameters => {
+    ParserErrorDefinition(parameters)
   }
 
   def help: Seq[Val] => Future[String] = {

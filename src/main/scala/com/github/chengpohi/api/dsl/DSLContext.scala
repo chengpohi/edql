@@ -48,6 +48,10 @@ trait DSLContext {
 
   object Monoid {
 
+    implicit object StringResponseMonoid extends Monoid[String] {
+      override def toJson(a: String): String = a
+    }
+
     implicit object IndexResponseMonoid extends Monoid[IndexResponse] {
       override def toJson(a: IndexResponse): String = responseGenerator.buildXContent(a)
     }
@@ -226,6 +230,10 @@ trait DSLContext {
   implicit class IndexNameAndIndexTypeVal(indexName: Val) {
     def /(indexType: Val): IndexPath = {
       IndexPath(indexName.extract[String], indexType.extract[String])
+    }
+
+    def /(indexType: String): IndexPath = {
+      IndexPath(indexName.extract[String], indexType)
     }
   }
 

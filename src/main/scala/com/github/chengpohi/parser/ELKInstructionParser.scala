@@ -1,20 +1,18 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.api.dsl.Definition
 import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 import fastparse.noApi._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 /**
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) extends CollectionParser {
+class ELKInstructionParser(val elkCommand: ELKCommand, val parserUtils: ParserUtils) extends CollectionParser {
+  type INSTRUMENT_TYPE = (String, Option[Seq[Val] => Definition[_]], Seq[Val])
 
   import WhitespaceApi._
-  import elkCommand._
 
   val help = P(alphaChars.rep(1).! ~ "?")
     .map(JsonCollection.Str)
@@ -34,15 +32,15 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val pendingTasks = P("pending tasks").map(s => ("pendingTasks", Some(elkCommand.pendingTasks), Seq()))
   val waitForStatus = P("wait for status" ~ ioParser).map(s => ("pendingTasks", Some(elkCommand.waitForStatus), s))
   val deleteDoc = P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
-    .map(c => ("delete", Some(elkCommand.delete), Seq(c._1, c._2, c._3)))
-  val deleteIndex = P("delete" ~ "index" ~/ strOrVar).map(c => ("delete", Some(elkCommand.delete), Seq(c)))
+    .map(c => ("delete", Some(elkCommand.deleteDoc), Seq(c._1, c._2, c._3)))
+  val deleteIndex = P("delete" ~ "index" ~/ strOrVar).map(c => ("delete", Some(elkCommand.deleteIndex), Seq(c)))
 
   val termQuery = P("term" ~ "query" ~/ ioParser).map(c => ("termQuery", Some(elkCommand.query), c))
-  val joinSearch = P("join" ~ strOrVar ~ "/"  ~ strOrVar ~ "by" ~ strOrVar)
-    .map(c => ("joinQuery", Some(elkCommand.query), Seq(c._1, c._2, c._3)))
+  val joinSearch = P("join" ~ strOrVar ~ "/" ~ strOrVar ~ "by" ~ strOrVar)
+    .map(c => ("joinQuery", Some(elkCommand.joinQuery), Seq(c._1, c._2, c._3)))
   val matchQuery = P("match" ~/ jsonExpr)
     .map(c => ("matchQuery", Some(elkCommand.matchQuery), Seq(c)))
-  val search = P("search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar ~ (matchQuery | joinSearch).?).?)
+  val search: P[INSTRUMENT_TYPE] = P("search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar ~ (matchQuery | joinSearch).?).?)
     .map(c => c._2 match {
       case None => ("query", Some(elkCommand.query), Seq(c._1))
       case Some((f, None)) => ("query", Some(elkCommand.query), Seq(c._1, f))
@@ -50,16 +48,21 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
     })
 
   val reindex = P("reindex" ~ "into" ~ strOrVar ~ "/" ~/ strOrVar ~ "from" ~/ strOrVar ~ "fields" ~/ jsonExpr)
-    .map(c => ("reindex", Some(elkCommand.reindex), Seq(c._1, c._2, c._3, c._4)))
+    .map(c => ("reindex", Some(elkCommand.reindexIndex), Seq(c._1, c._2, c._3, c._4)))
   val index = P("index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "fields" ~ jsonExpr ~ ("id" ~ strOrVar).?)
-    .map(c => ("index", Some(elkCommand.index), Seq(c._1, c._2, c._3) ++ c._4.toSeq))
+    .map(c => ("index", Some(elkCommand.createDoc), Seq(c._1, c._2, c._3) ++ c._4.toSeq))
   val bulkIndex = P("bulk index" ~/ ioParser).map(c => ("bulkIndex", Some(elkCommand.bulkIndex), c))
   val updateMapping = P("update mapping" ~/ ioParser).map(c => ("umapping", Some(elkCommand.updateMapping), c))
   val update = P("update" ~ "on" ~/ strOrVar ~ "/" ~ strOrVar ~ "fields" ~/ jsonExpr ~ ("id" ~ strOrVar).?)
-    .map(c => ("update", Some(elkCommand.update), Seq(c._1, c._2, c._3) ++ c._4.toSeq))
+    .map(c => {
+      c._4 match {
+        case None => ("update", Some(elkCommand.bulkUpdateDoc), Seq(c._1, c._2, c._3))
+        case Some(id) => ("update", Some(elkCommand.updateDoc), Seq(c._1, c._2, c._3) ++ c._4.toSeq)
+      }
+    })
   val createIndex = P("create" ~ "index" ~/ strOrVar).map(c => ("createIndex", Some(elkCommand.createIndex), Seq(c)))
   val getMapping = P(strOrVar ~ "mapping").map(c => ("getMapping", Some(elkCommand.getMapping), Seq(c)))
-  val analysis = P("analysis" ~/ strOrVar ~/ "by" ~/ strOrVar).map(c => ("analysis", Some(elkCommand.analysis), Seq(c._1, c._2)))
+  val analysis = P("analysis" ~/ strOrVar ~/ "by" ~/ strOrVar).map(c => ("analysis", Some(elkCommand.analysisText), Seq(c._1, c._2)))
   val createAnalyzer = P("create analyzer" ~/ ioParser).map(c => ("createAnalyzer", Some(elkCommand.createAnalyzer), c))
   val getDocById = P("get" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~/ strOrVar)
     .map(c => ("getDocById", Some(elkCommand.getDocById), Seq(c._1, c._2, c._3)))
@@ -79,10 +82,10 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
   val openIndex = P("open index" ~/ ioParser).map(c => ("openIndex", Some(elkCommand.openIndex), c))
   val dumpIndex = P("dump index" ~/ strOrVar ~/ ">" ~/ strChars.rep(1).!)
     .map(c => ("dumpIndex", Some(elkCommand.dumpIndex), Seq(c._1, JsonCollection.Str(c._2))))
-  val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", findJSONElements(c.value)))
-  val beauty = P("beauty").map(c => ("beauty", beautyJson))
+  //val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", findJSONElements(c.value)))
+  //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
-  val instrument = P((help | health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
+  val instrument: P[INSTRUMENT_TYPE] = P(health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
     | clusterSettings | nodeSettings | indexSettings | clusterState
     | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
     | deleteDoc | deleteIndex
@@ -91,14 +94,4 @@ class ELKInstructionParser(elkCommand: ELKCommand, parserUtils: ParserUtils) ext
     | updateMapping | update | analysis | aggs | createAnalyzer
     | getMapping | mapping
     | alias | count)
-    ~ (extractJSON).?).map(i => i._4 match {
-    case Some((name, extractFunction)) if i._2.isDefined => {
-      val f: Seq[Val] => Future[String] = i._2.get
-      val fComponent = (s: Seq[Val]) => {
-        f(s).map(t => extractFunction(t))
-      }
-      ELK.Instrument(i._1, Some(fComponent), i._3)
-    }
-    case _ => ELK.Instrument((i._1, i._2, i._3))
-  })
 }
