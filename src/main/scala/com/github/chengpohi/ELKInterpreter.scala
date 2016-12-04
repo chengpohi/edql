@@ -12,16 +12,16 @@ import scala.io.Source
 class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: ResponseGenerator}) {
   import env.elkParser._
 
-  def interceptDefinitions(definitions: Seq[INSTRUMENT_TYPE]): String = {
+  def interceptDefinitions(instructions: Seq[Instruction]): String = {
     val res = for {
-      definition <- definitions
-    } yield definition._2.get.apply(definition._3).json
+      instruction <- instructions
+    } yield instruction.f.apply(instruction.params).json
     res.mkString("\n")
   }
 
   def run(source: String): String = {
     val parsed = elkParser.parse(source)
-    val instruments = generateAST(parsed)
+    val instruments = generateDefinitions(parsed)
     interceptDefinitions(instruments)
   }
 

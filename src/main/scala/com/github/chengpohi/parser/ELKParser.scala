@@ -14,16 +14,15 @@ class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
 
   import WhitespaceApi._
 
-  val elkParser: P[Seq[INSTRUMENT_TYPE]] = P(WL0 ~ instrument.rep ~ End)
+  val elkParser: P[Seq[Instruction]] = P(WL0 ~ instrument.rep ~ End)
 
-  def generateAST(parsed: Parsed[Seq[INSTRUMENT_TYPE]]): Seq[INSTRUMENT_TYPE] = {
-    val instruments = parsed match {
-      case Success(f, state) => f map {
-        i: INSTRUMENT_TYPE => i
-      }
-      case Failure(_, _, t) => Seq(("error", Some(parserUtils.error), Seq(Str(t.traced.trace), Str(t.traced.trace))))
+  def generateDefinitions(parsed: Parsed[Seq[Instruction]]): Seq[Instruction] = {
+    val instructions = parsed match {
+      case Success(ins, state) => ins
+      case Failure(_, _, t) =>
+        Seq(Instruction("error", parserUtils.error, Seq(Str(t.traced.trace), Str(t.traced.trace))))
     }
-    instruments
+    instructions
   }
 }
 
