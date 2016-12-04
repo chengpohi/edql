@@ -48,6 +48,8 @@ import scala.concurrent.Future
   * Created by chengpohi on 6/28/16.
   */
 trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
+  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
+  val DEFAULT_RETRIEVE_SIZE: Int = 500
   implicit val formats = DefaultFormats
 
   abstract class FlagType
@@ -600,6 +602,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def json: String = execute.toJson
   }
 
+  case class ShutDownRequestDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      client.close()
+      Future {
+        "shutdown"
+      }
+    }
+
+    override def json: String = "shutdown"
+  }
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends Definition[IndexResponse] {
     def doc(fields: Map[String, Any]): IndexRequestDefinition = {
       val json = write(fields)
