@@ -9,8 +9,8 @@ import fastparse.noApi._
   * scala-parser-combinator
   * Created by chengpohi on 12/30/15.
   */
-class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
-  extends ELKInstructionParser(elkCommand, parserUtils) {
+class ELKParser(interceptFunction: InterceptFunction)
+  extends ELKInstructionParser(interceptFunction) {
 
   import WhitespaceApi._
 
@@ -20,7 +20,7 @@ class ELKParser(elkCommand: ELKCommand, parserUtils: ParserUtils)
     val instructions = parsed match {
       case Success(ins, state) => ins
       case Failure(_, _, t) =>
-        Seq(Instruction("error", parserUtils.error, Seq(Str(t.traced.trace), Str(t.traced.trace))))
+        Seq(Instruction("error", interceptFunction.error, Seq(Str(t.traced.trace), Str(t.traced.trace))))
     }
     instructions
   }

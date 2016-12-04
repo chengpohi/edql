@@ -8,10 +8,9 @@ import com.github.chengpohi.helper.ResponseGenerator
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: ResponseGenerator) {
+class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
   val MAX_NUMBER: Int = 500
 
-  import responseGenerator._
   import elasticCommand._
 
   def getMapping: Seq[Val] => GetMappingDefinition = {
@@ -248,13 +247,13 @@ class ELKCommand(val elasticCommand: ElasticDSL, val responseGenerator: Response
     }
   }
 
-  def findJSONElements(c: String): String => String = {
+/*  def findJSONElements(c: String): String => String = {
     extractJSON(_, c)
   }
 
   def beautyJson(): String => String = {
     beautyJSON
-  }
+  }*/
 
   implicit def valToString(v: Val): String = v.extract[String]
 }

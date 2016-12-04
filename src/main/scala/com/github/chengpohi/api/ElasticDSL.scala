@@ -17,7 +17,7 @@ trait DSLs extends AggsDSL
   with ManageDSL
   with QueryDSL
 
-class ElasticDSL(cl: Client) extends DSLs with DSLDefinition {
+class ElasticDSL(cl: Client) extends DSLs {
   val client: Client = cl
   val clusterClient: ClusterAdminClient = client.admin.cluster()
   val indicesClient = client.admin.indices()
