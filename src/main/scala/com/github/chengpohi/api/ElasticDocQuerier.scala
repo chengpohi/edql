@@ -6,7 +6,6 @@ import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.search.SearchHit
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
@@ -14,8 +13,6 @@ import scala.concurrent.Future
   * Created by chengpohi on 3/12/16.
   */
 trait ElasticDocQuerier extends QueryDSL {
-  private val MAX_ALL_NUMBER: Int = 10000
-  private val MAX_RETRIEVE_SIZE: Int = 500
 
 
   def queryAll(indexName: String, indexType: String): Future[SearchResponse] = {
@@ -56,12 +53,6 @@ trait ElasticDocQuerier extends QueryDSL {
         index into indexName / s.getType doc s.getSource.asScala.filter(i => fields.contains(i._1)).toMap
       }
     })
-  }
-
-  def reindex(sourceIndex: String, targetIndex: String, sourceIndexType: String, fields: Seq[String]): Future[String] = Future {
-    val sourceData: Stream[SearchHit] = queryAllByScan(sourceIndex)
-    bulkCopyIndex(targetIndex, sourceData, sourceIndexType, fields)
-    """{"hasErrors": false}"""
   }
 
   def bulkUpdateField(indexName: String, response: Stream[SearchHit],

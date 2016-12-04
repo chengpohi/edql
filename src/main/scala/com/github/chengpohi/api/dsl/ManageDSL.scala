@@ -10,8 +10,11 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksRequestBuilder
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
+import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
+
+import scala.concurrent.{Future, Promise}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * elasticshell
@@ -86,6 +89,8 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
     }
 
     def index(indexName: String): CreateIndexDefinition = CreateIndexDefinition(indicesClient.prepareCreate(indexName))
+
+    def analyzer(analyzer: String): CreateAnalyzerRequestDefinition = CreateAnalyzerRequestDefinition(analyzer)
   }
 
 
@@ -132,6 +137,31 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
     def index(indices: String): RefreshRequestDefinition = {
       RefreshRequestDefinition(indices)
     }
+  }
+
+  case class CreateAnalyzerRequestDefinition(analyzerSetting: String) extends Definition[UpdateSettingsResponse] {
+    override def execute: Future[UpdateSettingsResponse] = {
+      val p = Promise[UpdateSettingsResponse]()
+      DSL {
+        close index ELASTIC_SHELL_INDEX_NAME
+      } onSuccess {
+        case _ =>
+          val eventualUpdateSettingsResponse: Future[UpdateSettingsResponse] = DSL {
+            indice update ELASTIC_SHELL_INDEX_NAME settings analyzerSetting
+          }
+          eventualUpdateSettingsResponse.onSuccess {
+            case r => p success r
+          }
+      }
+      p.future onSuccess {
+        case _ => DSL {
+          open index ELASTIC_SHELL_INDEX_NAME
+        }
+      }
+      p.future
+    }
+
+    override def json: String = execute.await.toJson
   }
 
 }

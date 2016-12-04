@@ -1,6 +1,6 @@
 package com.github.chengpohi.api
 
-import com.github.chengpohi.api.dsl.AnalyzeDSL
+import com.github.chengpohi.api.dsl.{AnalyzeDSL, Definition}
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 
@@ -12,8 +12,6 @@ import scala.concurrent.{Future, Promise}
   * Created by chengpohi on 3/12/16.
   */
 trait ElasticAnalyzer extends AnalyzeDSL with ElasticManagement {
-  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
-
   def analysiser(a: String, analyzeText: String): Future[AnalyzeResponse] =
     DSL {
       analysis text analyzeText in ELASTIC_SHELL_INDEX_NAME analyzer a
@@ -35,4 +33,6 @@ trait ElasticAnalyzer extends AnalyzeDSL with ElasticManagement {
     }
     p.future
   }
+
+
 }

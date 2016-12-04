@@ -1,54 +1,28 @@
 package com.github.chengpohi
 
-import com.github.chengpohi.api.dsl.Definition
 import com.github.chengpohi.helper.ResponseGenerator
-import com.github.chengpohi.parser.{ELK, ELKParser}
+import com.github.chengpohi.parser.ELKParser
 import com.github.chengpohi.registry.ELKCommandRegistry
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.io.Source
-import scala.util.Try
 
 /**
   * Created by chengpohi on 1/3/16.
   */
 class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: ResponseGenerator}) {
-
   import env.elkParser._
-  import env.responseGenerator._
 
-  def interceptDefinition(definitions: Seq[Definition[_]]): Unit = {
+  def interceptDefinitions(definitions: Seq[INSTRUMENT_TYPE]): String = {
     val res = for {
       definition <- definitions
-    } yield definition.json
-    res.foreach(println)
-  }
-
-  def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): String = {
-    val outputs = instruments.map {
-      case i: ELK.Instrument => i.value match {
-        case (name, Some(ins), parameters) =>
-          try {
-            val response: String = Await.result(ins(parameters), Duration.Inf)
-            Try(beautyJSON(response)).getOrElse(response)
-          } catch {
-            case e: Exception => {
-              s"\nMethod Name: $name \nParameters: $parameters\nFull Stacktrace: ${e.toString}"
-            }
-          }
-        case (_, None, _) =>
-          s"Unknown Instrument!"
-      }
-    }
-
-    outputs.mkString("\\n")
+    } yield definition._2.get.apply(definition._3).json
+    res.mkString("\n")
   }
 
   def run(source: String): String = {
     val parsed = elkParser.parse(source)
-    val (functions, instruments) = generateAST(parsed)
-    runInstruments(instruments, Map())
+    val instruments = generateAST(parsed)
+    interceptDefinitions(instruments)
   }
 
   def run(str: String, parameters: String*): String = {
