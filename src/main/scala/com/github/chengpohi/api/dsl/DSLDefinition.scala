@@ -584,8 +584,9 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
   case class RefreshRequestDefinition(indices: String) extends ActionRequest[RefreshResponse] {
     override def execute: Future[RefreshResponse] = {
-      val sleep: Long = 2000
+      val sleep: Long = 1000
       Thread.sleep(sleep)
+      client.admin().cluster().prepareHealth().setWaitForNoRelocatingShards(true).execute.actionGet()
       client.admin().indices().prepareFlush().execute.flatMap(i =>
         indices match {
           case "*" => client.admin().indices().prepareRefresh().execute
