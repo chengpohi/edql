@@ -12,6 +12,7 @@ unmanagedBase := baseDirectory.value / "lib"
 
 resolvers += Resolver.mavenLocal
 
+resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 ivyScala := ivyScala.value map {
   _.copy(overrideScalaVersion = true)
