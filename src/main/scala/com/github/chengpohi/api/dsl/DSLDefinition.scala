@@ -50,6 +50,8 @@ import scala.concurrent.Future
 trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
+  val MAX_ALL_NUMBER: Int = 10000
+  val MAX_RETRIEVE_SIZE: Int = 500
   implicit val formats = DefaultFormats
 
   abstract class FlagType
