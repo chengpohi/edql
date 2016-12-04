@@ -83,12 +83,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[NodesStatsResponse] = {
       nodesStatsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class NodeInfoRequestDefinition(nodesInfoRequestBuilder: NodesInfoRequestBuilder) extends Definition[NodesInfoResponse] {
     override def execute: Future[NodesInfoResponse] = {
       nodesInfoRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class IndicesStatsRequestDefinition(indicesStatsRequestBuilder: IndicesStatsRequestBuilder) extends Definition[IndicesStatsResponse] {
@@ -100,12 +104,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[IndicesStatsResponse] = {
       indicesStatsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class ClusterStatsRequestDefinition(clusterStatsRequestBuilder: ClusterStatsRequestBuilder) extends Definition[ClusterStatsResponse] {
     override def execute: Future[ClusterStatsResponse] = {
       clusterStatsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class ClusterHealthRequestDefinition(clusterHealthRequestBuilder: ClusterHealthRequestBuilder) extends Definition[ClusterHealthResponse] {
@@ -128,6 +136,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[ClusterHealthResponse] = {
       clusterHealthRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder: ClusterUpdateSettingsRequestBuilder)
@@ -135,6 +145,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[ClusterUpdateSettingsResponse] = {
       clusterUpdateSettingsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class UpdateSettingsRequestDefinition(updateSettingsRequestBuilder: UpdateSettingsRequestBuilder) extends Definition[UpdateSettingsResponse] {
@@ -146,6 +158,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[UpdateSettingsResponse] = {
       updateSettingsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class PutRepositoryDefinition(putRepositoryRequestBuilder: PutRepositoryRequestBuilder) extends Definition[PutRepositoryResponse] {
@@ -162,6 +176,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[PutRepositoryResponse] = {
       putRepositoryRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class CreateSnapshotDefinition(snapshotName: String) extends Definition[CreateSnapshotResponse] {
@@ -175,6 +191,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[CreateSnapshotResponse] = {
       createSnapshotRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends Definition[CreateIndexResponse] {
@@ -186,6 +204,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[CreateIndexResponse] = {
       createIndexRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class GetSnapshotDefinition(snapshotName: String) extends Definition[GetSnapshotsResponse] {
@@ -202,6 +222,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[GetSnapshotsResponse] = {
       getSnapshotsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class DeleteSnapshotDefinition(snapshotName: String) extends Definition[DeleteSnapshotResponse] {
@@ -215,12 +237,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[DeleteSnapshotResponse] = {
       deleteSnapshotRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class GetMappingDefinition(getMappingsRequestBuilder: GetMappingsRequestBuilder) extends Definition[GetMappingsResponse] {
     override def execute: Future[GetMappingsResponse] = {
       getMappingsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class PutMappingRequestDefinition(putMappingRequestBuilder: PutMappingRequestBuilder) extends Definition[PutMappingResponse] {
@@ -232,18 +258,24 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[PutMappingResponse] = {
       putMappingRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class ClusterStateRequestDefinition(clusterStateRequestBuilder: ClusterStateRequestBuilder) extends Definition[ClusterStateResponse] {
     override def execute: Future[ClusterStateResponse] = {
       clusterStateRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class GetSettingsRequestDefinition(getSettingsRequestBuilder: GetSettingsRequestBuilder) extends Definition[GetSettingsResponse] {
     override def execute: Future[GetSettingsResponse] = {
       getSettingsRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class AddAliasRequestDefinition(targetAlias: String) extends Definition[IndicesAliasesResponse] {
@@ -257,6 +289,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[IndicesAliasesResponse] = {
       indicesAliasesRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class RestoreSnapshotRequestDefinition(snapshotName: String) extends Definition[RestoreSnapshotResponse] {
@@ -270,18 +304,24 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[RestoreSnapshotResponse] = {
       restoreSnapshotRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class CloseIndexRequestDefinition(closeIndexRequestBuilder: CloseIndexRequestBuilder) extends Definition[CloseIndexResponse] {
     override def execute: Future[CloseIndexResponse] = {
       closeIndexRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class SearchScrollRequestDefinition(searchScrollRequestBuilder: SearchScrollRequestBuilder) extends Definition[SearchResponse] {
     override def execute: Future[SearchResponse] = {
       searchScrollRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends Definition[SearchResponse] {
@@ -404,6 +444,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       }
       searchRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
 
@@ -434,6 +476,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[Stream[SearchHit]] = {
       searchRequestDefinition.execute.map(h => head(h))
     }
+
+    override def json: String = execute.toJson
   }
 
   case class JoinSearchRequestDefinition(scrollSearchRequestDefinition: ScrollSearchRequestDefinition, indexPath: IndexPath)
@@ -464,6 +508,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
         })
       })
     }
+
+    override def json: String = execute.toJson
   }
 
   case class PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
@@ -471,12 +517,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[PendingClusterTasksResponse] = {
       pendingClusterTasksRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class OpenIndexRequestDefinition(openIndexRequestBuilder: OpenIndexRequestBuilder) extends Definition[OpenIndexResponse] {
     override def execute: Future[OpenIndexResponse] = {
       openIndexRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class AnalyzeRequestDefinition(analyzeRequestBuilder: AnalyzeRequestBuilder) extends Definition[AnalyzeResponse] {
@@ -493,12 +543,16 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[AnalyzeResponse] = {
       analyzeRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class DeleteIndexRequestDefinition(deleteIndexRequestBuilder: DeleteIndexRequestBuilder) extends Definition[DeleteIndexResponse] {
     override def execute: Future[DeleteIndexResponse] = {
       deleteIndexRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
 
@@ -511,6 +565,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[DeleteResponse] = {
       deleteRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class UpdateRequestDefinition(documentId: String) extends Definition[UpdateResponse] {
@@ -540,6 +596,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[UpdateResponse] = {
       updateRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends Definition[IndexResponse] {
@@ -567,6 +625,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[IndexResponse] = {
       indexRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class GetRequestDefinition(getRequestBuilder: GetRequestBuilder) extends Definition[GetResponse] {
@@ -579,6 +639,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[GetResponse] = {
       getRequestBuilder.execute
     }
+
+    override def json: String = execute.toJson
   }
 
   case class RefreshRequestDefinition(indices: String) extends Definition[RefreshResponse] {
@@ -594,6 +656,8 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       )
 
     }
+
+    override def json: String = execute.toJson
   }
 
 }

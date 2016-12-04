@@ -9,11 +9,6 @@ import scala.concurrent.{Future, Promise}
   * Created by chengpohi on 6/28/16.
   */
 
-
-abstract class Definition[A] {
-  def execute: Future[A]
-}
-
 trait DSLExecutor {
   implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
