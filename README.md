@@ -26,6 +26,20 @@ In the ***conf/elastic.conf***, you can configure your ***elasticsearch host, po
 bin/es
 ```
 
+### DSL
+
+```
+val result: Future[SearchResponse] = DSL {
+  search in "*"
+}
+val result: SearchResponse = DSL {
+  search in "*"
+}.await
+val result: String = DSL {
+  search in "*"
+}.toJson
+```
+
 ### Syntax
 
 
