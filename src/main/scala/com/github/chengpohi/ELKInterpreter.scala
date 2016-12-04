@@ -18,7 +18,11 @@ class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: Resp
   import env.elkParser._
   import env.responseGenerator._
 
-  def interceptDefinition(definitions: Seq[Definition[_]], variables: Map[String, String]): Unit = {
+  def interceptDefinition(definitions: Seq[Definition[_]]): Unit = {
+    val res = for {
+      definition <- definitions
+    } yield definition.json
+    res.foreach(println)
   }
 
   def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): String = {
