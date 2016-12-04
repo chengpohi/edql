@@ -18,9 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by chengpohi on 6/29/16.
   */
 trait QueryDSL extends DSLDefinition with IndexerDSL {
-  val MAX_ALL_NUMBER: Int = 10000
-  val MAX_RETRIEVE_SIZE: Int = 500
-
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)

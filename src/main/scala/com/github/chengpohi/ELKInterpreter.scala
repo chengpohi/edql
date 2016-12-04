@@ -1,6 +1,5 @@
 package com.github.chengpohi
 
-import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.ELKParser
 import com.github.chengpohi.registry.ELKCommandRegistry
 
@@ -9,7 +8,8 @@ import scala.io.Source
 /**
   * Created by chengpohi on 1/3/16.
   */
-class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: ResponseGenerator}) {
+class ELKInterpreter(env: {val elkParser: ELKParser}) {
+
   import env.elkParser._
 
   def interceptDefinitions(instructions: Seq[Instruction]): String = {

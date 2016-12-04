@@ -1,7 +1,7 @@
 package com.github.chengpohi.helper
 
 import com.github.chengpohi.api.ElasticDSL
-import com.github.chengpohi.parser.{ELKCommand, ELKParser, ParserUtils}
+import com.github.chengpohi.parser.{InterceptFunction, ELKParser, ParserUtils}
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.node.Node
 
@@ -23,10 +23,12 @@ object ELKCommandTestRegistry {
   val client = node.client()
   val elasticdsl = new ElasticDSL(client)
   val responseGenerator = new ResponseGenerator
-  private[this] val elkCommand = new ELKCommand(elasticdsl, responseGenerator)
+  private[this] val elkCommand = new InterceptFunction(elasticdsl)
   private[this] val parserUtils = new ParserUtils
-  val elkParser = new ELKParser(elkCommand, parserUtils)
+  val elkParser = new ELKParser(elkCommand)
+
   import elasticdsl._
+
   DSL {
     delete index "*"
   }.await
