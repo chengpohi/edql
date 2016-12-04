@@ -1,14 +1,14 @@
 package com.github.chengpohi
 
+import com.github.chengpohi.api.dsl.Definition
 import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.{ELK, ELKParser}
 import com.github.chengpohi.registry.ELKCommandRegistry
 
 import scala.concurrent.Await
-import scala.io.Source
-import scala.util.{Failure, Success, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import scala.io.Source
+import scala.util.Try
 
 /**
   * Created by chengpohi on 1/3/16.
@@ -17,6 +17,9 @@ class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: Resp
 
   import env.elkParser._
   import env.responseGenerator._
+
+  def interceptDefinition(definitions: Seq[Definition[_]], variables: Map[String, String]): Unit = {
+  }
 
   def runInstruments(instruments: Seq[ELK.Instrument], variables: Map[String, String]): String = {
     val outputs = instruments.map {
@@ -43,6 +46,7 @@ class ELKInterpreter(env: {val elkParser: ELKParser; val responseGenerator: Resp
     val (functions, instruments) = generateAST(parsed)
     runInstruments(instruments, Map())
   }
+
   def run(str: String, parameters: String*): String = {
     val s = String.format(str, parameters: _*)
     run(s)

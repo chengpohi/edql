@@ -8,12 +8,13 @@ import scala.concurrent.{Future, Promise}
   * elasticshell
   * Created by chengpohi on 6/28/16.
   */
+
+
+abstract class Definition[A] {
+  def execute: Future[A]
+}
+
 trait DSLExecutor {
-
-  abstract class ActionRequest[A] {
-    def execute: Future[A]
-  }
-
   implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
     f(new ActionListener[A] {
@@ -35,7 +36,7 @@ trait DSLExecutor {
   }
 
   object DSL {
-    def apply[A](f: ActionRequest[A]): Future[A] = f.execute
+    def apply[A](f: Definition[A]): Future[A] = f.execute
   }
 
 }
