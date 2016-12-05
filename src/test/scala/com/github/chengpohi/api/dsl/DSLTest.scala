@@ -95,6 +95,23 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     result2.isExists should be(false)
   }
 
+  it should "extract json by path" in {
+    val _id: String = "1234"
+
+    DSL {
+      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar")) id _id
+    }
+
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    val result1 = DSL {
+      search in "testindex" / "testmap" where id equal _id extract "_source.Hello"
+    }.await
+    result1 should be("""["world","foobar"]""")
+  }
+
   after {
     DSL {
       delete index "*"
