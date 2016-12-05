@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.dsl.Definition
+import com.github.chengpohi.api.dsl.{Definition, ExtractDefinition}
 import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.{Str, Val}
 import fastparse.noApi._
@@ -10,6 +10,7 @@ import fastparse.noApi._
   * Created by chengpohi on 1/18/16.
   */
 class ELKInstructionParser(val interceptFunction: InterceptFunction) extends CollectionParser {
+
   import WhitespaceApi._
 
   val help = P(alphaChars.rep(1).! ~ "?")
@@ -81,10 +82,10 @@ class ELKInstructionParser(val interceptFunction: InterceptFunction) extends Col
   val openIndex = P("open index" ~/ ioParser).map(c => Instruction("openIndex", interceptFunction.openIndex, c))
   val dumpIndex = P("dump index" ~/ strOrVar ~/ ">" ~/ strChars.rep(1).!)
     .map(c => Instruction("dumpIndex", interceptFunction.dumpIndex, Seq(c._1, JsonCollection.Str(c._2))))
-  //val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", findJSONElements(c.value)))
+  val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
-  val instrument: P[Instruction] = P(health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
+  val instrument: P[Instruction] = P((health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
     | clusterSettings | nodeSettings | indexSettings | clusterState
     | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
     | deleteDoc | deleteIndex
@@ -92,7 +93,20 @@ class ELKInstructionParser(val interceptFunction: InterceptFunction) extends Col
     | reindex | index | bulkIndex | createIndex | closeIndex | openIndex | dumpIndex
     | updateMapping | update | analysis | aggs | createAnalyzer
     | getMapping | mapping
-    | alias | count)
+    | alias | count) ~ extractJSON.?).map(t => {
+    t._2 match {
+      case Some((name, s)) => {
+        val f = buildExtractDefinition(t._1.f, s)
+        t._1.copy(f = f)
+      }
+      case None => t._1
+    }
+  })
 
   case class Instruction(name: String, f: Seq[Val] => Definition[_], params: Seq[Val])
+
+  def buildExtractDefinition(f: Seq[Val] => Definition[_], path: String): Seq[Val] => ExtractDefinition = {
+    val f2: Definition[_] => ExtractDefinition = ExtractDefinition(_, path)
+    f andThen f2
+  }
 }

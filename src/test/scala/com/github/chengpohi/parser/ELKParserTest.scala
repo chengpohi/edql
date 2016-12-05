@@ -133,14 +133,14 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     assert(result.contains( """"_id":"hJJJJJJH""""))
   }
 
-/*  "ELKParser" should "extract json data" in {
+  "ELKParser" should "extract json data" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} id "HJJJJJJH" """)
     DSL {
       refresh index "*"
     }.await
     val result = runEngine.run( """search in "test-parser-name" / "test-parser-type" \\ "hits.hits._source.name"""")
     assert(result === """"hello"""")
-  }*/
+  }
 
   "ELKParser" should "search data by json" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
