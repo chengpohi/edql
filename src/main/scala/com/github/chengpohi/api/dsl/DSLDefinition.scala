@@ -496,19 +496,17 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def execute: Future[Stream[Map[String, AnyRef]]] = {
       val result: Future[Stream[SearchHit]] = scrollSearchRequestDefinition.execute
       result.map(s => {
-        s.flatMap(i => {
+        s.map(i => {
           val fieldValue = i.getSource.get(_field).asInstanceOf[String]
           val searchRequestBuilder =
             client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
-          SearchRequestDefinition(searchRequestBuilder).must(List((_field, fieldValue))).scroll("10m")
+          val res: Stream[Map[String, AnyRef]] = SearchRequestDefinition(searchRequestBuilder).must(List((_field, fieldValue))).scroll("10m")
             .execute.await.map(t => {
             val fields: mutable.Map[String, AnyRef] = t.sourceAsMap.asScala + ("id" -> t.getId)
-            val doc: mutable.Map[String, AnyRef] =
-              i.sourceAsMap.asScala +
-                ("id" -> i.getId) +
-                (s"${indexPath.indexType}" -> fields)
-            doc.toMap
+            fields.toMap
           })
+          val doc: mutable.Map[String, AnyRef] = i.getSource.asScala + ("id" -> i.getId) + (s"${indexPath.indexType}" -> res)
+          doc.toMap
         })
       })
     }
@@ -614,6 +612,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
     override def json: String = "shutdown"
   }
+
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends Definition[IndexResponse] {
     def doc(fields: Map[String, Any]): IndexRequestDefinition = {
       val json = write(fields)
