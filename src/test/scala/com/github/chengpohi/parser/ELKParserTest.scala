@@ -196,7 +196,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
     //val result = runEngine.run(""""test-parser-name" mapping \\ "test-parser-name.mappings.bookmark.properties.name.type" """)
     val result = runEngine.run(""""test-parser-name" mapping""")
-    result.contains("keyword") should be (true)
+    result.contains("keyword") should be(true)
   }
 
 
@@ -491,7 +491,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     val result = runEngine.run("""search in "test-index-name" / "test-index-type" match {"title": "foo"} """)
-    println(result)
+    result.contains(""""name":"test"""") should be(true)
   }
   "ELKParser" should "join search" in {
     runEngine.run(
@@ -504,6 +504,16 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
         |{"name": "test","_tip_id": "1"},
         |{"name": "foo","_tip_id": "2"},
         |{"name": "bar","_tip_id": "1"},
+        |{"name": "bar1","_tip_id": "1"},
+        |{"name": "bar2","_tip_id": "1"},
+        |{"name": "bar3","_tip_id": "1"},
+        |{"name": "bar4","_tip_id": "1"},
+        |{"name": "bar5","_tip_id": "1"},
+        |{"name": "bar6","_tip_id": "1"},
+        |{"name": "bar7","_tip_id": "1"},
+        |{"name": "bar8","_tip_id": "1"},
+        |{"name": "bar9","_tip_id": "1"},
+        |{"name": "bar10","_tip_id": "1"},
         |{"name": "jack","_tip_id": "2"}
         |] """.stripMargin)
     DSL {
@@ -513,9 +523,6 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       """
         |search in "test-index-name-1" / "test-index-type-1" join "test-index-name" / "test-index-type" by "_tip_id"
       """.stripMargin)
-    DSL {
-      refresh index "*"
-    }.await
     assert(result.contains("test-index-type"))
   }
 
