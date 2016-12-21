@@ -3,6 +3,7 @@ package com.github.chengpohi.repl
 import java.io.File
 
 import com.github.chengpohi.ELKInterpreter
+import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
@@ -16,6 +17,7 @@ import scala.io.Source
   */
 object ELKRepl {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
+  private val generator = new ResponseGenerator
   val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
@@ -32,12 +34,17 @@ object ELKRepl {
     while (true) {
       val line = reader.readLine()
       if (line == "exit") System.exit(0)
-      println(elkRunEngine.run(line))
+      val res = generator.beautyJSON(elkRunEngine.run(line))
+      println(res)
     }
   }
 
   def addShutdownHook(reader: ConsoleReader): Unit = {
-    elkRunEngine.run(s"""create index "$ELASTIC_SHELL_INDEX_NAME"""")
+    try {
+      elkRunEngine.run(s"""create index "$ELASTIC_SHELL_INDEX_NAME"""")
+    } catch {
+      case e: Exception => println(e)
+    }
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
         reader.getHistory.asInstanceOf[FileHistory].flush()

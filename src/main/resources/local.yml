@@ -2,4 +2,4 @@ http.enabled: false
 path.repo: ./local/
 action.destructive_requires_name: false
 path.home: ./local/
-transport.type: netty3
+transport.type: netty4
