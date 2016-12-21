@@ -14,7 +14,7 @@ import org.elasticsearch.index.reindex.ReindexPlugin
 import org.elasticsearch.percolator.PercolatorPlugin
 import org.elasticsearch.plugins.Plugin
 import org.elasticsearch.script.mustache.MustachePlugin
-import org.elasticsearch.transport.{Netty3Plugin, Netty4Plugin}
+import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
@@ -26,7 +26,7 @@ object ElasticClientConnector {
   val clusterName: String = indexConfig.getString("cluster.name")
   val isStandalone: Boolean = indexConfig.getBoolean("standalone")
 
-  val client = isStandalone match {
+  val client: Client = isStandalone match {
     case false => buildRemoteClient()
     case true => buildLocalClient()
   }
@@ -40,7 +40,6 @@ object ElasticClientConnector {
     val plugins =
       Collections.unmodifiableList(
         util.Arrays.asList(
-          classOf[Netty3Plugin],
           classOf[Netty4Plugin],
           classOf[ReindexPlugin],
           classOf[PercolatorPlugin],
@@ -54,7 +53,7 @@ object ElasticClientConnector {
     val settings = Settings.builder()
       .put("node.name", "elasticshell")
       .put("cluster.name", clusterName)
-      .put(NetworkModule.TRANSPORT_TYPE_KEY, Netty3Plugin.NETTY_TRANSPORT_NAME)
+      .put(NetworkModule.TRANSPORT_TYPE_KEY, Netty4Plugin.NETTY_TRANSPORT_NAME)
       .build()
 
     val host: String = indexConfig.getString("host")
