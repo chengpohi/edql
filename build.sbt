@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-1.2-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-core" % "2.7",
-  "org.elasticsearch.client" % "transport" % "5.0.0",
+  "org.elasticsearch.client" % "transport" % "5.1.1",
   "org.json4s" %% "json4s-native" % "3.2.10",
   "org.apache.commons" % "commons-lang3" % "3.5",
   "org.json4s" %% "json4s-jackson" % "3.2.10"
@@ -59,12 +59,11 @@ compileScalaStyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).
 }
 packageOptions := Seq(ManifestAttributes(
   ("Change", "253032b"),
-  ("Branch", "253032b4a7818992af360097e3ddc1475fa7b044"),
   ("X-Compile-Target-JDK", "1.8"),
   ("X-Compile-Source-JDK", "1.8"),
-  ("Branch", "253032b4a7818992af360097e3ddc1475fa7b044"),
-  ("X-Compile-Elasticsearch-Version", "5.0.0"),
-  ("X-Compile-Lucene-Version", "6.2.0"),
+  ("Branch", "5395e21a627bfe3ab8f037f49e68a9060bc967dd"),
+  ("X-Compile-Elasticsearch-Version", "5.1.1"),
+  ("X-Compile-Lucene-Version", "6.3.0"),
   ("X-Compile-Elasticsearch-Snapshot", "false"),
   ("Build-Date", System.currentTimeMillis().toString)
 ))
