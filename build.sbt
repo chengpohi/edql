@@ -109,4 +109,11 @@ pomExtra := (
     </developers>
   )
 
+lazy val distribution = project.in(file("distribution")).settings(
+  name := "elasticdsl_distribution",
+  organization := "com.github.chengpohi",
+  version := "0.2.2",
+  scalaVersion := "2.12.1"
+)
+
 
