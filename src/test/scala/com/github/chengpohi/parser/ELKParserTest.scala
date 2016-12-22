@@ -139,7 +139,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     val result = runEngine.run( """search in "test-parser-name" / "test-parser-type" \\ "hits.hits._source.name"""")
-    assert(result === """"hello"""")
+    assert(result === """["hello"]""")
   }
 
   "ELKParser" should "search data by json" in {
