@@ -1,10 +1,10 @@
 import sbt.Package.ManifestAttributes
 
-name := "elasticshell"
+name := "elasticdsl"
 
 organization := "com.github.chengpohi"
 
-version := "0.2.2-SNAPSHOT"
+version := "0.2.2"
 
 scalaVersion := "2.11.8"
 
@@ -70,3 +70,41 @@ packageOptions := Seq(ManifestAttributes(
 
 parallelExecution in ThisBuild := false
 parallelExecution in Test := false
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+publishMavenStyle := true
+
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+
+pomExtra := (
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+    <url>https://github.com/chengpohi/elasticdsl</url>
+    <scm>
+      <url>git@github.com:chengpohi/elasticdsl.git</url>
+      <connection>scm:git:git@github.com:chengpohi/elasticdsl.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>chengpohi</id>
+        <name>chengpohi</name>
+        <url>https://github.com/chengpohi/elasticdsl</url>
+      </developer>
+    </developers>
+  )
+
+
