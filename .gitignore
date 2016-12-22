@@ -20,4 +20,4 @@ project/plugins/project/
 project/target/*
 lib/*
 local/
-release/elasticshell-*/*
+release/elasticdsl-*/*

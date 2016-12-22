@@ -22,7 +22,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
   import ELKCommandTestRegistry.elasticdsl._
 
   before {
-    runEngine.run("""create index ".elasticshell"""")
+    runEngine.run("""create index ".elasticdsl"""")
     runEngine.run( """ create index "test-parser-name" """)
     outContent.reset()
     DSL {
@@ -475,7 +475,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     DSL {
       refresh index "*"
     }.await
-    val result = runEngine.run("""".elasticshell" settings""")
+    val result = runEngine.run("""".elasticdsl" settings""")
     assert(result.contains("myAnalyzer"))
   }
 

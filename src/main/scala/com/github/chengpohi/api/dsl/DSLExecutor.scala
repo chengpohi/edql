@@ -5,7 +5,7 @@ import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 import scala.concurrent.{Future, Promise}
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/28/16.
   */
 

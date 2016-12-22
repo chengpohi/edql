@@ -16,7 +16,7 @@ import org.json4s.native.Serialization.write
 import scala.collection.JavaConverters._
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 1/26/16.
   */
 class ResponseGenerator {

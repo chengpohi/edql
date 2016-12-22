@@ -6,7 +6,7 @@ import com.github.chengpohi.helper.ELKCommandTestRegistry
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 9/22/16.
   */
 class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {

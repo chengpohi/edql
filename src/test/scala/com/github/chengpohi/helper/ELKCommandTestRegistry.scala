@@ -6,7 +6,7 @@ import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.node.Node
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 4/4/16.
   */
 

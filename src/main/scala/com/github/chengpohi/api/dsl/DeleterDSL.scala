@@ -4,7 +4,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder
 import org.elasticsearch.action.delete.DeleteRequestBuilder
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/28/16.
   */
 trait DeleterDSL extends DSLDefinition {
