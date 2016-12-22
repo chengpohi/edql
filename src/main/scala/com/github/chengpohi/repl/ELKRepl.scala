@@ -12,11 +12,11 @@ import jline.internal.Configuration
 import scala.io.Source
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 1/27/16.
   */
 object ELKRepl {
-  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
+  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticdsl"
   private val generator = new ResponseGenerator
   val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
@@ -25,17 +25,21 @@ object ELKRepl {
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
-    reader.setPrompt("elasticshell>")
+    reader.setPrompt("elasticdsl>")
     reader.addCompleter(terms)
     reader.setCompletionHandler(eLKCompletionHandler)
-    reader.setHistory(new FileHistory(new File(Configuration.getUserHome, ".elasticshell.history")))
+    reader.setHistory(new FileHistory(new File(Configuration.getUserHome, ".elasticdsl.history")))
     addShutdownHook(reader)
 
     while (true) {
       val line = reader.readLine()
       if (line == "exit") System.exit(0)
-      val res = generator.beautyJSON(elkRunEngine.run(line))
-      println(res)
+      line.trim.isEmpty match {
+        case true =>
+        case false =>
+          val res = generator.beautyJSON(elkRunEngine.run(line))
+          println(res)
+      }
     }
   }
 

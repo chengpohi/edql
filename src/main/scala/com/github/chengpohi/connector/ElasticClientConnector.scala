@@ -18,7 +18,7 @@ import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 3/19/15.
   */
 object ElasticClientConnector {
@@ -51,7 +51,7 @@ object ElasticClientConnector {
 
   def buildRemoteClient(): Client = {
     val settings = Settings.builder()
-      .put("node.name", "elasticshell")
+      .put("node.name", "elasticdsl")
       .put("cluster.name", clusterName)
       .put(NetworkModule.TRANSPORT_TYPE_KEY, Netty4Plugin.NETTY_TRANSPORT_NAME)
       .build()

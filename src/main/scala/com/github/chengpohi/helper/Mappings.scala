@@ -1,7 +1,7 @@
 package com.github.chengpohi.helper
 
 /**
- * elasticshell
+ * elasticdsl
  * Created by chengpohi on 1/30/16.
  */
 object Mappings {

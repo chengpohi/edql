@@ -3,7 +3,7 @@ package com.github.chengpohi.helper
 import org.scalatest.FlatSpec
 
 /**
- * elasticshell
+ * elasticdsl
  * Created by chengpohi on 1/28/16.
  */
 class ResponseGeneratorTest extends FlatSpec {

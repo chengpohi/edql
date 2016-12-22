@@ -4,7 +4,7 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchType}
 import org.elasticsearch.index.query.QueryBuilders
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/26/16.
   */
 trait AggsDSL extends DSLDefinition {

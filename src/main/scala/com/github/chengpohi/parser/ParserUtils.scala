@@ -11,7 +11,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 3/24/16.
   */
 class ParserUtils {
