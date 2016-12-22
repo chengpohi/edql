@@ -9,7 +9,7 @@ import scala.collection.immutable.Iterable
 import scala.math.min
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 3/25/16.
   */
 class StringsCompleter(completions: Set[String], words: Set[String]) extends Completer {

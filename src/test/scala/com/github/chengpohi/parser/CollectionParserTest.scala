@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 2/1/16.
   */
 class CollectionParserTest extends FlatSpec with BeforeAndAfter {

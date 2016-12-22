@@ -3,7 +3,7 @@ package com.github.chengpohi.api.dsl
 import org.elasticsearch.action.index.IndexRequestBuilder
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/30/16.
   */
 trait IndexerDSL extends DSLDefinition{

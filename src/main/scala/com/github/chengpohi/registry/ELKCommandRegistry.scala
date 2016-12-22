@@ -6,7 +6,7 @@ import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.parser.{InterceptFunction, ELKParser, ParserUtils}
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 4/4/16.
   */
 

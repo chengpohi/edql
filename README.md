@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/chengpohi/elasticshell.svg)](https://travis-ci.org/chengpohi/elasticshell)
+[![Build Status](https://travis-ci.org/chengpohi/elasticdsl.svg)](https://travis-ci.org/chengpohi/elasticdsl)
 
 # Elastic DSL with REPL
 
@@ -7,11 +7,12 @@ It is a **DSL** for elasticsearch. Have fun :)
 
 ## Install
 
-Go to the [release folder](https://github.com/chengpohi/elasticshell/tree/master/release), choose a version and download.
+Go to the [release](https://github.com/chengpohi/elasticdsl/releases), choose a version and download.
 
 | Version | Elasticsearch Version |
 |-------------------------------------------|----------------|
 | 0.2.1             | 5.0.0 |
+| 0.2.2             | 5.1.1 |
 
 
 ## Use it

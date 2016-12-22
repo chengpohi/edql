@@ -44,11 +44,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/28/16.
   */
 trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
-  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticshell"
+  val ELASTIC_SHELL_INDEX_NAME: String = ".elasticdsl"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
   val MAX_ALL_NUMBER: Int = 10000
   val MAX_RETRIEVE_SIZE: Int = 500

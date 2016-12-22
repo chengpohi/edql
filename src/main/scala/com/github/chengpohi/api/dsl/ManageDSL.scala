@@ -17,7 +17,7 @@ import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 6/26/16.
   */
 trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {

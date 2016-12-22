@@ -7,7 +7,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /**
-  * elasticshell
+  * elasticdsl
   * Created by chengpohi on 1/6/16.
   */
 trait DSLs extends AggsDSL
