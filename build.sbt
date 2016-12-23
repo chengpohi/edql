@@ -1,3 +1,6 @@
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.{Files, Paths}
+import Process._
 import sbt.Package.ManifestAttributes
 
 name := "elasticdsl"
@@ -71,7 +74,10 @@ packageOptions := Seq(ManifestAttributes(
 parallelExecution in ThisBuild := false
 parallelExecution in Test := false
 
+//publish to sonatype
 publishArtifact in Test := false
+
+sonatypeProfileName := "org.xerial"
 
 pomIncludeRepository := { _ => false }
 
@@ -117,3 +123,55 @@ lazy val distribution = project.in(file("distribution")).settings(
 )
 
 
+lazy val testRelease = taskKey[Unit]("release elasticdsl distribution")
+
+val distributionPath = "./distribution/src/main/resources"
+
+testRelease := {
+  println("assembly elasticdsl")
+  val f = assembly.value
+  copyJar(f)
+  copyConf()
+  println("release to repository")
+  //Command.process("publishSigned", _)
+  //Command.process("sonatypeReleaseAll", _)
+  cleanDistribution()
+}
+
+def copyJar(f: File): Unit = {
+  val dist = Paths.get(distributionPath + "/lib/elasticdsl.jar")
+  println(s"copy $f to $dist")
+  Files.copy(f.toPath, dist, REPLACE_EXISTING)
+}
+
+def copyConf(): Unit = {
+  println(s"copy resources to conf/")
+  val f = Paths.get("./src/main/resources/")
+  f.toFile.listFiles().foreach(i => {
+    val d = Paths.get(distributionPath + "/conf/" + i.getName)
+    Files.copy(i.toPath, d, REPLACE_EXISTING)
+  })
+}
+
+def cleanDistribution(): Unit = {
+  Paths.get(distributionPath + "/conf/").toFile.listFiles().foreach(_.delete())
+  Paths.get(distributionPath + "/lib/").toFile.listFiles().foreach(_.delete())
+}
+
+
+import ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  ReleaseStep(action = Command.process("publishSigned", _)),
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+  pushChanges
+)
