@@ -1,13 +1,10 @@
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Paths}
-import Process._
 import sbt.Package.ManifestAttributes
 
 name := "elasticdsl"
 
 organization := "com.github.chengpohi"
-
-version := "0.2.2"
 
 scalaVersion := "2.12.1"
 
@@ -118,7 +115,6 @@ pomExtra := (
 lazy val distribution = project.in(file("distribution")).settings(
   name := "elasticdsl_distribution",
   organization := "com.github.chengpohi",
-  version := "0.2.2",
   scalaVersion := "2.12.1"
 )
 
@@ -169,9 +165,9 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
-  //ReleaseStep(action = Command.process("prepareDistribution", _)),
+  ReleaseStep(action = Command.process("prepareDistribution", _)),
   ReleaseStep(action = Command.process("publishSigned", _)),
-  //ReleaseStep(action = Command.process("cleanDistribution", _)),
+  ReleaseStep(action = Command.process("cleanDistribution", _)),
   setNextVersion,
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
