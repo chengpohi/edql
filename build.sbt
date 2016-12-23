@@ -123,19 +123,15 @@ lazy val distribution = project.in(file("distribution")).settings(
 )
 
 
-lazy val testRelease = taskKey[Unit]("release elasticdsl distribution")
+lazy val prepareDistribution = taskKey[Unit]("release elasticdsl distribution")
 
 val distributionPath = "./distribution/src/main/resources"
 
-testRelease := {
+prepareDistribution := {
   println("assembly elasticdsl")
   val f = assembly.value
   copyJar(f)
   copyConf()
-  println("release to repository")
-  //Command.process("publishSigned", _)
-  //Command.process("sonatypeReleaseAll", _)
-  cleanDistribution()
 }
 
 def copyJar(f: File): Unit = {
@@ -153,7 +149,10 @@ def copyConf(): Unit = {
   })
 }
 
-def cleanDistribution(): Unit = {
+
+lazy val cleanDistribution = taskKey[Unit]("clean elasticdsl distribution")
+
+cleanDistribution := {
   Paths.get(distributionPath + "/conf/").toFile.listFiles().foreach(_.delete())
   Paths.get(distributionPath + "/lib/").toFile.listFiles().foreach(_.delete())
 }
@@ -169,7 +168,9 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
+  //ReleaseStep(action = Command.process("prepareDistribution", _)),
   ReleaseStep(action = Command.process("publishSigned", _)),
+  //ReleaseStep(action = Command.process("cleanDistribution", _)),
   setNextVersion,
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
