@@ -160,6 +160,7 @@ cleanDistribution := {
 
 import ReleaseTransformations._
 
+//release release-version 0.2.2 next-version 0.2.2-SNAPSHOT
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
