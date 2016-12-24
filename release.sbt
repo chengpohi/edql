@@ -78,10 +78,6 @@ pomExtra := (
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-val o = new sbt.File("./target/universal/", s"elasticdsl-0.2.2.zip")
-val a = Artifact(s"elasticdsl", "zip", "zip")
-packagedArtifacts += (a -> o)
-
 //release release-version 0.2.2 next-version 0.2.2-SNAPSHOT
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
@@ -98,6 +94,8 @@ releaseProcess := Seq[ReleaseStep](
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
   pushChanges
 )
+
+scriptClasspath in bashScriptDefines ~= (cp => "../conf" +: cp)
 
 enablePlugins(JavaAppPackaging, UniversalDeployPlugin)
 
