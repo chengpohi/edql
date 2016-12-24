@@ -75,7 +75,12 @@ pomExtra := (
     </developers>
   )
 
+
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+val o = new sbt.File("./target/universal/", s"elasticdsl-0.2.2.zip")
+val a = Artifact(s"elasticdsl", "zip", "zip")
+packagedArtifacts += (a -> o)
 
 //release release-version 0.2.2 next-version 0.2.2-SNAPSHOT
 releaseProcess := Seq[ReleaseStep](
@@ -86,7 +91,7 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
-  ReleaseStep(action = Command.process("universal:publish", _)), //publish zip artificat
+  ReleaseStep(action = Command.process("universal:packageBin", _)), //publish zip artificat
   ReleaseStep(action = Command.process("publishSigned", _)), //publishLibarary
   setNextVersion,
   commitNextVersion,
