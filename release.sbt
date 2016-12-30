@@ -1,3 +1,5 @@
+import java.nio.file.{Files, Paths, StandardCopyOption}
+
 import com.typesafe.sbt.packager.SettingsHelper._
 import sbt.Package.ManifestAttributes
 
@@ -100,6 +102,21 @@ scriptClasspath in bashScriptDefines ~= (cp => "../conf" +: cp)
 enablePlugins(JavaAppPackaging, UniversalDeployPlugin)
 
 makeDeploymentSettings(Universal, packageBin in Universal, "zip")
+
+val pb = taskKey[Unit]("packageBin")
+
+pb := {
+  val localYaml = Paths.get("./src/universal/conf/local.yml")
+  val elasticConf = Paths.get("./src/universal/conf/elastic.conf")
+  val log4j2Properties = Paths.get("./src/universal/conf/log4j2.properties")
+  Files.copy(Paths.get("./src/main/resources/local.yml"), localYaml, StandardCopyOption.REPLACE_EXISTING)
+  Files.copy(Paths.get("./src/main/resources/elastic.conf"), elasticConf, StandardCopyOption.REPLACE_EXISTING)
+  Files.copy(Paths.get("./src/main/resources/log4j2.properties"), log4j2Properties, StandardCopyOption.REPLACE_EXISTING)
+  Command.process("universal:packageBin", state.value)
+  Files.delete(localYaml)
+  Files.delete(elasticConf)
+  Files.delete(log4j2Properties)
+}
 
 //------------------------------------------------//
 //------------------------------------------------//
