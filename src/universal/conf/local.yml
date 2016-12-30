@@ -1,4 +1,4 @@
-http.enabled: false
+http.enabled: true
 path.repo: ./local/
 action.destructive_requires_name: false
 path.home: ./local/
