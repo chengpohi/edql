@@ -14,11 +14,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by xiachen on 31/12/2016.
   */
 class PerformanceTest extends FlatSpec with Matchers {
-  val dsl = new ElasticDSL(ELKCommandRegistry.client)
-
-  import dsl._
-
-  it should "pressure test" in {
+  ignore should "pressure test" in {
+    val dsl = new ElasticDSL(ELKCommandRegistry.client)
+    import dsl._
     val permits = 1000
     val waitTime = 1 * 1000
     val semaphore = new Semaphore(permits)
