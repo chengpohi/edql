@@ -53,7 +53,6 @@ object ElasticClientConnector {
     val settings = Settings.builder()
       .put("node.name", "elasticdsl")
       .put("cluster.name", clusterName)
-      .put(NetworkModule.TRANSPORT_TYPE_KEY, Netty4Plugin.NETTY_TRANSPORT_NAME)
       .build()
 
     val host: String = indexConfig.getString("host")
