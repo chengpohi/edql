@@ -10,6 +10,7 @@ import jline.console.history.FileHistory
 import jline.internal.Configuration
 
 import scala.io.Source
+import scala.util.Try
 
 /**
   * elasticdsl
@@ -37,8 +38,13 @@ object ELKRepl {
       line.trim.isEmpty match {
         case true =>
         case false =>
-          val res = generator.beautyJSON(elkRunEngine.run(line))
-          println(res)
+          try {
+            val res = generator.beautyJSON(elkRunEngine.run(line))
+            println(res)
+          } catch {
+            case e: Exception =>
+              println(e.getMessage)
+          }
       }
     }
   }
