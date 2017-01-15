@@ -128,4 +128,11 @@ class ResponseGenerator {
   def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
 
   def buildIdResponse(id: String): String = write(("id", id))
+
+  def extractSourceToObject[T](s: String)(implicit mf: Manifest[T]): T = {
+    val p = parse(s)
+    val t = p \\ "_source"
+    t.extract(formats, mf)
+  }
+
 }

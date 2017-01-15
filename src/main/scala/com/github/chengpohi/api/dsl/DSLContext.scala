@@ -32,12 +32,14 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.search.SearchHit
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+
 
 /**
   * Created by xiachen on 10/11/2016.
@@ -47,6 +49,10 @@ trait DSLContext {
 
   trait Monoid[A] {
     def toJson(a: A): String
+
+    def as[T](str: String)(implicit mf: Manifest[T]): T = {
+      responseGenerator.extractSourceToObject(str)
+    }
   }
 
   object Monoid {
@@ -202,6 +208,11 @@ trait DSLContext {
     val value: A
 
     def toJson: String = F.toJson(value)
+
+    def as[T](implicit mf: Manifest[T]): T = {
+      val json = F.toJson(value)
+      F.as(json)
+    }
   }
 
   implicit def toMonoidOp[A: Monoid](a: A): MonoidOp[A] = new MonoidOp[A] {
@@ -210,18 +221,26 @@ trait DSLContext {
   }
 
 
-  trait FutureToJson[A, Future[_]] {
+  trait FutureToJson[A] {
     val F: Monoid[A]
-    val value: A
+    val value: Future[A]
 
-    def toJson: String = F.toJson(value)
+    def toJson: String = {
+      val result = Await.result(value, Duration.Inf)
+      F.toJson(result)
+    }
 
-    def await: A = value
+    def await: A = Await.result(value, Duration.Inf)
+
+    def as[T](implicit mf: Manifest[T]): Future[T] = value.map(a => {
+      val json = F.toJson(a)
+      F.as(json)
+    })
   }
 
-  implicit def futureToJson[A: Monoid](a: Future[A]): FutureToJson[A, Future] = new FutureToJson[A, Future] {
+  implicit def futureToJson[A: Monoid](a: Future[A]): FutureToJson[A] = new FutureToJson[A] {
     override val F: Monoid[A] = implicitly[Monoid[A]]
-    override val value: A = Await.result(a, Duration.Inf)
+    override val value: Future[A] = a
   }
 
   implicit class IndexNameAndIndexType(indexName: String) {
