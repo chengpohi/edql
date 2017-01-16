@@ -9,7 +9,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
   * elasticdsl
   * Created by chengpohi on 9/22/16.
   */
-case class TestMap(hello: String, foo: String, name: String)
+case class TestMap(id: String, hello: String, foo: String, name: String)
 
 class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   val dsl = ELKCommandTestRegistry.elasticdsl
@@ -131,7 +131,7 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
     }.await.as[TestMap]
-    r1 should be(Some(TestMap("world", "bar", "chengpohi")))
+    r1 should be(Some(TestMap(_id, "world", "bar", "chengpohi")))
   }
 
   after {

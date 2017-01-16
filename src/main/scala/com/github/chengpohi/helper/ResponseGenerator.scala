@@ -14,6 +14,7 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
+import scala.reflect.runtime.universe._
 
 /**
   * elasticdsl
@@ -129,10 +130,15 @@ class ResponseGenerator {
 
   def buildIdResponse(id: String): String = write(("id", id))
 
-  def extractSourceToObject[T](s: String)(implicit mf: Manifest[T]): T = {
-    val p = parse(s)
-    val t = p \\ "_source"
-    t.extract(formats, mf)
+  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: TypeTag[T]): Option[T] = {
+    val constructor = typeTag.tpe.decl(termNames.CONSTRUCTOR).asMethod
+    val args = constructor.paramLists.flatten.map((param: Symbol) => {
+      val name = param.name.decodedName.toString.trim
+      source(name)
+    })
+    val t = typeTag.mirror.reflectClass(typeTag.tpe.typeSymbol.asClass).reflectConstructor(constructor)
+      .apply(args: _*).asInstanceOf[T]
+    Some(t)
   }
 
 }

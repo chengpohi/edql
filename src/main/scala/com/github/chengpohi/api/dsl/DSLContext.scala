@@ -229,18 +229,8 @@ trait DSLContext {
       override def toJson(a: GetResponse): String = responseGenerator.buildXContent(a)
 
       override def as[T](a: GetResponse)(implicit typeTag: TypeTag[T]): Option[T] = {
-        val source: Map[String, AnyRef] = a.getSource.asScala.toMap
-
-        val constructor = typeTag.tpe.decl(termNames.CONSTRUCTOR).asMethod
-
-        val args = constructor.paramLists.flatten.map((param: Symbol) => {
-          val name = param.name.decodedName.toString.trim
-          source(name)
-        })
-
-        val t = typeTag.mirror.reflectClass(typeTag.tpe.typeSymbol.asClass).reflectConstructor(constructor)
-          .apply(args: _*).asInstanceOf[T]
-        Some(t)
+        val source: Map[String, AnyRef] = a.getSource.asScala.toMap + ("id" -> a.getId)
+        responseGenerator.extractObjectByMap(source)
       }
     }
 
