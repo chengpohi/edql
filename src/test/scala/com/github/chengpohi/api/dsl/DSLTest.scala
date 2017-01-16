@@ -5,9 +5,6 @@ import java.util
 import com.github.chengpohi.helper.ELKCommandTestRegistry
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 /**
   * elasticdsl
   * Created by chengpohi on 9/22/16.
@@ -117,10 +114,14 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     result1 should be("""["world","foobar"]""")
   }
 
-  it should "extract by type" in {
+  "dsl" should "extract by type" in {
     val _id: String = "1234"
     DSL {
       index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi") id _id
+    }
+
+    DSL {
+      index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi") id "5678"
     }
 
     DSL {
@@ -129,9 +130,8 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
-    }.as[TestMap]
-    val r2 = Await.result(r1, Duration.Inf)
-    r2 should be(TestMap("world", "bar", "chengpohi"))
+    }.await.as[TestMap]
+    r1 should be(Some(TestMap("world", "bar", "chengpohi")))
   }
 
   after {
