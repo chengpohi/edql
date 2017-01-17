@@ -9,7 +9,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
   * elasticdsl
   * Created by chengpohi on 9/22/16.
   */
-case class TestMap(id: String, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int])
+case class TestMap(id: Int, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int], list: List[String])
 
 class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   val dsl = ELKCommandTestRegistry.elasticdsl
@@ -116,8 +116,9 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   "dsl" should "extract by type" in {
     val _id: String = "1234"
+
     DSL {
-      index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack") id _id
+      index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack", "list" -> List("world", "foobar")) id _id
     }
 
     DSL {
@@ -131,13 +132,14 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
     }.await.as[TestMap]
-    r1.head should be(TestMap(_id, "world", "bar", "chengpohi", Some("jack"), None))
+    r1.head should be(TestMap(_id.toInt, "world", "bar", "chengpohi", Some("jack"), None, List("world", "foobar")))
 
     val r2 = DSL {
       search in "testindex" / "testmap"
     }.await.as[TestMap].toList
     r2.size should be(2)
-    r2 should contain(TestMap(_id, "world", "bar", "chengpohi", Some("jack"), None))
+    r2 should contain(TestMap(_id.toInt, "world", "bar", "chengpohi", Some("jack"), None, List("world", "foobar")))
+    r2 should contain(TestMap(5678, "world", "bar", "chengpohi", None, None, List()))
   }
 
   after {

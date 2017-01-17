@@ -14,14 +14,13 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
-import scala.reflect.runtime.universe._
 
 /**
   * elasticdsl
   * Created by chengpohi on 1/26/16.
   */
 class ResponseGenerator {
-  implicit val formats = DefaultFormats
+  implicit val formats = DefaultFormats + new NumberSerializer
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
     val builder = XContentFactory.jsonBuilder()
@@ -130,19 +129,16 @@ class ResponseGenerator {
 
   def buildIdResponse(id: String): String = write(("id", id))
 
-  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: TypeTag[T]): T = {
-    val constructor = typeTag.tpe.decl(termNames.CONSTRUCTOR).asMethod
-    val args = constructor.paramLists.flatten.map((param: Symbol) => {
-      val name = param.name.decodedName.toString.trim
-      if (param.typeSignature <:< typeOf[Option[_]]) {
-        source.get(name)
-      } else {
-        source(name)
-      }
-    })
-    val t = typeTag.mirror.reflectClass(typeTag.tpe.typeSymbol.asClass).reflectConstructor(constructor)
-      .apply(args: _*).asInstanceOf[T]
-    t
+  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: Manifest[T]): T = {
+    val json: JValue = Extraction.decompose(source)
+    json.extract(formats, mf)
   }
 
 }
+
+class NumberSerializer extends CustomSerializer[Int](format => ( {
+  case JInt(x) => x.toInt
+  case JString(x) => x.toInt
+}, {
+  case x: Int => JInt(x)
+}))
