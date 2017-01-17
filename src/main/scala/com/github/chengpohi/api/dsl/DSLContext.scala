@@ -52,7 +52,7 @@ trait DSLContext {
   trait Monoid[A] {
     def toJson(a: A): String
 
-    def as[T](a: A)(implicit mf: TypeTag[T]): Stream[T]
+    def as[T](a: A)(implicit mf: Manifest[T]): Stream[T]
   }
 
   object Monoid {
@@ -60,31 +60,31 @@ trait DSLContext {
     implicit object StringResponseMonoid extends Monoid[String] {
       override def toJson(a: String): String = a
 
-      override def as[T](a: String)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: String)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object IndexResponseMonoid extends Monoid[IndexResponse] {
       override def toJson(a: IndexResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: IndexResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: IndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object DeleteIndexResponseMonoid extends Monoid[DeleteIndexResponse] {
       override def toJson(a: DeleteIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: DeleteIndexResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: DeleteIndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object CreateIndexResponseMonoid extends Monoid[CreateIndexResponse] {
       override def toJson(a: CreateIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: CreateIndexResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: CreateIndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object SearchResponseMonoid extends Monoid[SearchResponse] {
       override def toJson(a: SearchResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: SearchResponse)(implicit mf: TypeTag[T]): Stream[T] = {
+      override def as[T](a: SearchResponse)(implicit mf: Manifest[T]): Stream[T] = {
         a.getHits.getHits.toStream.map(t => {
           val source = t.getSource.asScala.toMap + ("id" -> t.getId)
           responseGenerator.extractObjectByMap(source)(mf)
@@ -95,145 +95,145 @@ trait DSLContext {
     implicit object NodeStatsResponseMonoid extends Monoid[NodesStatsResponse] {
       override def toJson(a: NodesStatsResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: NodesStatsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: NodesStatsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object NodeInfoResponseMonoid extends Monoid[NodesInfoResponse] {
       override def toJson(a: NodesInfoResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: NodesInfoResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: NodesInfoResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object IndicesStatsResponseMonoid extends Monoid[IndicesStatsResponse] {
       override def toJson(a: IndicesStatsResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: IndicesStatsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: IndicesStatsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object ClusterStatsResponseMonoid extends Monoid[ClusterStatsResponse] {
       override def toJson(a: ClusterStatsResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: ClusterStatsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: ClusterStatsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object ClusterHealthResponseMonoid extends Monoid[ClusterHealthResponse] {
       override def toJson(a: ClusterHealthResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: ClusterHealthResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: ClusterHealthResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object ClusterUpdateSettingsResponseMonoid extends Monoid[ClusterUpdateSettingsResponse] {
       override def toJson(a: ClusterUpdateSettingsResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: ClusterUpdateSettingsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: ClusterUpdateSettingsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object UpdateSettingsResponseMonoid extends Monoid[UpdateSettingsResponse] {
       override def toJson(a: UpdateSettingsResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: UpdateSettingsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: UpdateSettingsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object PutRepositoryResponseMonoid extends Monoid[PutRepositoryResponse] {
       override def toJson(a: PutRepositoryResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: PutRepositoryResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: PutRepositoryResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object CreateSnapshotResponseMonoid extends Monoid[CreateSnapshotResponse] {
       override def toJson(a: CreateSnapshotResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: CreateSnapshotResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: CreateSnapshotResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object GetSnapshotsResponseMonoid extends Monoid[GetSnapshotsResponse] {
       override def toJson(a: GetSnapshotsResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: GetSnapshotsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: GetSnapshotsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object DeleteSnapshotResponseMonoid extends Monoid[DeleteSnapshotResponse] {
       override def toJson(a: DeleteSnapshotResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: DeleteSnapshotResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: DeleteSnapshotResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object GetMappingsResponseMonoid extends Monoid[GetMappingsResponse] {
       override def toJson(a: GetMappingsResponse): String = responseGenerator.buildGetMappingResponse(a)
 
-      override def as[T](a: GetMappingsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: GetMappingsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object PutMappingResponseMonoid extends Monoid[PutMappingResponse] {
       override def toJson(a: PutMappingResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: PutMappingResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: PutMappingResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object ClusterStateResponseMonoid extends Monoid[ClusterStateResponse] {
       override def toJson(a: ClusterStateResponse): String = responseGenerator.buildXContent(a.getState)
 
-      override def as[T](a: ClusterStateResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: ClusterStateResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object GetSettingsResponseMonoid extends Monoid[GetSettingsResponse] {
       override def toJson(a: GetSettingsResponse): String = responseGenerator.buildGetSettingsResponse(a)
 
-      override def as[T](a: GetSettingsResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: GetSettingsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object IndicesAliasesResponseMonoid extends Monoid[IndicesAliasesResponse] {
       override def toJson(a: IndicesAliasesResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: IndicesAliasesResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: IndicesAliasesResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object RestoreSnapshotResponseMonoid extends Monoid[RestoreSnapshotResponse] {
       override def toJson(a: RestoreSnapshotResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: RestoreSnapshotResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: RestoreSnapshotResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object CloseIndexResponseMonoid extends Monoid[CloseIndexResponse] {
       override def toJson(a: CloseIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: CloseIndexResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: CloseIndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object PendingClusterTasksResponseMonoid extends Monoid[PendingClusterTasksResponse] {
       override def toJson(a: PendingClusterTasksResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: PendingClusterTasksResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: PendingClusterTasksResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object OpenIndexResponseMonoid extends Monoid[OpenIndexResponse] {
       override def toJson(a: OpenIndexResponse): String = responseGenerator.buildAcknowledgedResponse(a)
 
-      override def as[T](a: OpenIndexResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: OpenIndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object AnalyzeResponseMonoid extends Monoid[AnalyzeResponse] {
       override def toJson(a: AnalyzeResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: AnalyzeResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: AnalyzeResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object DeleteResponseMonoid extends Monoid[DeleteResponse] {
       override def toJson(a: DeleteResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: DeleteResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: DeleteResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object UpdateResponseMonoid extends Monoid[UpdateResponse] {
       override def toJson(a: UpdateResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: UpdateResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: UpdateResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object GetResponseMonoid extends Monoid[GetResponse] {
       override def toJson(a: GetResponse): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: GetResponse)(implicit typeTag: TypeTag[T]): Stream[T] = {
+      override def as[T](a: GetResponse)(implicit typeTag: Manifest[T]): Stream[T] = {
         val source: Map[String, AnyRef] = a.getSource.asScala.toMap + ("id" -> a.getId)
         Stream(responseGenerator.extractObjectByMap(source))
       }
@@ -245,7 +245,7 @@ trait DSLContext {
         responseGenerator.buildStream(s)
       }
 
-      override def as[T](a: Stream[SearchResponse])(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: Stream[SearchResponse])(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object JoinSearchResponseMonoid extends Monoid[Stream[Map[String, AnyRef]]] {
@@ -253,19 +253,19 @@ trait DSLContext {
         responseGenerator.buildStreamMapTupels(a)
       }
 
-      override def as[T](a: Stream[Map[String, AnyRef]])(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: Stream[Map[String, AnyRef]])(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object SearchHitMonoid extends Monoid[SearchHit] {
       override def toJson(a: SearchHit): String = responseGenerator.buildXContent(a)
 
-      override def as[T](a: SearchHit)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: SearchHit)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object RefreshResponseMonoid extends Monoid[RefreshResponse] {
       override def toJson(a: RefreshResponse): String = a.toString
 
-      override def as[T](a: RefreshResponse)(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: RefreshResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object StreamSearchHitMonoid extends Monoid[Stream[SearchHit]] {
@@ -274,7 +274,7 @@ trait DSLContext {
         responseGenerator.buildStream(s)
       }
 
-      override def as[T](a: Stream[SearchHit])(implicit mf: TypeTag[T]): Stream[T] = Stream.empty
+      override def as[T](a: Stream[SearchHit])(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
   }
@@ -285,7 +285,7 @@ trait DSLContext {
 
     def toJson: String = F.toJson(value)
 
-    def as[T](implicit mf: TypeTag[T]): Stream[T] = F.as(value)
+    def as[T](implicit mf: Manifest[T]): Stream[T] = F.as(value)
   }
 
   implicit def toMonoidOp[A: Monoid](a: A): MonoidOp[A] = new MonoidOp[A] {
@@ -305,7 +305,7 @@ trait DSLContext {
 
     def await: A = Await.result(value, Duration.Inf)
 
-    def as[T](implicit mf: TypeTag[T]): Future[Stream[T]] = value.map(a => {
+    def as[T](implicit mf: Manifest[T]): Future[Stream[T]] = value.map(a => {
       F.as(a)
     })
   }
