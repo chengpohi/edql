@@ -130,15 +130,19 @@ class ResponseGenerator {
 
   def buildIdResponse(id: String): String = write(("id", id))
 
-  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: TypeTag[T]): Option[T] = {
+  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: TypeTag[T]): T = {
     val constructor = typeTag.tpe.decl(termNames.CONSTRUCTOR).asMethod
     val args = constructor.paramLists.flatten.map((param: Symbol) => {
       val name = param.name.decodedName.toString.trim
-      source(name)
+      if (param.typeSignature <:< typeOf[Option[_]]) {
+        source.get(name)
+      } else {
+        source(name)
+      }
     })
     val t = typeTag.mirror.reflectClass(typeTag.tpe.typeSymbol.asClass).reflectConstructor(constructor)
       .apply(args: _*).asInstanceOf[T]
-    Some(t)
+    t
   }
 
 }
