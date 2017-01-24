@@ -39,7 +39,7 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     DSL {
       index into "testindex" / "testmap" doc List(Map("Hello" -> List("world", "foobar")),
         Map("Hello" -> List("world", "foobar")),
-        Map("Hello" -> List("world", "foobar")))
+        Map("Hello" -> List("world", "foobar"))),
     }.await
 
     DSL {
@@ -159,6 +159,7 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     r1.head.score should be(3)
     r1.last.score should be(2)
   }
+
 
   after {
     DSL {

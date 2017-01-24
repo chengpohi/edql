@@ -30,7 +30,7 @@ import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.action.search.{SearchResponse, SearchType}
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.SearchHit
@@ -43,7 +43,6 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.reflect.runtime.universe._
 
 
 /**
@@ -73,7 +72,7 @@ trait DSLContext {
     }
 
     implicit object BulkResponseMonoid extends Monoid[BulkResponse] {
-      override def toJson(a: BulkResponse): String = s"""{"took": "${a.getTook}", "size": "${a.getItems.size}""""
+      override def toJson(a: BulkResponse): String = responseGenerator.buildBulkResponse(a)
 
       override def as[T](a: BulkResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
