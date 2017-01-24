@@ -26,6 +26,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
+import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
@@ -69,6 +70,12 @@ trait DSLContext {
       override def toJson(a: IndexResponse): String = responseGenerator.buildXContent(a)
 
       override def as[T](a: IndexResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
+    }
+
+    implicit object BulkResponseMonoid extends Monoid[BulkResponse] {
+      override def toJson(a: BulkResponse): String = s"""{"took": "${a.getTook}", "size": "${a.getItems.size}""""
+
+      override def as[T](a: BulkResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object DeleteIndexResponseMonoid extends Monoid[DeleteIndexResponse] {
@@ -280,7 +287,12 @@ trait DSLContext {
         responseGenerator.buildStream(s)
       }
 
-      override def as[T](a: Stream[SearchHit])(implicit mf: Manifest[T]): Stream[T] = Stream.empty
+      override def as[T](a: Stream[SearchHit])(implicit mf: Manifest[T]): Stream[T] = {
+        a.map(t => {
+          val source: Map[String, AnyRef] = t.getSource.asScala.toMap + ("id" -> t.getId)
+          responseGenerator.extractObjectByMap(source)
+        })
+      }
     }
 
   }
