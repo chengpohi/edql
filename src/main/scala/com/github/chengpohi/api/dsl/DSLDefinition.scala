@@ -25,6 +25,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
 import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
 import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
+import org.elasticsearch.action.bulk.{BulkRequestBuilder, BulkResponse}
 import org.elasticsearch.action.delete.{DeleteRequestBuilder, DeleteResponse}
 import org.elasticsearch.action.get.{GetRequestBuilder, GetResponse}
 import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
@@ -402,7 +403,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       ScrollSearchRequestDefinition(this)
     }
 
-    def order(s: SortBuilder[_]): SearchRequestDefinition = {
+    def sort(s: SortBuilder[_]): SearchRequestDefinition = {
       searchRequestBuilder.addSort(s)
       this
     }
@@ -613,11 +614,27 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     override def json: String = "shutdown"
   }
 
+  case class BulkRequestDefinition(bulkRequestBuilder: BulkRequestBuilder) extends Definition[BulkResponse] {
+    override def execute: Future[BulkResponse] = bulkRequestBuilder.execute()
+
+    override def json: String = execute.toJson
+  }
+
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends Definition[IndexResponse] {
     def doc(fields: Map[String, Any]): IndexRequestDefinition = {
       val json = write(fields)
       doc(json)
       this
+    }
+
+    def doc(fields: List[Map[String, Any]]): BulkRequestDefinition = {
+      val index = indexRequestBuilder.request().index()
+      val tpe = indexRequestBuilder.request().`type`()
+      val bulk = client.prepareBulk()
+      fields.map(f => {
+        client.prepareIndex(index, tpe).setSource(f.asJava)
+      }).foreach(i => bulk.add(i))
+      BulkRequestDefinition(bulk)
     }
 
     def doc(fields: String): IndexRequestDefinition = {
