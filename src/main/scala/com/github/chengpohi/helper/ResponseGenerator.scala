@@ -4,6 +4,7 @@ import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsResp
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
+import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
@@ -79,6 +80,23 @@ class ResponseGenerator {
     })
     builder.endObject()
     builder.string()
+  }
+
+  def buildBulkResponse(response: BulkResponse): String = {
+    val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.startObject()
+    builder.field("took", response.getTookInMillis)
+    if (response.getIngestTookInMillis != BulkResponse.NO_INGEST_TOOK) {
+      builder.field("intest_took", response.getIngestTookInMillis)
+    }
+    builder.field("errors", response.hasFailures)
+    builder.startArray("items")
+    response.forEach(i => {
+      i.toXContent(builder, ToXContent.EMPTY_PARAMS)
+    })
+    builder.endArray()
+    builder.endObject()
+    builder.toString
   }
 
 
