@@ -3,6 +3,7 @@ package com.github.chengpohi.api.dsl
 import java.util
 
 import com.github.chengpohi.helper.ELKCommandTestRegistry
+import org.elasticsearch.search.sort.SortOrder
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 /**
@@ -10,6 +11,8 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
   * Created by chengpohi on 9/22/16.
   */
 case class TestMap(id: Int, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int], list: List[String])
+
+case class TestMapScore(id: String, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int], list: List[String], score: Long)
 
 class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   val dsl = ELKCommandTestRegistry.elasticdsl
@@ -140,6 +143,34 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     r2.size should be(2)
     r2 should contain(TestMap(_id.toInt, "world", "bar", "chengpohi", Some("jack"), None, List("world", "foobar")))
     r2 should contain(TestMap(5678, "world", "bar", "chengpohi", None, None, List()))
+  }
+
+  "dsl" should "select order by" in {
+    val doc1 = Map("score" -> 1, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack",
+      "list" -> List("world", "foobar"))
+
+    DSL {
+      index into "testindex" / "testmap" doc doc1
+    }
+
+    DSL {
+      index into "testindex" / "testmap" doc Map("score" -> 2, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
+    }
+
+    DSL {
+      index into "testindex" / "testmap" doc Map("score" -> 3, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
+    }
+
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    val r1 = DSL {
+      search in "testindex" / "testmap" query ("score" gt "1") order ("score" as SortOrder.DESC)
+    }.await.as[TestMapScore]
+    r1.size should be(2)
+    r1.head.score should be(3)
+    r1.last.score should be(2)
   }
 
   after {

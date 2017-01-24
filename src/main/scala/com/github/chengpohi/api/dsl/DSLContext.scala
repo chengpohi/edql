@@ -29,9 +29,11 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.{SearchResponse, SearchType}
 import org.elasticsearch.action.update.UpdateResponse
+import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.SearchHit
+import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
@@ -234,8 +236,12 @@ trait DSLContext {
       override def toJson(a: GetResponse): String = responseGenerator.buildXContent(a)
 
       override def as[T](a: GetResponse)(implicit typeTag: Manifest[T]): Stream[T] = {
-        val source: Map[String, AnyRef] = a.getSource.asScala.toMap + ("id" -> a.getId)
-        Stream(responseGenerator.extractObjectByMap(source))
+        a.isExists match {
+          case true =>
+            val source: Map[String, AnyRef] = a.getSource.asScala.toMap + ("id" -> a.getId)
+            Stream(responseGenerator.extractObjectByMap(source))
+          case false => Stream.empty
+        }
       }
     }
 
@@ -332,6 +338,23 @@ trait DSLContext {
   }
 
   case class IndexPath(indexName: String, indexType: String)
+
+  implicit class StringBuilders(fieldName: String) {
+    def gt(v: String): RangeQueryBuilder = {
+      new RangeQueryBuilder(fieldName).gt(v)
+    }
+
+    def as(o: SortOrder): SortBuilder[_] = {
+      new FieldSortBuilder(fieldName).order(o)
+    }
+  }
+
+  implicit def strToQueryBuilder(query: String): QueryBuilder = query match {
+    case "*" => {
+      QueryBuilders.matchAllQuery()
+    }
+    case _ => QueryBuilders.queryStringQuery(query)
+  }
 
 }
 
