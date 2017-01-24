@@ -37,15 +37,9 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "scroll search to json" in {
     DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
-    }.await
-
-    DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
-    }.await
-
-    DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+      index into "testindex" / "testmap" doc List(Map("Hello" -> List("world", "foobar")),
+        Map("Hello" -> List("world", "foobar")),
+        Map("Hello" -> List("world", "foobar")))
     }.await
 
     DSL {
@@ -146,19 +140,12 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   "dsl" should "select order by" in {
-    val doc1 = Map("score" -> 1, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack",
-      "list" -> List("world", "foobar"))
-
     DSL {
-      index into "testindex" / "testmap" doc doc1
-    }
-
-    DSL {
-      index into "testindex" / "testmap" doc Map("score" -> 2, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
-    }
-
-    DSL {
-      index into "testindex" / "testmap" doc Map("score" -> 3, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
+      index into "testindex" / "testmap" doc List(
+        Map("score" -> 1, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack", "list" -> List("world", "foobar")),
+        Map("score" -> 2, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi"),
+        Map("score" -> 3, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
+      )
     }
 
     DSL {
@@ -166,7 +153,7 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
 
     val r1 = DSL {
-      search in "testindex" / "testmap" query ("score" gt "1") order ("score" as SortOrder.DESC)
+      search in "testindex" / "testmap" query ("score" gt "1") sort ("score" as SortOrder.DESC) scroll "1m"
     }.await.as[TestMapScore]
     r1.size should be(2)
     r1.head.score should be(3)
