@@ -35,6 +35,7 @@ import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
+import org.elasticsearch.search.sort.{SortBuilder, SortOrder}
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.write
 
@@ -330,7 +331,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder) extends Definition[SearchResponse] {
     var _joinSearchRequestBuilder: Option[SearchRequestBuilder] = None
-    var _joinField: Option[String] = None
+    var _tmpField: Option[String] = None
     var _dateHistogramAggregationBuilder: DateHistogramAggregationBuilder = _
 
     def join(indexPath: IndexPath): SearchRequestDefinition = {
@@ -339,7 +340,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     }
 
     def by(field: String): SearchRequestDefinition = {
-      _joinField = Some(field)
+      _tmpField = Some(field)
       this
     }
 
@@ -364,20 +365,14 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       this
     }
 
-    def query(query: String): SearchRequestDefinition = {
-      val queryString: QueryBuilder = query match {
-        case "*" => {
-          searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_AND_FETCH)
-          QueryBuilders.matchAllQuery()
-        }
-        case _ => QueryBuilders.queryStringQuery(query)
-      }
-      searchRequestBuilder.setQuery(queryString)
+    def query(queryBuilders: List[QueryBuilder]): SearchRequestDefinition = {
+      queryBuilders.foreach(i => searchRequestBuilder.setQuery(i))
       this
     }
 
-    def query(query: QueryBuilder): SearchRequestDefinition = {
-      searchRequestBuilder.setQuery(query)
+    def query(queryBuilder: QueryBuilder): SearchRequestDefinition = {
+      searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_AND_FETCH)
+      searchRequestBuilder.setQuery(queryBuilder)
       this
     }
 
@@ -405,6 +400,11 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     def scroll(s: String): ScrollSearchRequestDefinition = {
       searchRequestBuilder.setScroll(s)
       ScrollSearchRequestDefinition(this)
+    }
+
+    def order(s: SortBuilder[_]): SearchRequestDefinition = {
+      searchRequestBuilder.addSort(s)
+      this
     }
 
     def avg(name: String): SearchRequestDefinition = {
