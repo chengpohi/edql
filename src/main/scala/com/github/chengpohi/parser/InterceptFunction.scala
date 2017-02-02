@@ -137,7 +137,7 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
 
   def analysisText: Seq[Val] => AnalyzeRequestDefinition = {
     case Seq(doc, analyzer) => {
-      analysis text doc in ELASTIC_SHELL_INDEX_NAME analyzer analyzer
+      analyze text doc in ELASTIC_SHELL_INDEX_NAME analyzer analyzer
     }
   }
 
