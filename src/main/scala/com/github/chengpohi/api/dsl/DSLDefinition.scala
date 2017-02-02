@@ -543,6 +543,11 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       this
     }
 
+    def tokenizer(tokenizer: String): AnalyzeRequestDefinition = {
+      analyzeRequestBuilder.setTokenizer(tokenizer)
+      this
+    }
+
     override def execute: Future[AnalyzeResponse] = {
       analyzeRequestBuilder.execute
     }
