@@ -585,7 +585,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       this
     }
 
-    def doc(fields: Seq[(String, String)]): UpdateRequestDefinition = {
+    def doc(fields: Seq[(String, Any)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDoc(fields.toMap.asJava)
       this
     }
@@ -595,7 +595,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       this
     }
 
-    def docAsUpsert(fields: Seq[(String, String)]): UpdateRequestDefinition = {
+    def docAsUpsert(fields: Seq[(String, Any)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDocAsUpsert(true)
       updateRequestBuilder.setDoc(fields.toMap.asJava)
       this
