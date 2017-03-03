@@ -169,6 +169,31 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     result.getTokens.get(1).getTerm should be("world")
   }
 
+  "dsl" should "update collection" in {
+    val _id = "123"
+    val indexData = Map("score" -> List("hello", "world"))
+    DSL {
+      index into "testindex" / "testmap" doc indexData id _id
+    }
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    DSL {
+      update id _id in "testindex" / "testmap" doc Map("score" -> List("foo", "bar"))
+    }.await
+
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    val result = DSL {
+      search in "testindex" / "testmap" where id equal _id
+    }.await
+
+    result.getSource.get("score").getClass should be(classOf[java.util.ArrayList[_]])
+  }
+
 
   after {
     DSL {
