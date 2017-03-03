@@ -36,9 +36,8 @@ import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
-import org.elasticsearch.search.sort.{SortBuilder, SortOrder}
+import org.elasticsearch.search.sort.SortBuilder
 import org.json4s.DefaultFormats
-import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -586,18 +585,24 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     }
 
     def doc(fields: Seq[(String, Any)]): UpdateRequestDefinition = {
-      updateRequestBuilder.setDoc(fields.toMap.asJava)
+      updateRequestBuilder.setDoc(toJavaMap(fields.toMap))
       this
     }
 
-    def doc(fields: String): UpdateRequestDefinition = {
-      updateRequestBuilder.setDoc(fields)
+    def doc(fields: Map[String, Any]): UpdateRequestDefinition = {
+      updateRequestBuilder.setDoc(toJavaMap(fields))
+      this
+    }
+
+    def docAsUpsert(fields: Map[String, Any]): UpdateRequestDefinition = {
+      updateRequestBuilder.setDocAsUpsert(true)
+      updateRequestBuilder.setDoc(toJavaMap(fields))
       this
     }
 
     def docAsUpsert(fields: Seq[(String, Any)]): UpdateRequestDefinition = {
       updateRequestBuilder.setDocAsUpsert(true)
-      updateRequestBuilder.setDoc(fields.toMap.asJava)
+      updateRequestBuilder.setDoc(toJavaMap(fields.toMap))
       this
     }
 
@@ -627,8 +632,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder) extends Definition[IndexResponse] {
     def doc(fields: Map[String, Any]): IndexRequestDefinition = {
-      val json = write(fields)
-      doc(json)
+      indexRequestBuilder.setSource(toJavaMap(fields))
       this
     }
 
@@ -637,14 +641,9 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       val tpe = indexRequestBuilder.request().`type`()
       val bulk = client.prepareBulk()
       fields.map(f => {
-        client.prepareIndex(index, tpe).setSource(f.asJava)
+        client.prepareIndex(index, tpe).setSource(toJavaMap(f))
       }).foreach(i => bulk.add(i))
       BulkRequestDefinition(bulk)
-    }
-
-    def doc(fields: String): IndexRequestDefinition = {
-      indexRequestBuilder.setSource(fields)
-      this
     }
 
     def id(documentId: String): IndexRequestDefinition = {
@@ -653,7 +652,7 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
     }
 
     def fields(fs: Seq[(String, Any)]): IndexRequestDefinition = {
-      indexRequestBuilder.setSource(fs.toMap.asJava)
+      indexRequestBuilder.setSource(toJavaMap(fs.toMap))
       this
     }
 
@@ -689,7 +688,6 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
           case _ => client.admin().indices().prepareRefresh(indices).execute
         }
       )
-
     }
 
     override def json: String = execute.toJson

@@ -28,4 +28,15 @@ trait ElasticBase {
     def apply[A, Q](f: ActionListener[A] => Q): Future[A] = buildFuture(f)
   }
 
+  def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
+    import scala.collection.JavaConverters._
+    val res = m.map(a => {
+      val r = a._2 match {
+        case a: Iterable[_] => a.asJava
+        case a => a
+      }
+      (a._1, r)
+    })
+    res.asJava
+  }
 }
