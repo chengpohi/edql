@@ -180,7 +180,7 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
 
     DSL {
-      update id _id in "testindex" / "testmap" doc Map("score" -> List("foo", "bar"))
+      update id _id in "testindex" / "testmap" doc Map("score" -> List(1, 2))
     }.await
 
     DSL {
@@ -192,6 +192,24 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
 
     result.getSource.get("score").getClass should be(classOf[java.util.ArrayList[_]])
+  }
+
+  "dsl" should "index doc with dynamic mapping" in {
+    val _id = "123"
+    val indexData = Map("score" -> BigInt(123))
+    DSL {
+      index into "testindex" / "testmap" doc indexData id _id
+    }
+
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    val mapping = DSL {
+      get mapping "testindex"
+    }.await.toJson
+    println(mapping)
+
   }
 
 
