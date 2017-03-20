@@ -92,6 +92,9 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
 
     def analyzer(analyzer: String): CreateAnalyzerRequestDefinition =
       CreateAnalyzerRequestDefinition(analyzer)
+    def analyze(analyzer: String): AnalyzerDefinition =
+      AnalyzerDefinition(analyzer)
+    def field(field: String): FieldDefinition = FieldDefinition(field)
   }
 
 

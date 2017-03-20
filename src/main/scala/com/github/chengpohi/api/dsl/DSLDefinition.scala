@@ -1,5 +1,7 @@
 package com.github.chengpohi.api.dsl
 
+import java.io.Serializable
+
 import com.github.chengpohi.api.ElasticBase
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
 import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
@@ -201,18 +203,37 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
   }
 
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends Definition[CreateIndexResponse] {
+    var _analyzers = List[AnalyzerDefinition]()
+    var _fields = List[FieldDefinition]()
+
     def mappings(m: String): CreateIndexDefinition = {
       createIndexRequestBuilder.setSource(m)
       this
     }
 
-    def mappings(m: AnyRef): CreateIndexDefinition = {
-      val res = responseGenerator.toJson(m)
-      createIndexRequestBuilder.setSource(res)
+    def analyzers(m: List[AnalyzerDefinition]): CreateIndexDefinition = {
+      _analyzers = m
+      this
+    }
+
+    def fields(m: List[FieldDefinition]): CreateIndexDefinition = {
+      _fields = m
       this
     }
 
     override def execute: Future[CreateIndexResponse] = {
+      val fs = _fields.groupBy(_._tp).map(i => (i._1, Map("properties" -> i._2.map(_.toMap).toMap)))
+
+      val res = Map(
+        "mappings" -> fs,
+        "settings" -> Map(
+          "analysis" -> Map(
+            "analyzer" -> _analyzers.map(_.toMap).toMap
+          )
+        ))
+      val json = responseGenerator.toJson(res)
+      createIndexRequestBuilder.setSource(json)
+
       createIndexRequestBuilder.execute
     }
 
@@ -700,13 +721,70 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
   }
 
   case class AnalyzerDefinition(analyzer: String) {
-    def tpe(_tpe: String): AnalyzerDefinition = this
+    var _tpe = ""
+    var _filter = List[String]()
+    var _tokenizer = ""
 
-    def filter(_filters: List[String]): AnalyzerDefinition = {
+    def tpe(tpe: String): AnalyzerDefinition = {
+      _tpe = tpe
       this
     }
 
-    def tokenizer(_tokenizer: String): AnalyzerDefinition = this
+    def filter(_filters: List[String]): AnalyzerDefinition = {
+      _filter = _filters
+      this
+    }
+
+    def tokenizer(tokenizer: String): AnalyzerDefinition = {
+      _tokenizer = tokenizer
+      this
+    }
+
+    def toMap: (String, Map[String, Serializable]) = {
+      analyzer -> Map("type" -> _tpe, "tokenizer" -> _tokenizer, "filter" -> _filter)
+    }
+  }
+
+  case class FieldDefinition(field: String) {
+    var _tpe = ""
+    var _term_vector = ""
+    var _store: Boolean = false
+    var _analyzer: String = ""
+    var _tp: String = ""
+
+    def tpe(tpe: String): FieldDefinition = {
+      _tpe = tpe
+      this
+    }
+
+    def term_vector(term_vector: String): FieldDefinition = {
+      _term_vector = term_vector
+      this
+    }
+
+    def store(isStore: Boolean): FieldDefinition = {
+      _store = isStore
+      this
+    }
+
+    def analyzer(analyzer: String): FieldDefinition = {
+      _analyzer = analyzer
+      this
+    }
+
+    def in(tpe: String): FieldDefinition = {
+      _tp = tpe
+      this
+    }
+
+    def toMap: (String, Map[String, Any]) = {
+      (field ->
+        Map("type" -> _tpe,
+          "term_vector" -> _term_vector,
+          "store" -> _store,
+          "analyzer" -> _analyzer)
+        )
+    }
   }
 
   case class PropertiesDefinition()
