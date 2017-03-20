@@ -213,41 +213,19 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   "dsl" should "create index with mapping" in {
-    val res = Map("mappings" ->
-      Map("tweet" -> Map(
-        "properties" -> Map(
-          "text" -> Map(
-            "type" -> "text",
-            "term_vector" -> "with_positions_offsets_payloads",
-            "store" -> true,
-            "analyzer" -> "fulltext_analyzer"
-          ),
-          "fullname" -> Map(
-            "type" -> "text",
-            "term_vector" -> "with_positions_offsets_payloads",
-            "analyzer" -> "fulltext_analyzer"
-          )
-        ))),
-      "settings" -> Map(
-        "analysis" -> Map(
-          "analyzer" -> Map(
-            "fulltext_analyzer" -> Map(
-              "type" -> "custom",
-              "tokenizer" -> "whitespace",
-              "filter" -> List("lowercase", "type_as_payload")
-            )
-          )
-        )
-      ))
-
-    val res1 = DSL {
-      create index "test" mappings res
+    DSL {
+      create index "test" analyzers List(
+        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List("lowercase", "type_as_payload")
+      ) fields List(
+        create field "text" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store true analyzer "fulltext_analyzer",
+        create field "fullname" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store false analyzer "fulltext_analyzer"
+      )
     }.await
 
     val res2 = DSL {
       get mapping "test"
     }.await.toJson
-    println(res2)
+    res2.contains("fulltext_analyzer") should be(true)
   }
 
 
