@@ -206,6 +206,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       this
     }
 
+    def mappings(m: AnyRef): CreateIndexDefinition = {
+      val res = responseGenerator.toJson(m)
+      createIndexRequestBuilder.setSource(res)
+      this
+    }
+
     override def execute: Future[CreateIndexResponse] = {
       createIndexRequestBuilder.execute
     }
@@ -692,5 +698,19 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
 
     override def json: String = execute.toJson
   }
+
+  case class AnalyzerDefinition(analyzer: String) {
+    def tpe(_tpe: String): AnalyzerDefinition = this
+
+    def filter(_filters: List[String]): AnalyzerDefinition = {
+      this
+    }
+
+    def tokenizer(_tokenizer: String): AnalyzerDefinition = this
+  }
+
+  case class PropertiesDefinition()
+
+  case class MappingDefinition(analyzer: AnalyzerDefinition, properties: PropertiesDefinition)
 
 }

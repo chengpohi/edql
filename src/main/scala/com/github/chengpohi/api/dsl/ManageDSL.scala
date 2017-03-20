@@ -90,7 +90,8 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
 
     def index(indexName: String): CreateIndexDefinition = CreateIndexDefinition(indicesClient.prepareCreate(indexName))
 
-    def analyzer(analyzer: String): CreateAnalyzerRequestDefinition = CreateAnalyzerRequestDefinition(analyzer)
+    def analyzer(analyzer: String): CreateAnalyzerRequestDefinition =
+      CreateAnalyzerRequestDefinition(analyzer)
   }
 
 
