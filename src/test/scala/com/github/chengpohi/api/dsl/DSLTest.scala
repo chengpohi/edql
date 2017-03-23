@@ -3,7 +3,6 @@ package com.github.chengpohi.api.dsl
 import java.util
 
 import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder
 import org.elasticsearch.search.sort.SortOrder
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
@@ -228,6 +227,33 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     res2.contains("fulltext_analyzer") should be(true)
   }
 
+  "dsl" should "get term frequency" in {
+    DSL {
+      create index "test" analyzers List(
+        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List("lowercase", "type_as_payload")
+      ) fields List(
+        create field "text" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store true analyzer "fulltext_analyzer",
+        create field "fullname" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store false analyzer "fulltext_analyzer"
+      )
+    }.await
+
+    DSL {
+      index into "test" / "tweet" doc List(
+        Map("text" -> "twitter test test test ", "fullname" -> "John Doe", "id" -> "1"),
+        Map("text" -> "Another twitter test ...", "fullname" -> "Jane Doe", "id" -> "2")
+      )
+    }.await
+
+    val response: String = client.prepareTermVectors()
+      .setIndex("test")
+      .setType("tweet")
+      .setId("1")
+      .setFieldStatistics(true)
+      .setPositions(true)
+      .setOffsets(true)
+      .setTermStatistics(true).execute().toJson
+    println(response.toJson)
+  }
 
   after {
     DSL {

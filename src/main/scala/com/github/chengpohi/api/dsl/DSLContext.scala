@@ -2,6 +2,7 @@ package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.collection.JsonCollection.Val
 import com.github.chengpohi.helper.ResponseGenerator
+import org.elasticsearch.action.ListenableActionFuture
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse
@@ -31,6 +32,7 @@ import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.termvectors.TermVectorsResponse
 import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.SearchHit
@@ -48,7 +50,7 @@ import scala.concurrent.{Await, Future}
 /**
   * Created by xiachen on 10/11/2016.
   */
-trait DSLContext {
+trait DSLContext extends DSLExecutor {
   val responseGenerator = new ResponseGenerator
 
   trait Monoid[A] {
@@ -280,6 +282,12 @@ trait DSLContext {
       override def as[T](a: RefreshResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
+    implicit object TermVectorResponseMonoid extends Monoid[TermVectorsResponse] {
+      override def toJson(a: TermVectorsResponse): String = responseGenerator.buildXContent(a)
+
+      override def as[T](a: TermVectorsResponse)(implicit mf: Manifest[T]): Stream[T] = Stream.empty
+    }
+
     implicit object StreamSearchHitMonoid extends Monoid[Stream[SearchHit]] {
       override def toJson(a: Stream[SearchHit]): String = {
         val s = a.map(s => s.toJson)
@@ -328,6 +336,11 @@ trait DSLContext {
   }
 
   implicit def futureToJson[A: Monoid](a: Future[A]): FutureToJson[A] = new FutureToJson[A] {
+    override val F: Monoid[A] = implicitly[Monoid[A]]
+    override val value: Future[A] = a
+  }
+
+  implicit def listenableActionFutureMonoid[A: Monoid](a: ListenableActionFuture[A]): FutureToJson[A] = new FutureToJson[A] {
     override val F: Monoid[A] = implicitly[Monoid[A]]
     override val value: Future[A] = a
   }
