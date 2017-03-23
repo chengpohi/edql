@@ -156,7 +156,7 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
   case class BulkIndexRequestDefinition(indexPath: IndexPath) extends Definition[String] {
     var _fields: List[List[(String, String)]] = _
 
-    def fields(_f: List[List[(String, String)]]): BulkIndexRequestDefinition = {
+    def doc(_f: List[List[(String, String)]]): BulkIndexRequestDefinition = {
       _fields = _f
       this
     }
