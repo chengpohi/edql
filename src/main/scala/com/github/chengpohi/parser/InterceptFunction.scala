@@ -122,7 +122,7 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
 
   def bulkIndex: Seq[Val] => BulkIndexRequestDefinition = {
     case Seq(indexName, indexType, fields) => {
-      bulk index indexName / indexType fields fields.extract[List[List[(String, String)]]]
+      bulk index indexName / indexType doc fields.extract[List[List[(String, String)]]]
     }
   }
 

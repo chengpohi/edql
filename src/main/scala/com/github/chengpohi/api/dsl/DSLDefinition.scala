@@ -50,7 +50,7 @@ import scala.concurrent.Future
   * elasticdsl
   * Created by chengpohi on 6/28/16.
   */
-trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
+trait DSLDefinition extends ElasticBase with DSLContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticdsl"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
   val MAX_ALL_NUMBER: Int = 10000
@@ -668,7 +668,12 @@ trait DSLDefinition extends ElasticBase with DSLExecutor with DSLContext {
       val tpe = indexRequestBuilder.request().`type`()
       val bulk = client.prepareBulk()
       fields.map(f => {
-        client.prepareIndex(index, tpe).setSource(toJavaMap(f))
+        val r = f.filter(!_._1.equals("id"))
+        val source = client.prepareIndex(index, tpe).setSource(toJavaMap(r))
+        f.get("id").map(i => {
+          source.setId(i.toString)
+        })
+        source
       }).foreach(i => bulk.add(i))
       BulkRequestDefinition(bulk)
     }
