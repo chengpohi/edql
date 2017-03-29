@@ -205,6 +205,12 @@ trait DSLDefinition extends ElasticBase with DSLContext {
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends Definition[CreateIndexResponse] {
     var _analyzers = List[AnalyzerDefinition]()
     var _fields = List[FieldDefinition]()
+    var _settings: Option[IndexSettingsDefinition] = None
+
+    def settings(settings: IndexSettingsDefinition): CreateIndexDefinition = {
+      _settings = Some(settings)
+      this
+    }
 
     def mappings(m: String): CreateIndexDefinition = {
       createIndexRequestBuilder.setSource(m)
@@ -227,6 +233,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       val res = Map(
         "mappings" -> fs,
         "settings" -> Map(
+          "index" -> _settings.map(_.toMap).getOrElse(Map()),
           "analysis" -> Map(
             "analyzer" -> _analyzers.map(_.toMap).toMap
           )
@@ -723,6 +730,26 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     override def json: String = execute.toJson
+  }
+
+  case class IndexSettingsDefinition() {
+    var number_of_shards = Some(1)
+    var number_of_replicas = Some(0)
+
+    def number_of_replicas(n: Int): IndexSettingsDefinition = {
+      number_of_replicas = Some(n)
+      this
+    }
+
+    def number_of_shards(n: Int): IndexSettingsDefinition = {
+      number_of_shards = Some(n)
+      this
+    }
+
+    def toMap: Map[String, Serializable] = {
+      Map("number_of_shards" -> number_of_shards.get,
+        "number_of_replicas" -> number_of_replicas.get)
+    }
   }
 
   case class AnalyzerDefinition(analyzer: String) {
