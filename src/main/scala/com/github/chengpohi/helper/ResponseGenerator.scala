@@ -103,6 +103,7 @@ class ResponseGenerator {
 
   def buildXContent(toXContent: ToXContent): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
+    builder.prettyPrint()
     builder.startObject()
     toXContent.toXContent(builder, ToXContent.EMPTY_PARAMS)
     builder.endObject()
