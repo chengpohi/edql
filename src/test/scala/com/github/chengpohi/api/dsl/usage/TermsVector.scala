@@ -1,11 +1,10 @@
 package com.github.chengpohi.api.dsl.usage
 
 import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.elasticsearch.common.lucene.uid.Versions
 
 import scala.io.Source
 
-object TermsBayesian extends App {
+object TermsVector extends App {
   val dsl = ELKCommandTestRegistry.elasticdsl
   val corpus = Source
     .fromInputStream(this.getClass.getResourceAsStream("/training/corpus.txt"))
