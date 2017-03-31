@@ -79,6 +79,10 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
   }
 
   case object create {
+    def tokenizer(tokenizer: String): NgramTokenizerDefinition = {
+      NgramTokenizerDefinition(tokenizer)
+    }
+
     def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
       PutRepositoryDefinition(putRepository)
