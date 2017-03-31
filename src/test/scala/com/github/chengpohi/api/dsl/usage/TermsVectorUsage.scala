@@ -4,7 +4,7 @@ import com.github.chengpohi.helper.ELKCommandTestRegistry
 
 import scala.io.Source
 
-object TermsVector extends App {
+object TermsVectorUsage extends App {
   val dsl = ELKCommandTestRegistry.elasticdsl
   val corpus = Source
     .fromInputStream(this.getClass.getResourceAsStream("/training/corpus.txt"))
@@ -16,8 +16,8 @@ object TermsVector extends App {
 
   val testStr = "I have never seen a better programming language"
 
-  val _indexType = "tweet"
-  val _indexName = "test"
+  val _indexType = "foo"
+  val _indexName = "bar"
   DSL {
     create index _indexName analyzers List(
       create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List("lowercase", "type_as_payload")
