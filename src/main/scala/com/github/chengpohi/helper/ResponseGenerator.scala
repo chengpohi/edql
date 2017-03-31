@@ -22,6 +22,7 @@ import scala.collection.JavaConverters._
   */
 class ResponseGenerator {
 
+  DefaultFormats.preservingEmptyValues
   implicit val formats = DefaultFormats + new NumberSerializer
 
   def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
@@ -154,7 +155,15 @@ class ResponseGenerator {
     json.extract(formats, mf)
   }
 
-  def toJson(m: AnyRef): String = write(m)
+  def toJson(m: AnyRef): String = {
+    val decompose = Extraction.decompose(m)
+    val res = decompose.removeField {
+      case (_, JString("")) => true
+      case (_, JArray(List())) => true
+      case _ => false
+    }
+    compact(render(res))
+  }
 }
 
 class NumberSerializer extends CustomSerializer[Int](format => ( {

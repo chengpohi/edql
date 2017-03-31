@@ -204,6 +204,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
 
   case class CreateIndexDefinition(createIndexRequestBuilder: CreateIndexRequestBuilder) extends Definition[CreateIndexResponse] {
     var _analyzers = List[AnalyzerDefinition]()
+    var _tokenizers = List[NgramTokenizerDefinition]()
     var _fields = List[FieldDefinition]()
     var _settings: Option[IndexSettingsDefinition] = None
 
@@ -214,6 +215,11 @@ trait DSLDefinition extends ElasticBase with DSLContext {
 
     def mappings(m: String): CreateIndexDefinition = {
       createIndexRequestBuilder.setSource(m)
+      this
+    }
+
+    def tokenizer(m: List[NgramTokenizerDefinition]): CreateIndexDefinition = {
+      _tokenizers = m
       this
     }
 
@@ -235,7 +241,8 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         "settings" -> Map(
           "index" -> _settings.map(_.toMap).getOrElse(Map()),
           "analysis" -> Map(
-            "analyzer" -> _analyzers.map(_.toMap).toMap
+            "analyzer" -> _analyzers.map(_.toMap).toMap,
+            "tokenizer" -> _tokenizers.map(_.toMap).toMap
           )
         ))
       val json = responseGenerator.toJson(res)
@@ -749,6 +756,37 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     def toMap: Map[String, Serializable] = {
       Map("number_of_shards" -> number_of_shards.get,
         "number_of_replicas" -> number_of_replicas.get)
+    }
+  }
+
+  case class NgramTokenizerDefinition(tokenizer: String) {
+    var _tpe = ""
+    var _tokenChars = List[String]()
+    var _min_gram = 2
+    var _max_gram = 2
+
+    def tpe(tpe: String): NgramTokenizerDefinition = {
+      _tpe = tpe
+      this
+    }
+
+    def min_gram(min_gram: Int): NgramTokenizerDefinition = {
+      _min_gram = min_gram
+      this
+    }
+
+    def max_gram(max_gram: Int): NgramTokenizerDefinition = {
+      _max_gram = max_gram
+      this
+    }
+
+    def token_chars(token_chars: List[String]): NgramTokenizerDefinition = {
+      _tokenChars = token_chars
+      this
+    }
+
+    def toMap: (String, Map[String, Serializable]) = {
+      tokenizer -> Map("type" -> _tpe, "token_chars" -> _tokenChars, "min_gram" -> _min_gram, "max_gram" -> _max_gram)
     }
   }
 
