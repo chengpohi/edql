@@ -27,7 +27,7 @@ object TermsVectorUsage extends App {
   }.await
 
   val mapping = DSL {
-    get mapping "test"
+    get mapping _indexName
   }.toJson
 
   println(mapping)

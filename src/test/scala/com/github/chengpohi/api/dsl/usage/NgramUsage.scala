@@ -23,7 +23,13 @@ object NgramUsage extends App {
       create analyze "my_analyzer" tokenizer "my_tokenizer"
     ) fields List(
       create field "text" in _indexType tpe "text" store true analyzer "my_analyzer"
-    ) settings (IndexSettingsDefinition() number_of_replicas 0 number_of_shards 1)
+    ) settings (
+      IndexSettingsDefinition() number_of_replicas 0 number_of_shards 1
+      )
+  }.await
+
+  DSL {
+    index into _indexName / _indexType doc corpus
   }.await
 
   val response = DSL {
