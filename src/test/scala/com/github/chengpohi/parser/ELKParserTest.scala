@@ -42,8 +42,8 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     //then
-    val result = runEngine.run( """search in "test-parser-name" """)
-    assert(result.contains(""""name":"hello""""))
+    val result = runEngine.run( """search in "test-parser-name"""")
+    assert(result.contains(""""name" : "hello""""))
   }
 
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
@@ -54,7 +54,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
     //then
     val result = runEngine.run( """ search in "test-parser-name" """)
-    assert(result.contains(""""_id":"123""""))
+    assert(result.contains(""""_id" : "123""""))
   }
 
   "ELKParser" should "update doc by id and fields" in {
@@ -71,7 +71,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     }.await
     //then
     val result = runEngine.run( """ search in "test-parser-name" """)
-    assert(result.contains(""""name":"chengpohi""""))
+    assert(result.contains(""""name" : "chengpohi""""))
   }
 
   "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
@@ -89,7 +89,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     val result = runEngine.run( """ search in "test-parser-name-reindex" """)
     //then
     assert(result.contains(
-      """"name":"hello"""".stripMargin.trim))
+      """"name" : "hello"""".stripMargin.trim))
   }
   "ELKParser" should "delete doc by id" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
@@ -103,7 +103,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     val result = runEngine.run( """search in "test-parser-name" / "test-parser-type"""")
-    assert(result.contains(""""hits":[]"""))
+    assert(result.contains(""""hits" : [ ]"""))
   }
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
@@ -123,14 +123,14 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
   "ELKParser" should "analysis doc by specific analyzer" in {
     val result = runEngine.run( """analysis "foo,bar" by "standard"""")
     assert(result.contains(
-      """"token":"foo","""
+      """"token" : "foo","""
     ))
   }
 
   "ELKParser" should "index and get doc by id" in {
     runEngine.run( """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"}  id "HJJJJJJH"""")
     val result = runEngine.run( """get from "test-parser-name" / "test-parser-type" id "hJJJJJJH"""")
-    assert(result.contains( """"_id":"hJJJJJJH""""))
+    assert(result.contains( """"_id" : "hJJJJJJH""""))
   }
 
   "ELKParser" should "extract json data" in {
@@ -331,7 +331,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     val result = runEngine.run( """aggs in "test-index2" / "test-parser-type" term "title.tags"""")
-    assert(result.contains(""""key":"java""""))
+    assert(result.contains(""""key" : "java""""))
   }
 
   "ELKParser" should "alias index" in {
@@ -407,7 +407,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
     runEngine.run(
       """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
-    assert(result.contains("\"snapshot\":\"snapshot1\","))
+    assert(result.contains("\"snapshot\" : \"snapshot1\","))
   }
 
   "ELKParser" should "cluster stats" in {
@@ -491,7 +491,7 @@ class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
       refresh index "*"
     }.await
     val result = runEngine.run("""search in "test-index-name" / "test-index-type" match {"title": "foo"} """)
-    result.contains(""""name":"test"""") should be(true)
+    result.contains(""""name" : "test"""") should be(true)
   }
   "ELKParser" should "join search" in {
     runEngine.run(
