@@ -1,6 +1,5 @@
 package com.github.chengpohi.api.dsl.usage
 
-import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object NgramExplorer extends App {
