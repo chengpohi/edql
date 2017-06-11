@@ -1,4 +1,4 @@
-package com.github.chengpohi
+package com.github.chengpohi.repl
 
 import com.github.chengpohi.parser.ELKParser
 import com.github.chengpohi.registry.ELKCommandRegistry

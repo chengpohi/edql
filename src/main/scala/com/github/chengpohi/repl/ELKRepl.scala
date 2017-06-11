@@ -2,7 +2,6 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.helper.ResponseGenerator
 import com.github.chengpohi.registry.ELKCommandRegistry
 import jline.console.ConsoleReader
