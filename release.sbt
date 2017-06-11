@@ -5,33 +5,54 @@ import sbt.Package.ManifestAttributes
 
 //-------Package and Assembly------//
 assemblyMergeStrategy in assembly := {
-  case PathList("org", "joda", "time", "base", "BaseDateTime.class") => MergeStrategy.first
+  case PathList("org", "joda", "time", "base", "BaseDateTime.class") =>
+    MergeStrategy.first
   case "META-INF/io.netty.versions.properties" => MergeStrategy.first
-  case PathList("org", "apache", "logging", "log4j", "core", "impl", "ThrowableProxy$CacheEntry.class") => MergeStrategy.first
-  case PathList("org", "apache", "logging", "log4j", "core", "impl", "ThrowableProxy.class") => MergeStrategy.first
-  case PathList("org", "apache", "logging", "log4j", "core", "jmx", "Server.class") => MergeStrategy.first
+  case PathList("org",
+                "apache",
+                "logging",
+                "log4j",
+                "core",
+                "impl",
+                "ThrowableProxy$CacheEntry.class") =>
+    MergeStrategy.first
+  case PathList("org",
+                "apache",
+                "logging",
+                "log4j",
+                "core",
+                "impl",
+                "ThrowableProxy.class") =>
+    MergeStrategy.first
+  case PathList("org",
+                "apache",
+                "logging",
+                "log4j",
+                "core",
+                "jmx",
+                "Server.class") =>
+    MergeStrategy.first
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
 
-
-packageOptions := Seq(ManifestAttributes(
-  ("Change", "253032b"),
-  ("X-Compile-Target-JDK", "1.8"),
-  ("X-Compile-Source-JDK", "1.8"),
-  ("Branch", "5395e21a627bfe3ab8f037f49e68a9060bc967dd"),
-  ("X-Compile-Elasticsearch-Version", "5.1.1"),
-  ("X-Compile-Lucene-Version", "6.3.0"),
-  ("X-Compile-Elasticsearch-Snapshot", "false"),
-  ("Build-Date", System.currentTimeMillis().toString)
-))
+packageOptions := Seq(
+  ManifestAttributes(
+    ("Change", "253032b"),
+    ("X-Compile-Target-JDK", "1.8"),
+    ("X-Compile-Source-JDK", "1.8"),
+    ("Branch", "5395e21a627bfe3ab8f037f49e68a9060bc967dd"),
+    ("X-Compile-Elasticsearch-Version", "5.1.1"),
+    ("X-Compile-Lucene-Version", "6.3.0"),
+    ("X-Compile-Elasticsearch-Snapshot", "false"),
+    ("Build-Date", System.currentTimeMillis().toString)
+  ))
 
 parallelExecution in ThisBuild := false
 parallelExecution in Test := false
 
 //------------------------------------------------//
-
 
 //------------------------------------------------//
 //------------------Release-----------------------//
@@ -41,7 +62,9 @@ publishArtifact in Test := false
 
 sonatypeProfileName := "com.github.chengpohi"
 
-pomIncludeRepository := { _ => false }
+pomIncludeRepository := { _ =>
+  false
+}
 
 publishMavenStyle := true
 
@@ -75,8 +98,7 @@ pomExtra := (
         <url>https://github.com/chengpohi/elasticdsl</url>
       </developer>
     </developers>
-  )
-
+)
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
@@ -106,14 +128,15 @@ makeDeploymentSettings(Universal, packageBin in Universal, "zip")
 val pb = taskKey[Unit]("packageBin")
 
 pb := {
-  val localYaml = Paths.get("./src/universal/conf/local.yml")
-  val elasticConf = Paths.get("./src/universal/conf/elastic.conf")
+  val elasticConf = Paths.get("./src/universal/conf/elasticdsl.conf")
   val log4j2Properties = Paths.get("./src/universal/conf/log4j2.properties")
-  Files.copy(Paths.get("./src/main/resources/local.yml"), localYaml, StandardCopyOption.REPLACE_EXISTING)
-  Files.copy(Paths.get("./src/main/resources/elastic.conf"), elasticConf, StandardCopyOption.REPLACE_EXISTING)
-  Files.copy(Paths.get("./src/main/resources/log4j2.properties"), log4j2Properties, StandardCopyOption.REPLACE_EXISTING)
+  Files.copy(Paths.get("./src/main/resources/elasticdsl.conf"),
+             elasticConf,
+             StandardCopyOption.REPLACE_EXISTING)
+  Files.copy(Paths.get("./src/main/resources/log4j2.properties"),
+             log4j2Properties,
+             StandardCopyOption.REPLACE_EXISTING)
   Command.process("universal:packageBin", state.value)
-  Files.delete(localYaml)
   Files.delete(elasticConf)
   Files.delete(log4j2Properties)
 }

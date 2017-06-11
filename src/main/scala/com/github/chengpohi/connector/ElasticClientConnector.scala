@@ -1,13 +1,11 @@
 package com.github.chengpohi.connector
 
 import java.net.InetSocketAddress
-import java.nio.file.Paths
 import java.util
 import java.util.Collections
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
 import org.elasticsearch.client.Client
-import org.elasticsearch.common.network.NetworkModule
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.reindex.ReindexPlugin
@@ -22,7 +20,11 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
   * Created by chengpohi on 3/19/15.
   */
 object ElasticClientConnector {
-  lazy val indexConfig = ConfigFactory.load("elastic.conf").getConfig("elastic")
+  private lazy val indexConfig =
+    ConfigFactory.load("elasticdsl.conf").getConfig("elasticdsl")
+  private lazy val standaloneConfig =
+    ConfigFactory.load("elasticdsl.conf").getConfig("standalone")
+
   val clusterName: String = indexConfig.getString("cluster.name")
   val isStandalone: Boolean = indexConfig.getBoolean("standalone")
 
@@ -32,25 +34,30 @@ object ElasticClientConnector {
   }
 
   def buildLocalClient(): Client = {
-    val settings: Settings = Settings.builder()
-      .loadFromPath(Paths.get(getClass.getResource("/local.yml").toURI))
+    val settings: Settings = Settings
+      .builder()
+      .loadFromSource(
+        standaloneConfig.root().render(ConfigRenderOptions.concise())
+      )
       .put("cluster.name", clusterName)
       .build()
 
     val plugins =
       Collections.unmodifiableList(
-        util.Arrays.asList(
-          classOf[Netty4Plugin],
-          classOf[ReindexPlugin],
-          classOf[PercolatorPlugin],
-          classOf[MustachePlugin]))
-    val clientNode: ClientNode = new ClientNode(settings, plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
+        util.Arrays.asList(classOf[Netty4Plugin],
+                           classOf[ReindexPlugin],
+                           classOf[PercolatorPlugin],
+                           classOf[MustachePlugin]))
+    val clientNode: ClientNode = new ClientNode(
+      settings,
+      plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
     clientNode.start()
     clientNode.client()
   }
 
   def buildRemoteClient(): Client = {
-    val settings = Settings.builder()
+    val settings = Settings
+      .builder()
       .put("node.name", "elasticdsl")
       .put("cluster.name", clusterName)
       .build()
@@ -59,7 +66,8 @@ object ElasticClientConnector {
     val port: Int = indexConfig.getInt("port")
 
     val client = new PreBuiltTransportClient(settings)
-      .addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+      .addTransportAddress(
+        new InetSocketTransportAddress(new InetSocketAddress(host, port)))
     client
   }
 }
