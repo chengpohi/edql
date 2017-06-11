@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.nio.file.{Files, Paths}
 
-import com.github.chengpohi.ELKInterpreter
 import com.github.chengpohi.helper.ELKCommandTestRegistry
+import com.github.chengpohi.repl.ELKInterpreter
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.io.Source
