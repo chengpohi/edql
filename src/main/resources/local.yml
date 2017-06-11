@@ -1,8 +1,0 @@
-http.enabled: true
-path.repo: ./local/
-action.destructive_requires_name: false
-path.home: ./local/
-transport.type: netty4
-bootstrap.memory_lock: true
-thread_pool.index.size: 9
-thread_pool.index.queue_size: 1000
