@@ -19,7 +19,7 @@ Go to the [release](https://github.com/chengpohi/elasticdsl/releases), choose a 
 
 ### conf
 
-In the ***conf/elastic.conf***, you can configure your ***elasticsearch host, port and clustername***.
+In the ***conf/elasticdsl.conf***, you can configure your ***elasticsearch host, port and clustername***.
 
 ### Start
 
