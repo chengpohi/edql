@@ -4,7 +4,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicLong
 
 import com.github.chengpohi.api.ElasticDSL
-import com.github.chengpohi.registry.ELKCommandRegistry
+import com.github.chengpohi.registry.ELKDSLContext
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
@@ -15,8 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 class PerformanceTest extends FlatSpec with Matchers {
   ignore should "pressure test" in {
-    val dsl = new ElasticDSL(ELKCommandRegistry.client)
-    import dsl._
+    import ELKDSLContext.dsl._
     val permits = 1000
     val waitTime = 1 * 1000
     val semaphore = new Semaphore(permits)

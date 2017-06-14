@@ -11,6 +11,8 @@ import org.elasticsearch.node.Node
   */
 
 object ELKCommandTestRegistry {
+  val responseGenerator = new ResponseGenerator
+
   private[this] val settings: Settings = Settings.builder()
     .put("http.enabled", "false")
     .put("cluster.name", "testelk")
@@ -19,13 +21,12 @@ object ELKCommandTestRegistry {
     .put("path.home", "./target/elkdata")
     .put("transport.type", "local")
     .build()
-  val node = new Node(settings).start()
-  val client = node.client()
+  private[this] val node = new Node(settings).start()
+  private[this] val client = node.client()
   val elasticdsl = new ElasticDSL(client)
-  val responseGenerator = new ResponseGenerator
   private[this] val elkCommand = new InterceptFunction(elasticdsl)
   private[this] val parserUtils = new ParserUtils
-  val elkParser = new ELKParser(elkCommand)
+  implicit lazy val elkParser = new ELKParser(elkCommand)
 
   import elasticdsl._
 
