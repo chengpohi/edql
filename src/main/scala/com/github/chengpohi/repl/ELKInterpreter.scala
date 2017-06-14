@@ -1,16 +1,16 @@
 package com.github.chengpohi.repl
 
 import com.github.chengpohi.parser.ELKParser
-import com.github.chengpohi.registry.ELKCommandRegistry
+import com.github.chengpohi.registry.ELKDSLContext
 
 import scala.io.Source
 
 /**
   * Created by chengpohi on 1/3/16.
   */
-class ELKInterpreter(env: {val elkParser: ELKParser}) {
+class ELKInterpreter(implicit val elkParser: ELKParser) {
 
-  import env.elkParser._
+  import elkParser._
 
   def interceptDefinitions(instructions: Seq[Instruction]): String = {
     val res = for {
@@ -20,7 +20,7 @@ class ELKInterpreter(env: {val elkParser: ELKParser}) {
   }
 
   def run(source: String): String = {
-    val parsed = elkParser.parse(source)
+    val parsed = instructionParser.parse(source)
     val instruments = generateDefinitions(parsed)
     interceptDefinitions(instruments)
   }
@@ -32,7 +32,8 @@ class ELKInterpreter(env: {val elkParser: ELKParser}) {
 }
 
 object ELKInterpreter {
-  private val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandRegistry)
+  import ELKDSLContext.elkParser
+  private val runEngine: ELKInterpreter = new ELKInterpreter()
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {
