@@ -10,14 +10,25 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
   * elasticdsl
   * Created by chengpohi on 9/22/16.
   */
-case class TestMap(id: Int, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int], list: List[String])
+case class TestMap(id: Int,
+                   hello: String,
+                   foo: String,
+                   name: String,
+                   pp: Option[String],
+                   tt: Option[Int],
+                   list: List[String])
 
-case class TestMapScore(id: String, hello: String, foo: String, name: String, pp: Option[String], tt: Option[Int], list: List[String], score: Long)
+case class TestMapScore(id: String,
+                        hello: String,
+                        foo: String,
+                        name: String,
+                        pp: Option[String],
+                        tt: Option[Int],
+                        list: List[String],
+                        score: Long)
 
 class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
-  val dsl = ELKCommandTestRegistry.elasticdsl
-
-  import dsl._
+  import ELKCommandTestRegistry.elasticdsl._
 
   before {
     DSL {
@@ -30,14 +41,16 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "parse response to json" in {
     val res = DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+      index into "testindex" / "testmap" doc Map(
+        "Hello" -> List("world", "foobar"))
     }.await
     res.toJson.isEmpty should be(false)
   }
 
   it should "scroll search to json" in {
     DSL {
-      index into "testindex" / "testmap" doc List(Map("Hello" -> List("world", "foobar")),
+      index into "testindex" / "testmap" doc List(
+        Map("Hello" -> List("world", "foobar")),
         Map("Hello" -> List("world", "foobar")),
         Map("Hello" -> List("world", "foobar")))
     }.await
@@ -56,7 +69,8 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "index nest map" in {
     DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar"))
+      index into "testindex" / "testmap" doc Map(
+        "Hello" -> List("world", "foobar"))
     }.await
 
     DSL {
@@ -65,7 +79,11 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val result = DSL {
       search in "testindex" / "testmap"
     }.await
-    val source: util.ArrayList[String] = result.getHits.getAt(0).getSource.get("Hello").asInstanceOf[util.ArrayList[String]]
+    val source: util.ArrayList[String] = result.getHits
+      .getAt(0)
+      .getSource
+      .get("Hello")
+      .asInstanceOf[util.ArrayList[String]]
     assert(source.size() === 2)
     assert(source.get(0) === "world")
     assert(source.get(1) === "foobar")
@@ -75,7 +93,8 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val _id: String = "1234"
 
     DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar")) id _id
+      index into "testindex" / "testmap" doc Map(
+        "Hello" -> List("world", "foobar")) id _id
     }
 
     DSL {
@@ -98,7 +117,8 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val _id: String = "1234"
 
     DSL {
-      index into "testindex" / "testmap" doc Map("Hello" -> List("world", "foobar")) id _id
+      index into "testindex" / "testmap" doc Map(
+        "Hello" -> List("world", "foobar")) id _id
     }
 
     DSL {
@@ -115,11 +135,19 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val _id: String = "1234"
 
     DSL {
-      index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack", "list" -> List("world", "foobar")) id _id
+      index into "testindex" / "testmap" doc Map(
+        "hello" -> "world",
+        "foo" -> "bar",
+        "name" -> "chengpohi",
+        "pp" -> "jack",
+        "list" -> List("world", "foobar")) id _id
     }
 
     DSL {
-      index into "testindex" / "testmap" doc Map("hello" -> "world", "foo" -> "bar", "name" -> "chengpohi") id "5678"
+      index into "testindex" / "testmap" doc Map(
+        "hello" -> "world",
+        "foo" -> "bar",
+        "name" -> "chengpohi") id "5678"
     }
 
     DSL {
@@ -129,22 +157,48 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
     }.await.as[TestMap]
-    r1.head should be(TestMap(_id.toInt, "world", "bar", "chengpohi", Some("jack"), None, List("world", "foobar")))
+    r1.head should be(
+      TestMap(_id.toInt,
+              "world",
+              "bar",
+              "chengpohi",
+              Some("jack"),
+              None,
+              List("world", "foobar")))
 
     val r2 = DSL {
       search in "testindex" / "testmap"
     }.await.as[TestMap].toList
     r2.size should be(2)
-    r2 should contain(TestMap(_id.toInt, "world", "bar", "chengpohi", Some("jack"), None, List("world", "foobar")))
-    r2 should contain(TestMap(5678, "world", "bar", "chengpohi", None, None, List()))
+    r2 should contain(
+      TestMap(_id.toInt,
+              "world",
+              "bar",
+              "chengpohi",
+              Some("jack"),
+              None,
+              List("world", "foobar")))
+    r2 should contain(
+      TestMap(5678, "world", "bar", "chengpohi", None, None, List()))
   }
 
   "dsl" should "select order by" in {
     DSL {
       index into "testindex" / "testmap" doc List(
-        Map("score" -> 1, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi", "pp" -> "jack", "list" -> List("world", "foobar")),
-        Map("score" -> 2, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi"),
-        Map("score" -> 3, "hello" -> "world", "foo" -> "bar", "name" -> "chengpohi")
+        Map("score" -> 1,
+            "hello" -> "world",
+            "foo" -> "bar",
+            "name" -> "chengpohi",
+            "pp" -> "jack",
+            "list" -> List("world", "foobar")),
+        Map("score" -> 2,
+            "hello" -> "world",
+            "foo" -> "bar",
+            "name" -> "chengpohi"),
+        Map("score" -> 3,
+            "hello" -> "world",
+            "foo" -> "bar",
+            "name" -> "chengpohi")
       )
     }
 
@@ -191,7 +245,8 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
       search in "testindex" / "testmap" where id equal _id
     }.await
 
-    result.getSource.get("score").getClass should be(classOf[java.util.ArrayList[_]])
+    result.getSource.get("score").getClass should be(
+      classOf[java.util.ArrayList[_]])
   }
 
   "dsl" should "index doc with dynamic mapping" in {
@@ -214,7 +269,9 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   "dsl" should "create index with mapping" in {
     DSL {
       create index "test" analyzers List(
-        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List("lowercase", "type_as_payload")
+        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List(
+          "lowercase",
+          "type_as_payload")
       ) fields List(
         create field "text" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store true analyzer "fulltext_analyzer",
         create field "fullname" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store false analyzer "fulltext_analyzer"
@@ -230,7 +287,9 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
   "dsl" should "get term frequency" in {
     DSL {
       create index "test" analyzers List(
-        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List("lowercase", "type_as_payload")
+        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List(
+          "lowercase",
+          "type_as_payload")
       ) fields List(
         create field "text" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store true analyzer "fulltext_analyzer",
         create field "fullname" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store false analyzer "fulltext_analyzer"
@@ -239,19 +298,26 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     DSL {
       index into "test" / "tweet" doc List(
-        Map("text" -> "twitter test test test ", "fullname" -> "John Doe", "id" -> "1"),
-        Map("text" -> "Another twitter test ...", "fullname" -> "Jane Doe", "id" -> "2")
+        Map("text" -> "twitter test test test ",
+            "fullname" -> "John Doe",
+            "id" -> "1"),
+        Map("text" -> "Another twitter test ...",
+            "fullname" -> "Jane Doe",
+            "id" -> "2")
       )
     }.await
 
-    val response: String = client.prepareTermVectors()
+    val response: String = client
+      .prepareTermVectors()
       .setIndex("test")
       .setType("tweet")
       .setId("1")
       .setFieldStatistics(true)
       .setPositions(true)
       .setOffsets(true)
-      .setTermStatistics(true).execute().toJson
+      .setTermStatistics(true)
+      .execute()
+      .toJson
     println(response.toJson)
   }
 

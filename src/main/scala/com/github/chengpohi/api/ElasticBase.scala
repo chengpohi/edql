@@ -30,8 +30,8 @@ trait ElasticBase {
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
     import scala.collection.JavaConverters._
-    val res = m.map(a => {
-      val r = a._2 match {
+    val res = m.map(b => {
+      val r = b._2 match {
         case a: Iterable[_] => a.asJava
         case a: Int => Integer.parseInt(a.toString)
         case a: Double => java.lang.Double.parseDouble(a.toString)
@@ -41,7 +41,7 @@ trait ElasticBase {
         case a: BigDecimal => a.bigDecimal
         case a => a
       }
-      (a._1, r)
+      (b._1, r)
     })
     res.asJava
   }

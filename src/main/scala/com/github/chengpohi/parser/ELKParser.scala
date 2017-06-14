@@ -14,7 +14,7 @@ class ELKParser(interceptFunction: InterceptFunction)
 
   import WhitespaceApi._
 
-  val elkParser: P[Seq[Instruction]] = P(WL0 ~ instrument.rep ~ End)
+  val instructionParser: P[Seq[Instruction]] = P(WL0 ~ instrument.rep ~ End)
 
   def generateDefinitions(parsed: Parsed[Seq[Instruction]]): Seq[Instruction] = {
     val instructions = parsed match {

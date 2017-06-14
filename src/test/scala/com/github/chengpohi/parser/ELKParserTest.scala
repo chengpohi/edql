@@ -17,7 +17,8 @@ import scala.io.Source
 class ELKParserTest extends FlatSpec with Matchers with BeforeAndAfter {
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
-  val runEngine: ELKInterpreter = new ELKInterpreter(ELKCommandTestRegistry)
+  import ELKCommandTestRegistry.elkParser
+  val runEngine: ELKInterpreter = new ELKInterpreter()
 
   import ELKCommandTestRegistry.elasticdsl._
 
