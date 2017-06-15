@@ -10,6 +10,7 @@ import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent._
+import org.elasticsearch.search.SearchHit
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
@@ -25,19 +26,22 @@ class ResponseGenerator {
   DefaultFormats.preservingEmptyValues
   implicit val formats = DefaultFormats + new NumberSerializer
 
-  def buildGetMappingResponse(getMappingsResponse: GetMappingsResponse): String = {
+  def buildGetMappingResponse(
+      getMappingsResponse: GetMappingsResponse): String = {
     val builder = XContentFactory.jsonBuilder()
     builder.startObject()
-    getMappingsResponse.getMappings.asScala.filter(!_.value.isEmpty).foreach(indexEntry => {
-      builder.startObject(indexEntry.key)
-      builder.startObject("mappings")
-      indexEntry.value.asScala.foreach(typeEntry => {
-        builder.field(typeEntry.key)
-        builder.map(typeEntry.value.sourceAsMap())
+    getMappingsResponse.getMappings.asScala
+      .filter(!_.value.isEmpty)
+      .foreach(indexEntry => {
+        builder.startObject(indexEntry.key)
+        builder.startObject("mappings")
+        indexEntry.value.asScala.foreach(typeEntry => {
+          builder.field(typeEntry.key)
+          builder.map(typeEntry.value.sourceAsMap())
+        })
+        builder.endObject()
+        builder.endObject()
       })
-      builder.endObject()
-      builder.endObject()
-    })
     builder.endObject()
     builder.string()
   }
@@ -58,7 +62,8 @@ class ResponseGenerator {
     builder.string()
   }
 
-  def buildClusterSettingsResponse(response: ClusterUpdateSettingsResponse): String = {
+  def buildClusterSettingsResponse(
+      response: ClusterUpdateSettingsResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject("persistent")
     response.getPersistentSettings.toXContent(builder, ToXContent.EMPTY_PARAMS)
@@ -73,13 +78,15 @@ class ResponseGenerator {
   def buildGetSettingsResponse(response: GetSettingsResponse): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.startObject()
-    response.getIndexToSettings.asScala.filter(!_.value.getAsMap.isEmpty).foreach(cursor => {
-      builder.startObject(cursor.key)
-      builder.startObject("settings")
-      cursor.value.toXContent(builder, ToXContent.EMPTY_PARAMS)
-      builder.endObject()
-      builder.endObject()
-    })
+    response.getIndexToSettings.asScala
+      .filter(!_.value.getAsMap.isEmpty)
+      .foreach(cursor => {
+        builder.startObject(cursor.key)
+        builder.startObject("settings")
+        cursor.value.toXContent(builder, ToXContent.EMPTY_PARAMS)
+        builder.endObject()
+        builder.endObject()
+      })
     builder.endObject()
     builder.string()
   }
@@ -101,7 +108,6 @@ class ResponseGenerator {
     builder.toString
   }
 
-
   def buildXContent(toXContent: ToXContent): String = {
     val builder = XContentFactory.contentBuilder(XContentType.JSON)
     builder.prettyPrint()
@@ -119,10 +125,11 @@ class ResponseGenerator {
     write(s)
   }
 
-
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)
-    val result = filterName.split("\\.").foldLeft(jObj) { (o, i) => o \ i }
+    val result = filterName.split("\\.").foldLeft(jObj) { (o, i) =>
+      o \ i
+    }
     write(result)
   }
 
@@ -130,7 +137,8 @@ class ResponseGenerator {
     pretty(render(parse(json)))
   }
 
-  def buildAcknowledgedResponse(acknowledgedResponse: AcknowledgedResponse): String = {
+  def buildAcknowledgedResponse(
+      acknowledgedResponse: AcknowledgedResponse): String = {
     write(("acknowledged", acknowledgedResponse.isAcknowledged))
   }
 
@@ -146,13 +154,27 @@ class ResponseGenerator {
     builder.string()
   }
 
-  def buildIsCreated(isCreated: Boolean): String = write(("isCreated", isCreated))
+  def buildIsCreated(isCreated: Boolean): String =
+    write(("isCreated", isCreated))
 
   def buildIdResponse(id: String): String = write(("id", id))
 
-  def extractObjectByMap[T](source: Map[String, AnyRef])(implicit mf: Manifest[T]): T = {
+  def extractObjectByMap[T](source: Map[String, AnyRef])(
+      implicit mf: Manifest[T]): T = {
     val json: JValue = Extraction.decompose(source)
     json.extract(formats, mf)
+  }
+
+  def mapGetResponse[T](getResponse: GetResponse)(implicit mf: Manifest[T]): T = {
+    val j = parse(getResponse.getSourceAsString)
+    val r = j merge JObject("id" -> JString(getResponse.getId))
+    r.extract(formats, mf)
+  }
+
+  def mapSearchHit[T](searchHit: SearchHit)(implicit mf: Manifest[T]): T = {
+    val j = parse(searchHit.sourceAsString())
+    val r = j merge JObject("id" -> JString(searchHit.getId))
+    r.extract(formats, mf)
   }
 
   def toJson(m: AnyRef): String = {
@@ -166,9 +188,11 @@ class ResponseGenerator {
   }
 }
 
-class NumberSerializer extends CustomSerializer[Int](format => ( {
-  case JInt(x) => x.toInt
-  case JString(x) => x.toInt
-}, {
-  case x: Int => JInt(x)
-}))
+class NumberSerializer
+    extends CustomSerializer[Int](format =>
+      ({
+        case JInt(x) => x.toInt
+        case JString(x) => x.toInt
+      }, {
+        case x: Int => JInt(x)
+      }))
