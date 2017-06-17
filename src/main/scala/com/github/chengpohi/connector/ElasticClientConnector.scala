@@ -5,6 +5,7 @@ import java.util
 import java.util.Collections
 
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
+import org.apache.lucene.util.IOUtils
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
@@ -52,6 +53,9 @@ object ElasticClientConnector {
       settings,
       plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
     clientNode.start()
+    Runtime.getRuntime.addShutdownHook(new Thread(() => {
+      IOUtils.close(clientNode)
+    }))
     clientNode.client()
   }
 
