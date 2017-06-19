@@ -2,34 +2,34 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.helper.ResponseGenerator
+import com.github.chengpohi.connector.ELKDSLConfig
 import com.github.chengpohi.registry.ELKDSLContext
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration
 
 import scala.io.Source
-import scala.util.Try
 
 /**
   * elasticdsl
   * Created by chengpohi on 1/27/16.
   */
-object ELKRepl {
+object ELKRepl extends ELKDSLConfig with ELKDSLContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticdsl"
-  import ELKDSLContext.elkParser
-  val terms = new StringsCompleter(Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
+  val terms = new StringsCompleter(
+    Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
   val elkRunEngine = new ELKInterpreter()
-  val generator = ELKDSLContext.responseGenerator
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
     reader.setPrompt("elasticdsl>")
     reader.addCompleter(terms)
     reader.setCompletionHandler(eLKCompletionHandler)
-    reader.setHistory(new FileHistory(new File(Configuration.getUserHome, ".elasticdsl.history")))
+    reader.setHistory(
+      new FileHistory(
+        new File(Configuration.getUserHome, ".elasticdsl.history")))
     addShutdownHook(reader)
 
     while (true) {
@@ -39,7 +39,7 @@ object ELKRepl {
         case true =>
         case false =>
           try {
-            val res = generator.beautyJSON(elkRunEngine.run(line))
+            val res = responseGenerator.beautyJSON(elkRunEngine.run(line))
             println(res)
           } catch {
             case e: Exception =>

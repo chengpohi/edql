@@ -10,7 +10,7 @@ import org.elasticsearch.node.Node
   * Created by chengpohi on 4/4/16.
   */
 
-object ELKCommandTestRegistry {
+trait ELKCommandTestRegistry {
   val responseGenerator = new ResponseGenerator
 
   private[this] val settings: Settings = Settings.builder()

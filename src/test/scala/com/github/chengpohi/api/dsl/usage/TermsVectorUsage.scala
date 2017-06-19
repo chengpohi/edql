@@ -1,18 +1,18 @@
 package com.github.chengpohi.api.dsl.usage
 
+
 import com.github.chengpohi.helper.ELKCommandTestRegistry
 
 import scala.io.Source
 
-object TermsVectorUsage extends App {
-  val dsl = ELKCommandTestRegistry.elasticdsl
+object TermsVectorUsage extends App with ELKCommandTestRegistry{
   val corpus = Source
     .fromInputStream(this.getClass.getResourceAsStream("/training/corpus.txt"))
     .getLines()
     .zipWithIndex
     .map(s => Map("text" -> s._1, "id" -> s._2)).toList
 
-  import dsl._
+  import elasticdsl._
 
   val testStr = "I have never seen a better programming language"
 
