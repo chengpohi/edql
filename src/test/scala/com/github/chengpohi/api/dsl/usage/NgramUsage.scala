@@ -4,15 +4,14 @@ import com.github.chengpohi.helper.ELKCommandTestRegistry
 
 import scala.io.Source
 
-object NgramUsage extends App {
-  val dsl = ELKCommandTestRegistry.elasticdsl
+object NgramUsage extends App with ELKCommandTestRegistry{
+  import elasticdsl._
   val corpus = Source
     .fromInputStream(this.getClass.getResourceAsStream("/training/corpus.txt"))
     .getLines()
     .zipWithIndex
     .map(s => Map("text" -> s._1, "id" -> s._2)).toList
 
-  import dsl._
 
   val _indexType = "foo"
   val _indexName = "bar"

@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
-import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
+import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
@@ -18,29 +18,24 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /**
   * elasticdsl
-  * Created by chengpohi on 3/19/15.
+  * Created by chengpohi on 16/06/16.
   */
-object ElasticClientConnector {
-  private lazy val indexConfig =
-    ConfigFactory.load("elasticdsl.conf").getConfig("elasticdsl")
-  private lazy val standaloneConfig =
-    ConfigFactory.load("elasticdsl.conf").getConfig("standalone")
+trait ELKDSLConfig {
+  val config: Config = ConfigFactory.load("elasticdsl.conf").getConfig("elasticdsl")
 
-  val clusterName: String = indexConfig.getString("cluster.name")
-  val isStandalone: Boolean = indexConfig.getBoolean("standalone")
+  def buildClient(config: Config): Client =
+    config.getBoolean("standalone") match {
+      case true => buildLocalClient(config)
+      case false => buildRemoteClient(config)
+    }
 
-  val client: Client = isStandalone match {
-    case false => buildRemoteClient()
-    case true => buildLocalClient()
-  }
-
-  def buildLocalClient(): Client = {
+  private def buildLocalClient(config: Config): Client = {
     val settings: Settings = Settings
       .builder()
       .loadFromSource(
-        standaloneConfig.root().render(ConfigRenderOptions.concise())
+        config.getConfig("local").root().render(ConfigRenderOptions.concise())
       )
-      .put("cluster.name", clusterName)
+      .put("cluster.name", config.getString("cluster.name"))
       .build()
 
     val plugins =
@@ -59,15 +54,15 @@ object ElasticClientConnector {
     clientNode.client()
   }
 
-  def buildRemoteClient(): Client = {
+  private def buildRemoteClient(config: Config): Client = {
     val settings = Settings
       .builder()
       .put("node.name", "elasticdsl")
-      .put("cluster.name", clusterName)
+      .put("cluster.name", config.getString("cluster.name"))
       .build()
 
-    val host: String = indexConfig.getString("host")
-    val port: Int = indexConfig.getInt("port")
+    val host: String = config.getString("host")
+    val port: Int = config.getInt("port")
 
     val client = new PreBuiltTransportClient(settings)
       .addTransportAddress(

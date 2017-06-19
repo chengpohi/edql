@@ -1,5 +1,6 @@
 package com.github.chengpohi.repl
 
+import com.github.chengpohi.connector.ELKDSLConfig
 import com.github.chengpohi.parser.ELKParser
 import com.github.chengpohi.registry.ELKDSLContext
 
@@ -31,8 +32,7 @@ class ELKInterpreter(implicit val elkParser: ELKParser) {
   }
 }
 
-object ELKInterpreter {
-  import ELKDSLContext.elkParser
+object ELKInterpreter extends ELKDSLContext with ELKDSLConfig{
   private val runEngine: ELKInterpreter = new ELKInterpreter()
 
   def main(args: Array[String]): Unit = {
@@ -40,8 +40,12 @@ object ELKInterpreter {
       println("usage elk file.elk")
       System.exit(0)
     }
-    val parseFile: String = Source.fromFile(args(0)).getLines().filter(!_.trim().startsWith("//")).toList.mkString("")
+    val parseFile: String = Source
+      .fromFile(args(0))
+      .getLines()
+      .filter(!_.trim().startsWith("//"))
+      .toList
+      .mkString("")
     println(runEngine.run(parseFile))
   }
 }
-

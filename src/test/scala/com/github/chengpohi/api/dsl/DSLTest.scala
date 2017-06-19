@@ -27,8 +27,8 @@ case class TestMapScore(id: String,
                         list: List[String],
                         score: Long)
 
-class DSLTest extends FlatSpec with Matchers with BeforeAndAfter {
-  import ELKCommandTestRegistry.elasticdsl._
+class DSLTest extends FlatSpec with Matchers with BeforeAndAfter with ELKCommandTestRegistry{
+  import elasticdsl._
 
   before {
     DSL {
