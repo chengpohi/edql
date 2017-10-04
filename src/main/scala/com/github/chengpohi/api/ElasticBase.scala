@@ -33,13 +33,13 @@ trait ElasticBase {
     val res = m.map(b => {
       val r = b._2 match {
         case a: Iterable[_] => a.asJava
-        case a: Int => Integer.parseInt(a.toString)
-        case a: Double => java.lang.Double.parseDouble(a.toString)
-        case a: Long => java.lang.Long.parseLong(a.toString)
-        case a: Float => java.lang.Float.parseFloat(a.toString)
-        case a: BigInt => Integer.parseInt(a.toString())
-        case a: BigDecimal => a.bigDecimal
-        case a => a
+        case a: Int         => Integer.parseInt(a.toString)
+        case a: Double      => java.lang.Double.parseDouble(a.toString)
+        case a: Long        => java.lang.Long.parseLong(a.toString)
+        case a: Float       => java.lang.Float.parseFloat(a.toString)
+        case a: BigInt      => Integer.parseInt(a.toString())
+        case a: BigDecimal  => a.bigDecimal
+        case a              => a
       }
       (b._1, r)
     })

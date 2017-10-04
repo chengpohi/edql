@@ -376,8 +376,7 @@ class ELKParserTest
       refresh index "*"
     }.await
 
-    runEngine.run(
-      """create snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    runEngine.run("""create snapshot "snapshot1" "test_snapshot"""".stripMargin)
     DSL {
       refresh index "*"
     }.await
@@ -414,8 +413,7 @@ class ELKParserTest
       refresh index "*"
     }.await
 
-    runEngine.run(
-      """delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
+    runEngine.run("""delete snapshot "snapshot1" "test_snapshot"""".stripMargin)
 
     assert(result.contains("\"snapshot\" : \"snapshot1\","))
   }

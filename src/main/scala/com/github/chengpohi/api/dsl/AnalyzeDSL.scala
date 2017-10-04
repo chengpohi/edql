@@ -9,7 +9,8 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder
 trait AnalyzeDSL extends DSLDefinition {
   case object analyze {
     def text(text: String): AnalyzeRequestDefinition = {
-      val analyzeRequestBuilder: AnalyzeRequestBuilder = indicesClient.prepareAnalyze(text)
+      val analyzeRequestBuilder: AnalyzeRequestBuilder =
+        indicesClient.prepareAnalyze(text)
       AnalyzeRequestDefinition(analyzeRequestBuilder)
     }
   }

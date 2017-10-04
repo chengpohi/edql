@@ -18,10 +18,12 @@ class ParserUtils {
   implicit val formats = DefaultFormats
   val instrumentations = ConfigFactory.load("instrumentations.json")
 
-  case class ParserErrorDefinition(parameters: Seq[Val]) extends Definition[String] {
+  case class ParserErrorDefinition(parameters: Seq[Val])
+      extends Definition[String] {
     override def execute: Future[String] = {
       Future {
-        val (errorMsg, input) = (parameters.head.extract[String], parameters(1).extract[String])
+        val (errorMsg, input) =
+          (parameters.head.extract[String], parameters(1).extract[String])
         write(Map(("illegal_input", input), ("caused_by", errorMsg)))
       }
     }
@@ -38,8 +40,10 @@ class ParserUtils {
       case Seq(input) =>
         Future {
           val s = input.extract[String]
-          val example: String = instrumentations.getConfig(s.trim).getString("example")
-          val description: String = instrumentations.getConfig(s.trim).getString("description")
+          val example: String =
+            instrumentations.getConfig(s.trim).getString("example")
+          val description: String =
+            instrumentations.getConfig(s.trim).getString("description")
           write(Map(("example", example), ("description", description)))
         }
       case _ =>

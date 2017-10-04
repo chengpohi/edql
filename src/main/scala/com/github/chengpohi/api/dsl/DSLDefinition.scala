@@ -2,6 +2,7 @@ package com.github.chengpohi.api.dsl
 
 import java.io.Serializable
 
+import com.github.chengpohi.annotation.Analyzer
 import com.github.chengpohi.api.ElasticBase
 import org.elasticsearch.action.admin.cluster.health.{
   ClusterHealthRequestBuilder,
@@ -118,10 +119,13 @@ import org.elasticsearch.search.aggregations.bucket.histogram.{
 import org.elasticsearch.search.sort.SortBuilder
 import org.json4s.DefaultFormats
 
+import scala.annotation.StaticAnnotation
+import scala.annotation.meta.field
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.reflect.runtime.universe
 
 /**
   * elasticdsl
@@ -218,10 +222,10 @@ trait DSLDefinition extends ElasticBase with DSLContext {
 
     def status(status: String): ClusterHealthRequestDefinition = {
       val clusterHealthStatus: ClusterHealthStatus = status match {
-        case "GREEN" => ClusterHealthStatus.GREEN
-        case "RED" => ClusterHealthStatus.RED
+        case "GREEN"  => ClusterHealthStatus.GREEN
+        case "RED"    => ClusterHealthStatus.RED
         case "YELLOW" => ClusterHealthStatus.YELLOW
-        case _ => ClusterHealthStatus.GREEN
+        case _        => ClusterHealthStatus.GREEN
       }
       clusterHealthRequestBuilder.setWaitForStatus(clusterHealthStatus)
       this
@@ -303,14 +307,25 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     var _tokenizers = List[NgramTokenizerDefinition]()
     var _fields = List[FieldDefinition]()
     var _settings: Option[IndexSettingsDefinition] = None
+    var _s: Option[IndexSettings] = None
+    var _m: Option[MappingsDefinition] = None
 
     def settings(settings: IndexSettingsDefinition): CreateIndexDefinition = {
       _settings = Some(settings)
       this
     }
+    def settings(settings: IndexSettings): CreateIndexDefinition = {
+      this._s = Some(settings)
+      this
+    }
 
     def mappings(m: String): CreateIndexDefinition = {
       createIndexRequestBuilder.setSource(m)
+      this
+    }
+
+    def mappings(m: MappingsDefinition): CreateIndexDefinition = {
+      this._m = Some(m)
       this
     }
 
@@ -491,19 +506,17 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     override def json: String = execute.toJson
   }
 
-  case class SearchRequestDefinition(
-      searchRequestBuilder: SearchRequestBuilder)
+  case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder)
       extends Definition[SearchResponse] {
     var _joinSearchRequestBuilder: Option[SearchRequestBuilder] = None
     var _tmpField: Option[String] = None
     var _dateHistogramAggregationBuilder: DateHistogramAggregationBuilder = _
 
-    def join(indexPath: IndexPath): SearchRequestDefinition = {
-      _joinSearchRequestBuilder = Some(
-        client
-          .prepareSearch(indexPath.indexName)
-          .setTypes(indexPath.indexType))
-      this
+    def join(indexPath: IndexPath): JoinSearchRequestDefinition = {
+      size(MAX_RETRIEVE_SIZE)
+      scroll("10m")
+      JoinSearchRequestDefinition(ScrollSearchRequestDefinition(this),
+                                  indexPath)
     }
 
     def by(field: String): SearchRequestDefinition = {
@@ -583,21 +596,20 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     def hist(name: String): SearchRequestDefinition = {
-      _dateHistogramAggregationBuilder =
-        AggregationBuilders.dateHistogram(name)
+      _dateHistogramAggregationBuilder = AggregationBuilders.dateHistogram(name)
       this
     }
 
     def interval(_internalval: String): SearchRequestDefinition = {
       val interval: DateHistogramInterval = _internalval.toLowerCase() match {
-        case "week" => DateHistogramInterval.WEEK
-        case "hour" => DateHistogramInterval.HOUR
-        case "second" => DateHistogramInterval.SECOND
-        case "month" => DateHistogramInterval.MONTH
-        case "year" => DateHistogramInterval.YEAR
-        case "day" => DateHistogramInterval.DAY
+        case "week"    => DateHistogramInterval.WEEK
+        case "hour"    => DateHistogramInterval.HOUR
+        case "second"  => DateHistogramInterval.SECOND
+        case "month"   => DateHistogramInterval.MONTH
+        case "year"    => DateHistogramInterval.YEAR
+        case "day"     => DateHistogramInterval.DAY
         case "quarter" => DateHistogramInterval.QUARTER
-        case "minute" => DateHistogramInterval.MINUTE
+        case "minute"  => DateHistogramInterval.MINUTE
       }
       _dateHistogramAggregationBuilder.dateHistogramInterval(interval)
       this
@@ -756,8 +768,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     override def json: String = execute.toJson
   }
 
-  case class DeleteRequestDefinition(
-      deleteRequestBuilder: DeleteRequestBuilder)
+  case class DeleteRequestDefinition(deleteRequestBuilder: DeleteRequestBuilder)
       extends Definition[DeleteResponse] {
     def id(documentId: String): DeleteRequestDefinition = {
       deleteRequestBuilder.setId(documentId)
@@ -912,7 +923,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         .flatMap(i =>
           indices match {
             case "*" => client.admin().indices().prepareRefresh().execute
-            case _ => client.admin().indices().prepareRefresh(indices).execute
+            case _   => client.admin().indices().prepareRefresh(indices).execute
         })
     }
 
@@ -1045,5 +1056,88 @@ trait DSLDefinition extends ElasticBase with DSLContext {
 
   case class MappingDefinition(analyzer: AnalyzerDefinition,
                                properties: PropertiesDefinition)
+
+  type IndexMappings =
+    (String, Map[String, (String, Map[String, (String, String)])])
+
+  import scala.reflect.runtime.universe._
+
+  case class MappingsDefinition(tpes: TypeTag[_]*) {
+
+    def build
+      : (String, Map[String, (String, Map[String, Map[String, String]])]) = {
+      val res = tpes.map(i => {
+        val indexType = getTypeName(i.tpe)
+
+        val fields = i.tpe.members.collect {
+          case m: TermSymbol if m.isVal || m.isVar =>
+            val analyzer = m.annotations
+              .find(a => a.tree.tpe <:< typeOf[Analyzer])
+              .map(a => {
+                a.tree.children.tail.map {
+                  case Literal(Constant(c)) => c.asInstanceOf[String]
+                }.head
+              })
+              .getOrElse("standard")
+            val fieldDefinition = Map("type" -> getTypeName(m.typeSignature),
+                                      "analyzer" -> analyzer)
+            m.name.decodedName.toString -> fieldDefinition
+        }
+
+        indexType -> ("properties" -> fields.toMap)
+      })
+      "mappings" -> res.toMap
+    }
+    private def getTypeName(i: Type) = {
+      i.typeSymbol.name.decodedName.toString.toLowerCase
+    }
+  }
+
+  object Mappings {
+    def apply[A](implicit typeTag: TypeTag[A]) = MappingsDefinition(typeTag)
+    def apply[A, B](implicit typeTagA: TypeTag[A], typeTagB: TypeTag[B]) =
+      MappingsDefinition(typeTagA, typeTagB)
+    def apply[A, B, C](implicit typeTagA: TypeTag[A],
+                       typeTagB: TypeTag[B],
+                       typeTagC: TypeTag[C]) =
+      MappingsDefinition(typeTagA, typeTagB, typeTagC)
+    def apply[A, B, C, D](implicit typeTagA: TypeTag[A],
+                          typeTagB: TypeTag[B],
+                          typeTagC: TypeTag[C],
+                          typeTagD: TypeTag[D]) =
+      MappingsDefinition(typeTagA, typeTagB, typeTagC, typeTagD)
+    def apply[A, B, C, D, E](implicit typeTagA: TypeTag[A],
+                             typeTagB: TypeTag[B],
+                             typeTagC: TypeTag[C],
+                             typeTagD: TypeTag[D],
+                             typeTagE: TypeTag[E]) =
+      MappingsDefinition(typeTagA, typeTagB, typeTagC, typeTagD, typeTagE)
+    def apply[A, B, C, D, E, F](implicit typeTagA: TypeTag[A],
+                                typeTagB: TypeTag[B],
+                                typeTagC: TypeTag[C],
+                                typeTagD: TypeTag[D],
+                                typeTagE: TypeTag[E],
+                                typeTagF: TypeTag[F]) =
+      MappingsDefinition(typeTagA,
+                         typeTagB,
+                         typeTagC,
+                         typeTagD,
+                         typeTagE,
+                         typeTagF)
+  }
+
+  trait IndexSettings {
+
+    case class Analyzer(name: String,
+                        tpe: String,
+                        tokenizer: String,
+                        filter: String,
+                        stopwordsPath: String)
+
+    case class Filter(name: String, tpe: String, keepwordsPath: String)
+
+    val analyzer: Analyzer
+    val filter: Filter
+  }
 
 }

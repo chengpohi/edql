@@ -27,7 +27,12 @@ case class TestMapScore(id: String,
                         list: List[String],
                         score: Long)
 
-class DSLTest extends FlatSpec with Matchers with BeforeAndAfter with ELKCommandTestRegistry{
+class DSLTest
+    extends FlatSpec
+    with Matchers
+    with BeforeAndAfter
+    with ELKCommandTestRegistry {
+
   import elasticdsl._
 
   before {
@@ -268,11 +273,13 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter with ELKCommand
 
   "dsl" should "create index with mapping" in {
     DSL {
-      create index "test" analyzers List(
-        create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List(
-          "lowercase",
-          "type_as_payload")
-      ) fields List(
+      create index "test" analyzers {
+        List(
+          create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List(
+            "lowercase",
+            "type_as_payload")
+        )
+      } fields List(
         create field "text" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store true analyzer "fulltext_analyzer",
         create field "fullname" in "tweet" tpe "text" term_vector "with_positions_offsets_payloads" store false analyzer "fulltext_analyzer"
       )
@@ -321,9 +328,30 @@ class DSLTest extends FlatSpec with Matchers with BeforeAndAfter with ELKCommand
     println(response.toJson)
   }
 
+  it should "join index" in {
+    DSL {
+      index into "testindex" / "testmap" doc Map("foo" -> "bar",
+                                                 "name" -> "hello")
+    }.await
+
+    DSL {
+      index into "testindex" / "testfoo" doc Map("pp" -> "tt",
+                                                 "name" -> "hello")
+    }.await
+
+    DSL {
+      refresh index "testindex"
+    }.await
+
+    val res = DSL {
+      search in "testindex" / "testmap" join "testindex" / "testfoo" by "name"
+    }.await.toJson
+    println(res)
+  }
+
   after {
     DSL {
-      delete index "*"
+      delete index ALL
     }
   }
 }

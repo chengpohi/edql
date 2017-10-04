@@ -10,10 +10,6 @@ resolvers += Resolver.mavenLocal
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
-ivyScala := ivyScala.value map {
-  _.copy(overrideScalaVersion = true)
-}
-
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
 
 libraryDependencies ++= Seq(
@@ -30,15 +26,3 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % "3.5.0",
   "org.apache.commons" % "commons-lang3" % "3.5"
 )
-
-lazy val compileScalaStyle = taskKey[Unit]("compileScalastyle")
-
-compileScalaStyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value
-
-(scalastyleConfig in Compile) := file("project/scalastyle-config.xml")
-(scalastyleConfig in Test) := file("project/scalastyle-test-config.xml")
-
-(compile in Compile) <<= (compile in Compile) dependsOn compileScalaStyle
-(test in Test) := {
-  (test in Test) dependsOn compileScalaStyle
-}

@@ -84,7 +84,10 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
 
   def matchQuery: Seq[Val] => SearchRequestDefinition = {
     case Seq(indexName, indexType, queryData) => {
-      search in indexName / indexType mth queryData.extract[Map[String, String]].toList.head from 0 size MAX_NUMBER
+      search in indexName / indexType mth queryData
+        .extract[Map[String, String]]
+        .toList
+        .head from 0 size MAX_NUMBER
     }
   }
 
@@ -92,7 +95,9 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
     case Seq(indexName, indexType) =>
       search in indexName / indexType query "*" from 0 size MAX_NUMBER
     case Seq(indexName, indexType, queryData) =>
-      search in indexName / indexType must queryData.extract[Map[String, String]].toList from 0 size MAX_NUMBER
+      search in indexName / indexType must queryData
+        .extract[Map[String, String]]
+        .toList from 0 size MAX_NUMBER
     case Seq(indexName) =>
       search in indexName / "*" query "*" from 0 size MAX_NUMBER
   }
@@ -104,34 +109,40 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
 
   def bulkUpdateDoc: Seq[Val] => BulkUpdateRequestDefinition = {
     case Seq(indexName, indexType, updateFields) => {
-      bulk update indexName / indexType fields updateFields.extract[List[(String, String)]]
+      bulk update indexName / indexType fields updateFields
+        .extract[List[(String, String)]]
     }
   }
 
   def updateDoc: Seq[Val] => UpdateRequestDefinition = {
     case Seq(indexName, indexType, updateFields, _id) => {
-      update id _id in indexName / indexType docAsUpsert updateFields.extract[List[(String, String)]]
+      update id _id in indexName / indexType docAsUpsert updateFields
+        .extract[List[(String, String)]]
     }
   }
 
   def reindexIndex: Seq[Val] => ReindexRequestDefinition = {
     case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-      reindex into targetIndex / sourceIndexType from sourceIndex fields fields.extract[List[String]]
+      reindex into targetIndex / sourceIndexType from sourceIndex fields fields
+        .extract[List[String]]
     }
   }
 
   def bulkIndex: Seq[Val] => BulkIndexRequestDefinition = {
     case Seq(indexName, indexType, fields) => {
-      bulk index indexName / indexType doc fields.extract[List[List[(String, String)]]]
+      bulk index indexName / indexType doc fields
+        .extract[List[List[(String, String)]]]
     }
   }
 
   def createDoc: Seq[Val] => IndexRequestDefinition = {
     case Seq(indexName, indexType, fields) => {
-      index into indexName / indexType fields fields.extract[List[(String, String)]]
+      index into indexName / indexType fields fields
+        .extract[List[(String, String)]]
     }
     case Seq(indexName, indexType, fields, _id) => {
-      index into indexName / indexType fields fields.extract[List[(String, String)]] id _id
+      index into indexName / indexType fields fields
+        .extract[List[(String, String)]] id _id
     }
   }
 
@@ -192,7 +203,8 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
 
   def createRepository: Seq[Val] => PutRepositoryDefinition = {
     case Seq(repositoryName, repositoryType, settings) => {
-      create repository repositoryName tpe repositoryType settings settings.extract[Map[String, String]]
+      create repository repositoryName tpe repositoryType settings settings
+        .extract[Map[String, String]]
     }
   }
 
@@ -247,7 +259,7 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
     }
   }
 
-/*  def findJSONElements(c: String): String => String = {
+  /*  def findJSONElements(c: String): String => String = {
     extractJSON(_, c)
   }
 

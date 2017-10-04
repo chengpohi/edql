@@ -4,7 +4,10 @@ import java.io.IOException
 import java.util
 
 import jline.console.ConsoleReader
-import jline.console.completer.{CandidateListCompletionHandler, CompletionHandler}
+import jline.console.completer.{
+  CandidateListCompletionHandler,
+  CompletionHandler
+}
 
 import scala.collection.JavaConversions._
 
@@ -14,7 +17,9 @@ import scala.collection.JavaConversions._
   */
 class ELKCompletionHandler extends CompletionHandler {
   @throws[IOException]
-  override def complete(reader: ConsoleReader, candidates: util.List[CharSequence], position: Int): Boolean = {
+  override def complete(reader: ConsoleReader,
+                        candidates: util.List[CharSequence],
+                        position: Int): Boolean = {
     val buf = reader.getCursorBuffer
     candidates.size() match {
       case 1 =>
@@ -35,8 +40,7 @@ class ELKCompletionHandler extends CompletionHandler {
 
   @throws[IOException]
   def setBuffer(reader: ConsoleReader, value: CharSequence, offset: Int) {
-    while ((reader.getCursorBuffer.cursor > offset) && reader.backspace) {
-    }
+    while ((reader.getCursorBuffer.cursor > offset) && reader.backspace) {}
     reader.putString(value)
     reader.setCursorPosition(offset + value.length)
   }

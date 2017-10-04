@@ -10,12 +10,16 @@ import org.elasticsearch.action.delete.DeleteRequestBuilder
 trait DeleterDSL extends DSLDefinition {
   case object delete {
     def index(indexName: String): DeleteIndexRequestDefinition = {
-      val deleteIndexRequestBuilder: DeleteIndexRequestBuilder = indicesClient.prepareDelete(indexName)
+      val deleteIndexRequestBuilder: DeleteIndexRequestBuilder =
+        indicesClient.prepareDelete(indexName)
       DeleteIndexRequestDefinition(deleteIndexRequestBuilder)
     }
 
     def in(indexPath: IndexPath): DeleteRequestDefinition = {
-      val deleteRequestBuilder: DeleteRequestBuilder = client.prepareDelete().setIndex(indexPath.indexName).setType(indexPath.indexType)
+      val deleteRequestBuilder: DeleteRequestBuilder = client
+        .prepareDelete()
+        .setIndex(indexPath.indexName)
+        .setType(indexPath.indexType)
       DeleteRequestDefinition(deleteRequestBuilder)
     }
 

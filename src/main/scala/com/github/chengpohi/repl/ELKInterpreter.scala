@@ -32,7 +32,7 @@ class ELKInterpreter(implicit val elkParser: ELKParser) {
   }
 }
 
-object ELKInterpreter extends ELKDSLContext with ELKDSLConfig{
+object ELKInterpreter extends ELKDSLContext with ELKDSLConfig {
   private val runEngine: ELKInterpreter = new ELKInterpreter()
 
   def main(args: Array[String]): Unit = {
