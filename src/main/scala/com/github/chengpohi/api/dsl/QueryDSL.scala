@@ -7,7 +7,10 @@ import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryRequ
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuilder
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequestBuilder
-import org.elasticsearch.action.search.{SearchRequestBuilder, SearchScrollRequestBuilder}
+import org.elasticsearch.action.search.{
+  SearchRequestBuilder,
+  SearchScrollRequestBuilder
+}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -20,7 +23,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait QueryDSL extends DSLDefinition with IndexerDSL {
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
-      val putRepository: PutRepositoryRequestBuilder = clusterClient.preparePutRepository(repositoryName)
+      val putRepository: PutRepositoryRequestBuilder =
+        clusterClient.preparePutRepository(repositoryName)
       PutRepositoryDefinition(putRepository)
     }
 
@@ -29,32 +33,40 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
     }
 
     def mapping(indexName: String): GetMappingDefinition = {
-      val mappingsRequestBuilder: GetMappingsRequestBuilder = indicesClient.prepareGetMappings(indexName)
+      val mappingsRequestBuilder: GetMappingsRequestBuilder =
+        indicesClient.prepareGetMappings(indexName)
       GetMappingDefinition(mappingsRequestBuilder)
     }
 
     def settings(indexName: String): GetSettingsRequestDefinition = {
-      val getSettingsRequestBuilder: GetSettingsRequestBuilder = indicesClient.prepareGetSettings(indexName)
+      val getSettingsRequestBuilder: GetSettingsRequestBuilder =
+        indicesClient.prepareGetSettings(indexName)
       GetSettingsRequestDefinition(getSettingsRequestBuilder)
     }
   }
 
   case object search {
     def in(indexName: String): SearchRequestDefinition = {
-      val searchRequestBuilder: SearchRequestBuilder = client.prepareSearch(indexName)
+      val searchRequestBuilder: SearchRequestBuilder =
+        client.prepareSearch(indexName)
       SearchRequestDefinition(searchRequestBuilder)
     }
 
     def in(indexPath: IndexPath): SearchRequestDefinition = {
-      val searchRequestBuilder: SearchRequestBuilder = indexPath.indexType match {
-        case "*" => client.prepareSearch(indexPath.indexName)
-        case _ => client.prepareSearch(indexPath.indexName).setTypes(indexPath.indexType)
-      }
+      val searchRequestBuilder: SearchRequestBuilder =
+        indexPath.indexType match {
+          case "*" => client.prepareSearch(indexPath.indexName)
+          case _ =>
+            client
+              .prepareSearch(indexPath.indexName)
+              .setTypes(indexPath.indexType)
+        }
       SearchRequestDefinition(searchRequestBuilder)
     }
 
     def scroll(s: String): SearchScrollRequestDefinition = {
-      val searchScrollRequestBuilder: SearchScrollRequestBuilder = client.prepareSearchScroll(s)
+      val searchScrollRequestBuilder: SearchScrollRequestBuilder =
+        client.prepareSearchScroll(s)
       SearchScrollRequestDefinition(searchScrollRequestBuilder)
     }
   }
@@ -95,7 +107,8 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
     }
   }
 
-  case class ReindexRequestDefinition(indexPath: IndexPath) extends Definition[String] {
+  case class ReindexRequestDefinition(indexPath: IndexPath)
+      extends Definition[String] {
     var _sourceIndex: String = _
     var _fields: List[String] = _
 
@@ -114,11 +127,16 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
         search in _sourceIndex size MAX_RETRIEVE_SIZE scroll "10m"
       }
       searchResponse.map(response => {
-        response.filter(s => s.getType == indexPath.indexType || indexPath.indexType == "*").foreach(s => {
-          DSL {
-            index into indexPath.indexName / s.getType doc s.getSource.asScala.filter(i => _fields.contains(i._1)).toMap
-          }
-        })
+        response
+          .filter(s =>
+            s.getType == indexPath.indexType || indexPath.indexType == "*")
+          .foreach(s => {
+            DSL {
+              index into indexPath.indexName / s.getType doc s.getSource.asScala
+                .filter(i => _fields.contains(i._1))
+                .toMap
+            }
+          })
         "success"
       })
     }
@@ -126,7 +144,8 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
     override def json: String = execute.await.toJson
   }
 
-  case class BulkUpdateRequestDefinition(indexPath: IndexPath) extends Definition[String] {
+  case class BulkUpdateRequestDefinition(indexPath: IndexPath)
+      extends Definition[String] {
     var _fields: List[(String, String)] = _
 
     def fields(_uf: List[(String, String)]): BulkUpdateRequestDefinition = {
@@ -139,12 +158,13 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
         search in indexPath size MAX_RETRIEVE_SIZE scroll "10m"
       }
       searchResponse.map(f => {
-        f.filter(s => s.getType == indexPath.indexName || indexPath.indexType == "*").map {
-          s =>
+        f.filter(s =>
+            s.getType == indexPath.indexName || indexPath.indexType == "*")
+          .map { s =>
             DSL {
               update id s.getId doc _fields in indexPath
             }
-        }
+          }
         "success"
       })
     }
@@ -152,8 +172,8 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
     override def json: String = execute.await
   }
 
-
-  case class BulkIndexRequestDefinition(indexPath: IndexPath) extends Definition[String] {
+  case class BulkIndexRequestDefinition(indexPath: IndexPath)
+      extends Definition[String] {
     var _fields: List[List[(String, String)]] = _
 
     def doc(_f: List[List[(String, String)]]): BulkIndexRequestDefinition = {
@@ -167,15 +187,18 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
           index into indexPath fields f
         }
       })
-      Future.sequence(res).map(f => {
-        "success"
-      })
+      Future
+        .sequence(res)
+        .map(f => {
+          "success"
+        })
     }
 
     override def json: String = execute.await
   }
 
-  case class DumpIndexRequestDefinition(indexName: String) extends Definition[String] {
+  case class DumpIndexRequestDefinition(indexName: String)
+      extends Definition[String] {
     var _fileName: String = _
 
     def store(file: String): DumpIndexRequestDefinition = {
@@ -191,10 +214,12 @@ trait QueryDSL extends DSLDefinition with IndexerDSL {
       }
       searchResponse.map(j => {
         j.map(i => {
-          s"""index into "${i.index()}" / "${i.`type`()}" fields ${i.getSourceAsString}"""
-        }).foreach(l => {
-          writer.write(l + System.lineSeparator())
-        })
+            s"""index into "${i.index()}" / "${i
+              .`type`()}" fields ${i.getSourceAsString}"""
+          })
+          .foreach(l => {
+            writer.write(l + System.lineSeparator())
+          })
         writer.flush()
         writer.close()
         path.toUri.toString

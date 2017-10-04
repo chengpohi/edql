@@ -3,40 +3,6 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 import com.typesafe.sbt.packager.SettingsHelper._
 import sbt.Package.ManifestAttributes
 
-//-------Package and Assembly------//
-assemblyMergeStrategy in assembly := {
-  case PathList("org", "joda", "time", "base", "BaseDateTime.class") =>
-    MergeStrategy.first
-  case "META-INF/io.netty.versions.properties" => MergeStrategy.first
-  case PathList("org",
-                "apache",
-                "logging",
-                "log4j",
-                "core",
-                "impl",
-                "ThrowableProxy$CacheEntry.class") =>
-    MergeStrategy.first
-  case PathList("org",
-                "apache",
-                "logging",
-                "log4j",
-                "core",
-                "impl",
-                "ThrowableProxy.class") =>
-    MergeStrategy.first
-  case PathList("org",
-                "apache",
-                "logging",
-                "log4j",
-                "core",
-                "jmx",
-                "Server.class") =>
-    MergeStrategy.first
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}
-
 packageOptions := Seq(
   ManifestAttributes(
     ("Change", "253032b"),
@@ -111,11 +77,11 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
-  ReleaseStep(action = Command.process("universal:packageBin", _)), //publish zip artificat
-  ReleaseStep(action = Command.process("publishSigned", _)), //publishLibarary
+  //ReleaseStep(action = Command.process("universal:packageBin", _)), //publish zip artificat
+  // ReleaseStep(action = Command.process("publishSigned", _)), //publishLibarary
   setNextVersion,
   commitNextVersion,
-  ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+  //ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
   pushChanges
 )
 
@@ -136,7 +102,7 @@ pb := {
   Files.copy(Paths.get("./src/main/resources/log4j2.properties"),
              log4j2Properties,
              StandardCopyOption.REPLACE_EXISTING)
-  Command.process("universal:packageBin", state.value)
+  //Command.process("universal:packageBin", state.value)
   Files.delete(elasticConf)
   Files.delete(log4j2Properties)
 }

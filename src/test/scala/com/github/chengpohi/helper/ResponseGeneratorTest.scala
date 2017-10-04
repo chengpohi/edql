@@ -3,9 +3,9 @@ package com.github.chengpohi.helper
 import org.scalatest.FlatSpec
 
 /**
- * elasticdsl
- * Created by chengpohi on 1/28/16.
- */
+  * elasticdsl
+  * Created by chengpohi on 1/28/16.
+  */
 class ResponseGeneratorTest extends FlatSpec {
   val responseGenerator = new ResponseGenerator
 
