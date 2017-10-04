@@ -21,11 +21,12 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
   * Created by chengpohi on 16/06/16.
   */
 trait ELKDSLConfig {
-  val config: Config = ConfigFactory.load("elasticdsl.conf").getConfig("elasticdsl")
+  val config: Config =
+    ConfigFactory.load("elasticdsl.conf").getConfig("elasticdsl")
 
   def buildClient(config: Config): Client =
     config.getBoolean("standalone") match {
-      case true => buildLocalClient(config)
+      case true  => buildLocalClient(config)
       case false => buildRemoteClient(config)
     }
 

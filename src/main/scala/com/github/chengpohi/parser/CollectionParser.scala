@@ -14,7 +14,8 @@ class CollectionParser extends Basic {
 
   val StringChars = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
-  val CollectionChars = NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
+  val CollectionChars =
+    NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
 
   val strChars = P(CharsWhile(StringChars))
   val alphaChars = P(CharsWhile(AlphaChars))
@@ -26,10 +27,11 @@ class CollectionParser extends Basic {
   val escape = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
   //val string =
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+  val string = P("\"" ~ strChars.rep(1).! ~ "\"").map(i =>
+    JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
-
-  val variable = P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
+  val variable =
+    P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   val strOrVar = P(string | variable)
   val Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
@@ -42,17 +44,20 @@ class CollectionParser extends Basic {
     x => JsonCollection.Num(x.toDouble)
   )
   val pair = P(string.map(_.value) ~/ ":" ~/ jsonExpr)
-  val obj = P("{" ~/ pair.rep(sep = ",".~/) ~ "}").map(JsonCollection.Obj(_: _*))
+  val obj =
+    P("{" ~/ pair.rep(sep = ",".~/) ~ "}").map(JsonCollection.Obj(_: _*))
 
   val `null` = P("null").map(_ => JsonCollection.Null)
   val `false` = P("false").map(_ => JsonCollection.False)
   val `true` = P("true").map(_ => JsonCollection.True)
 
+  val tuple =
+    P("(" ~ jsonExpr.rep(1, sep = ",".~/) ~ ")").map(JsonCollection.Arr(_: _*))
+  val array =
+    P("[" ~ jsonExpr.rep(1, sep = ",".~/) ~ "]").map(JsonCollection.Arr(_: _*))
 
-  val tuple = P("(" ~ jsonExpr.rep(1, sep = ",".~/) ~ ")").map(JsonCollection.Arr(_: _*))
-  val array = P("[" ~ jsonExpr.rep(1, sep = ",".~/) ~ "]").map(JsonCollection.Arr(_: _*))
-
-  val jsonExpr: P[JsonCollection.Val] = P(obj | array | tuple | string | `true` | `false` | `null` | number)
+  val jsonExpr: P[JsonCollection.Val] = P(
+    obj | array | tuple | string | `true` | `false` | `null` | number)
   val ioParser: P[Seq[JsonCollection.Val]] = P(jsonExpr.rep(1))
 }
 

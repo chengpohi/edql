@@ -34,7 +34,11 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.termvectors.TermVectorsResponse
 import org.elasticsearch.action.update.UpdateResponse
-import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
+import org.elasticsearch.index.query.{
+  QueryBuilder,
+  QueryBuilders,
+  RangeQueryBuilder
+}
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 import org.json4s._
@@ -78,8 +82,8 @@ trait DSLContext extends DSLExecutor {
       override def toJson(a: BulkResponse): String =
         responseGenerator.buildBulkResponse(a)
 
-      override def as[T](a: BulkResponse)(
-          implicit mf: Manifest[T]): Stream[T] = Stream.empty
+      override def as[T](a: BulkResponse)(implicit mf: Manifest[T]): Stream[T] =
+        Stream.empty
     }
 
     implicit object DeleteIndexResponseMonoid
@@ -112,8 +116,7 @@ trait DSLContext extends DSLExecutor {
       }
     }
 
-    implicit object NodeStatsResponseMonoid
-        extends Monoid[NodesStatsResponse] {
+    implicit object NodeStatsResponseMonoid extends Monoid[NodesStatsResponse] {
       override def toJson(a: NodesStatsResponse): String =
         responseGenerator.buildXContent(a)
 

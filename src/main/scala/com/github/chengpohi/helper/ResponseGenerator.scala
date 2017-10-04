@@ -165,7 +165,8 @@ class ResponseGenerator {
     json.extract(formats, mf)
   }
 
-  def mapGetResponse[T](getResponse: GetResponse)(implicit mf: Manifest[T]): T = {
+  def mapGetResponse[T](getResponse: GetResponse)(
+      implicit mf: Manifest[T]): T = {
     val j = parse(getResponse.getSourceAsString)
     val r = j merge JObject("id" -> JString(getResponse.getId))
     r.extract(formats, mf)
@@ -180,9 +181,9 @@ class ResponseGenerator {
   def toJson(m: AnyRef): String = {
     val decompose = Extraction.decompose(m)
     val res = decompose.removeField {
-      case (_, JString("")) => true
+      case (_, JString(""))    => true
       case (_, JArray(List())) => true
-      case _ => false
+      case _                   => false
     }
     compact(render(res))
   }
@@ -191,7 +192,7 @@ class ResponseGenerator {
 class NumberSerializer
     extends CustomSerializer[Int](format =>
       ({
-        case JInt(x) => x.toInt
+        case JInt(x)    => x.toInt
         case JString(x) => x.toInt
       }, {
         case x: Int => JInt(x)

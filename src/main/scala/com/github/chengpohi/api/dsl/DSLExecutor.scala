@@ -8,7 +8,6 @@ import scala.concurrent.{Future, Promise}
   * elasticdsl
   * Created by chengpohi on 6/28/16.
   */
-
 trait DSLExecutor {
   implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()
