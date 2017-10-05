@@ -18,6 +18,7 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
 
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 /**
   * elasticdsl
@@ -219,21 +220,19 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
       val p = Promise[UpdateSettingsResponse]()
       DSL {
         close index ELASTIC_SHELL_INDEX_NAME
-      } onSuccess {
-        case _ =>
-          val eventualUpdateSettingsResponse: Future[UpdateSettingsResponse] =
-            DSL {
-              indice update ELASTIC_SHELL_INDEX_NAME settings analyzerSetting
-            }
-          eventualUpdateSettingsResponse.onSuccess {
-            case r => p success r
-          }
-      }
-      p.future onSuccess {
-        case _ =>
+      } onComplete { _ =>
+        val eventualUpdateSettingsResponse: Future[UpdateSettingsResponse] =
           DSL {
-            open index ELASTIC_SHELL_INDEX_NAME
+            indice update ELASTIC_SHELL_INDEX_NAME settings analyzerSetting
           }
+        eventualUpdateSettingsResponse onComplete {
+          case Success(r) => p success r
+        }
+      }
+      p.future onComplete { _ =>
+        DSL {
+          open index ELASTIC_SHELL_INDEX_NAME
+        }
       }
       p.future
     }
