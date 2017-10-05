@@ -4,9 +4,8 @@ import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.nio.file.{Files, Paths}
 
-import com.github.chengpohi.helper.ELKCommandTestRegistry
+import com.github.chengpohi.helper.ELKTestTrait
 import com.github.chengpohi.repl.ELKInterpreter
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.io.Source
 
@@ -14,25 +13,13 @@ import scala.io.Source
   * elasticservice
   * Created by chengpohi on 1/19/16.
   */
-class ELKParserTest
-    extends FlatSpec
-    with Matchers
-    with BeforeAndAfter
-    with ELKCommandTestRegistry {
-  val outContent = new ByteArrayOutputStream()
-  val errContent = new ByteArrayOutputStream()
+class ELKParserTest extends ELKTestTrait {
   val runEngine: ELKInterpreter = new ELKInterpreter()
 
-  import elasticdsl._
+  val outContent = new ByteArrayOutputStream()
+  val errContent = new ByteArrayOutputStream()
 
-  before {
-    runEngine.run("""create index ".elasticdsl"""")
-    runEngine.run(""" create index "test-parser-name" """)
-    outContent.reset()
-    DSL {
-      refresh index "*"
-    }.await
-  }
+  import elasticdsl._
 
   "ELKParser" should "get health of elasticsearch" in {
     val result = runEngine.run("health")
@@ -197,6 +184,7 @@ class ELKParserTest
   }
 
   "ELKParser" should "update mapping" in {
+
     runEngine.run("""update mapping "test-parser-name" "bookmark" {
         |      "properties": {
         |        "created_at": {
@@ -458,7 +446,7 @@ class ELKParserTest
     assert(result.contains("indices"))
   }
 
-  "ELKParser" should "wait for status" in {
+  ignore should "wait for status" in {
     runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23},
@@ -477,7 +465,7 @@ class ELKParserTest
     assert(result.contains(""""description":"create index by index name""""))
   }*/
 
-  "ELKParser" should "create analyzer" in {
+  ignore should "create analyzer" in {
     runEngine.run(
       """create analyzer {"analyzer":{"myAnalyzer":{"type":"pattern","pattern":"\s+"}}}""")
     DSL {
@@ -523,16 +511,12 @@ class ELKParserTest
         |{"name": "jack","_tip_id": "2"}
         |] """.stripMargin)
     DSL {
-      refresh index "*"
+      refresh index ALL_INDEX
     }.await
     val result = runEngine.run(
       """
         |search in "test-index-name-1" / "test-index-type-1" join "test-index-name" / "test-index-type" by "_tip_id"
       """.stripMargin)
     assert(result.contains("test-index-type"))
-  }
-
-  after {
-    runEngine.run(""" delete index "*"""")
   }
 }
