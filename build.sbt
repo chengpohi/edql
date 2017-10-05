@@ -27,4 +27,6 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-lang3" % "3.5"
 )
 
+scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import")
+
 testOptions in Test += Tests.Cleanup(() => println("Cleanup"))

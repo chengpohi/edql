@@ -5,15 +5,6 @@
 ## Introduction
 It is a **DSL** for elasticsearch. Have fun :)
 
-## Install
-
-Go to the [release](https://github.com/chengpohi/elasticdsl/releases), choose a version and download.
-
-| Version | Elasticsearch Version |
-|-------------------------------------------|----------------|
-| 0.2.1             | 5.0.0 |
-| 0.2.2             | 5.1.1 |
-
 
 ## Use it
 
@@ -42,7 +33,6 @@ val result: String = DSL {
 ```
 
 ### Syntax
-
 
 | Operation                                 | Syntax | Description |
 |-------------------------------------------|----------------|----------|
