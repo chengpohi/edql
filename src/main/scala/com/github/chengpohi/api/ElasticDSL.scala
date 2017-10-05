@@ -22,7 +22,7 @@ class ElasticDSL(cl: Client) extends DSLs {
   val client: Client = cl
   val clusterClient: ClusterAdminClient = client.admin.cluster()
   val indicesClient = client.admin.indices()
-  val ALL = "*"
+  val ALL_INDEX = "*"
 
   implicit def waitFuture[T](r: Future[T]): T = Await.result(r, Duration.Inf)
 }

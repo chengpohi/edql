@@ -2,9 +2,8 @@ package com.github.chengpohi.api.dsl
 
 import java.util
 
-import com.github.chengpohi.helper.ELKCommandTestRegistry
+import com.github.chengpohi.helper.ELKTestTrait
 import org.elasticsearch.search.sort.SortOrder
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 /**
   * elasticdsl
@@ -27,22 +26,9 @@ case class TestMapScore(id: String,
                         list: List[String],
                         score: Long)
 
-class DSLTest
-    extends FlatSpec
-    with Matchers
-    with BeforeAndAfter
-    with ELKCommandTestRegistry {
+class DSLTest extends ELKTestTrait {
 
   import elasticdsl._
-
-  before {
-    DSL {
-      create index "testindex"
-    }.await
-    DSL {
-      refresh index "testindex"
-    }.await
-  }
 
   it should "parse response to json" in {
     val res = DSL {
@@ -347,11 +333,5 @@ class DSLTest
       search in "testindex" / "testmap" join "testindex" / "testfoo" by "name"
     }.await.toJson
     println(res)
-  }
-
-  after {
-    DSL {
-      delete index ALL
-    }
   }
 }

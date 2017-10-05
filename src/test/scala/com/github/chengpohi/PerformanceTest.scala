@@ -3,8 +3,7 @@ package com.github.chengpohi
 import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicLong
 
-import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.scalatest.{FlatSpec, Matchers}
+import com.github.chengpohi.helper.ELKTestTrait
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -12,11 +11,10 @@ import scala.util.{Failure, Success}
 /**
   * Created by xiachen on 31/12/2016.
   */
-class PerformanceTest
-    extends FlatSpec
-    with Matchers
-    with ELKCommandTestRegistry {
+class PerformanceTest extends ELKTestTrait {
+
   import elasticdsl._
+
   ignore should "pressure test" in {
     val permits = 1000
     val waitTime = 1 * 1000

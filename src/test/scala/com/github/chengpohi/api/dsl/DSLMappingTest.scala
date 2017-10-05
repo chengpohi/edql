@@ -3,65 +3,54 @@ package com.github.chengpohi.api.dsl
 import java.util.Date
 
 import com.github.chengpohi.annotation.Analyzer
-import com.github.chengpohi.helper.ELKCommandTestRegistry
-import org.json4s.DefaultFormats
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import com.github.chengpohi.helper.ELKTestTrait
 
 /**
   * elasticdsl
   * Created by chengpohi on 10/04/17.
   */
-class DSLMappingTest
-    extends FlatSpec
-    with Matchers
-    with BeforeAndAfter
-    with ELKCommandTestRegistry {
+class DSLMappingTest extends ELKTestTrait {
 
   import elasticdsl._
 
-  before {
-    DSL {
-      create index "testindex"
-    }.await
-    DSL {
-      refresh index "testindex"
-    }.await
-  }
-
-  case class Bookmark(@Analyzer("myanalyzer") comment: String,
+  case class Bookmark(@Analyzer("tag_analyzer") comment: String,
                       created: Date,
                       name: String,
                       nameTags: String,
                       tabId: String)
 
-  val a1 = create analyzer "tag_analyzer" tpe "standard" tokenizer "standard" filter "standard, tags_filter" stopwords "stop_words.txt"
-  val fi = create filter "tags_filter" tpe "keep" keepwords "tags.csv"
-
-  case object MySettings extends IndexSettings {
+  case object UserIndexSettings extends IndexSettings {
     override val analyzer = Analyzer(
       name = "tag_analyzer",
       tpe = "standard",
       tokenizer = "standard",
       filter = "standard",
-      stopwordsPath = "./stop_words.txt"
+      stopwordsPath = this.getClass.getResource("/words.txt").getFile
     )
     override val filter =
-      Filter(name = "tags_filter", tpe = "keep", keepwordsPath = "tags.csv")
+      Filter(name = "tags_filter",
+             tpe = "keep",
+             keepwordsPath =
+               this.getClass.getResource("/completions.txt").getFile)
   }
 
   it should "parse response to json" in {
-    import org.json4s.native.Serialization.write
-    implicit val formats = DefaultFormats
+    val indexName = "user1"
+    val res = DSL {
+      create index indexName mappings Mappings[Bookmark] settings UserIndexSettings
+    }.toJson
 
-    val mappings = Mappings[Bookmark]
+    println(res)
+    val res2 = DSL {
+      get mapping indexName
+    }.toJson
+    res2 should include("tag_analyzer")
 
-    println(write(mappings.build))
-    //create index "user" mappings Mappings(Bookmark.getClass) settings MySettings
-  }
+    val res3 = DSL {
+      get settings indexName
+    }.toJson
 
-  after {
-    DSL {
-      delete index ALL
-    }
+    res3 should include("tag_analyzer")
+    res3 should include("tags_filter")
   }
 }
