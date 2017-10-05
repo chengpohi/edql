@@ -2,7 +2,7 @@ package com.github.chengpohi.api.dsl
 
 import java.io.Serializable
 
-import com.github.chengpohi.annotation.Analyzer
+import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.api.ElasticBase
 import org.elasticsearch.action.admin.cluster.health.{
   ClusterHealthRequestBuilder,
@@ -123,6 +123,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.reflect.runtime.universe
 
 /**
   * elasticdsl
@@ -1051,11 +1052,11 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     def toMap: (String, Map[String, Any]) = {
-      (field ->
+      field ->
         Map("type" -> _tpe,
             "term_vector" -> _term_vector,
             "store" -> _store,
-            "analyzer" -> _analyzer))
+            "analyzer" -> _analyzer)
     }
   }
 
@@ -1072,37 +1073,51 @@ trait DSLDefinition extends ElasticBase with DSLContext {
   case class MappingsDefinition(tpes: TypeTag[_]*) {
 
     def source: IndexMappings = {
-      val res = tpes.map(i => {
-        val indexType = getTypeName(i.tpe)
+      val res =
+        tpes.map(
+          i => {
+            val indexType = getTypeName(i.tpe)
 
-        val fields = i.tpe.members.collect {
-          case m: TermSymbol if m.isVal || m.isVar =>
-            val analyzer = m.annotations
-              .find(a => a.tree.tpe <:< typeOf[Analyzer])
-              .map(a => {
-                a.tree.children.tail.map {
-                  case Literal(Constant(c)) => c.asInstanceOf[String]
-                }.head
-              })
-              .map(a => "analyzer" -> a)
-              .toMap
-            val fieldDefinition = Map(
-              "type" -> {
-                getTypeName(m.typeSignature) match {
-                  case "string" => "text"
-                  case a        => a
+            val fields = i.tpe.members.collect {
+              case m: TermSymbol if m.isVal || m.isVar =>
+                val analyzer = getAnnotationByType[Analyzer]("analyzer", m)
+                val copyTo = getAnnotationByType[CopyTo]("copy_to", m)
+                val index = getAnnotationByType[Index]("index", m)
+                val alias = getAnnotationByType[Alias]("alias", m)
+
+                val fieldDefinition = Map("type" -> getTypeName(
+                  m.typeSignature)) ++ analyzer ++ copyTo ++ index
+
+                if (alias.isEmpty) {
+                  m.name.decodedName.toString -> fieldDefinition
+                } else {
+                  alias("alias") -> fieldDefinition
                 }
-              }
-            ) ++ analyzer
-            m.name.decodedName.toString -> fieldDefinition
-        }
+            }
 
-        indexType -> ("properties" -> fields.toMap)
-      })
+            indexType -> ("properties" -> fields.toMap)
+          })
       "mappings" -> res.toMap
     }
+
+    private def getAnnotationByType[T](name: String, m: universe.TermSymbol)(
+        implicit typeTag: TypeTag[T]) = {
+      m.annotations
+        .find(a => a.tree.tpe <:< typeTag.tpe)
+        .map(a => {
+          a.tree.children.tail.map {
+            case Literal(Constant(c)) => c.asInstanceOf[String]
+          }.head
+        })
+        .map(a => name -> a)
+        .toMap
+    }
+
     private def getTypeName(i: Type): String = {
-      i.typeSymbol.name.decodedName.toString.toLowerCase
+      i.typeSymbol.name.decodedName.toString.toLowerCase match {
+        case "string" => "text"
+        case a        => a
+      }
     }
   }
 

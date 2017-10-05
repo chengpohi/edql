@@ -2,7 +2,7 @@ package com.github.chengpohi.api.dsl
 
 import java.util.Date
 
-import com.github.chengpohi.annotation.Analyzer
+import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.helper.ELKTestTrait
 
 /**
@@ -15,9 +15,19 @@ class DSLMappingTest extends ELKTestTrait {
 
   case class Bookmark(@Analyzer("tag_analyzer") comment: String,
                       created: Date,
-                      name: String,
-                      nameTags: String,
-                      tabId: String)
+                      @CopyTo("name_tags") name: String,
+                      @Alias("name_tags") nameTags: String,
+                      @Index("not_analyzed") url: String,
+                      @Index("not_analyzed") tabId: String)
+
+  case class Tab(createdAt: Date,
+                 name: String,
+                 @Index("not_analyzed") tabId: String)
+
+  case class Info(name: String,
+                  @Index("not_analyzed") email: String,
+                  @Index("not_analyzed") password: String,
+                  createdAt: Date)
 
   case object UserIndexSettings extends IndexSettings {
     override val analyzer = Analyzer(
@@ -29,22 +39,24 @@ class DSLMappingTest extends ELKTestTrait {
     )
     override val filter =
       Filter(name = "tags_filter",
-             tpe = "keep",
-             keepwordsPath =
-               this.getClass.getResource("/completions.txt").getFile)
+        tpe = "keep",
+        keepwordsPath =
+          this.getClass.getResource("/completions.txt").getFile)
   }
 
   it should "parse response to json" in {
     val indexName = "user1"
-    val res = DSL {
-      create index indexName mappings Mappings[Bookmark] settings UserIndexSettings
+    DSL {
+      create index indexName mappings Mappings[Bookmark, Info, Tab] settings UserIndexSettings
     }.toJson
 
-    println(res)
     val res2 = DSL {
       get mapping indexName
     }.toJson
     res2 should include("tag_analyzer")
+    res2 should include("name_tags")
+    res2 should include("tab")
+    res2 should include("info")
 
     val res3 = DSL {
       get settings indexName
