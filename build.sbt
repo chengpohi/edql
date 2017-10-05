@@ -26,3 +26,5 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % "3.5.0",
   "org.apache.commons" % "commons-lang3" % "3.5"
 )
+
+testOptions in Test += Tests.Cleanup(() => println("Cleanup"))

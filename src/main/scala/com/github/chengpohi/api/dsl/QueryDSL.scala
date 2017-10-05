@@ -13,14 +13,15 @@ import org.elasticsearch.action.search.{
 }
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * elasticdsl
   * Created by chengpohi on 6/29/16.
   */
 trait QueryDSL extends DSLDefinition with IndexerDSL {
+
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
       val putRepository: PutRepositoryRequestBuilder =

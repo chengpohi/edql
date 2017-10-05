@@ -119,13 +119,10 @@ import org.elasticsearch.search.aggregations.bucket.histogram.{
 import org.elasticsearch.search.sort.SortBuilder
 import org.json4s.DefaultFormats
 
-import scala.annotation.StaticAnnotation
-import scala.annotation.meta.field
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.reflect.runtime.universe
 
 /**
   * elasticdsl
@@ -349,15 +346,25 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         .groupBy(_._tp)
         .map(i => (i._1, Map("properties" -> i._2.map(_.toMap).toMap)))
 
-      val res = Map(
-        "mappings" -> fs,
-        "settings" -> Map(
-          "index" -> _settings.map(_.toMap).getOrElse(Map()),
-          "analysis" -> Map(
-            "analyzer" -> _analyzers.map(_.toMap).toMap,
-            "tokenizer" -> _tokenizers.map(_.toMap).toMap
+      val mappings = _m match {
+        case None     => fs
+        case Some(ms) => ms.source._2
+      }
+
+      val ss = _s match {
+        case None =>
+          Map(
+            "index" -> _settings.map(_.toMap).getOrElse(Map()),
+            "analysis" -> Map(
+              "analyzer" -> _analyzers.map(_.toMap).toMap,
+              "tokenizer" -> _tokenizers.map(_.toMap).toMap
+            )
           )
-        )
+        case Some(se) => se.source._2
+      }
+      val res = Map(
+        "mappings" -> mappings,
+        "settings" -> ss
       )
       val json = responseGenerator.toJson(res)
       createIndexRequestBuilder.setSource(json)
@@ -1058,14 +1065,13 @@ trait DSLDefinition extends ElasticBase with DSLContext {
                                properties: PropertiesDefinition)
 
   type IndexMappings =
-    (String, Map[String, (String, Map[String, (String, String)])])
+    (String, Map[String, (String, Map[String, Map[String, String]])])
 
   import scala.reflect.runtime.universe._
 
   case class MappingsDefinition(tpes: TypeTag[_]*) {
 
-    def build
-      : (String, Map[String, (String, Map[String, Map[String, String]])]) = {
+    def source: IndexMappings = {
       val res = tpes.map(i => {
         val indexType = getTypeName(i.tpe)
 
@@ -1078,9 +1084,16 @@ trait DSLDefinition extends ElasticBase with DSLContext {
                   case Literal(Constant(c)) => c.asInstanceOf[String]
                 }.head
               })
-              .getOrElse("standard")
-            val fieldDefinition = Map("type" -> getTypeName(m.typeSignature),
-                                      "analyzer" -> analyzer)
+              .map(a => "analyzer" -> a)
+              .toMap
+            val fieldDefinition = Map(
+              "type" -> {
+                getTypeName(m.typeSignature) match {
+                  case "string" => "text"
+                  case a        => a
+                }
+              }
+            ) ++ analyzer
             m.name.decodedName.toString -> fieldDefinition
         }
 
@@ -1088,7 +1101,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       })
       "mappings" -> res.toMap
     }
-    private def getTypeName(i: Type) = {
+    private def getTypeName(i: Type): String = {
       i.typeSymbol.name.decodedName.toString.toLowerCase
     }
   }
@@ -1132,12 +1145,28 @@ trait DSLDefinition extends ElasticBase with DSLContext {
                         tpe: String,
                         tokenizer: String,
                         filter: String,
-                        stopwordsPath: String)
+                        stopwordsPath: String = "") {
+      def source: (String, Map[String, AnyRef]) = {
+        name -> Map("type" -> tpe,
+                    "tokenizer" -> tokenizer,
+                    "filter" -> filter.split("\\s+,\\s+"),
+                    "stopwords_path" -> stopwordsPath)
+      }
+    }
 
-    case class Filter(name: String, tpe: String, keepwordsPath: String)
+    case class Filter(name: String, tpe: String, keepwordsPath: String = "") {
+      def source: (String, Map[String, String]) = {
+        name -> Map("type" -> tpe, "keep_words_path" -> keepwordsPath)
+      }
+    }
 
     val analyzer: Analyzer
     val filter: Filter
+
+    def source = {
+      "settings" -> ("analysis" -> Map("analyzer" -> analyzer.source,
+                                       "filter" -> filter.source))
+    }
   }
 
 }
