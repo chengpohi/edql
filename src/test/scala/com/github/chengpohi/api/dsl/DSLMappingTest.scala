@@ -39,9 +39,9 @@ class DSLMappingTest extends ELKTestTrait {
     )
     override val filter =
       Filter(name = "tags_filter",
-        tpe = "keep",
-        keepwordsPath =
-          this.getClass.getResource("/completions.txt").getFile)
+             tpe = "keep",
+             keepwordsPath =
+               this.getClass.getResource("/completions.txt").getFile)
   }
 
   it should "parse response to json" in {
@@ -53,16 +53,12 @@ class DSLMappingTest extends ELKTestTrait {
     val res2 = DSL {
       get mapping indexName
     }.toJson
-    res2 should include("tag_analyzer")
-    res2 should include("name_tags")
-    res2 should include("tab")
-    res2 should include("info")
+    res2 should equalToJSONFile("mapping.json")
 
     val res3 = DSL {
       get settings indexName
     }.toJson
 
-    res3 should include("tag_analyzer")
-    res3 should include("tags_filter")
+    res3 should equalToJSONFile("settings.json")
   }
 }

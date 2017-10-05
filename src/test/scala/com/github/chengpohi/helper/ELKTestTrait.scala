@@ -1,6 +1,12 @@
 package com.github.chengpohi.helper
 
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FlatSpec, Matchers}
+import org.json4s.JValue
+import org.json4s.JsonAST.JNothing
+import org.json4s.native.JsonMethods
+import org.scalatest.matchers.{MatchResult, Matcher}
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+
+import scala.io.Source
 
 /**
   * elasticdsl
@@ -10,7 +16,8 @@ trait ELKTestTrait
     extends FlatSpec
     with Matchers
     with BeforeAndAfter
-    with BeforeAndAfterAll {
+    with JsonMethods {
+
   implicit val elkParser = ELKDSLTestClient.elkParser
   val elasticdsl = ELKDSLTestClient.dsl
 
@@ -39,4 +46,24 @@ trait ELKTestTrait
       delete index ALL_INDEX
     }.await
   }
+
+  def equalToJSONFile(str: String) = new JSONAssertWord(str)
+
+  final class JSONAssertWord(jsonFile: String) extends Matcher[String] {
+    val expectJSONObj: JValue = parse(
+      Source
+        .fromInputStream(this.getClass.getResourceAsStream("/json/" + jsonFile))
+        .getLines()
+        .mkString(""))
+    val prettyJSON: String = pretty(render(expectJSONObj))
+    def apply(left: String): MatchResult = {
+      val diff = parse(left) diff expectJSONObj
+      MatchResult(
+        diff.changed == JNothing,
+        s"$left not equal to $prettyJSON",
+        s"$left not equal to $prettyJSON"
+      )
+    }
+  }
+
 }
