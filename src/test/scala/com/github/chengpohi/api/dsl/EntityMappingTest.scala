@@ -9,7 +9,7 @@ import com.github.chengpohi.helper.ELKTestTrait
   * elasticdsl
   * Created by chengpohi on 10/04/17.
   */
-class DSLMappingTest extends ELKTestTrait {
+class EntityMappingTest extends ELKTestTrait {
 
   import elasticdsl._
 
