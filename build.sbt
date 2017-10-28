@@ -8,12 +8,15 @@ unmanagedBase := baseDirectory.value / "lib"
 
 resolvers += Resolver.mavenLocal
 
+version in ThisBuild := "0.2.3-SNAPSHOT"
+
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl")
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "org.elasticsearch.test" % "framework" % "5.1.1" % "test",
   "org.scalactic" %% "scalactic" % "3.0.1",
   "com.typesafe" % "config" % "1.3.0",
   "com.lihaoyi" %% "fastparse" % "0.4.2",
