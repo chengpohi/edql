@@ -20,7 +20,7 @@ import scala.concurrent.Future
   * elasticdsl
   * Created by chengpohi on 6/29/16.
   */
-trait QueryDSL extends DSLDefinition with IndexerDSL {
+trait QueryDSL extends DSLDefinition with IndexDSL {
 
   case object get {
     def repository(repositoryName: String): PutRepositoryDefinition = {
