@@ -119,7 +119,8 @@ trait ResponseSerializer {
 
     implicit object ClusterStateResponseJSONSerializer
         extends JSONSerializer[ClusterStateResponse] {
-      override def json(response: ClusterStateResponse): String = ""
+      override def json(response: ClusterStateResponse): String =
+        XContentResponseJSONSerializer.json(response.getState)
     }
 
     implicit object StreamSearchHitResponseJSONSerializer
