@@ -142,7 +142,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
       })
     }
 
-    override def json: String = execute.await.toJson
+    override def json: String = execute.toJson
   }
 
   case class BulkUpdateRequestDefinition(indexPath: IndexPath)
@@ -170,7 +170,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
       })
     }
 
-    override def json: String = execute.await
+    override def json: String = execute.toJson
   }
 
   case class BulkIndexRequestDefinition(indexPath: IndexPath)
@@ -195,7 +195,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
         })
     }
 
-    override def json: String = execute.await
+    override def json: String = execute.toJson
   }
 
   case class DumpIndexRequestDefinition(indexName: String)
@@ -227,7 +227,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
       })
     }
 
-    override def json: String = execute.await
+    override def json: String = execute.toJson
   }
 
 }

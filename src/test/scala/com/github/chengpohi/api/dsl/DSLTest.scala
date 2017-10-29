@@ -3,7 +3,10 @@ package com.github.chengpohi.api.dsl
 import java.util
 
 import com.github.chengpohi.helper.ELKTestTrait
+import org.elasticsearch.action.termvectors.TermVectorsResponse
 import org.elasticsearch.search.sort.SortOrder
+
+import scala.concurrent.Future
 
 /**
   * elasticdsl
@@ -34,8 +37,8 @@ class DSLTest extends ELKTestTrait {
     val res = DSL {
       index into "testindex" / "testmap" doc Map(
         "Hello" -> List("world", "foobar"))
-    }.await
-    res.toJson.isEmpty should be(false)
+    }.toJson
+    res.isEmpty should be(false)
   }
 
   it should "scroll search to json" in {
@@ -147,7 +150,7 @@ class DSLTest extends ELKTestTrait {
 
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
-    }.await.as[TestMap]
+    }.as[TestMap]
     r1.head should be(
       TestMap(_id.toInt,
               "world",
@@ -159,7 +162,7 @@ class DSLTest extends ELKTestTrait {
 
     val r2 = DSL {
       search in "testindex" / "testmap"
-    }.await.as[TestMap].toList
+    }.as[TestMap].toList
     r2.size should be(2)
     r2 should contain(
       TestMap(_id.toInt,
@@ -199,7 +202,7 @@ class DSLTest extends ELKTestTrait {
 
     val r1 = DSL {
       search in "testindex" / "testmap" query ("score" gt "1") sort ("score" as SortOrder.DESC) scroll "1m"
-    }.await.as[TestMapScore]
+    }.as[TestMapScore]
     r1.size should be(2)
     r1.head.score should be(3)
     r1.last.score should be(2)
@@ -253,7 +256,7 @@ class DSLTest extends ELKTestTrait {
 
     val mapping = DSL {
       get mapping "testindex"
-    }.await.toJson
+    }.toJson
     println(mapping)
   }
 
@@ -273,7 +276,7 @@ class DSLTest extends ELKTestTrait {
 
     val res2 = DSL {
       get mapping "test"
-    }.await.toJson
+    }.toJson
     res2.contains("fulltext_analyzer") should be(true)
   }
 
@@ -300,7 +303,7 @@ class DSLTest extends ELKTestTrait {
       )
     }.await
 
-    val response: String = client
+    val response: Future[TermVectorsResponse] = client
       .prepareTermVectors()
       .setIndex("test")
       .setType("tweet")
@@ -310,7 +313,7 @@ class DSLTest extends ELKTestTrait {
       .setOffsets(true)
       .setTermStatistics(true)
       .execute()
-      .toJson
+
     println(response.toJson)
   }
 
@@ -331,7 +334,7 @@ class DSLTest extends ELKTestTrait {
 
     val res = DSL {
       search in "testindex" / "testmap" join "testindex" / "testfoo" by "name"
-    }.await.toJson
+    }.toJson
     println(res)
   }
 }
