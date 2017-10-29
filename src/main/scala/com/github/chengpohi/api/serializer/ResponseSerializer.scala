@@ -1,22 +1,24 @@
 package com.github.chengpohi.api.serializer
 
 import com.github.chengpohi.helper.NumberSerializer
+import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
 import org.elasticsearch.action.bulk.BulkResponse
+import org.elasticsearch.action.support.broadcast.BroadcastResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent.{
   ToXContent,
   XContentFactory,
   XContentType
 }
+import org.elasticsearch.search.SearchHit
 import org.json4s._
 import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
 
 trait ResponseSerializer {
-
   implicit val formats = DefaultFormats + new NumberSerializer
 
   trait JSONSerializer[A] {
@@ -105,6 +107,35 @@ trait ResponseSerializer {
       }
     }
 
+    implicit object BroadcastResponseJSONSerializer
+        extends JSONSerializer[BroadcastResponse] {
+      override def json(response: BroadcastResponse): String = ""
+    }
+
+    implicit object StringResponseJSONSerializer
+        extends JSONSerializer[String] {
+      override def json(response: String): String = response
+    }
+
+    implicit object ClusterStateResponseJSONSerializer
+        extends JSONSerializer[ClusterStateResponse] {
+      override def json(response: ClusterStateResponse): String = ""
+    }
+
+    implicit object StreamSearchHitResponseJSONSerializer
+        extends JSONSerializer[Stream[SearchHit]] {
+      override def json(response: Stream[SearchHit]): String = {
+        val a = response.map(s => XContentResponseJSONSerializer.json(s))
+        write(a)
+      }
+    }
+
+    implicit object StreamMapSearchHitResponseJSONSerializer
+        extends JSONSerializer[Stream[Map[String, AnyRef]]] {
+      override def json(response: Stream[Map[String, AnyRef]]): String = {
+        write(response)
+      }
+    }
   }
 
   trait SerializerOps[A] {
@@ -113,24 +144,10 @@ trait ResponseSerializer {
     def json: String = F.json(value)
   }
 
-  implicit def toSerializer[A: JSONSerializer](a: A)(
+  implicit def toSerializerOps[A: JSONSerializer](a: A)(
       implicit F0: JSONSerializer[A]): SerializerOps[A] = new SerializerOps[A] {
     override val F = F0
     override val value = a
   }
 
-  implicit def toXContentSerializer[A <: ToXContent](a: A)(
-      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
-    new SerializerOps[ToXContent] {
-      override val F = F0
-      override val value = a
-    }
-
-  implicit def toAcknowledgedSerializer(a: AcknowledgedResponse)(
-      implicit F0: JSONSerializer[AcknowledgedResponse])
-    : SerializerOps[AcknowledgedResponse] =
-    new SerializerOps[AcknowledgedResponse] {
-      override val F = F0
-      override val value = a
-    }
 }
