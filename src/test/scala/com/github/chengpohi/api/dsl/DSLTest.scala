@@ -37,7 +37,7 @@ class DSLTest extends ELKTestTrait {
     val res = DSL {
       index into "testindex" / "testmap" doc Map(
         "Hello" -> List("world", "foobar"))
-    }.toJson
+    }.await.json
     res.isEmpty should be(false)
   }
 
@@ -314,7 +314,7 @@ class DSLTest extends ELKTestTrait {
       .setTermStatistics(true)
       .execute()
 
-    println(response.toJson)
+    println(response.await.json)
   }
 
   it should "join index" in {

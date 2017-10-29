@@ -171,7 +171,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       nodesStatsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class NodeInfoRequestDefinition(
@@ -181,7 +181,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       nodesInfoRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class IndicesStatsRequestDefinition(
@@ -196,7 +196,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       indicesStatsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ClusterStatsRequestDefinition(
@@ -206,7 +206,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       clusterStatsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ClusterHealthRequestDefinition(
@@ -232,7 +232,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       clusterHealthRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ClusterSettingsRequestDefinition(
@@ -242,7 +242,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       clusterUpdateSettingsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class UpdateSettingsRequestDefinition(
@@ -257,7 +257,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       updateSettingsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class PutRepositoryDefinition(
@@ -277,7 +277,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       putRepositoryRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class CreateSnapshotDefinition(snapshotName: String)
@@ -294,7 +294,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       createSnapshotRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class CreateIndexDefinition(
@@ -372,7 +372,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       createIndexRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class GetSnapshotDefinition(snapshotName: String)
@@ -394,7 +394,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       getSnapshotsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class DeleteSnapshotDefinition(snapshotName: String)
@@ -411,7 +411,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       deleteSnapshotRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class GetMappingDefinition(
@@ -421,7 +421,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       getMappingsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class PutMappingRequestDefinition(
@@ -436,7 +436,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       putMappingRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ClusterStateRequestDefinition(
@@ -446,7 +446,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       clusterStateRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class GetSettingsRequestDefinition(
@@ -456,7 +456,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       getSettingsRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class AddAliasRequestDefinition(targetAlias: String)
@@ -473,7 +473,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       indicesAliasesRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class RestoreSnapshotRequestDefinition(snapshotName: String)
@@ -490,7 +490,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       restoreSnapshotRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class CloseIndexRequestDefinition(
@@ -500,7 +500,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       closeIndexRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class SearchScrollRequestDefinition(
@@ -510,7 +510,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       searchScrollRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class SearchRequestDefinition(searchRequestBuilder: SearchRequestBuilder)
@@ -640,7 +640,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       searchRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ScrollSearchRequestDefinition(
@@ -675,7 +675,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       searchRequestDefinition.execute.map(h => head(h))
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class JoinSearchRequestDefinition(
@@ -717,7 +717,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       })
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class PendingClusterTasksDefinition(
@@ -727,7 +727,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       pendingClusterTasksRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class OpenIndexRequestDefinition(
@@ -737,7 +737,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       openIndexRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class AnalyzeRequestDefinition(
@@ -762,7 +762,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       analyzeRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class DeleteIndexRequestDefinition(
@@ -772,7 +772,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       deleteIndexRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class DeleteRequestDefinition(deleteRequestBuilder: DeleteRequestBuilder)
@@ -786,7 +786,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       deleteRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class UpdateRequestDefinition(documentId: String)
@@ -826,7 +826,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       updateRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class ShutDownRequestDefinition() extends Definition[String] {
@@ -844,7 +844,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       extends Definition[BulkResponse] {
     override def execute: Future[BulkResponse] = bulkRequestBuilder.execute()
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class IndexRequestDefinition(indexRequestBuilder: IndexRequestBuilder)
@@ -892,7 +892,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       indexRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class GetRequestDefinition(getRequestBuilder: GetRequestBuilder)
@@ -907,7 +907,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       getRequestBuilder.execute
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class RefreshRequestDefinition(indices: String)
@@ -934,7 +934,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         })
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
   case class IndexSettingsDefinition() {

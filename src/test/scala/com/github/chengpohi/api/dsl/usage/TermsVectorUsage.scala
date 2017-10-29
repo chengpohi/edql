@@ -46,7 +46,7 @@ object TermsVectorUsage extends ELKTestTrait {
 
     val response = DSL {
       search in _indexName / _indexType size corpus.size
-    }.toJson
+    }.await.json
 
     println(response)
 
@@ -58,6 +58,6 @@ object TermsVectorUsage extends ELKTestTrait {
       .setTermStatistics(true)
       .setFieldStatistics(true)
       .execute()
-    println(r.toJson)
+    println(r.await.json)
   }
 }

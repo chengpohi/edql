@@ -237,7 +237,7 @@ trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
       p.future
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
 }
