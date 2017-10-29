@@ -18,7 +18,7 @@ import scala.concurrent.{Await, Future}
 /**
   * Created by xiachen on 10/11/2016.
   */
-trait DSLContext extends FutureOps {
+trait DSLContext extends DSLExecutor with FutureOps {
   val responseGenerator = new ResponseGenerator
 
   implicit class IndexNameAndIndexType(indexName: String) {
