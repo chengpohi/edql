@@ -134,7 +134,6 @@ trait DSLDefinition extends ElasticBase with DSLContext {
   val DEFAULT_RETRIEVE_SIZE: Int = 500
   val MAX_ALL_NUMBER: Int = 10000
   val MAX_RETRIEVE_SIZE: Int = 500
-  implicit val formats = DefaultFormats
 
   abstract class FlagType
 

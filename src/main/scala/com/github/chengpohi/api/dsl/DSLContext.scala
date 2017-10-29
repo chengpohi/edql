@@ -1,5 +1,6 @@
 package com.github.chengpohi.api.dsl
 
+import com.github.chengpohi.api.serializer.ResponseSerializer
 import com.github.chengpohi.collection.JsonCollection.Val
 import com.github.chengpohi.helper.ResponseGenerator
 import org.elasticsearch.action.ListenableActionFuture
@@ -52,7 +53,7 @@ import scala.concurrent.{Await, Future}
 /**
   * Created by xiachen on 10/11/2016.
   */
-trait DSLContext extends DSLExecutor {
+trait DSLContext extends DSLExecutor with ResponseSerializer {
   val responseGenerator = new ResponseGenerator
 
   trait Monoid[A] {
@@ -71,16 +72,14 @@ trait DSLContext extends DSLExecutor {
     }
 
     implicit object IndexResponseMonoid extends Monoid[IndexResponse] {
-      override def toJson(a: IndexResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: IndexResponse): String = a.json
 
       override def as[T](a: IndexResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object BulkResponseMonoid extends Monoid[BulkResponse] {
-      override def toJson(a: BulkResponse): String =
-        responseGenerator.buildBulkResponse(a)
+      override def toJson(a: BulkResponse): String = a.json
 
       override def as[T](a: BulkResponse)(implicit mf: Manifest[T]): Stream[T] =
         Stream.empty
@@ -88,8 +87,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object DeleteIndexResponseMonoid
         extends Monoid[DeleteIndexResponse] {
-      override def toJson(a: DeleteIndexResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: DeleteIndexResponse): String = a.json
 
       override def as[T](a: DeleteIndexResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -97,16 +95,14 @@ trait DSLContext extends DSLExecutor {
 
     implicit object CreateIndexResponseMonoid
         extends Monoid[CreateIndexResponse] {
-      override def toJson(a: CreateIndexResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: CreateIndexResponse): String = a.json
 
       override def as[T](a: CreateIndexResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object SearchResponseMonoid extends Monoid[SearchResponse] {
-      override def toJson(a: SearchResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: SearchResponse): String = a.json
 
       override def as[T](a: SearchResponse)(
           implicit mf: Manifest[T]): Stream[T] = {
@@ -117,16 +113,14 @@ trait DSLContext extends DSLExecutor {
     }
 
     implicit object NodeStatsResponseMonoid extends Monoid[NodesStatsResponse] {
-      override def toJson(a: NodesStatsResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: NodesStatsResponse): String = a.json
 
       override def as[T](a: NodesStatsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object NodeInfoResponseMonoid extends Monoid[NodesInfoResponse] {
-      override def toJson(a: NodesInfoResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: NodesInfoResponse): String = a.json
 
       override def as[T](a: NodesInfoResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -134,8 +128,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object IndicesStatsResponseMonoid
         extends Monoid[IndicesStatsResponse] {
-      override def toJson(a: IndicesStatsResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: IndicesStatsResponse): String = a.json
 
       override def as[T](a: IndicesStatsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -143,8 +136,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object ClusterStatsResponseMonoid
         extends Monoid[ClusterStatsResponse] {
-      override def toJson(a: ClusterStatsResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: ClusterStatsResponse): String = a.json
 
       override def as[T](a: ClusterStatsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -152,8 +144,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object ClusterHealthResponseMonoid
         extends Monoid[ClusterHealthResponse] {
-      override def toJson(a: ClusterHealthResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: ClusterHealthResponse): String = a.json
 
       override def as[T](a: ClusterHealthResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -161,8 +152,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object ClusterUpdateSettingsResponseMonoid
         extends Monoid[ClusterUpdateSettingsResponse] {
-      override def toJson(a: ClusterUpdateSettingsResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: ClusterUpdateSettingsResponse): String = a.json
 
       override def as[T](a: ClusterUpdateSettingsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -170,8 +160,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object UpdateSettingsResponseMonoid
         extends Monoid[UpdateSettingsResponse] {
-      override def toJson(a: UpdateSettingsResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: UpdateSettingsResponse): String = a.json
 
       override def as[T](a: UpdateSettingsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -179,8 +168,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object PutRepositoryResponseMonoid
         extends Monoid[PutRepositoryResponse] {
-      override def toJson(a: PutRepositoryResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: PutRepositoryResponse): String = a.json
 
       override def as[T](a: PutRepositoryResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -188,8 +176,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object CreateSnapshotResponseMonoid
         extends Monoid[CreateSnapshotResponse] {
-      override def toJson(a: CreateSnapshotResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: CreateSnapshotResponse): String = a.json
 
       override def as[T](a: CreateSnapshotResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -197,8 +184,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object GetSnapshotsResponseMonoid
         extends Monoid[GetSnapshotsResponse] {
-      override def toJson(a: GetSnapshotsResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: GetSnapshotsResponse): String = a.json
 
       override def as[T](a: GetSnapshotsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -206,8 +192,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object DeleteSnapshotResponseMonoid
         extends Monoid[DeleteSnapshotResponse] {
-      override def toJson(a: DeleteSnapshotResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: DeleteSnapshotResponse): String = a.json
 
       override def as[T](a: DeleteSnapshotResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -215,8 +200,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object GetMappingsResponseMonoid
         extends Monoid[GetMappingsResponse] {
-      override def toJson(a: GetMappingsResponse): String =
-        responseGenerator.buildGetMappingResponse(a)
+      override def toJson(a: GetMappingsResponse): String = a.json
 
       override def as[T](a: GetMappingsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -224,8 +208,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object PutMappingResponseMonoid
         extends Monoid[PutMappingResponse] {
-      override def toJson(a: PutMappingResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: PutMappingResponse): String = a.json
 
       override def as[T](a: PutMappingResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -233,8 +216,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object ClusterStateResponseMonoid
         extends Monoid[ClusterStateResponse] {
-      override def toJson(a: ClusterStateResponse): String =
-        responseGenerator.buildXContent(a.getState)
+      override def toJson(a: ClusterStateResponse): String = a.getState.json
 
       override def as[T](a: ClusterStateResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -242,8 +224,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object GetSettingsResponseMonoid
         extends Monoid[GetSettingsResponse] {
-      override def toJson(a: GetSettingsResponse): String =
-        responseGenerator.buildGetSettingsResponse(a)
+      override def toJson(a: GetSettingsResponse): String = a.json
 
       override def as[T](a: GetSettingsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -251,8 +232,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object IndicesAliasesResponseMonoid
         extends Monoid[IndicesAliasesResponse] {
-      override def toJson(a: IndicesAliasesResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: IndicesAliasesResponse): String = a.json
 
       override def as[T](a: IndicesAliasesResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -260,8 +240,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object RestoreSnapshotResponseMonoid
         extends Monoid[RestoreSnapshotResponse] {
-      override def toJson(a: RestoreSnapshotResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: RestoreSnapshotResponse): String = a.json
 
       override def as[T](a: RestoreSnapshotResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -269,8 +248,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object CloseIndexResponseMonoid
         extends Monoid[CloseIndexResponse] {
-      override def toJson(a: CloseIndexResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: CloseIndexResponse): String = a.json
 
       override def as[T](a: CloseIndexResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -278,48 +256,42 @@ trait DSLContext extends DSLExecutor {
 
     implicit object PendingClusterTasksResponseMonoid
         extends Monoid[PendingClusterTasksResponse] {
-      override def toJson(a: PendingClusterTasksResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: PendingClusterTasksResponse): String = a.json
 
       override def as[T](a: PendingClusterTasksResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object OpenIndexResponseMonoid extends Monoid[OpenIndexResponse] {
-      override def toJson(a: OpenIndexResponse): String =
-        responseGenerator.buildAcknowledgedResponse(a)
+      override def toJson(a: OpenIndexResponse): String = a.json
 
       override def as[T](a: OpenIndexResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object AnalyzeResponseMonoid extends Monoid[AnalyzeResponse] {
-      override def toJson(a: AnalyzeResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: AnalyzeResponse): String = a.json
 
       override def as[T](a: AnalyzeResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object DeleteResponseMonoid extends Monoid[DeleteResponse] {
-      override def toJson(a: DeleteResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: DeleteResponse): String = a.json
 
       override def as[T](a: DeleteResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object UpdateResponseMonoid extends Monoid[UpdateResponse] {
-      override def toJson(a: UpdateResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: UpdateResponse): String = a.json
 
       override def as[T](a: UpdateResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
     }
 
     implicit object GetResponseMonoid extends Monoid[GetResponse] {
-      override def toJson(a: GetResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: GetResponse): String = a.json
 
       override def as[T](a: GetResponse)(
           implicit typeTag: Manifest[T]): Stream[T] = {
@@ -334,7 +306,7 @@ trait DSLContext extends DSLExecutor {
     implicit object StreamSearchResponseMonoid
         extends Monoid[Stream[SearchResponse]] {
       override def toJson(a: Stream[SearchResponse]): String = {
-        val s = a.map(s => s.toJson)
+        val s = a.map(s => s.json)
         responseGenerator.buildStream(s)
       }
 
@@ -353,8 +325,7 @@ trait DSLContext extends DSLExecutor {
     }
 
     implicit object SearchHitMonoid extends Monoid[SearchHit] {
-      override def toJson(a: SearchHit): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: SearchHit): String = a.json
 
       override def as[T](a: SearchHit)(implicit mf: Manifest[T]): Stream[T] =
         Stream.empty
@@ -369,8 +340,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object TermVectorResponseMonoid
         extends Monoid[TermVectorsResponse] {
-      override def toJson(a: TermVectorsResponse): String =
-        responseGenerator.buildXContent(a)
+      override def toJson(a: TermVectorsResponse): String = a.json
 
       override def as[T](a: TermVectorsResponse)(
           implicit mf: Manifest[T]): Stream[T] = Stream.empty
@@ -378,7 +348,7 @@ trait DSLContext extends DSLExecutor {
 
     implicit object StreamSearchHitMonoid extends Monoid[Stream[SearchHit]] {
       override def toJson(a: Stream[SearchHit]): String = {
-        val s = a.map(s => s.toJson)
+        val s = a.map(s => s.json)
         responseGenerator.buildStream(s)
       }
 
