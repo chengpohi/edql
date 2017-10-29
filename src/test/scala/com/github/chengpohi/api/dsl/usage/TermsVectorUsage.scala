@@ -1,7 +1,9 @@
 package com.github.chengpohi.api.dsl.usage
 
 import com.github.chengpohi.helper.ELKTestTrait
+import org.elasticsearch.action.termvectors.TermVectorsResponse
 
+import scala.concurrent.Future
 import scala.io.Source
 
 object TermsVectorUsage extends ELKTestTrait {
@@ -44,11 +46,11 @@ object TermsVectorUsage extends ELKTestTrait {
 
     val response = DSL {
       search in _indexName / _indexType size corpus.size
-    }.await.toJson
+    }.toJson
 
     println(response)
 
-    val r: String = client
+    val r: Future[TermVectorsResponse] = client
       .prepareTermVectors(_indexName, _indexType, "1")
       .setSelectedFields("text")
       .setOffsets(true)
@@ -56,7 +58,6 @@ object TermsVectorUsage extends ELKTestTrait {
       .setTermStatistics(true)
       .setFieldStatistics(true)
       .execute()
-      .toJson
-    println(r)
+    println(r.toJson)
   }
 }

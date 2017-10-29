@@ -109,6 +109,7 @@ import org.elasticsearch.action.search.{
 }
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
+import org.elasticsearch.common.xcontent.ToXContent
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -117,7 +118,6 @@ import org.elasticsearch.search.aggregations.bucket.histogram.{
   DateHistogramInterval
 }
 import org.elasticsearch.search.sort.SortBuilder
-import org.json4s.DefaultFormats
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
