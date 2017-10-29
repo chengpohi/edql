@@ -39,7 +39,7 @@ object NgramUsage extends ELKTestTrait {
 
     val response = DSL {
       analyze text "Quick Fox" tokenizer "ngram"
-    }.toJson
+    }.await.json
 
     println(response)
 

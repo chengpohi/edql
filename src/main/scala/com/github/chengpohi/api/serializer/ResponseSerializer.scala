@@ -4,6 +4,7 @@ import com.github.chengpohi.helper.NumberSerializer
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
+import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.support.broadcast.BroadcastResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
@@ -137,6 +138,7 @@ trait ResponseSerializer {
         write(response)
       }
     }
+
   }
 
   trait SerializerOps[A] {
@@ -151,4 +153,32 @@ trait ResponseSerializer {
     override val value = a
   }
 
+  implicit def toXContentSerializerOps[A <: ToXContent](a: A)(
+      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
+    new SerializerOps[ToXContent] {
+      override val F = F0
+      override val value = a
+    }
+
+  implicit def toAckSerializerOps[A <: AcknowledgedResponse](a: A)(
+      implicit F0: JSONSerializer[AcknowledgedResponse])
+    : SerializerOps[AcknowledgedResponse] =
+    new SerializerOps[AcknowledgedResponse] {
+      override val F = F0
+      override val value = a
+    }
+
+  implicit def toBroadSerializerOps[A <: BroadcastResponse](a: A)(
+      implicit F0: JSONSerializer[BroadcastResponse])
+    : SerializerOps[BroadcastResponse] = new SerializerOps[BroadcastResponse] {
+    override val F = F0
+    override val value = a
+  }
+
+  implicit def toIndicesStatsSerializerOps(a: IndicesStatsResponse)(
+      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
+    new SerializerOps[ToXContent] {
+      override val F = F0
+      override val value = a
+    }
 }

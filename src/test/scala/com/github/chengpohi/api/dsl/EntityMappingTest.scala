@@ -48,7 +48,7 @@ class EntityMappingTest extends ELKTestTrait {
     val indexName = "user1"
     DSL {
       create index indexName mappings Mappings[Bookmark, Info, Tab] settings UserIndexSettings
-    }.toJson
+    }.await.json
 
     val res2 = DSL {
       get mapping indexName

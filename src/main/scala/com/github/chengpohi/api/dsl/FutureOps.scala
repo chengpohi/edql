@@ -10,11 +10,31 @@ import org.elasticsearch.common.xcontent.ToXContent
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 
-trait FutureOps
-    extends DSLExecutor
-    with ResponseSerializer
-    with ResponseConverter {
+import scala.concurrent.{Future, Promise}
+
+trait FutureOps extends ResponseSerializer with ResponseConverter {
+
+  implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
+    val p = Promise[A]()
+    f(new ActionListener[A] {
+      def onFailure(e: Exception): Unit = p.tryFailure(e)
+
+      def onResponse(resp: A): Unit = p.trySuccess(resp)
+    })
+    p.future
+  }
+
+  implicit def buildFuture[A](f: ListenableActionFuture[A]): Future[A] = {
+    val p = Promise[A]()
+    f.addListener(new ActionListener[A] {
+      def onFailure(e: Exception): Unit = p.tryFailure(e)
+
+      def onResponse(resp: A): Unit = p.trySuccess(resp)
+    })
+    p.future
+  }
 
   trait FutureAwaitOps[A] {
     val value: Future[A]
@@ -26,7 +46,7 @@ trait FutureOps
       override val value: Future[A] = v
     }
 
-  trait FutureJSONOps[A] {
+  trait FutureJsonOps[A] {
     val F0: JSONSerializer[A]
     val value: Future[A]
 
@@ -46,41 +66,10 @@ trait FutureOps
   }
 
   implicit def futureToJsonOps[A: JSONSerializer](a: Future[A])(
-      implicit F: JSONSerializer[A]): FutureJSONOps[A] =
-    new FutureJSONOps[A] {
+      implicit F: JSONSerializer[A]): FutureJsonOps[A] =
+    new FutureJsonOps[A] {
       override val F0: JSONSerializer[A] = F
       override val value: Future[A] = a
-    }
-
-  implicit def futureXContentToJsonOps[B <: ToXContent](a: Future[B])(
-      implicit F: JSONSerializer[ToXContent]): FutureJSONOps[ToXContent] =
-    new FutureJSONOps[ToXContent] {
-      override val F0: JSONSerializer[ToXContent] = F
-      override val value: Future[B] = a
-    }
-
-  implicit def futureAckToJsonOps[B <: AcknowledgedResponse](a: Future[B])(
-      implicit F: JSONSerializer[AcknowledgedResponse])
-    : FutureJSONOps[AcknowledgedResponse] =
-    new FutureJSONOps[AcknowledgedResponse] {
-      override val F0: JSONSerializer[AcknowledgedResponse] = F
-      override val value: Future[B] = a
-    }
-
-  implicit def futureBroadcastToJsonOps[B <: BroadcastResponse](a: Future[B])(
-      implicit F: JSONSerializer[BroadcastResponse])
-    : FutureJSONOps[BroadcastResponse] =
-    new FutureJSONOps[BroadcastResponse] {
-      override val F0: JSONSerializer[BroadcastResponse] = F
-      override val value: Future[B] = a
-    }
-
-  implicit def futureMixedBroadcastWithToXContentToJsonOps[
-      B <: ToXContent with BroadcastResponse](a: Future[B])(
-      implicit F: JSONSerializer[ToXContent]): FutureJSONOps[ToXContent] =
-    new FutureJSONOps[ToXContent] {
-      override val F0: JSONSerializer[ToXContent] = F
-      override val value: Future[B] = a
     }
 
   implicit def futureToConverterOps[A: Converter](a: Future[A])(
