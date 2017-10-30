@@ -1,7 +1,6 @@
 package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.collection.JsonCollection.Val
-import com.github.chengpohi.helper.ResponseGenerator
 import org.elasticsearch.index.query.{
   QueryBuilder,
   QueryBuilders,
@@ -19,8 +18,6 @@ import scala.concurrent.{Await, Future}
   * Created by xiachen on 10/11/2016.
   */
 trait DSLContext extends DSLExecutor with FutureOps {
-  val responseGenerator = new ResponseGenerator
-
   implicit class IndexNameAndIndexType(indexName: String) {
     def /(indexType: String): IndexPath = {
       IndexPath(indexName, indexType)

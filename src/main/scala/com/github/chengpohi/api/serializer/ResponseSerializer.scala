@@ -1,6 +1,5 @@
 package com.github.chengpohi.api.serializer
 
-import com.github.chengpohi.helper.NumberSerializer
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse
@@ -14,13 +13,11 @@ import org.elasticsearch.common.xcontent.{
   XContentType
 }
 import org.elasticsearch.search.SearchHit
-import org.json4s._
 import org.json4s.native.Serialization.write
 
 import scala.collection.JavaConverters._
 
-trait ResponseSerializer {
-  implicit val formats = DefaultFormats + new NumberSerializer
+trait ResponseSerializer extends JSONOps {
 
   trait JSONSerializer[A] {
     def json(a: A): String
@@ -139,6 +136,11 @@ trait ResponseSerializer {
       }
     }
 
+    implicit object MapSearchHitResponseJSONSerializer
+        extends JSONSerializer[Map[String, AnyRef]] {
+      override def json(response: Map[String, AnyRef]): String =
+        toJson(response)
+    }
   }
 
   trait SerializerOps[A] {

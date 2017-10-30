@@ -2,17 +2,11 @@ package com.github.chengpohi.api.dsl
 
 import com.github.chengpohi.api.converter.ResponseConverter
 import com.github.chengpohi.api.serializer.ResponseSerializer
-import org.elasticsearch.action.ListenableActionFuture
-import org.elasticsearch.action.support.broadcast.BroadcastResponse
-import org.elasticsearch.action.support.master.AcknowledgedResponse
-import org.elasticsearch.common.xcontent.ToXContent
+import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
-
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{Await, Future, Promise}
 
 trait FutureOps extends ResponseSerializer with ResponseConverter {
 
