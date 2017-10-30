@@ -1,5 +1,6 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection.Str
 import fastparse.core.Parsed.{Failure, Success}
 import fastparse.noApi._
@@ -8,22 +9,25 @@ import fastparse.noApi._
   * scala-parser-combinator
   * Created by chengpohi on 12/30/15.
   */
-class ELKParser(interceptFunction: InterceptFunction)
-    extends ELKInstructionParser(interceptFunction) {
+class ELKParser(dsl: ElasticDSL) extends ELKInstructionParser {
+
+  override val interceptFunction: InterceptFunction = new InterceptFunction(dsl)
 
   import WhitespaceApi._
 
-  val instructionParser: P[Seq[Instruction]] = P(WL0 ~ instrument.rep ~ End)
+  val instructionParser: P[Seq[interceptFunction.Instruction]] = P(
+    WL0 ~ instrument.rep ~ End)
 
-  def generateDefinitions(
-      parsed: Parsed[Seq[Instruction]]): Seq[Instruction] = {
+  def generateDefinitions(parsed: Parsed[Seq[interceptFunction.Instruction]])
+    : Seq[interceptFunction.Instruction] = {
     val instructions = parsed match {
       case Success(ins, state) => ins
       case Failure(_, _, t) =>
         Seq(
-          Instruction("error",
-                      interceptFunction.error,
-                      Seq(Str(t.traced.trace), Str(t.traced.trace))))
+          interceptFunction.Instruction(
+            "error",
+            interceptFunction.error,
+            Seq(Str(t.traced.trace), Str(t.traced.trace))))
     }
     instructions
   }

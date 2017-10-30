@@ -18,6 +18,7 @@ import scala.concurrent.{Await, Future}
   * Created by xiachen on 10/11/2016.
   */
 trait DSLContext extends DSLExecutor with FutureOps {
+
   implicit class IndexNameAndIndexType(indexName: String) {
     def /(indexType: String): IndexPath = {
       IndexPath(indexName, indexType)
@@ -53,34 +54,4 @@ trait DSLContext extends DSLExecutor with FutureOps {
     case _ => QueryBuilders.queryStringQuery(query)
   }
 
-}
-
-trait Definition[A] {
-  def execute: Future[A]
-
-  def extract(path: String): ExtractDefinition = {
-    ExtractDefinition(this, path)
-  }
-
-  def json: String
-}
-
-case class ExtractDefinition(definition: Definition[_], path: String)
-    extends Definition[String] {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-  implicit val formats = DefaultFormats
-
-  override def execute: Future[String] = {
-    Future {
-      val jObj = parse(definition.json)
-      val result = path.split("\\.").foldLeft(jObj) { (o, i) =>
-        o \ i
-      }
-      write(result)
-    }
-  }
-
-  override def json: String = Await.result(execute, Duration.Inf)
 }
