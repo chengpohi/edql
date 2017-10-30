@@ -24,7 +24,7 @@ import scala.util.Success
   * elasticdsl
   * Created by chengpohi on 6/26/16.
   */
-trait ManageDSL extends DSLDefinition with DeleterDSL with QueryDSL {
+trait ManageDSL extends DeleterDSL with QueryDSL {
 
   case object node {
     def stats(nodeIds: List[String]): NodeStatsRequestDefinition = {

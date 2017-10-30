@@ -11,8 +11,7 @@ import com.github.chengpohi.parser.{ELKParser, InterceptFunction}
 trait ELKDSLContext {
   this: ELKDSLConfig =>
   private val client = buildClient(config)
-  private val interceptFunction = new InterceptFunction(dsl)
 
   implicit lazy val dsl: ElasticDSL = new ElasticDSL(client)
-  implicit lazy val elkParser = new ELKParser(interceptFunction)
+  implicit lazy val elkParser = new ELKParser(dsl)
 }

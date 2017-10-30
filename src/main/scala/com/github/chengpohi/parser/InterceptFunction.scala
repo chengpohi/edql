@@ -2,12 +2,15 @@ package com.github.chengpohi.parser
 
 import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection._
+import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.Future
 
 /**
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
+class InterceptFunction(val elasticCommand: ElasticDSL) {
   val MAX_NUMBER: Int = 500
 
   import elasticCommand._
@@ -258,6 +261,10 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
     }
   }
 
+  def error: Seq[Val] => ParserErrorDefinition = parameters => {
+    ParserErrorDefinition(parameters)
+  }
+
   /*  def findJSONElements(c: String): String => String = {
     extractJSON(_, c)
   }
@@ -265,6 +272,38 @@ class InterceptFunction(val elasticCommand: ElasticDSL) extends ParserUtils {
   def beautyJson(): String => String = {
     beautyJSON
   }*/
+  val instrumentations = ConfigFactory.load("instrumentations.json")
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+  def help: Seq[Val] => Future[String] = {
+    {
+      case Seq(input) =>
+        Future {
+          val s = input.extract[String]
+          val example: String =
+            instrumentations.getConfig(s.trim).getString("example")
+          val description: String =
+            instrumentations.getConfig(s.trim).getString("description")
+          val r: Map[String, AnyRef] =
+            Map(("example", example), ("description", description))
+          r.json
+        }
+      case _ =>
+        Future {
+          "I have no idea for this."
+        }
+    }
+  }
 
   implicit def valToString(v: Val): String = v.extract[String]
+
+  case class Instruction(name: String,
+                         f: Seq[Val] => Definition[_],
+                         params: Seq[Val])
+
+  def buildExtractDefinition(f: Seq[Val] => Definition[_],
+                             path: String): Seq[Val] => ExtractDefinition = {
+    val f2: Definition[_] => ExtractDefinition = ExtractDefinition(_, path)
+    f andThen f2
+  }
 }
