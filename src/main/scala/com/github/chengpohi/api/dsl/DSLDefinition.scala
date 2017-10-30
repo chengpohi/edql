@@ -4,6 +4,7 @@ import java.io.Serializable
 
 import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.api.ElasticBase
+import com.github.chengpohi.collection.JsonCollection.Val
 import org.elasticsearch.action.admin.cluster.health.{
   ClusterHealthRequestBuilder,
   ClusterHealthResponse
@@ -122,7 +123,7 @@ import org.elasticsearch.search.sort.SortBuilder
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.reflect.runtime.universe
 
 /**
@@ -1181,6 +1182,18 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       "settings" -> ("analysis" -> Map("analyzer" -> analyzer.source,
                                        "filter" -> filter.source))
     }
+  }
+
+  case class ParserErrorDefinition(parameters: Seq[Val])
+      extends Definition[Map[String, AnyRef]] {
+    override def execute: Future[Map[String, AnyRef]] = {
+      Future {
+        val (errorMsg, input) =
+          (parameters.head.extract[String], parameters(1).extract[String])
+        Map(("illegal_input", input), ("caused_by", errorMsg))
+      }
+    }
+    override def json: String = execute.await.json
   }
 
 }

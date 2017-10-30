@@ -13,7 +13,8 @@ class ELKInterpreter(implicit val elkParser: ELKParser) {
 
   import elkParser._
 
-  def interceptDefinitions(instructions: Seq[Instruction]): String = {
+  def interceptDefinitions(
+      instructions: Seq[elkParser.interceptFunction.Instruction]): String = {
     val res = for {
       instruction <- instructions
     } yield instruction.f.apply(instruction.params).json
