@@ -362,12 +362,12 @@ trait DSLDefinition extends ElasticBase with DSLContext {
           )
         case Some(se) => se.source._2
       }
-      val res = Map(
+      val res: Map[String, AnyRef] = Map(
         "mappings" -> mappings,
         "settings" -> ss
       )
-      val json = responseGenerator.toJson(res)
-      createIndexRequestBuilder.setSource(json)
+
+      createIndexRequestBuilder.setSource(res.json)
 
       createIndexRequestBuilder.execute
     }
@@ -855,7 +855,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     def doc[T <: AnyRef](d: T): IndexRequestDefinition = {
-      val source = responseGenerator.toJson(d)
+      val source = toJson(d)
       indexRequestBuilder.setSource(source)
       this
     }

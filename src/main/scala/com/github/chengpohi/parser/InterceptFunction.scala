@@ -2,7 +2,6 @@ package com.github.chengpohi.parser
 
 import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.collection.JsonCollection._
-import com.github.chengpohi.helper.ResponseGenerator
 
 /**
   * elasticservice
