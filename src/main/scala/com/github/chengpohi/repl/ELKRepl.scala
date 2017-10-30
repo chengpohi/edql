@@ -2,6 +2,7 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
+import com.github.chengpohi.api.serializer.JSONOps
 import com.github.chengpohi.connector.ELKDSLConfig
 import com.github.chengpohi.registry.ELKDSLContext
 import jline.console.ConsoleReader
@@ -14,7 +15,7 @@ import scala.io.Source
   * elasticdsl
   * Created by chengpohi on 1/27/16.
   */
-object ELKRepl extends ELKDSLConfig with ELKDSLContext {
+object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
   val ELASTIC_SHELL_INDEX_NAME: String = ".elasticdsl"
   val terms = new StringsCompleter(
     Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
@@ -39,7 +40,7 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext {
         case true =>
         case false =>
           try {
-            val res = responseGenerator.beautyJSON(elkRunEngine.run(line))
+            val res = elkRunEngine.run(line).beautify
             println(res)
           } catch {
             case e: Exception =>

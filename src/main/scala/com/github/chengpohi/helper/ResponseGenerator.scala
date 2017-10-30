@@ -22,9 +22,8 @@ import scala.collection.JavaConverters._
   * Created by chengpohi on 1/26/16.
   */
 class ResponseGenerator {
-
   DefaultFormats.preservingEmptyValues
-  implicit val formats = DefaultFormats + new NumberSerializer
+  implicit val formats = DefaultFormats
 
   def buildGetMappingResponse(
       getMappingsResponse: GetMappingsResponse): String = {
@@ -188,12 +187,3 @@ class ResponseGenerator {
     compact(render(res))
   }
 }
-
-class NumberSerializer
-    extends CustomSerializer[Int](format =>
-      ({
-        case JInt(x)    => x.toInt
-        case JString(x) => x.toInt
-      }, {
-        case x: Int => JInt(x)
-      }))
