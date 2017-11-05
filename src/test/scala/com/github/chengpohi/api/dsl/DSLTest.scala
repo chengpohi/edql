@@ -150,7 +150,7 @@ class DSLTest extends ELKTestTrait {
 
     val r1 = DSL {
       search in "testindex" / "testmap" where id equal _id
-    }.as[TestMap]
+    }.as[TestMap].await
     r1.head should be(
       TestMap(_id.toInt,
               "world",
@@ -162,7 +162,7 @@ class DSLTest extends ELKTestTrait {
 
     val r2 = DSL {
       search in "testindex" / "testmap"
-    }.as[TestMap].toList
+    }.as[TestMap].await.toList
     r2.size should be(2)
     r2 should contain(
       TestMap(_id.toInt,
@@ -202,7 +202,7 @@ class DSLTest extends ELKTestTrait {
 
     val r1 = DSL {
       search in "testindex" / "testmap" query ("score" gt "1") sort ("score" as SortOrder.DESC) scroll "1m"
-    }.as[TestMapScore]
+    }.as[TestMapScore].await
     r1.size should be(2)
     r1.head.score should be(3)
     r1.last.score should be(2)
