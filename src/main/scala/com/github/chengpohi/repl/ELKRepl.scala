@@ -8,6 +8,8 @@ import com.github.chengpohi.registry.ELKDSLContext
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration
+import scalaz._
+import Scalaz._
 
 import scala.io.Source
 
@@ -22,6 +24,8 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
   val eLKCompletionHandler = new ELKCompletionHandler
   val elkRunEngine = new ELKInterpreter()
+
+  import dsl._
 
   def main(args: Array[String]): Unit = {
     val reader = new ConsoleReader()
@@ -40,8 +44,7 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
         case true =>
         case false =>
           try {
-            val res = elkRunEngine.run(line).beautify
-            println(res)
+            elkRunEngine.run(line).beautify.println
           } catch {
             case e: Exception =>
               println(e.getMessage)
@@ -51,15 +54,16 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
   }
 
   def addShutdownHook(reader: ConsoleReader): Unit = {
-    try {
-      elkRunEngine.run(s"""create index "$ELASTIC_SHELL_INDEX_NAME"""")
-    } catch {
-      case e: Exception => println(e)
-    }
+    DSL {
+      create index ELASTIC_SHELL_INDEX_NAME
+    }.await
+
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
         reader.getHistory.asInstanceOf[FileHistory].flush()
-        elkRunEngine.run(s"""delete "$ELASTIC_SHELL_INDEX_NAME"""")
+        DSL {
+          delete index ELASTIC_SHELL_INDEX_NAME
+        }.await
       }
     })
   }
