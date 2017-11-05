@@ -4,11 +4,11 @@ import com.github.chengpohi.api.converter.ResponseConverter
 import com.github.chengpohi.api.serializer.ResponseSerializer
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
 
 trait FutureOps extends ResponseSerializer with ResponseConverter {
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
 
   implicit def buildFuture[A](f: ActionListener[A] => Any): Future[A] = {
     val p = Promise[A]()

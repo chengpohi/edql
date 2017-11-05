@@ -26,7 +26,8 @@ libraryDependencies ++= Seq(
   "org.elasticsearch.client" % "transport" % "5.1.1",
   "org.json4s" %% "json4s-native" % "3.5.0",
   "org.json4s" %% "json4s-jackson" % "3.5.0",
-  "org.apache.commons" % "commons-lang3" % "3.5"
+  "org.apache.commons" % "commons-lang3" % "3.5",
+  "org.scalaz" %% "scalaz-core" % "7.3.0-M9",
 )
 
 scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import")
