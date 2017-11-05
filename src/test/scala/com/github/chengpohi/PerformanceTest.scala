@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicLong
 
 import com.github.chengpohi.helper.ELKTestTrait
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 /**
