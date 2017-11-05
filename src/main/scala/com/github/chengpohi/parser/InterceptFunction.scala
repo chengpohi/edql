@@ -274,7 +274,6 @@ class InterceptFunction(val elasticCommand: ElasticDSL) {
   }*/
   val instrumentations = ConfigFactory.load("instrumentations.json")
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   def help: Seq[Val] => Future[String] = {
     {
       case Seq(input) =>

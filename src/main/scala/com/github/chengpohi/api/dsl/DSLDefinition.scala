@@ -110,7 +110,6 @@ import org.elasticsearch.action.search.{
 }
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.common.xcontent.ToXContent
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -122,9 +121,10 @@ import org.elasticsearch.search.sort.SortBuilder
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.reflect.runtime.universe
+import scalaz.Scalaz._
+import scalaz._
 
 /**
   * elasticdsl
@@ -1186,12 +1186,13 @@ trait DSLDefinition extends ElasticBase with DSLContext {
 
   case class ParserErrorDefinition(parameters: Seq[Val])
       extends Definition[Map[String, AnyRef]] {
+
     override def execute: Future[Map[String, AnyRef]] = {
-      Future {
-        val (errorMsg, input) =
-          (parameters.head.extract[String], parameters(1).extract[String])
-        Map(("illegal_input", input), ("caused_by", errorMsg))
-      }
+      (List("illegal_input", "caused_by") fzip parameters
+        .take(2)
+        .map(_.extract[String])
+        .toList).toMap
+        .pure[Future]
     }
     override def json: String = execute.await.json
   }
