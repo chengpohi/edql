@@ -226,7 +226,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
       })
     }
 
-    override def json: String = execute.toJson
+    override def json: String = execute.await.json
   }
 
 }
