@@ -221,11 +221,9 @@ trait ManageDSL extends DeleterDSL with QueryDSL {
         close index ELASTIC_SHELL_INDEX_NAME
       } andThen {
         case _ =>
-          val eventualUpdateSettingsResponse: Future[UpdateSettingsResponse] =
-            DSL {
-              indice update ELASTIC_SHELL_INDEX_NAME settings analyzerSetting
-            }
-          eventualUpdateSettingsResponse andThen {
+          DSL {
+            indice update ELASTIC_SHELL_INDEX_NAME settings analyzerSetting
+          } andThen {
             case Success(r) => p success r
           }
       }

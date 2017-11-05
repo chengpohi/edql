@@ -3,9 +3,6 @@ package com.github.chengpohi.api
 import com.github.chengpohi.api.dsl._
 import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-
 /**
   * elasticdsl
   * Created by chengpohi on 1/6/16.
@@ -24,6 +21,4 @@ class ElasticDSL(cl: Client) extends DSLs {
   val indicesClient: IndicesAdminClient = client.admin.indices()
   val ALL_INDEX: String = "*"
   val ALL_TYPE: String = "_all"
-
-  implicit def waitFuture[T](r: Future[T]): T = Await.result(r, Duration.Inf)
 }

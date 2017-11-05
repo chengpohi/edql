@@ -28,8 +28,6 @@ trait DSLExecutor extends FutureOps {
   case class ExtractDefinition(definition: Definition[_], path: String)
       extends Definition[String] {
 
-    implicit val formats = DefaultFormats
-
     override def execute: Future[String] = {
       val jObj = parse(definition.json)
       val result = path.split("\\.").foldLeft(jObj) { (o, i) =>
@@ -38,7 +36,7 @@ trait DSLExecutor extends FutureOps {
       write(result).pure[Future]
     }
 
-    override def json: String = Await.result(execute, Duration.Inf)
+    override def json: String = execute.await
   }
 
   object DSL {
