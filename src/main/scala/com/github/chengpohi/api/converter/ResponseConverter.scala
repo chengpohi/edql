@@ -44,7 +44,7 @@ trait ResponseConverter extends ResponseSerializer {
     }
 
     def mapSearchHit[T](searchHit: SearchHit)(implicit mf: Manifest[T]): T = {
-      val j = parse(searchHit.sourceAsString())
+      val j = parse(searchHit.getSourceAsString())
       val r = j merge JObject("id" -> JString(searchHit.getId))
       r.extract(formats, mf)
     }

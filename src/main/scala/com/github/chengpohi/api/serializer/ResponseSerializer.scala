@@ -10,6 +10,7 @@ import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.xcontent.{
   ToXContent,
   XContentFactory,
+  XContentHelper,
   XContentType
 }
 import org.elasticsearch.search.SearchHit
@@ -28,12 +29,8 @@ trait ResponseSerializer extends JSONOps {
     implicit object XContentResponseJSONSerializer
         extends JSONSerializer[ToXContent] {
       override def json(a: ToXContent): String = {
-        val builder = XContentFactory.contentBuilder(XContentType.JSON)
-        builder.prettyPrint()
-        builder.startObject()
-        a.toXContent(builder, ToXContent.EMPTY_PARAMS)
-        builder.endObject()
-        builder.string()
+        val bytes = XContentHelper.toXContent(a, XContentType.JSON, true)
+        XContentHelper.convertToJson(bytes, true, XContentType.JSON)
       }
     }
 
@@ -42,7 +39,7 @@ trait ResponseSerializer extends JSONOps {
       override def json(response: BulkResponse): String = {
         val builder = XContentFactory.contentBuilder(XContentType.JSON)
         builder.startObject()
-        builder.field("took", response.getTookInMillis)
+        builder.field("took", response.getTook)
         if (response.getIngestTookInMillis != BulkResponse.NO_INGEST_TOOK) {
           builder.field("intest_took", response.getIngestTookInMillis)
         }
@@ -70,7 +67,7 @@ trait ResponseSerializer extends JSONOps {
         val builder = XContentFactory.contentBuilder(XContentType.JSON)
         builder.startObject()
         response.getIndexToSettings.asScala
-          .filter(!_.value.getAsMap.isEmpty)
+          .filter(!_.value.getAsGroups.isEmpty)
           .foreach(cursor => {
             builder.startObject(cursor.key)
             builder.startObject("settings")
@@ -166,6 +163,14 @@ trait ResponseSerializer extends JSONOps {
       implicit F0: JSONSerializer[AcknowledgedResponse])
     : SerializerOps[AcknowledgedResponse] =
     new SerializerOps[AcknowledgedResponse] {
+      override val F = F0
+      override val value = a
+    }
+
+  implicit def toAckWithToXContentSerializerOps[
+      A <: ToXContent with AcknowledgedResponse](a: A)(
+      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
+    new SerializerOps[ToXContent] {
       override val F = F0
       override val value = a
     }

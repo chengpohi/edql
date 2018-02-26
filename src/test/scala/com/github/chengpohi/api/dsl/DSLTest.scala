@@ -75,7 +75,7 @@ class DSLTest extends ELKTestTrait {
     }.await
     val source: util.ArrayList[String] = result.getHits
       .getAt(0)
-      .getSource
+      .getSourceAsMap
       .get("Hello")
       .asInstanceOf[util.ArrayList[String]]
     assert(source.size() === 2)

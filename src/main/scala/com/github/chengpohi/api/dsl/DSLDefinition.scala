@@ -110,6 +110,7 @@ import org.elasticsearch.action.search.{
 }
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
+import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -250,7 +251,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
       updateSettingsRequestBuilder: UpdateSettingsRequestBuilder)
       extends Definition[UpdateSettingsResponse] {
     def settings(st: String): UpdateSettingsRequestDefinition = {
-      updateSettingsRequestBuilder.setSettings(st)
+      updateSettingsRequestBuilder.setSettings(st, XContentType.JSON)
       this
     }
 
@@ -318,7 +319,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     def mappings(m: String): CreateIndexDefinition = {
-      createIndexRequestBuilder.setSource(m)
+      createIndexRequestBuilder.setSource(m, XContentType.JSON)
       this
     }
 
@@ -368,7 +369,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         "settings" -> ss
       )
 
-      createIndexRequestBuilder.setSource(res.json)
+      createIndexRequestBuilder.setSource(res.json, XContentType.JSON)
 
       createIndexRequestBuilder.execute
     }
@@ -559,7 +560,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
     }
 
     def query(queryBuilder: QueryBuilder): SearchRequestDefinition = {
-      searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_AND_FETCH)
+      searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
       searchRequestBuilder.setQuery(queryBuilder)
       this
     }
@@ -695,7 +696,7 @@ trait DSLDefinition extends ElasticBase with DSLContext {
         scrollSearchRequestDefinition.execute
       result.map(s => {
         s.map(i => {
-          val fieldValue = i.getSource.get(_field).asInstanceOf[String]
+          val fieldValue = i.getSourceAsMap.get(_field).asInstanceOf[String]
           val searchRequestBuilder =
             client
               .prepareSearch(indexPath.indexName)
@@ -708,11 +709,11 @@ trait DSLDefinition extends ElasticBase with DSLContext {
               .await
               .map(t => {
                 val fields
-                  : mutable.Map[String, AnyRef] = t.sourceAsMap.asScala + ("id" -> t.getId)
+                  : mutable.Map[String, AnyRef] = t.getSourceAsMap.asScala + ("id" -> t.getId)
                 fields.toMap
               })
           val doc
-            : mutable.Map[String, AnyRef] = i.getSource.asScala + ("id" -> i.getId) + (s"${indexPath.indexType}" -> res)
+            : mutable.Map[String, AnyRef] = i.getSourceAsMap.asScala + ("id" -> i.getId) + (s"${indexPath.indexType}" -> res)
           doc.toMap
         })
       })

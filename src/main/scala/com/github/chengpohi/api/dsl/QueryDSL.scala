@@ -132,7 +132,7 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
             s.getType == indexPath.indexType || indexPath.indexType == "*")
           .foreach(s => {
             DSL {
-              index into indexPath.indexName / s.getType doc s.getSource.asScala
+              index into indexPath.indexName / s.getType doc s.getSourceAsMap.asScala
                 .filter(i => _fields.contains(i._1))
                 .toMap
             }
@@ -214,8 +214,8 @@ trait QueryDSL extends DSLDefinition with IndexDSL {
       }
       searchResponse.map(j => {
         j.map(i => {
-            s"""index into "${i.index()}" / "${i
-              .`type`()}" fields ${i.getSourceAsString}"""
+            s"""index into "${i.getIndex}" / "${i
+              .getType()}" fields ${i.getSourceAsString}"""
           })
           .foreach(l => {
             writer.write(l + System.lineSeparator())
