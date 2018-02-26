@@ -18,9 +18,7 @@ trait JSONOps {
     compact(render(res))
   }
 
-  def beautyJSON(json: String): String = {
-    pretty(render(parse(json)))
-  }
+  def beautyJSON(json: String): String = pretty(render(parse(json)))
 
   def extractJSON(json: String, filterName: String): String = {
     val jObj = parse(json)
@@ -31,7 +29,12 @@ trait JSONOps {
   }
 
   implicit class StringJSONOps(str: String) {
-    def beautify: String = beautyJSON(str)
+    def beautify: String = {
+      if (str.isEmpty) {
+        return ""
+      }
+      beautyJSON(str)
+    }
   }
 
   class NumberSerializer
