@@ -8,7 +8,8 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.common.transport.TransportAddress
+import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.reindex.ReindexPlugin
 import org.elasticsearch.percolator.PercolatorPlugin
 import org.elasticsearch.plugins.Plugin
@@ -34,7 +35,8 @@ trait ELKDSLConfig {
     val settings: Settings = Settings
       .builder()
       .loadFromSource(
-        config.getConfig("local").root().render(ConfigRenderOptions.concise())
+        config.getConfig("local").root().render(ConfigRenderOptions.concise()),
+        XContentType.JSON
       )
       .put("cluster.name", config.getString("cluster.name"))
       .build()
@@ -67,7 +69,8 @@ trait ELKDSLConfig {
 
     val client = new PreBuiltTransportClient(settings)
       .addTransportAddress(
-        new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+        new TransportAddress(new InetSocketAddress(host, port))
+      )
     client
   }
 }
