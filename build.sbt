@@ -8,7 +8,7 @@ unmanagedBase := baseDirectory.value / "lib"
 
 resolvers += Resolver.mavenLocal
 
-version in ThisBuild := "0.2.3-SNAPSHOT"
+version in ThisBuild := "6.x-SNAPSHOT"
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-1.2-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-api" % "2.7",
   "org.apache.logging.log4j" % "log4j-core" % "2.7",
-  "org.elasticsearch.client" % "transport" % "5.1.1",
+  "org.elasticsearch.client" % "transport" % "6.1.2",
   "org.json4s" %% "json4s-native" % "3.5.0",
   "org.json4s" %% "json4s-jackson" % "3.5.0",
   "org.apache.commons" % "commons-lang3" % "3.5",
