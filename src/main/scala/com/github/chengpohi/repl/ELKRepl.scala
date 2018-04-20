@@ -34,7 +34,7 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
       if (line == "exit") System.exit(0)
       line.trim match {
         case "exit" => System.exit(0)
-        case l      => println(run(interpret(l)))
+        case l => println(run(interpret(l)))
       }
     }
   }
@@ -49,15 +49,12 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
 
   def addShutdownHook(reader: ConsoleReader): Unit = {
     DSL {
-      create index ELASTIC_SHELL_INDEX_NAME
+      create index ELASTIC_SHELL_INDEX_NAME not exist
     }.await
 
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
         reader.getHistory.asInstanceOf[FileHistory].flush()
-        DSL {
-          delete index ELASTIC_SHELL_INDEX_NAME
-        }.await
       }
     })
   }
