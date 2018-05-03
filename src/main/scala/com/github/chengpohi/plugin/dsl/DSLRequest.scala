@@ -1,17 +1,14 @@
 package com.github.chengpohi.plugin.dsl
 
-import org.elasticsearch.action.CompositeIndicesRequest
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.index.reindex.AbstractBulkIndexByScrollRequest
-import org.elasticsearch.tasks.TaskId
+import org.elasticsearch.action.{ActionRequest, ActionRequestValidationException, CompositeIndicesRequest}
 
-class DSLRequest extends AbstractBulkIndexByScrollRequest[DSLRequest] with CompositeIndicesRequest {
-  override def self(): DSLRequest = this
-  override def forSlice(slicingTask: TaskId, slice: SearchRequest, totalSlices: Int): DSLRequest = {
+class DSLRequest extends ActionRequest with CompositeIndicesRequest {
+  var request: String = _
+  override def validate(): ActionRequestValidationException = {
     null
   }
 }
 
 object DSLRequest {
-  def apply(): DSLRequest = new DSLRequest()
+  def apply: DSLRequest = new DSLRequest
 }
