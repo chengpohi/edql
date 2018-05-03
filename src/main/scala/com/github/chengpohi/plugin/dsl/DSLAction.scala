@@ -2,21 +2,20 @@ package com.github.chengpohi.plugin.dsl
 
 import org.elasticsearch.action.Action
 import org.elasticsearch.client.ElasticsearchClient
-import org.elasticsearch.index.reindex.BulkByScrollResponse
 
 class DSLAction(name: String) extends Action[DSLRequest, DSLResponse, DSLRequestBuilder](name) {
   override def newRequestBuilder(client: ElasticsearchClient): DSLRequestBuilder = {
     DSLRequestBuilder(client, this)
   }
   override def newResponse(): DSLResponse = {
-    new DSLResponse
+    DSLResponse("unknown")
   }
 }
 
 object DSLAction {
-  val name = "indices:data/write/reindex"
+  val NAME = "indices:data/write/dsl"
   val INSTANCE = DSLAction()
 
-  def apply(): DSLAction = new DSLAction(name) {
+  def apply(): DSLAction = new DSLAction(NAME) {
   }
 }

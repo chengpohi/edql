@@ -14,5 +14,6 @@ class DSLRequestBuilder(client: ElasticsearchClient,
 object DSLRequestBuilder {
   def apply(client: ElasticsearchClient,
             action: Action[DSLRequest, DSLResponse, DSLRequestBuilder]
-           ): DSLRequestBuilder = new DSLRequestBuilder(client, action)
+           ): DSLRequestBuilder =
+    new DSLRequestBuilder(client, action)
 }
