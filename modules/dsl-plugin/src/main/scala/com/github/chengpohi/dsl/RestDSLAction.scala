@@ -1,4 +1,4 @@
-package com.github.chengpohi.plugin.dsl
+package com.github.chengpohi.dsl
 
 import org.elasticsearch.client.node.NodeClient
 import org.elasticsearch.common.settings.Settings

@@ -1,9 +1,9 @@
-package com.github.chengpohi.plugin
+package com.github.chengpohi
 
 import java.util
 import java.util.function.Supplier
 
-import com.github.chengpohi.plugin.dsl.{DSLAction, RestDSLAction, TransportDSLAction}
+import com.github.chengpohi.dsl.{DSLAction, RestDSLAction, TransportDSLAction}
 import org.elasticsearch.action.{ActionRequest, ActionResponse}
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver
 import org.elasticsearch.cluster.node.DiscoveryNodes
