@@ -43,7 +43,7 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
     Reader((elkRunEngine: ELKInterpreter) => elkRunEngine.run(line).beautify)
   }
 
-  def run[T](reader: Reader[ELKInterpreter, T]) = {
+  def run[T](reader: Reader[ELKInterpreter, T]): Id.Id[T] = {
     reader(elkInterpreter)
   }
 

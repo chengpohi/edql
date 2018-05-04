@@ -1,4 +1,4 @@
-package com.github.chengpohi.plugin.dsl
+package com.github.chengpohi.dsl
 
 import com.github.chengpohi.api.ElasticDSL
 import com.github.chengpohi.parser.ELKParser
@@ -31,7 +31,7 @@ class TransportDSLAction @Inject()(settings: Settings,
     indexNameExpressionResolver,
     () => {
       new DSLRequest
-    },
+    }
   ) {
   implicit val dsl: ElasticDSL = new ElasticDSL(client)
   implicit val elkParser = new ELKParser(dsl)
