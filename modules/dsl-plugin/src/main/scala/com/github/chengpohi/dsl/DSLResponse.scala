@@ -1,4 +1,4 @@
-package com.github.chengpohi.plugin.dsl
+package com.github.chengpohi.dsl
 
 import org.elasticsearch.action.ActionResponse
 import org.elasticsearch.common.xcontent.{ToXContent, ToXContentFragment, XContentBuilder}
