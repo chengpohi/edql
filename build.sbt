@@ -7,6 +7,8 @@ lazy val root = project
   .settings(commonSettings: _*)
   .settings(rootProjectSettings: _*)
   .settings(
-    pluginName in esplugin := "dslplugin.jar"
+    pluginName in espackage := "dslplugin.jar",
+    pluginClassName in espackage := "com.github.chengpohi.DSLPlugin",
+    pluginDescription in espackage := "dsl explore for elasticsearch"
   )
 
