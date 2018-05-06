@@ -54,7 +54,6 @@ trait DSLContext extends DSLExecutor with FutureOps {
     case _ => QueryBuilders.queryStringQuery(query)
   }
 
-
   trait OperationStatus
 
   case object exist extends OperationStatus

@@ -1,6 +1,10 @@
 package com.github.chengpohi.dsl
 
-import org.elasticsearch.action.{ActionRequest, ActionRequestValidationException, CompositeIndicesRequest}
+import org.elasticsearch.action.{
+  ActionRequest,
+  ActionRequestValidationException,
+  CompositeIndicesRequest
+}
 
 class DSLRequest extends ActionRequest with CompositeIndicesRequest {
   var request: String = _
