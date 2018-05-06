@@ -34,7 +34,7 @@ object ELKRepl extends ELKDSLConfig with ELKDSLContext with JSONOps {
       if (line == "exit") System.exit(0)
       line.trim match {
         case "exit" => System.exit(0)
-        case l => println(run(interpret(l)))
+        case l      => println(run(interpret(l)))
       }
     }
   }

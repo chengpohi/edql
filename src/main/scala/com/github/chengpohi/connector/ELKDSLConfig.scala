@@ -4,6 +4,7 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
+import com.github.chengpohi.DSLPlugin
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.client.Client
