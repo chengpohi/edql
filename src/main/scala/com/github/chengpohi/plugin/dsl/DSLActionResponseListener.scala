@@ -4,12 +4,19 @@ import java.util
 
 import org.elasticsearch.common.xcontent.{ToXContent, XContentBuilder}
 import org.elasticsearch.rest.action.RestBuilderListener
-import org.elasticsearch.rest.{BytesRestResponse, RestChannel, RestResponse, RestStatus}
+import org.elasticsearch.rest.{
+  BytesRestResponse,
+  RestChannel,
+  RestResponse,
+  RestStatus
+}
 
-class DSLActionResponseListener(channel: RestChannel) extends RestBuilderListener[DSLResponse](channel) {
+class DSLActionResponseListener(channel: RestChannel)
+    extends RestBuilderListener[DSLResponse](channel) {
   private val params: util.Map[String, String] = null
 
-  override def buildResponse(response: DSLResponse, builder: XContentBuilder): RestResponse = {
+  override def buildResponse(response: DSLResponse,
+                             builder: XContentBuilder): RestResponse = {
 //    builder.startObject
 //    response.toXContent(
 //      builder,

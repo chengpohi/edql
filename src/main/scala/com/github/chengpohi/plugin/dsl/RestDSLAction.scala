@@ -5,20 +5,24 @@ import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.rest.RestRequest.Method.{GET, POST}
 import org.elasticsearch.rest._
 
-class RestDSLAction(settings: Settings, controller: RestController) extends BaseRestHandler(settings) {
+class RestDSLAction(settings: Settings, controller: RestController)
+    extends BaseRestHandler(settings) {
 
   override def getName: String = "dsl_action"
 
-  override def prepareRequest(request: RestRequest, client: NodeClient): BaseRestHandler.RestChannelConsumer = {
-    channel: RestChannel => {
-      val req = new DSLRequest
-      req.request = request.content().utf8ToString()
-      client.executeLocally(
-        new DSLAction(DSLAction.NAME),
-        req,
-        new DSLActionResponseListener(channel)
-      )
-    }
+  override def prepareRequest(
+      request: RestRequest,
+      client: NodeClient): BaseRestHandler.RestChannelConsumer = {
+    channel: RestChannel =>
+      {
+        val req = new DSLRequest
+        req.request = request.content().utf8ToString()
+        client.executeLocally(
+          new DSLAction(DSLAction.NAME),
+          req,
+          new DSLActionResponseListener(channel)
+        )
+      }
   }
 }
 

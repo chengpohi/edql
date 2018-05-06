@@ -15,8 +15,8 @@ import org.elasticsearch.rest.{RestController, RestHandler}
 class DSLPlugin extends Plugin with ActionPlugin {
   val NAME = "dsl"
 
-
-  override def getActions: util.List[ActionHandler[_ <: ActionRequest, _ <: ActionResponse]] = {
+  override def getActions
+    : util.List[ActionHandler[_ <: ActionRequest, _ <: ActionResponse]] = {
     util.Arrays.asList(
       new ActionHandler(DSLAction.INSTANCE, classOf[TransportDSLAction])
     )
@@ -35,7 +35,14 @@ class DSLPlugin extends Plugin with ActionPlugin {
   //        }))
   //  }
 
-  override def getRestHandlers(settings: Settings, restController: RestController, clusterSettings: ClusterSettings, indexScopedSettings: IndexScopedSettings, settingsFilter: SettingsFilter, indexNameExpressionResolver: IndexNameExpressionResolver, nodesInCluster: Supplier[DiscoveryNodes]): util.List[RestHandler] = {
+  override def getRestHandlers(
+      settings: Settings,
+      restController: RestController,
+      clusterSettings: ClusterSettings,
+      indexScopedSettings: IndexScopedSettings,
+      settingsFilter: SettingsFilter,
+      indexNameExpressionResolver: IndexNameExpressionResolver,
+      nodesInCluster: Supplier[DiscoveryNodes]): util.List[RestHandler] = {
     util.Arrays.asList(
       RestDSLAction(settings, restController)
     )
