@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import sbt.internal.DslEntry
 import sbtassembly.AssemblyKeys._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyJarName
 
@@ -17,7 +16,7 @@ object Settings {
   lazy val rootProjectSettings = Seq(
     name := "elasticdsl",
     unmanagedBase := baseDirectory.value / "lib",
-    scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import"),
+    scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import", "-language:implicitConversions"),
     testOptions in Test += Tests.Cleanup(() => println("Cleanup")),
     mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl"),
     libraryDependencies ++= dependencies

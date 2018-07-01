@@ -4,7 +4,7 @@ import java.util
 
 import jline.console.completer.Completer
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 import scala.math.min
 
@@ -29,7 +29,7 @@ class StringsCompleter(completions: Set[String], words: Set[String])
   override def complete(buffer: String,
                         cursor: Int,
                         candidates: util.List[CharSequence]): Int = {
-    if (buffer.isEmpty) candidates.addAll(completions)
+    if (buffer.isEmpty) candidates.addAll(completions.asJava)
     completions.contains(buffer) match {
       case true =>
         val strings: List[String] =
@@ -39,14 +39,14 @@ class StringsCompleter(completions: Set[String], words: Set[String])
             .toList
             .sortBy(i => i._2)
             .map(i => i._1)
-        candidates.addAll(strings.take(3))
+        candidates.addAll(strings.take(3).asJava)
       case false =>
         val filters: Set[String] = completions.filter(c => c.startsWith(buffer))
         val indentFilters: Set[String] =
           completions.filter(c => indentFilter(c, buffer))
         val wordCompleter = termCompeleter(buffer)
         val strings: Set[String] = indentFilters ++ filters ++ wordCompleter
-        candidates.addAll(strings)
+        candidates.addAll(strings.asJava)
     }
 
     candidates.isEmpty match {
