@@ -41,7 +41,9 @@ object EsPluginPackagerPlugin extends AutoPlugin {
         level = (logLevel in espackage).value
       )
     },
-    espackage := packageToEsPlugin(espackage).value
+    espackage := {
+      packageToEsPlugin(espackage).value
+    }
   )
 
   lazy val esPluginSettings: Seq[sbt.Def.Setting[_]] = baseEsPluginPackagerSettings
