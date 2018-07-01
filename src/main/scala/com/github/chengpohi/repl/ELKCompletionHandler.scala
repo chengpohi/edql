@@ -9,7 +9,7 @@ import jline.console.completer.{
   CompletionHandler
 }
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
   * ELKCompletionHandler
@@ -23,11 +23,11 @@ class ELKCompletionHandler extends CompletionHandler {
     val buf = reader.getCursorBuffer
     candidates.size() match {
       case 1 =>
-        val value = candidates.head
+        val value = candidates.asScala.head
         setBuffer(reader, value, position)
         true
       case i if i > 1 => {
-        val value = candidates.head
+        val value = candidates.asScala.head
         setBuffer(reader, value, position)
         CandidateListCompletionHandler.printCandidates(reader, candidates)
         reader.drawLine()
