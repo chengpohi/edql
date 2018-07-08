@@ -1,13 +1,13 @@
 package com.github.chengpohi.qa
 
-import com.github.chengpohi.connector.ELKDSLConfig
-import com.github.chengpohi.registry.ELKDSLContext
+import com.github.chengpohi.connector.EQLConfig
+import com.github.chengpohi.registry.EQLContext
 
-object QuestionsImport extends ELKDSLConfig with ELKDSLContext {
+object QuestionsImport extends EQLConfig with EQLContext {
 
-  import dsl._
+  import eql._
 
-  DSL {
+  EQL {
     index into "qa" / "question" doc Map("question" -> "question",
                                          "answers" -> List("answer1",
                                                            "answer2"))

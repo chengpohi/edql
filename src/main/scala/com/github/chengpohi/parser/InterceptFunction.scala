@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.ElasticDSL
+import com.github.chengpohi.api.EQLClient
 import com.github.chengpohi.collection.JsonCollection._
 import com.typesafe.config.ConfigFactory
 
@@ -10,7 +10,7 @@ import scala.concurrent.Future
   * elasticservice
   * Created by chengpohi on 1/18/16.
   */
-class InterceptFunction(val elasticCommand: ElasticDSL) {
+class InterceptFunction(val elasticCommand: EQLClient) {
   val MAX_NUMBER: Int = 500
 
   import elasticCommand._

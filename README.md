@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/chengpohi/elasticdsl.svg)](https://travis-ci.org/chengpohi/elasticdsl)
 
-# Elastic DSL with REPL
+# EQL with REPL
 
 ## Introduction
-It is a **DSL** for elasticsearch. Have fun :)
+It is a **EQL** for elasticsearch. Have fun :)
 
 
 ## Use it
@@ -18,16 +18,16 @@ In the ***conf/elasticdsl.conf***, you can configure your ***elasticsearch host,
 bin/es
 ```
 
-### DSL
+### EQL
 
 ```
-val result: Future[SearchResponse] = DSL {
+val result: Future[SearchResponse] = EQL {
   search in "*"
 }
-val result: SearchResponse = DSL {
+val result: SearchResponse = EQL {
   search in "*"
 }.await
-val result: String = DSL {
+val result: String = EQL {
   search in "*"
 }.toJson
 ```

@@ -1,6 +1,6 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.ElasticDSL
+import com.github.chengpohi.api.EQLClient
 import com.github.chengpohi.collection.JsonCollection.Str
 import fastparse.core.Parsed.{Failure, Success}
 import fastparse.noApi._
@@ -9,9 +9,9 @@ import fastparse.noApi._
   * scala-parser-combinator
   * Created by chengpohi on 12/30/15.
   */
-class ELKParser(dsl: ElasticDSL) extends ELKInstructionParser {
+class ELKParser(eql: EQLClient) extends ELKInstructionParser {
 
-  override val interceptFunction: InterceptFunction = new InterceptFunction(dsl)
+  override val interceptFunction: InterceptFunction = new InterceptFunction(eql)
 
   import WhitespaceApi._
 
