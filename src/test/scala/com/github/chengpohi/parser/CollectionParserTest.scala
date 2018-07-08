@@ -5,7 +5,7 @@ import fastparse.core.Parsed
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 /**
-  * elasticdsl
+  * elasticeql
   * Created by chengpohi on 2/1/16.
   */
 class CollectionParserTest extends FlatSpec with BeforeAndAfter {

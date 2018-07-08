@@ -5,7 +5,7 @@ import fastparse.noApi._
 import org.apache.commons.lang3.StringEscapeUtils
 
 /**
-  * elasticdsl
+  * elasticeql
   * Created by chengpohi on 2/1/16.
   */
 class CollectionParser extends Basic {

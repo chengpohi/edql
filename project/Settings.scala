@@ -14,11 +14,11 @@ object Settings {
   )
 
   lazy val rootProjectSettings = Seq(
-    name := "elasticdsl",
+    name := "eql",
     unmanagedBase := baseDirectory.value / "lib",
     scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import", "-language:implicitConversions"),
     testOptions in Test += Tests.Cleanup(() => println("Cleanup")),
-    mainClass in Compile := Some("com.github.chengpohi.repl.ELKRepl"),
+    mainClass in Compile := Some("com.github.chengpohi.repl.EQLRepl"),
     libraryDependencies ++= dependencies
   )
 
@@ -41,7 +41,7 @@ object Settings {
   implicit class ElasticPlugin(pro: Project) {
     def toElasticPlugin(pluginName: String): Project = {
       val plugin = project
-        .in(file("modules/dsl-plugin"))
+        .in(file("modules/eql-plugin"))
         .settings(commonSettings: _*)
         .settings(
           assemblyJarName in assembly := pluginName,

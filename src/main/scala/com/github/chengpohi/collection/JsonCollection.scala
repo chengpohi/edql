@@ -3,7 +3,7 @@ package com.github.chengpohi.collection
 import scala.reflect.runtime.universe._
 
 /**
-  * elasticdsl
+  * eql
   * Created by chengpohi on 2/17/16.
   */
 object JsonCollection {
