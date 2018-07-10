@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/chengpohi/elasticdsl.svg)](https://travis-ci.org/chengpohi/elasticdsl)
+[![JProfiler Support](
+https://www.ej-technologies.com/images/product_banners/jprofiler_small.png)](https://www.ej-technologies.com/products/jprofiler/overview.html)
 
 # Elastic DSL with REPL
 
