@@ -3,12 +3,9 @@ package com.github.chengpohi.api.eql
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization.write
+import scalaz.Scalaz._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-
-import scalaz._
-import Scalaz._
+import scala.concurrent.Future
 
 /**
   * eql

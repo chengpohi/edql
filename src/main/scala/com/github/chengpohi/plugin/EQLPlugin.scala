@@ -3,7 +3,11 @@ package com.github.chengpohi.plugin
 import java.util
 import java.util.function.Supplier
 
-import com.github.chengpohi.plugin.eql.{EQLAction, RestEQLAction, TransportEQLAction}
+import com.github.chengpohi.plugin.eql.{
+  EQLAction,
+  RestEQLAction,
+  TransportEQLAction
+}
 import org.elasticsearch.action.{ActionRequest, ActionResponse}
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver
 import org.elasticsearch.cluster.node.DiscoveryNodes

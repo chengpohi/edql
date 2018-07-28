@@ -8,6 +8,11 @@ object Settings {
     version := "6.x-SNAPSHOT",
     organization := "com.github.chengpohi",
     scalaVersion := "2.12.1",
+    scalacOptions ++= Seq("-Ywarn-unused",
+                          "-Ywarn-unused-import",
+                          "-feature",
+                          "-language:implicitConversions",
+                          "-language:postfixOps"),
     resolvers += Resolver.mavenLocal,
     resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases",
     test in assembly := {}
@@ -16,7 +21,11 @@ object Settings {
   lazy val rootProjectSettings = Seq(
     name := "eql",
     unmanagedBase := baseDirectory.value / "lib",
-    scalacOptions in compile ++= Seq("-Ywarn-unused", "-Ywarn-unused-import", "-language:implicitConversions"),
+    scalacOptions ++= Seq("-Ywarn-unused",
+                          "-Ywarn-unused-import",
+                          "-feature",
+                          "-language:implicitConversions",
+                          "-language:postfixOps"),
     testOptions in Test += Tests.Cleanup(() => println("Cleanup")),
     mainClass in Compile := Some("com.github.chengpohi.repl.EQLRepl"),
     libraryDependencies ++= dependencies
@@ -55,13 +64,13 @@ object Settings {
         .settings(projectDependencies := {
           Seq(
             (projectID in pro).value.exclude("org.elasticsearch.client",
-              "transport"),
+                                             "transport"),
             (projectID in pro).value.exclude("org.apache.logging.log4j",
-              "log4j-1.2-api"),
+                                             "log4j-1.2-api"),
             (projectID in pro).value.exclude("org.apache.logging.log4j",
-              "log4j-api"),
+                                             "log4j-api"),
             (projectID in pro).value.exclude("org.apache.logging.log4j",
-              "log4j-core")
+                                             "log4j-core")
           )
         })
         .dependsOn(pro)

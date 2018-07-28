@@ -61,10 +61,9 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
     val reader = new ConsoleReader()
     reader.setPrompt("eql>")
     reader.addCompleter(terms)
-    reader.setCompletionHandler(new ELKCompletionHandler)
+    reader.setCompletionHandler(new EQLCompletionHandler)
     reader.setHistory(
-      new FileHistory(
-        new File(Configuration.getUserHome, ".eql.history")))
+      new FileHistory(new File(Configuration.getUserHome, ".eql.history")))
     addShutdownHook(reader)
     reader
   }
