@@ -4,10 +4,7 @@ import com.github.chengpohi.api.EQLClient
 import com.github.chengpohi.connector.EQLConfig
 import com.github.chengpohi.parser.ELKParser
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 4/4/16.
-  */
+
 trait EQLContext {
   this: EQLConfig =>
   private val client = buildClient(config)

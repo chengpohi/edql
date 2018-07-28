@@ -12,10 +12,7 @@ import scalaz._
 
 import scala.io.Source
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 1/27/16.
-  */
+
 object EQLRepl extends EQLConfig with EQLContext with JSONOps {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val terms = new StringsCompleter(

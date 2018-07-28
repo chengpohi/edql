@@ -3,10 +3,7 @@ package com.github.chengpohi.api.eql
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder
 import org.elasticsearch.action.delete.DeleteRequestBuilder
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 6/28/16.
-  */
+
 trait DeleterEQL extends EQLDefinition {
   case object delete {
     def index(indexName: String): DeleteIndexRequestDefinition = {

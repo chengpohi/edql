@@ -4,9 +4,6 @@ import com.github.chengpohi.collection.JsonCollection.Val
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 
-/**
-  * Created by xiachen on 10/11/2016.
-  */
 trait EQLContext extends EQLExecutor with FutureOps {
 
   implicit class IndexNameAndIndexType(indexName: String) {

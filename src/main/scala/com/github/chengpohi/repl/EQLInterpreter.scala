@@ -6,9 +6,6 @@ import com.github.chengpohi.registry.EQLContext
 
 import scala.io.Source
 
-/**
-  * Created by chengpohi on 1/3/16.
-  */
 class EQLInterpreter(implicit val elkParser: ELKParser) {
 
   import elkParser._

@@ -4,10 +4,7 @@ import com.github.chengpohi.collection.JsonCollection
 import com.github.chengpohi.collection.JsonCollection.Str
 import fastparse.noApi._
 
-/**
-  * elasticservice
-  * Created by chengpohi on 1/18/16.
-  */
+
 trait ELKInstructionParser extends CollectionParser {
   val interceptFunction: InterceptFunction
 
