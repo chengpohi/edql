@@ -2,7 +2,7 @@ package com.github.chengpohi.registry
 
 import com.github.chengpohi.api.EQLClient
 import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.parser.{ELKParser, InterceptFunction}
+import com.github.chengpohi.parser.ELKParser
 
 /**
   * elasticdsl

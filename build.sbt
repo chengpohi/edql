@@ -11,4 +11,3 @@ lazy val root = project
     pluginClassName in espackage := "com.github.chengpohi.EQLPlugin",
     pluginDescription in espackage := "eql explore for elasticsearch"
   )
-

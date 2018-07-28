@@ -1,18 +1,8 @@
 package com.github.chengpohi.api.eql
 
 import com.github.chengpohi.collection.JsonCollection.Val
-import org.elasticsearch.index.query.{
-  QueryBuilder,
-  QueryBuilders,
-  RangeQueryBuilder
-}
+import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
-import org.json4s._
-import org.json4s.native.JsonMethods._
-import org.json4s.native.Serialization.write
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 /**
   * Created by xiachen on 10/11/2016.

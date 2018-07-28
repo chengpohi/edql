@@ -4,10 +4,7 @@ import java.io.IOException
 import java.util
 
 import jline.console.ConsoleReader
-import jline.console.completer.{
-  CandidateListCompletionHandler,
-  CompletionHandler
-}
+import jline.console.completer.{CandidateListCompletionHandler, CompletionHandler}
 
 import scala.collection.JavaConverters._
 
@@ -15,12 +12,11 @@ import scala.collection.JavaConverters._
   * ELKCompletionHandler
   * Created by chengpohi on 3/25/16.
   */
-class ELKCompletionHandler extends CompletionHandler {
+class EQLCompletionHandler extends CompletionHandler {
   @throws[IOException]
   override def complete(reader: ConsoleReader,
                         candidates: util.List[CharSequence],
                         position: Int): Boolean = {
-    val buf = reader.getCursorBuffer
     candidates.size() match {
       case 1 =>
         val value = candidates.asScala.head

@@ -5,129 +5,50 @@ import java.io.Serializable
 import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.api.ElasticBase
 import com.github.chengpohi.collection.JsonCollection.Val
-import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.admin.cluster.health.{
-  ClusterHealthRequestBuilder,
-  ClusterHealthResponse
-}
-import org.elasticsearch.action.admin.cluster.node.info.{
-  NodesInfoRequestBuilder,
-  NodesInfoResponse
-}
-import org.elasticsearch.action.admin.cluster.node.stats.{
-  NodesStatsRequestBuilder,
-  NodesStatsResponse
-}
-import org.elasticsearch.action.admin.cluster.repositories.put.{
-  PutRepositoryRequestBuilder,
-  PutRepositoryResponse
-}
-import org.elasticsearch.action.admin.cluster.settings.{
-  ClusterUpdateSettingsRequestBuilder,
-  ClusterUpdateSettingsResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.create.{
-  CreateSnapshotRequestBuilder,
-  CreateSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.delete.{
-  DeleteSnapshotRequestBuilder,
-  DeleteSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.get.{
-  GetSnapshotsRequestBuilder,
-  GetSnapshotsResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.restore.{
-  RestoreSnapshotRequestBuilder,
-  RestoreSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.state.{
-  ClusterStateRequestBuilder,
-  ClusterStateResponse
-}
-import org.elasticsearch.action.admin.cluster.stats.{
-  ClusterStatsRequestBuilder,
-  ClusterStatsResponse
-}
-import org.elasticsearch.action.admin.cluster.tasks.{
-  PendingClusterTasksRequestBuilder,
-  PendingClusterTasksResponse
-}
-import org.elasticsearch.action.admin.indices.alias.{
-  IndicesAliasesRequestBuilder,
-  IndicesAliasesResponse
-}
-import org.elasticsearch.action.admin.indices.analyze.{
-  AnalyzeRequestBuilder,
-  AnalyzeResponse
-}
-import org.elasticsearch.action.admin.indices.close.{
-  CloseIndexRequestBuilder,
-  CloseIndexResponse
-}
-import org.elasticsearch.action.admin.indices.create.{
-  CreateIndexRequestBuilder,
-  CreateIndexResponse
-}
-import org.elasticsearch.action.admin.indices.delete.{
-  DeleteIndexRequestBuilder,
-  DeleteIndexResponse
-}
+import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
+import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
+import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
+import org.elasticsearch.action.admin.cluster.repositories.put.{PutRepositoryRequestBuilder, PutRepositoryResponse}
+import org.elasticsearch.action.admin.cluster.settings.{ClusterUpdateSettingsRequestBuilder, ClusterUpdateSettingsResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.create.{CreateSnapshotRequestBuilder, CreateSnapshotResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.delete.{DeleteSnapshotRequestBuilder, DeleteSnapshotResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.get.{GetSnapshotsRequestBuilder, GetSnapshotsResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.restore.{RestoreSnapshotRequestBuilder, RestoreSnapshotResponse}
+import org.elasticsearch.action.admin.cluster.state.{ClusterStateRequestBuilder, ClusterStateResponse}
+import org.elasticsearch.action.admin.cluster.stats.{ClusterStatsRequestBuilder, ClusterStatsResponse}
+import org.elasticsearch.action.admin.cluster.tasks.{PendingClusterTasksRequestBuilder, PendingClusterTasksResponse}
+import org.elasticsearch.action.admin.indices.alias.{IndicesAliasesRequestBuilder, IndicesAliasesResponse}
+import org.elasticsearch.action.admin.indices.analyze.{AnalyzeRequestBuilder, AnalyzeResponse}
+import org.elasticsearch.action.admin.indices.close.{CloseIndexRequestBuilder, CloseIndexResponse}
+import org.elasticsearch.action.admin.indices.create.{CreateIndexRequestBuilder, CreateIndexResponse}
+import org.elasticsearch.action.admin.indices.delete.{DeleteIndexRequestBuilder, DeleteIndexResponse}
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
-import org.elasticsearch.action.admin.indices.mapping.get.{
-  GetMappingsRequestBuilder,
-  GetMappingsResponse
-}
-import org.elasticsearch.action.admin.indices.mapping.put.{
-  PutMappingRequestBuilder,
-  PutMappingResponse
-}
-import org.elasticsearch.action.admin.indices.open.{
-  OpenIndexRequestBuilder,
-  OpenIndexResponse
-}
+import org.elasticsearch.action.admin.indices.mapping.get.{GetMappingsRequestBuilder, GetMappingsResponse}
+import org.elasticsearch.action.admin.indices.mapping.put.{PutMappingRequestBuilder, PutMappingResponse}
+import org.elasticsearch.action.admin.indices.open.{OpenIndexRequestBuilder, OpenIndexResponse}
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
-import org.elasticsearch.action.admin.indices.settings.get.{
-  GetSettingsRequestBuilder,
-  GetSettingsResponse
-}
-import org.elasticsearch.action.admin.indices.settings.put.{
-  UpdateSettingsRequestBuilder,
-  UpdateSettingsResponse
-}
-import org.elasticsearch.action.admin.indices.stats.{
-  IndicesStatsRequestBuilder,
-  IndicesStatsResponse
-}
+import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
+import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
+import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
 import org.elasticsearch.action.bulk.{BulkRequestBuilder, BulkResponse}
 import org.elasticsearch.action.delete.{DeleteRequestBuilder, DeleteResponse}
 import org.elasticsearch.action.get.{GetRequestBuilder, GetResponse}
 import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
-import org.elasticsearch.action.search.{
-  SearchRequestBuilder,
-  SearchResponse,
-  SearchScrollRequestBuilder,
-  SearchType
-}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.histogram.{
-  DateHistogramAggregationBuilder,
-  DateHistogramInterval
-}
+import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.elasticsearch.search.sort.SortBuilder
+import scalaz.Scalaz._
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.reflect.runtime.universe
-import scalaz.Scalaz._
-import scalaz._
 
 /**
   * eql
