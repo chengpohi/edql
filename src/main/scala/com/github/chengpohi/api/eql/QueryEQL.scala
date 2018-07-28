@@ -15,10 +15,7 @@ import org.elasticsearch.action.search.{
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 6/29/16.
-  */
+
 trait QueryEQL extends EQLDefinition with IndexEQL {
 
   case object get {
