@@ -8,10 +8,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.io.Source
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 4/4/16.
-  */
+
 trait EQLTestTrait
     extends FlatSpec
     with Matchers

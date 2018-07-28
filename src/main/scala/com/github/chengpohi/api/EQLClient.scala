@@ -3,10 +3,7 @@ package com.github.chengpohi.api
 import com.github.chengpohi.api.eql._
 import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient}
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 1/6/16.
-  */
+
 trait EQLs
     extends AggsEQL
     with AnalyzeEQL

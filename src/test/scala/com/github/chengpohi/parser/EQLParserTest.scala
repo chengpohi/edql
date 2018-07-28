@@ -9,10 +9,7 @@ import com.github.chengpohi.repl.EQLInterpreter
 
 import scala.io.Source
 
-/**
-  * elasticservice
-  * Created by chengpohi on 1/19/16.
-  */
+
 class EQLParserTest extends EQLTestTrait {
   val runEngine: EQLInterpreter = new EQLInterpreter()
 

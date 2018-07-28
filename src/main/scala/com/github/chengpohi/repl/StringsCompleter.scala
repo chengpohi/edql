@@ -8,10 +8,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 import scala.math.min
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 3/25/16.
-  */
+
 class StringsCompleter(completions: Set[String], words: Set[String])
     extends Completer {
 

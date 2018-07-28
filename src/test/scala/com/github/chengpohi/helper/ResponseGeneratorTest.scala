@@ -3,10 +3,7 @@ package com.github.chengpohi.helper
 import com.github.chengpohi.api.serializer.JSONOps
 import org.scalatest.FlatSpec
 
-/**
-  * elasticdsl
-  * Created by chengpohi on 1/28/16.
-  */
+
 class ResponseGeneratorTest extends FlatSpec with JSONOps {
   "extractJSON" should "extract json by paths" in {
     val json =
