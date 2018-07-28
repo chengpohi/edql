@@ -16,7 +16,7 @@ object EsPluginPackager {
     Assembly(
       new File(s"${crossTarget.value}/$pn"),
       (assemblyOption in key).value,
-      (packageOptions in(Compile, packageBin)).value,
+      (packageOptions in (Compile, packageBin)).value,
       Assembly.assembledMappingsTask(key).value,
       s.cacheDirectory,
       s.log

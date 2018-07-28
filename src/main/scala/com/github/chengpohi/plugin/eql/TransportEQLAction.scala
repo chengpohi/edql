@@ -1,11 +1,14 @@
 package com.github.chengpohi.plugin.eql
 
-
 import com.github.chengpohi.api.EQLClient
 import com.github.chengpohi.parser.ELKParser
 import com.github.chengpohi.repl.EQLInterpreter
 import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.support.{ActionFilters, AutoCreateIndex, HandledTransportAction}
+import org.elasticsearch.action.support.{
+  ActionFilters,
+  AutoCreateIndex,
+  HandledTransportAction
+}
 import org.elasticsearch.client.Client
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver
 import org.elasticsearch.cluster.service.ClusterService
@@ -17,25 +20,25 @@ import org.elasticsearch.threadpool.ThreadPool
 import org.elasticsearch.transport.TransportService
 
 class TransportEQLAction @Inject()(
-                                    settings: Settings,
-                                    threadPool: ThreadPool,
-                                    actionFilters: ActionFilters,
-                                    indexNameExpressionResolver: IndexNameExpressionResolver,
-                                    clusterService: ClusterService,
-                                    scriptService: ScriptService,
-                                    autoCreateIndex: AutoCreateIndex,
-                                    client: Client,
-                                    transportService: TransportService)
-  extends HandledTransportAction[EQLRequest, EQLResponse](
-    settings,
-    EQLAction.NAME,
-    threadPool,
-    transportService,
-    actionFilters,
-    indexNameExpressionResolver,
-    () => {
-      new EQLRequest
-    }) {
+    settings: Settings,
+    threadPool: ThreadPool,
+    actionFilters: ActionFilters,
+    indexNameExpressionResolver: IndexNameExpressionResolver,
+    clusterService: ClusterService,
+    scriptService: ScriptService,
+    autoCreateIndex: AutoCreateIndex,
+    client: Client,
+    transportService: TransportService)
+    extends HandledTransportAction[EQLRequest, EQLResponse](
+      settings,
+      EQLAction.NAME,
+      threadPool,
+      transportService,
+      actionFilters,
+      indexNameExpressionResolver,
+      () => {
+        new EQLRequest
+      }) {
   implicit val eqlClient: EQLClient = new EQLClient(client)
   implicit val elkParser = new ELKParser(eqlClient)
   val interpreter = new EQLInterpreter()

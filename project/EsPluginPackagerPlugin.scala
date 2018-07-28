@@ -3,16 +3,15 @@ import sbt.Keys._
 import sbt._
 import sbtassembly.{Assembly, AssemblyOption, MergeStrategy, PathList}
 
-
 object EsPluginPackagerPlugin extends AutoPlugin {
   override def requires: AutoPlugin = plugins.JvmPlugin
   override def trigger: PluginTrigger = allRequirements
   override lazy val projectSettings: Seq[Def.Setting[_]] = esPluginSettings
 
-
   object autoImport extends EsPluginPackagerKeys {
     val ESPluginPackager = EsPluginPackager
-    val baseEsPluginSettings = EsPluginPackagerPlugin.baseEsPluginPackagerSettings
+    val baseEsPluginSettings =
+      EsPluginPackagerPlugin.baseEsPluginPackagerSettings
   }
 
   import autoImport.{ESPluginPackager => _, baseEsPluginSettings => _, _}
@@ -28,7 +27,7 @@ object EsPluginPackagerPlugin extends AutoPlugin {
         includeDependency = true,
         mergeStrategy = {
           case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-          case _ => MergeStrategy.first
+          case _                             => MergeStrategy.first
         },
         excludedJars = Seq(),
         excludedFiles = Assembly.defaultExcludedFiles,
@@ -46,5 +45,6 @@ object EsPluginPackagerPlugin extends AutoPlugin {
     }
   )
 
-  lazy val esPluginSettings: Seq[sbt.Def.Setting[_]] = baseEsPluginPackagerSettings
+  lazy val esPluginSettings: Seq[sbt.Def.Setting[_]] =
+    baseEsPluginPackagerSettings
 }
