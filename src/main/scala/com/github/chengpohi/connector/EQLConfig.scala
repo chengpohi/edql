@@ -4,7 +4,6 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
-import com.github.chengpohi.plugin.EQLPlugin
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.client.Client
@@ -28,7 +27,7 @@ trait EQLConfig {
 
   def buildClient(config: Config): Client =
     config.getBoolean("standalone") match {
-      case true  => buildLocalClient(config)
+      case true => buildLocalClient(config)
       case false => buildRemoteClient(config)
     }
 
@@ -45,10 +44,10 @@ trait EQLConfig {
     val plugins =
       Collections.unmodifiableList(
         util.Arrays.asList(classOf[Netty4Plugin],
-                           classOf[ReindexPlugin],
-                           classOf[EQLPlugin],
-                           classOf[PercolatorPlugin],
-                           classOf[MustachePlugin]))
+          classOf[ReindexPlugin],
+          //          classOf[EQLPlugin],
+          classOf[PercolatorPlugin],
+          classOf[MustachePlugin]))
     val clientNode: ClientNode = new ClientNode(
       settings,
       plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])

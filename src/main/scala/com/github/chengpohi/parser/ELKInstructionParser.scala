@@ -28,11 +28,15 @@ trait ELKInstructionParser extends CollectionParser {
     s =>
       interceptFunction
         .Instruction("clusterStats", interceptFunction.clusterStats, Seq()))
+  val clusterHealth = P("cluster health").map(
+    s =>
+      interceptFunction
+        .Instruction("clusterHealth", interceptFunction.clusterHealth, Seq()))
   //indices, aliases, restore, snapshots, routing nodes etc
   val clusterState = P("cluster state").map(
     s =>
       interceptFunction
-        .Instruction("clusterState", interceptFunction.getIndices, Seq()))
+        .Instruction("clusterState", interceptFunction.getClusterState, Seq()))
   val indicesStats = P("indices stats").map(
     s =>
       interceptFunction
@@ -44,8 +48,8 @@ trait ELKInstructionParser extends CollectionParser {
   val clusterSettings = P("cluster settings").map(
     s =>
       interceptFunction.Instruction("clusterSettings",
-                                    interceptFunction.clusterSettings,
-                                    Seq()))
+        interceptFunction.clusterSettings,
+        Seq()))
   val nodeSettings = P("node settings").map(
     s =>
       interceptFunction
@@ -67,8 +71,8 @@ trait ELKInstructionParser extends CollectionParser {
       .map(
         c =>
           interceptFunction.Instruction("delete",
-                                        interceptFunction.deleteDoc,
-                                        Seq(c._1, c._2, c._3)))
+            interceptFunction.deleteDoc,
+            Seq(c._1, c._2, c._3)))
   val deleteIndex = P("delete" ~ "index" ~/ strOrVar).map(
     c =>
       interceptFunction
@@ -80,8 +84,8 @@ trait ELKInstructionParser extends CollectionParser {
     .map(
       c =>
         interceptFunction.Instruction("joinQuery",
-                                      interceptFunction.joinQuery,
-                                      Seq(c._1, c._2, c._3)))
+          interceptFunction.joinQuery,
+          Seq(c._1, c._2, c._3)))
   val matchQuery = P("match" ~/ jsonExpr)
     .map(
       c =>
@@ -93,30 +97,30 @@ trait ELKInstructionParser extends CollectionParser {
       c._2 match {
         case None =>
           interceptFunction.Instruction("query",
-                                        interceptFunction.query,
-                                        Seq(c._1))
+            interceptFunction.query,
+            Seq(c._1))
         case Some((f, None)) =>
           interceptFunction.Instruction("query",
-                                        interceptFunction.query,
-                                        Seq(c._1, f))
+            interceptFunction.query,
+            Seq(c._1, f))
         case Some((f, Some(t))) =>
           interceptFunction.Instruction(t.name, t.f, Seq(c._1, f) ++ t.params)
-    })
+      })
 
   val reindex = P(
     "reindex" ~ "into" ~ strOrVar ~ "/" ~/ strOrVar ~ "from" ~/ strOrVar ~ "fields" ~/ jsonExpr)
     .map(
       c =>
         interceptFunction.Instruction("reindex",
-                                      interceptFunction.reindexIndex,
-                                      Seq(c._1, c._2, c._3, c._4)))
+          interceptFunction.reindexIndex,
+          Seq(c._1, c._2, c._3, c._4)))
   val index = P(
     "index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "fields" ~ jsonExpr ~ ("id" ~ strOrVar).?)
     .map(
       c =>
         interceptFunction.Instruction("index",
-                                      interceptFunction.createDoc,
-                                      Seq(c._1, c._2, c._3) ++ c._4.toSeq))
+          interceptFunction.createDoc,
+          Seq(c._1, c._2, c._3) ++ c._4.toSeq))
   val bulkIndex = P("bulk index" ~/ ioParser).map(c =>
     interceptFunction.Instruction("bulkIndex", interceptFunction.bulkIndex, c))
   val updateMapping = P("update mapping" ~/ ioParser).map(
@@ -129,12 +133,12 @@ trait ELKInstructionParser extends CollectionParser {
       c._4 match {
         case None =>
           interceptFunction.Instruction("update",
-                                        interceptFunction.bulkUpdateDoc,
-                                        Seq(c._1, c._2, c._3))
+            interceptFunction.bulkUpdateDoc,
+            Seq(c._1, c._2, c._3))
         case Some(id) =>
           interceptFunction.Instruction("update",
-                                        interceptFunction.updateDoc,
-                                        Seq(c._1, c._2, c._3) ++ c._4.toSeq)
+            interceptFunction.updateDoc,
+            Seq(c._1, c._2, c._3) ++ c._4.toSeq)
       }
     })
   val createIndex = P("create" ~ "index" ~/ strOrVar).map(
@@ -157,8 +161,8 @@ trait ELKInstructionParser extends CollectionParser {
       .map(
         c =>
           interceptFunction.Instruction("getDocById",
-                                        interceptFunction.getDocById,
-                                        Seq(c._1, c._2, c._3)))
+            interceptFunction.getDocById,
+            Seq(c._1, c._2, c._3)))
   val mapping = P("mapping" ~/ ioParser).map(c =>
     interceptFunction.Instruction("mapping", interceptFunction.mapping, c))
   val avgAggs = P("avg" ~/ strOrVar).map(
@@ -174,8 +178,8 @@ trait ELKInstructionParser extends CollectionParser {
       .map(
         c =>
           interceptFunction.Instruction("histAggs",
-                                        interceptFunction.histAggs,
-                                        Seq(c._1, c._2, c._3)))
+            interceptFunction.histAggs,
+            Seq(c._1, c._2, c._3)))
   val aggs = P(
     "aggs in" ~/ strOrVar ~ "/" ~ strOrVar ~/ (avgAggs | termsAggs | histAggs))
     .map(c =>
@@ -213,13 +217,13 @@ trait ELKInstructionParser extends CollectionParser {
     .map(
       c =>
         interceptFunction.Instruction("dumpIndex",
-                                      interceptFunction.dumpIndex,
-                                      Seq(c._1, JsonCollection.Str(c._2))))
+          interceptFunction.dumpIndex,
+          Seq(c._1, JsonCollection.Str(c._2))))
   val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
   val instrument: P[interceptFunction.Instruction] = P(
-    (health | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks | waitForStatus
+    (health | shutdown | clusterStats | clusterHealth | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings | clusterState
       | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | deleteDoc | deleteIndex

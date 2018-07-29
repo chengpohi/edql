@@ -22,12 +22,19 @@ class InterceptFunction(val elasticCommand: EQLClient) {
     case Seq(indexName) => create index indexName
   }
 
-  def getIndices: Seq[Val] => ClusterStateRequestDefinition = _ => {
+  def getClusterSettings: Seq[Val] => ClusterStateRequestDefinition = _ => {
+    cluster state
+  }
+  def getClusterState: Seq[Val] => ClusterStateRequestDefinition = _ => {
     cluster state
   }
 
   def clusterStats: Seq[Val] => ClusterStatsRequestDefinition = _ => {
     cluster stats
+  }
+
+  def clusterHealth: Seq[Val] => ClusterHealthRequestDefinition = _ => {
+    cluster health
   }
 
   def indicesStats: Seq[Val] => IndicesStatsRequestDefinition = _ => {
@@ -38,7 +45,7 @@ class InterceptFunction(val elasticCommand: EQLClient) {
     node stats NodeType.ALL flag FlagType.ALL
   }
 
-  def clusterSettings: Seq[Val] => ClusterSettingsRequestDefinition = _ => {
+  def clusterSettings: Seq[Val] => ClusterStateRequestDefinition = _ => {
     cluster settings
   }
 
