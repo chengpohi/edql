@@ -84,11 +84,10 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
       ClusterHealthRequestDefinition(clusterHealthRequestBuilder)
     }
 
-    def settings: ClusterSettingsRequestDefinition = {
-      val clusterUpdateSettingsRequestBuilder
-        : ClusterUpdateSettingsRequestBuilder =
-        clusterClient.prepareUpdateSettings()
-      ClusterSettingsRequestDefinition(clusterUpdateSettingsRequestBuilder)
+    def settings: ClusterStateRequestDefinition = {
+      val stateRequestBuilder: ClusterStateRequestBuilder =
+        clusterClient.prepareState().setNodes(false).setRoutingTable(false).setLocal(true)
+      ClusterStateRequestDefinition(stateRequestBuilder)
     }
   }
 
