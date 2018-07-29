@@ -1132,7 +1132,7 @@ trait EQLDefinition extends ElasticBase with EQLContext {
       extends Definition[Map[String, AnyRef]] {
 
     override def execute: Future[Map[String, AnyRef]] = {
-      (List("illegal_input", "caused_by") fzip parameters
+      (List("error_msg", "caused_by") fzip parameters
         .take(2)
         .map(_.extract[String])
         .toList).toMap

@@ -8,13 +8,17 @@ import com.github.chengpohi.registry.EQLContext
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration
+import org.apache.lucene.util.IOUtils
 import scalaz._
 
 import scala.io.Source
 
 
+//noinspection ScalaStyle
 object EQLRepl extends EQLConfig with EQLContext with JSONOps {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
+  val ANSI_GREEN = "\u001B[32m"
+  val ANSI_RESET = "\u001B[0m"
   val terms = new StringsCompleter(
     Source.fromURL(getClass.getResource("/completions.txt")).getLines().toSet,
     Source.fromURL(getClass.getResource("/words.txt")).getLines().toSet)
@@ -23,14 +27,14 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
   import eql._
 
   def main(args: Array[String]): Unit = {
+    println(ANSI_GREEN + "Welcome to EQL Repl :)" + ANSI_RESET)
     val reader: ConsoleReader = buildReader
 
     while (true) {
       val line = reader.readLine()
-      if (line == "exit") System.exit(0)
       line.trim match {
         case "exit" => System.exit(0)
-        case l      => println(run(interpret(l)))
+        case l => println(run(interpret(l)))
       }
     }
   }
@@ -50,13 +54,15 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
 
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
+        println(ANSI_GREEN + "exiting..." + ANSI_RESET)
+        IOUtils.close(client)
         reader.getHistory.asInstanceOf[FileHistory].flush()
       }
     })
   }
   def buildReader: ConsoleReader = {
     val reader = new ConsoleReader()
-    reader.setPrompt("eql>")
+    reader.setPrompt(ANSI_GREEN +  "eql>" + ANSI_RESET)
     reader.addCompleter(terms)
     reader.setCompletionHandler(new EQLCompletionHandler)
     reader.setHistory(
