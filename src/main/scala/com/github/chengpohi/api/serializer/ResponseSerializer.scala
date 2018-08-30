@@ -10,7 +10,7 @@ import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.bytes.BytesReference
 import org.elasticsearch.common.xcontent.{ToXContent, XContentFactory, XContentHelper, XContentType}
 import org.elasticsearch.search.SearchHit
-import org.json4s.native.Serialization.write
+import org.json4s.jackson.Serialization.write
 
 import scala.collection.JavaConverters._
 

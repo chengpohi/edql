@@ -6,7 +6,7 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.search.SearchHit
 import org.json4s._
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 
 trait ResponseConverter extends ResponseSerializer {
 
@@ -35,7 +35,7 @@ trait ResponseConverter extends ResponseSerializer {
     }
 
     implicit object StreamSearchResponseConverter
-        extends Converter[Stream[SearchHit]] {
+      extends Converter[Stream[SearchHit]] {
       def as[T](a: Stream[SearchHit])(implicit mf: Manifest[T]): Stream[T] = {
         a.map(t => {
           mapSearchHit(t)(mf)
@@ -50,7 +50,7 @@ trait ResponseConverter extends ResponseSerializer {
     }
 
     def mapGetResponse[T](getResponse: GetResponse)(
-        implicit mf: Manifest[T]): T = {
+      implicit mf: Manifest[T]): T = {
       val j = parse(getResponse.getSourceAsString)
       val r = j merge JObject("id" -> JString(getResponse.getId))
       r.extract(formats, mf)
