@@ -6,6 +6,7 @@ import java.util.Collections
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.lucene.util.IOUtils
+import org.elasticsearch.analysis.common.CommonAnalysisPlugin
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
@@ -45,6 +46,7 @@ trait EQLConfig {
       Collections.unmodifiableList(
         util.Arrays.asList(classOf[Netty4Plugin],
           classOf[ReindexPlugin],
+          classOf[CommonAnalysisPlugin],
           //          classOf[EQLPlugin],
           classOf[PercolatorPlugin],
           classOf[MustachePlugin]))
