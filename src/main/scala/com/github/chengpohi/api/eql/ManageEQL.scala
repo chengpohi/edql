@@ -4,16 +4,12 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequestBuilder
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryRequestBuilder
-import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsRequestBuilder
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequestBuilder
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksRequestBuilder
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.settings.put.{
-  UpdateSettingsRequestBuilder,
-  UpdateSettingsResponse
-}
+import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
 
 import scala.concurrent.{Future, Promise}
@@ -235,6 +231,14 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
     }
 
     override def json: String = execute.await.json
+  }
+
+  case object cat {
+    def nodes: PendingClusterTasksDefinition = {
+      val pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder =
+        clusterClient.preparePendingClusterTasks()
+      PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder)
+    }
   }
 
 }

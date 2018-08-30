@@ -39,7 +39,7 @@ object Settings {
     "org.apache.logging.log4j" % "log4j-1.2-api" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
-    "org.elasticsearch.client" % "transport" % "6.1.2",
+    "org.elasticsearch.client" % "transport" % "6.4.0",
     "org.apache.commons" % "commons-lang3" % "3.5",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "org.scalactic" %% "scalactic" % "3.0.1",
