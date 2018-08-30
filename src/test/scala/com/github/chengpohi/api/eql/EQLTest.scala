@@ -280,7 +280,7 @@ class EQLTest extends EQLTestTrait {
     res2.contains("fulltext_analyzer") should be(true)
   }
 
-  "eql" should "get term frequency" in {
+  ignore should "get term frequency" in {
     EQL {
       create index "test" analyzers List(
         create analyze "fulltext_analyzer" tpe "custom" tokenizer "whitespace" filter List(
@@ -317,7 +317,7 @@ class EQLTest extends EQLTestTrait {
     println(response.await.json)
   }
 
-  it should "join index" in {
+  ignore should "join index" in {
     EQL {
       index into "testindex" / "testmap" doc Map("foo" -> "bar",
                                                  "name" -> "hello")
