@@ -2,6 +2,8 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 
 import com.typesafe.sbt.packager.SettingsHelper._
 import sbt.Package.ManifestAttributes
+import scala.sys.process._
+
 
 packageOptions := Seq(
   ManifestAttributes(
@@ -94,15 +96,16 @@ makeDeploymentSettings(Universal, packageBin in Universal, "zip")
 val pb = taskKey[Unit]("packageBin")
 
 pb := {
-  val elasticConf = Paths.get("./src/universal/conf/elasticdsl.conf")
+  val elasticConf = Paths.get("./src/universal/conf/eql.conf")
   val log4j2Properties = Paths.get("./src/universal/conf/log4j2.properties")
-  Files.copy(Paths.get("./src/main/resources/elasticdsl.conf"),
+  Files.copy(Paths.get("./src/main/resources/eql.conf"),
              elasticConf,
              StandardCopyOption.REPLACE_EXISTING)
   Files.copy(Paths.get("./src/main/resources/log4j2.properties"),
              log4j2Properties,
              StandardCopyOption.REPLACE_EXISTING)
   //Command.process("universal:packageBin", state.value)
+  "sbt universal:packageBin".!!
   Files.delete(elasticConf)
   Files.delete(log4j2Properties)
 }
