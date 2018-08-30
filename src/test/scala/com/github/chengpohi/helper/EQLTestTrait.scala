@@ -2,7 +2,7 @@ package com.github.chengpohi.helper
 
 import org.json4s.JValue
 import org.json4s.JsonAST.JNothing
-import org.json4s.native.JsonMethods
+import org.json4s.jackson.JsonMethods
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
