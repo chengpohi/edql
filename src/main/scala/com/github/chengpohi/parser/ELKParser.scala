@@ -24,7 +24,7 @@ class ELKParser(eql: EQLClient) extends ELKInstructionParser {
             "error",
             interceptFunction.error,
 //            Seq(Str(t.traced.trace), Str(t.traced.trace)))
-            Seq(Str("not found command")))
+            Seq(Str("command not found")))
         )
     }
     instructions

@@ -59,16 +59,10 @@ trait EQLConfig {
   }
 
   private def buildRemoteClient(config: Config): Client = {
-    val settings = Settings
-      .builder()
-      .put("node.name", "eql")
-      .put("cluster.name", config.getString("cluster.name"))
-      .build()
-
     val host: String = config.getString("host")
     val port: Int = config.getInt("port")
 
-    val client = new PreBuiltTransportClient(settings)
+    val client = new PreBuiltTransportClient(Settings.EMPTY)
       .addTransportAddress(
         new TransportAddress(new InetSocketAddress(host, port))
       )
