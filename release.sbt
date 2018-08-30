@@ -2,6 +2,8 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 
 import com.typesafe.sbt.packager.SettingsHelper._
 import sbt.Package.ManifestAttributes
+import sbtassembly.{MergeStrategy, PathList}
+
 import scala.sys.process._
 
 
@@ -66,7 +68,7 @@ pomExtra := (
         <url>https://github.com/chengpohi/elasticdsl</url>
       </developer>
     </developers>
-)
+  )
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
@@ -99,11 +101,11 @@ pb := {
   val elasticConf = Paths.get("./src/universal/conf/eql.conf")
   val log4j2Properties = Paths.get("./src/universal/conf/log4j2.properties")
   Files.copy(Paths.get("./src/main/resources/eql.conf"),
-             elasticConf,
-             StandardCopyOption.REPLACE_EXISTING)
+    elasticConf,
+    StandardCopyOption.REPLACE_EXISTING)
   Files.copy(Paths.get("./src/main/resources/log4j2.properties"),
-             log4j2Properties,
-             StandardCopyOption.REPLACE_EXISTING)
+    log4j2Properties,
+    StandardCopyOption.REPLACE_EXISTING)
   //Command.process("universal:packageBin", state.value)
   "sbt universal:packageBin".!!
   Files.delete(elasticConf)
