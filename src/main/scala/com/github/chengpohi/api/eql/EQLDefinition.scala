@@ -5,6 +5,7 @@ import java.io.Serializable
 import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.api.ElasticBase
 import com.github.chengpohi.collection.JsonCollection.Val
+import org.apache.http.util.EntityUtils
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
 import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
 import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
@@ -36,6 +37,7 @@ import org.elasticsearch.action.get.{GetRequestBuilder, GetResponse}
 import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
+import org.elasticsearch.client.Request
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
@@ -669,10 +671,68 @@ trait EQLDefinition extends ElasticBase with EQLContext {
                                             pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
     extends Definition[PendingClusterTasksResponse] {
     override def execute: Future[PendingClusterTasksResponse] = {
+      val request = new Request("GET", "_cat/nodes")
+      val entity = restClient.performRequest(request).getEntity
+      EntityUtils.toString(entity)
       pendingClusterTasksRequestBuilder.execute
     }
 
     override def json: String = execute.await.json
+  }
+
+  case class CatNodesDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val request = new Request("GET", "_cat/nodes")
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+    override def json: String = execute.await
+  }
+
+  case class CatAllocationDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val request = new Request("GET", "_cat/allocation")
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+    override def json: String = execute.await
+  }
+
+  case class CatMasterDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val request = new Request("GET", "_cat/master")
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+    override def json: String = execute.await
+  }
+
+  case class CatIndicesDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val request = new Request("GET", "_cat/indices")
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+    override def json: String = execute.await
+  }
+
+  case class CatShardsDefinition() extends Definition[String] {
+    override def execute: Future[String] = {
+      Future {
+        val request = new Request("GET", "_cat/shards")
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+    override def json: String = execute.await
   }
 
   case class OpenIndexRequestDefinition(

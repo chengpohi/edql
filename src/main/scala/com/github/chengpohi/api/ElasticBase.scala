@@ -1,6 +1,6 @@
 package com.github.chengpohi.api
 
-import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient}
+import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient, RestClient}
 
 /**
   * ElasticBase function
@@ -10,6 +10,7 @@ trait ElasticBase {
   val client: Client
   val clusterClient: ClusterAdminClient
   val indicesClient: IndicesAdminClient
+  val restClient: RestClient
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
     import scala.collection.JavaConverters._
