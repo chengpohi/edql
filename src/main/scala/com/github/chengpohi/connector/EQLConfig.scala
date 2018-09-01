@@ -4,10 +4,13 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
+import com.github.chengpohi.api.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
+import org.apache.http.HttpHost
 import org.apache.lucene.util.IOUtils
+import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest
 import org.elasticsearch.analysis.common.CommonAnalysisPlugin
-import org.elasticsearch.client.Client
+import org.elasticsearch.client.{Client, RestClient}
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.common.xcontent.XContentType
@@ -18,6 +21,8 @@ import org.elasticsearch.script.mustache.MustachePlugin
 import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
+import scala.collection.JavaConverters._
+
 /**
   * eql
   * Created by chengpohi on 16/06/16.
@@ -26,13 +31,13 @@ trait EQLConfig {
   val config: Config =
     ConfigFactory.load("eql.conf").getConfig("eql")
 
-  def buildClient(config: Config): Client =
+  def buildClient(config: Config): EQLClient =
     config.getBoolean("standalone") match {
       case true => buildLocalClient(config)
       case false => buildRemoteClient(config)
     }
 
-  private def buildLocalClient(config: Config): Client = {
+  private def buildLocalClient(config: Config): EQLClient = {
     val settings: Settings = Settings
       .builder()
       .loadFromSource(
@@ -47,7 +52,6 @@ trait EQLConfig {
         util.Arrays.asList(classOf[Netty4Plugin],
           classOf[ReindexPlugin],
           classOf[CommonAnalysisPlugin],
-          //          classOf[EQLPlugin],
           classOf[PercolatorPlugin],
           classOf[MustachePlugin]))
     val clientNode: ClientNode = new ClientNode(
@@ -57,17 +61,31 @@ trait EQLConfig {
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
       IOUtils.close(clientNode)
     }))
-    clientNode.client()
+
+    val restClient = buildRestClient(clientNode.client())
+    EQLClient(clientNode.client(), restClient)
   }
 
-  private def buildRemoteClient(config: Config): Client = {
+  private def buildRemoteClient(config: Config): EQLClient = {
     val host: String = config.getString("host")
     val port: Int = config.getInt("port")
 
+    val address = new TransportAddress(new InetSocketAddress(host, port))
     val client = new PreBuiltTransportClient(Settings.EMPTY)
       .addTransportAddress(
-        new TransportAddress(new InetSocketAddress(host, port))
+        address
       )
-    client
+
+    val restClient: RestClient = buildRestClient(client)
+    EQLClient(client, restClient)
+  }
+
+  private def buildRestClient(client: Client) = {
+    val request = new NodesInfoRequest()
+    request.http(true)
+    val resp = client.admin().cluster().nodesInfo(request).get()
+    val transportAddress = resp.getNodes.asScala.toStream.map(i => i.getHttp.getAddress.publishAddress()).head
+    val restClient = RestClient.builder(new HttpHost(transportAddress.getAddress, transportAddress.getPort)).build()
+    restClient
   }
 }

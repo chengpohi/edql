@@ -4,6 +4,8 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods.{compact, render, _}
 import org.json4s.jackson.Serialization.write
 
+import scala.util.Try
+
 trait JSONOps {
   DefaultFormats.preservingEmptyValues
   implicit val formats = DefaultFormats + new NumberSerializer
@@ -33,7 +35,7 @@ trait JSONOps {
       if (str.isEmpty) {
         return ""
       }
-      beautyJSON(str)
+      Try(beautyJSON(str)).getOrElse(str)
     }
   }
 

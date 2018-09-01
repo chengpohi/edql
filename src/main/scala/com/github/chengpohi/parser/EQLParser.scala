@@ -5,7 +5,7 @@ import com.github.chengpohi.collection.JsonCollection.Str
 import fastparse.core.Parsed.{Failure, Success}
 import fastparse.noApi._
 
-class ELKParser(eql: EQLClient) extends ELKInstructionParser {
+class EQLParser(eql: EQLClient) extends EQLInstructionParser {
 
   override val interceptFunction: InterceptFunction = new InterceptFunction(eql)
 
