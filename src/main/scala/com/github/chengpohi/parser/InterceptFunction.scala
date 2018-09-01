@@ -33,6 +33,23 @@ class InterceptFunction(val elasticCommand: EQLClient) {
     cluster stats
   }
 
+  def catNodes: Seq[Val] => CatNodesDefinition = _ => {
+    cat nodes
+  }
+
+  def catAllocation: Seq[Val] => CatAllocationDefinition = _ => {
+    cat allocation
+  }
+  def catMaster: Seq[Val] => CatMasterDefinition = _ => {
+    cat master
+  }
+  def catIndices: Seq[Val] => CatIndicesDefinition = _ => {
+    cat indices
+  }
+  def catShards: Seq[Val] => CatShardsDefinition = _ => {
+    cat shards
+  }
+
   def clusterHealth: Seq[Val] => ClusterHealthRequestDefinition = _ => {
     cluster health
   }

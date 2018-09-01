@@ -1,12 +1,12 @@
 package com.github.chengpohi.repl
 
 import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.parser.ELKParser
+import com.github.chengpohi.parser.EQLParser
 import com.github.chengpohi.registry.EQLContext
 
 import scala.io.Source
 
-class EQLInterpreter(implicit val elkParser: ELKParser) {
+class EQLInterpreter(implicit val elkParser: EQLParser) {
 
   import elkParser._
 

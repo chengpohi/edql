@@ -5,7 +5,7 @@ import com.github.chengpohi.collection.JsonCollection.Str
 import fastparse.noApi._
 
 
-trait ELKInstructionParser extends CollectionParser {
+trait EQLInstructionParser extends CollectionParser {
   val interceptFunction: InterceptFunction
 
   import WhitespaceApi._
@@ -28,6 +28,26 @@ trait ELKInstructionParser extends CollectionParser {
     s =>
       interceptFunction
         .Instruction("clusterStats", interceptFunction.clusterStats, Seq()))
+  val catNodes = P("cat nodes").map(
+    s =>
+      interceptFunction
+        .Instruction("catNodes", interceptFunction.catNodes, Seq()))
+  val catAllocation = P("cat allocation").map(
+    s =>
+      interceptFunction
+        .Instruction("catNodes", interceptFunction.catAllocation, Seq()))
+  val catMaster = P("cat master").map(
+    s =>
+      interceptFunction
+        .Instruction("catNodes", interceptFunction.catMaster, Seq()))
+  val catIndices = P("cat indices").map(
+    s =>
+      interceptFunction
+        .Instruction("catNodes", interceptFunction.catIndices, Seq()))
+  val catShards = P("cat shards").map(
+    s =>
+      interceptFunction
+        .Instruction("catNodes", interceptFunction.catShards, Seq()))
   val clusterHealth = P("cluster health").map(
     s =>
       interceptFunction
@@ -225,6 +245,7 @@ trait ELKInstructionParser extends CollectionParser {
   val instrument: P[interceptFunction.Instruction] = P(
     (health | shutdown | clusterStats | clusterHealth | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings | clusterState
+      | catNodes | catAllocation | catIndices | catMaster | catShards
       | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | deleteDoc | deleteIndex
       | search | termQuery | getDocById

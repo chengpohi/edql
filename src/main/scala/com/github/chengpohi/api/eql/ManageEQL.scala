@@ -164,7 +164,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case class CreateFilterRequestDefinition(analyzerSetting: String)
-      extends Definition[UpdateSettingsResponse] {
+    extends Definition[UpdateSettingsResponse] {
     var keepwords: String = _
     var tpe: String = _
 
@@ -183,7 +183,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case class CreateAnalyzerRequestDefinition(analyzerSetting: String)
-      extends Definition[UpdateSettingsResponse] {
+    extends Definition[UpdateSettingsResponse] {
     var tpe: String = _
 
     var tokenizer: String = _
@@ -234,10 +234,21 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case object cat {
-    def nodes: PendingClusterTasksDefinition = {
-      val pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder =
-        clusterClient.preparePendingClusterTasks()
-      PendingClusterTasksDefinition(pendingClusterTasksRequestBuilder)
+    def nodes: CatNodesDefinition = {
+      CatNodesDefinition()
+    }
+    def allocation: CatAllocationDefinition = {
+      CatAllocationDefinition()
+    }
+
+    def master: CatMasterDefinition = {
+      CatMasterDefinition()
+    }
+    def indices: CatIndicesDefinition = {
+      CatIndicesDefinition()
+    }
+    def shards: CatShardsDefinition = {
+      CatShardsDefinition()
     }
   }
 
