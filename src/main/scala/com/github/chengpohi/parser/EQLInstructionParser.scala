@@ -35,19 +35,31 @@ trait EQLInstructionParser extends CollectionParser {
   val catAllocation = P("cat allocation").map(
     s =>
       interceptFunction
-        .Instruction("catNodes", interceptFunction.catAllocation, Seq()))
+        .Instruction("catMaster", interceptFunction.catAllocation, Seq()))
   val catMaster = P("cat master").map(
     s =>
       interceptFunction
-        .Instruction("catNodes", interceptFunction.catMaster, Seq()))
+        .Instruction("catIndices", interceptFunction.catMaster, Seq()))
   val catIndices = P("cat indices").map(
     s =>
       interceptFunction
-        .Instruction("catNodes", interceptFunction.catIndices, Seq()))
+        .Instruction("catIndices", interceptFunction.catIndices, Seq()))
   val catShards = P("cat shards").map(
     s =>
       interceptFunction
-        .Instruction("catNodes", interceptFunction.catShards, Seq()))
+        .Instruction("catShards", interceptFunction.catShards, Seq()))
+  val catCount = P("cat count").map(
+    s =>
+      interceptFunction
+        .Instruction("catCount", interceptFunction.catCount, Seq()))
+  val catRecovery = P("cat recovery").map(
+    s =>
+      interceptFunction
+        .Instruction("catRecovery", interceptFunction.catRecovery, Seq()))
+  val catPendingTasks = P("cat pending_tasks").map(
+    s =>
+      interceptFunction
+        .Instruction("catPendingTasks", interceptFunction.catPendingTasks, Seq()))
   val clusterHealth = P("cluster health").map(
     s =>
       interceptFunction
@@ -245,7 +257,7 @@ trait EQLInstructionParser extends CollectionParser {
   val instrument: P[interceptFunction.Instruction] = P(
     (health | shutdown | clusterStats | clusterHealth | indicesStats | nodeStats | pendingTasks | waitForStatus
       | clusterSettings | nodeSettings | indexSettings | clusterState
-      | catNodes | catAllocation | catIndices | catMaster | catShards
+      | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
       | restoreSnapshot | deleteSnapshot | createSnapshot | getSnapshot | createRepository
       | deleteDoc | deleteIndex
       | search | termQuery | getDocById
