@@ -250,6 +250,17 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
     def shards: CatShardsDefinition = {
       CatShardsDefinition()
     }
+
+    def count: CatCountDefinition = {
+      CatCountDefinition()
+    }
+
+    def pending_tasks: CatPendingTaskDefinition = {
+      CatPendingTaskDefinition()
+    }
+    def recovery: CatRecoveryDefinition = {
+      CatRecoveryDefinition()
+    }
   }
 
 }
