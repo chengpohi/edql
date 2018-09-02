@@ -4,6 +4,7 @@ import java.io.Serializable
 
 import com.github.chengpohi.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.api.ElasticBase
+import com.github.chengpohi.api.http.HttpContext
 import com.github.chengpohi.collection.JsonCollection.Val
 import org.apache.http.util.EntityUtils
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
@@ -56,7 +57,7 @@ import scala.reflect.runtime.universe
   * eql
   * Created by chengpohi on 6/28/16.
   */
-trait EQLDefinition extends ElasticBase with EQLContext {
+trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
   val MAX_ALL_NUMBER: Int = 10000
@@ -671,68 +672,48 @@ trait EQLDefinition extends ElasticBase with EQLContext {
                                             pendingClusterTasksRequestBuilder: PendingClusterTasksRequestBuilder)
     extends Definition[PendingClusterTasksResponse] {
     override def execute: Future[PendingClusterTasksResponse] = {
-      val request = new Request("GET", "_cat/nodes")
-      val entity = restClient.performRequest(request).getEntity
-      EntityUtils.toString(entity)
       pendingClusterTasksRequestBuilder.execute
     }
 
     override def json: String = execute.await.json
   }
 
-  case class CatNodesDefinition() extends Definition[String] {
+  trait CatDefinition extends Definition[String] {
+    val path: String
     override def execute: Future[String] = {
-      Future {
-        val request = new Request("GET", "_cat/nodes")
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
-      }
+      GET(path).execute
     }
     override def json: String = execute.await
   }
 
-  case class CatAllocationDefinition() extends Definition[String] {
-    override def execute: Future[String] = {
-      Future {
-        val request = new Request("GET", "_cat/allocation")
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
-      }
-    }
-    override def json: String = execute.await
+  case class CatNodesDefinition() extends CatDefinition {
+    val path: String = "_cat/nodes"
   }
 
-  case class CatMasterDefinition() extends Definition[String] {
-    override def execute: Future[String] = {
-      Future {
-        val request = new Request("GET", "_cat/master")
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
-      }
-    }
-    override def json: String = execute.await
+  case class CatAllocationDefinition() extends CatDefinition {
+    val path: String = "_cat/allocation"
   }
 
-  case class CatIndicesDefinition() extends Definition[String] {
-    override def execute: Future[String] = {
-      Future {
-        val request = new Request("GET", "_cat/indices")
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
-      }
-    }
-    override def json: String = execute.await
+  case class CatMasterDefinition() extends CatDefinition {
+    val path: String = "_cat/master"
   }
 
-  case class CatShardsDefinition() extends Definition[String] {
-    override def execute: Future[String] = {
-      Future {
-        val request = new Request("GET", "_cat/shards")
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
-      }
-    }
-    override def json: String = execute.await
+  case class CatIndicesDefinition() extends CatDefinition {
+    val path: String = "_cat/indices"
+  }
+
+  case class CatShardsDefinition() extends CatDefinition {
+    val path: String = "_cat/shards"
+  }
+  case class CatCountDefinition() extends CatDefinition {
+    val path: String = "_cat/count"
+  }
+
+  case class CatPendingTaskDefinition() extends CatDefinition {
+    val path: String = "_cat/pending_tasks"
+  }
+  case class CatRecoveryDefinition() extends CatDefinition {
+    val path: String = "_cat/recovery"
   }
 
   case class OpenIndexRequestDefinition(
