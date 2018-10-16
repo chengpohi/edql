@@ -25,7 +25,7 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "index doc by indexName, indexType, fields" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" }""")
+      """index into "test-parser-name" / "test-parser-type" fields {"name" : "hello", "ppp":"fff" }""")
 
     EQL {
       refresh index "*"
