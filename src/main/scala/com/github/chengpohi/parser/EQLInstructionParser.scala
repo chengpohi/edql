@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.JsonCollection
-import com.github.chengpohi.collection.JsonCollection.Str
+import com.github.chengpohi.parser.collection.JsonCollection
+import com.github.chengpohi.parser.collection.JsonCollection.Str
 import fastparse.noApi._
 
 

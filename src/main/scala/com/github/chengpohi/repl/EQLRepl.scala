@@ -2,9 +2,9 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.api.serializer.JSONOps
+import com.github.chengpohi.dsl.serializer.JSONOps
 import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.registry.EQLContext
+import com.github.chengpohi.context.EQLContext
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration

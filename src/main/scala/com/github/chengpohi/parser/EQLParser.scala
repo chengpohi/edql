@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.EQLClient
-import com.github.chengpohi.collection.JsonCollection.Str
+import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.parser.collection.JsonCollection.Str
 import fastparse.core.Parsed.{Failure, Success}
 import fastparse.noApi._
 

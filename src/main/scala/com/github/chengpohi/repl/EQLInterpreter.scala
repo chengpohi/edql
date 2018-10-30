@@ -2,7 +2,7 @@ package com.github.chengpohi.repl
 
 import com.github.chengpohi.connector.EQLConfig
 import com.github.chengpohi.parser.EQLParser
-import com.github.chengpohi.registry.EQLContext
+import com.github.chengpohi.context.EQLContext
 
 import scala.io.Source
 
@@ -10,11 +10,16 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
 
   import elkParser._
 
-  def interceptDefinitions(
-      instructions: Seq[elkParser.interceptFunction.Instruction]): String = {
+  def interceptDefinitions(instructions: Seq[elkParser.interceptFunction.Instruction]): String = {
     val res = for {
       instruction <- instructions
-    } yield instruction.f.apply(instruction.params).json
+    } yield {
+      try {
+        instruction.f.apply(instruction.params).json
+      } catch {
+        case ex: Exception => s"unhandle error: ${ex.getMessage}"
+      }
+    }
     res.mkString("\n")
   }
 

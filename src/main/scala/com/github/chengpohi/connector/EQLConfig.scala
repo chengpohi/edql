@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
-import com.github.chengpohi.api.EQLClient
+import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.http.HttpHost
 import org.apache.lucene.util.IOUtils
@@ -22,13 +22,14 @@ import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
   * eql
   * Created by chengpohi on 16/06/16.
   */
 trait EQLConfig {
-  val config: Config =
+  lazy val config: Config =
     ConfigFactory.load("eql.conf").getConfig("eql")
 
   def buildClient(config: Config): EQLClient =
@@ -63,7 +64,7 @@ trait EQLConfig {
     }))
 
     val restClient = buildRestClient(clientNode.client())
-    EQLClient(clientNode.client(), restClient)
+    EQLClient(clientNode.client(), Try(restClient).getOrElse(null))
   }
 
   private def buildRemoteClient(config: Config): EQLClient = {
