@@ -32,6 +32,7 @@ object Settings {
     testOptions in Test += Tests.Cleanup(() => println("Cleanup")),
     mainClass in Compile := Some("com.github.chengpohi.repl.EQLRepl"),
     libraryDependencies ++= dependencies,
+    assemblyJarName in assembly := "eql.jar",
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript())),
     assemblyMergeStrategy in assembly := {
       case "META-INF/io.netty.versions.properties" => MergeStrategy.discard

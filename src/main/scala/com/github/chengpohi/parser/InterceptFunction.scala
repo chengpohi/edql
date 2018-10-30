@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.api.EQLClient
-import com.github.chengpohi.collection.JsonCollection._
+import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.parser.collection.JsonCollection._
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future

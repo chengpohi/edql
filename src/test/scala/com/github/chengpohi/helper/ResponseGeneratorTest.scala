@@ -1,6 +1,6 @@
 package com.github.chengpohi.helper
 
-import com.github.chengpohi.api.serializer.JSONOps
+import com.github.chengpohi.dsl.serializer.JSONOps
 import org.scalatest.FlatSpec
 
 
