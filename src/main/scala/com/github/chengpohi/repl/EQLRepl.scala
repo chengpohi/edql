@@ -2,9 +2,9 @@ package com.github.chengpohi.repl
 
 import java.io.File
 
-import com.github.chengpohi.dsl.serializer.JSONOps
 import com.github.chengpohi.connector.EQLConfig
 import com.github.chengpohi.context.EQLContext
+import com.github.chengpohi.dsl.serializer.JSONOps
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration
@@ -62,7 +62,7 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
   }
   def buildReader: ConsoleReader = {
     val reader = new ConsoleReader()
-    reader.setPrompt(ANSI_GREEN +  "eql>" + ANSI_RESET)
+    reader.setPrompt(ANSI_GREEN + "eql>" + ANSI_RESET)
     reader.addCompleter(terms)
     reader.setCompletionHandler(new EQLCompletionHandler)
     reader.setHistory(
