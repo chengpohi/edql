@@ -3,7 +3,10 @@
 
 case "$1" in
   "build")
-    sbt pb
+    sbt build
+    ;;
+  "assembly")
+    sbt assembly
     ;;
   *)
     sbt build
