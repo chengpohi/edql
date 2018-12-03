@@ -124,19 +124,27 @@ trait EQLInstructionParser extends CollectionParser {
         interceptFunction
           .Instruction("matchQuery", interceptFunction.matchQuery, Seq(c)))
   val search: P[interceptFunction.Instruction] = P(
-    "search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar ~ (matchQuery | joinSearch).?).?)
+    "search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar).? ~ (matchQuery | joinSearch).?)
     .map(c =>
       c._2 match {
         case None =>
-          interceptFunction.Instruction("query",
-            interceptFunction.query,
-            Seq(c._1))
-        case Some((f, None)) =>
-          interceptFunction.Instruction("query",
-            interceptFunction.query,
-            Seq(c._1, f))
-        case Some((f, Some(t))) =>
-          interceptFunction.Instruction(t.name, t.f, Seq(c._1, f) ++ t.params)
+          c._3 match {
+            case None =>
+              interceptFunction.Instruction("query",
+                interceptFunction.query,
+                Seq(c._1))
+            case Some(t) =>
+              interceptFunction.Instruction(t.name, t.f, Seq(c._1) ++ t.params)
+          }
+        case Some(f) =>
+          c._3 match {
+            case None =>
+              interceptFunction.Instruction("query",
+                interceptFunction.query,
+                Seq(c._1, f))
+            case Some(t) =>
+              interceptFunction.Instruction(t.name, t.f, Seq(c._1, f) ++ t.params)
+          }
       })
 
   val reindex = P(
