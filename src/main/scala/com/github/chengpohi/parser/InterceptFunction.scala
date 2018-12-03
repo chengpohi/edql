@@ -124,6 +124,12 @@ class InterceptFunction(val elasticCommand: EQLClient) {
         .toList
         .head from 0 size MAX_NUMBER
     }
+    case Seq(indexName, queryData) => {
+      search in indexName mth queryData
+        .extract[Map[String, String]]
+        .toList
+        .head from 0 size MAX_NUMBER
+    }
   }
 
   def query: INSTRUMENT_TYPE = {
