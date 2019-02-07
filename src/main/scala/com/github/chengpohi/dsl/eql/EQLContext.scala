@@ -4,7 +4,7 @@ import com.github.chengpohi.parser.collection.JsonCollection.Val
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 
-trait EQLContext extends EQLExecutor with FutureOps {
+private[dsl] trait EQLContext extends EQLExecutor with FutureOps {
 
   implicit class IndexNameAndIndexType(indexName: String) {
     def /(indexType: String): IndexPath = {
@@ -44,4 +44,5 @@ trait EQLContext extends EQLExecutor with FutureOps {
   trait OperationStatus
 
   case object exist extends OperationStatus
+
 }
