@@ -8,6 +8,9 @@ case "$1" in
   "assembly")
     sbt assembly
     ;;
+  "pb")
+    sbt publishLocal
+    ;;
   *)
     sbt build
     ;;
