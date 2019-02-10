@@ -13,6 +13,7 @@ object Settings {
       "-Ywarn-unused-import",
       "-feature",
       "-language:implicitConversions",
+      "-language:higherKinds",
       "-language:postfixOps"),
     resolvers += Resolver.mavenLocal,
     resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases",

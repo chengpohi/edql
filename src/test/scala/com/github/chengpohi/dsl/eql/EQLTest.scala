@@ -29,6 +29,11 @@ case class TestMapScore(id: String,
                         list: List[String],
                         score: Long)
 
+case class User(name: String,
+                email: Option[String] = None,
+                password: Option[String] = None,
+                token: Option[String] = None)
+
 class EQLTest extends EQLTestTrait {
 
   import eql._
@@ -153,12 +158,12 @@ class EQLTest extends EQLTestTrait {
     }.as[TestMap].await
     r1.head should be(
       TestMap(_id.toInt,
-              "world",
-              "bar",
-              "chengpohi",
-              Some("jack"),
-              None,
-              List("world", "foobar")))
+        "world",
+        "bar",
+        "chengpohi",
+        Some("jack"),
+        None,
+        List("world", "foobar")))
 
     val r2 = EQL {
       search in "testindex" / "testmap"
@@ -166,12 +171,12 @@ class EQLTest extends EQLTestTrait {
     r2.size should be(2)
     r2 should contain(
       TestMap(_id.toInt,
-              "world",
-              "bar",
-              "chengpohi",
-              Some("jack"),
-              None,
-              List("world", "foobar")))
+        "world",
+        "bar",
+        "chengpohi",
+        Some("jack"),
+        None,
+        List("world", "foobar")))
     r2 should contain(
       TestMap(5678, "world", "bar", "chengpohi", None, None, List()))
   }
@@ -180,19 +185,19 @@ class EQLTest extends EQLTestTrait {
     EQL {
       index into "testindex" / "testmap" doc List(
         Map("score" -> 1,
-            "hello" -> "world",
-            "foo" -> "bar",
-            "name" -> "chengpohi",
-            "pp" -> "jack",
-            "list" -> List("world", "foobar")),
+          "hello" -> "world",
+          "foo" -> "bar",
+          "name" -> "chengpohi",
+          "pp" -> "jack",
+          "list" -> List("world", "foobar")),
         Map("score" -> 2,
-            "hello" -> "world",
-            "foo" -> "bar",
-            "name" -> "chengpohi"),
+          "hello" -> "world",
+          "foo" -> "bar",
+          "name" -> "chengpohi"),
         Map("score" -> 3,
-            "hello" -> "world",
-            "foo" -> "bar",
-            "name" -> "chengpohi")
+          "hello" -> "world",
+          "foo" -> "bar",
+          "name" -> "chengpohi")
       )
     }
 
@@ -280,6 +285,46 @@ class EQLTest extends EQLTestTrait {
     res2.contains("fulltext_analyzer") should be(true)
   }
 
+
+  it should "search one element" in {
+    val u = User("testuser", Some("email"), Some("password"), Some("token"))
+    EQL {
+      index into "testindex" / "testdoc" doc u
+    }.await
+
+    EQL {
+      refresh index "testindex"
+    }.await
+
+    val res = EQL {
+      search in "testindex" / "testdoc" must ("name" -> "testuser")
+    }.as[User].await.headOption.get
+
+    res.email should be(Some("email"))
+    res.name should be("testuser")
+  }
+
+  ignore should "join index" in {
+    EQL {
+      index into "testindex" / "testmap" doc Map("foo" -> "bar",
+        "name" -> "hello")
+    }.await
+
+    EQL {
+      index into "testindex" / "testfoo" doc Map("pp" -> "tt",
+        "name" -> "hello")
+    }.await
+
+    EQL {
+      refresh index "testindex"
+    }.await
+
+    val res = EQL {
+      search in "testindex" / "testmap" join "testindex" / "testfoo" by "name"
+    }.toJson
+    println(res)
+  }
+
   ignore should "get term frequency" in {
     EQL {
       create index "test" analyzers List(
@@ -295,11 +340,11 @@ class EQLTest extends EQLTestTrait {
     EQL {
       index into "test" / "tweet" doc List(
         Map("text" -> "twitter test test test ",
-            "fullname" -> "John Doe",
-            "id" -> "1"),
+          "fullname" -> "John Doe",
+          "id" -> "1"),
         Map("text" -> "Another twitter test ...",
-            "fullname" -> "Jane Doe",
-            "id" -> "2")
+          "fullname" -> "Jane Doe",
+          "id" -> "2")
       )
     }.await
 
@@ -315,26 +360,5 @@ class EQLTest extends EQLTestTrait {
       .execute()
 
     println(response.await.json)
-  }
-
-  ignore should "join index" in {
-    EQL {
-      index into "testindex" / "testmap" doc Map("foo" -> "bar",
-                                                 "name" -> "hello")
-    }.await
-
-    EQL {
-      index into "testindex" / "testfoo" doc Map("pp" -> "tt",
-                                                 "name" -> "hello")
-    }.await
-
-    EQL {
-      refresh index "testindex"
-    }.await
-
-    val res = EQL {
-      search in "testindex" / "testmap" join "testindex" / "testfoo" by "name"
-    }.toJson
-    println(res)
   }
 }

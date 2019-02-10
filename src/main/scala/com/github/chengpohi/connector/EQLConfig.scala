@@ -7,6 +7,7 @@ import java.util.Collections
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.http.HttpHost
+import org.apache.logging.log4j.LogManager
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest
 import org.elasticsearch.analysis.common.CommonAnalysisPlugin
@@ -22,13 +23,14 @@ import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 /**
   * eql
   * Created by chengpohi on 16/06/16.
   */
 trait EQLConfig {
+  private val log = LogManager.getLogger(this.getClass)
+
   lazy val config: Config =
     ConfigFactory.load("eql.conf").getConfig("eql")
 
@@ -64,7 +66,7 @@ trait EQLConfig {
     }))
 
     val restClient = buildRestClient(clientNode.client())
-    EQLClient(clientNode.client(), Try(restClient).getOrElse(null))
+    EQLClient(clientNode.client(), restClient)
   }
 
   private def buildRemoteClient(config: Config): EQLClient = {
@@ -85,8 +87,16 @@ trait EQLConfig {
     val request = new NodesInfoRequest()
     request.http(true)
     val resp = client.admin().cluster().nodesInfo(request).get()
-    val transportAddress = resp.getNodes.asScala.toStream.map(i => i.getHttp.getAddress.publishAddress()).head
-    val restClient = RestClient.builder(new HttpHost(transportAddress.getAddress, transportAddress.getPort)).build()
-    restClient
+    resp.getNodes.asScala.toStream
+      .map(i => {
+        Some(i.getHttp.getAddress).map(_.publishAddress())
+      })
+      .head
+      .map(i =>
+        RestClient.builder(new HttpHost(i.getAddress, i.getPort)).build())
+      .getOrElse({
+        log.error("rest client not enabled")
+        null
+      })
   }
 }
