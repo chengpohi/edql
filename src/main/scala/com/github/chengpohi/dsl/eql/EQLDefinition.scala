@@ -685,35 +685,35 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   }
 
   case class CatNodesDefinition() extends CatDefinition {
-    val path: String = "_cat/nodes"
+    val path: String = "_cat/nodes?v"
   }
 
   case class CatAllocationDefinition() extends CatDefinition {
-    val path: String = "_cat/allocation"
+    val path: String = "_cat/allocation?v"
   }
 
   case class CatMasterDefinition() extends CatDefinition {
-    val path: String = "_cat/master"
+    val path: String = "_cat/master?v"
   }
 
   case class CatIndicesDefinition() extends CatDefinition {
-    val path: String = "_cat/indices"
+    val path: String = "_cat/indices?v"
   }
 
   case class CatShardsDefinition() extends CatDefinition {
-    val path: String = "_cat/shards"
+    val path: String = "_cat/shards?v"
   }
 
   case class CatCountDefinition() extends CatDefinition {
-    val path: String = "_cat/count"
+    val path: String = "_cat/count?v"
   }
 
   case class CatPendingTaskDefinition() extends CatDefinition {
-    val path: String = "_cat/pending_tasks"
+    val path: String = "_cat/pending_tasks?v"
   }
 
   case class CatRecoveryDefinition() extends CatDefinition {
-    val path: String = "_cat/recovery"
+    val path: String = "_cat/recovery?v"
   }
 
   case class OpenIndexRequestDefinition(
