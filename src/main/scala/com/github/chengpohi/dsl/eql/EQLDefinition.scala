@@ -2,8 +2,8 @@ package com.github.chengpohi.dsl.eql
 
 import java.io.Serializable
 
-import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.ElasticBase
+import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
 import com.github.chengpohi.parser.collection.JsonCollection.Val
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
@@ -38,7 +38,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
-import org.elasticsearch.common.xcontent.XContentType
+import org.elasticsearch.common.xcontent.{XContentBuilder, XContentType}
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -525,7 +525,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       this
     }
 
-    def mth(m: (String, AnyRef)): SearchRequestDefinition = {
+    def must(m: (String, AnyRef)): SearchRequestDefinition = {
       val matchQueryBuilder: MatchQueryBuilder =
         QueryBuilders.matchQuery(m._1, m._2)
       searchRequestBuilder.setQuery(matchQueryBuilder)
@@ -703,6 +703,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   case class CatShardsDefinition() extends CatDefinition {
     val path: String = "_cat/shards"
   }
+
   case class CatCountDefinition() extends CatDefinition {
     val path: String = "_cat/count"
   }
@@ -710,6 +711,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   case class CatPendingTaskDefinition() extends CatDefinition {
     val path: String = "_cat/pending_tasks"
   }
+
   case class CatRecoveryDefinition() extends CatDefinition {
     val path: String = "_cat/recovery"
   }
@@ -840,7 +842,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
     def doc[T <: AnyRef](d: T): IndexRequestDefinition = {
       val source = toJson(d)
-      indexRequestBuilder.setSource(source)
+      indexRequestBuilder.setSource(source, XContentType.JSON)
       this
     }
 

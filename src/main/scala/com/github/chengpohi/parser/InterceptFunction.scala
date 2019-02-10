@@ -119,13 +119,13 @@ class InterceptFunction(val elasticCommand: EQLClient) {
 
   def matchQuery: INSTRUMENT_TYPE = {
     case Seq(indexName, indexType, queryData) => {
-      search in indexName / indexType mth queryData
+      search in indexName / indexType must queryData
         .extract[Map[String, String]]
         .toList
         .head from 0 size MAX_NUMBER
     }
     case Seq(indexName, queryData) => {
-      search in indexName mth queryData
+      search in indexName must queryData
         .extract[Map[String, String]]
         .toList
         .head from 0 size MAX_NUMBER

@@ -34,6 +34,13 @@ trait ResponseConverter extends ResponseSerializer {
         Stream(mapGetResponse(a))
     }
 
+    implicit object SearchHitConverter
+      extends Converter[SearchHit] {
+      def as[T](a: SearchHit)(implicit mf: Manifest[T]): Stream[T] = {
+        Stream.apply(mapSearchHit(a)(mf))
+      }
+    }
+
     implicit object StreamSearchResponseConverter
       extends Converter[Stream[SearchHit]] {
       def as[T](a: Stream[SearchHit])(implicit mf: Manifest[T]): Stream[T] = {
@@ -42,6 +49,7 @@ trait ResponseConverter extends ResponseSerializer {
         })
       }
     }
+
 
     def mapSearchHit[T](searchHit: SearchHit)(implicit mf: Manifest[T]): T = {
       val j = parse(searchHit.getSourceAsString())
