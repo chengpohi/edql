@@ -281,7 +281,7 @@ class InterceptFunction(val elasticCommand: EQLClient) {
 
   def dumpIndex: INSTRUMENT_TYPE = {
     case Seq(indexName, fileName) => {
-      dump index indexName store fileName
+      dump index indexName into fileName
     }
   }
 
