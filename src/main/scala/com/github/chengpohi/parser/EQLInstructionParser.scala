@@ -155,7 +155,7 @@ trait EQLInstructionParser extends CollectionParser {
           interceptFunction.reindexIndex,
           Seq(c._1, c._2, c._3, c._4)))
   val index = P(
-    "index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "fields" ~ jsonExpr ~ ("id" ~ strOrVar).?)
+    "index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "doc" ~ jsonExpr ~ ("id" ~ strOrVar).?)
     .map(
       c =>
         interceptFunction.Instruction("index",
@@ -168,7 +168,7 @@ trait EQLInstructionParser extends CollectionParser {
       interceptFunction
         .Instruction("umapping", interceptFunction.updateMapping, c))
   val update = P(
-    "update" ~ "on" ~/ strOrVar ~ "/" ~ strOrVar ~ "fields" ~/ jsonExpr ~ ("id" ~ strOrVar).?)
+    "update" ~ "on" ~/ strOrVar ~ "/" ~ strOrVar ~ "doc" ~/ jsonExpr ~ ("id" ~ strOrVar).?)
     .map(c => {
       c._4 match {
         case None =>
