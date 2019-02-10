@@ -23,9 +23,9 @@ class EQLParserTest extends EQLTestTrait {
     assert(result.contains("cluster_name"))
   }
 
-  "ELKParser" should "index doc by indexName, indexType, fields" in {
+  "ELKParser" should "index doc by indexName, indexType, doc" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name" : "hello", "ppp":"fff" }""")
+      """index into "test-parser-name" / "test-parser-type" doc {"name" : "hello", "ppp":"fff" }""")
 
     EQL {
       refresh index "*"
@@ -38,7 +38,7 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "index doc by indexName, indexType, id and fields" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
+      """index into "test-parser-name" / "test-parser-type" doc { "name" : "hello", "ppp":"fff" } id "123"""")
 
     EQL {
       refresh index "*"
@@ -50,14 +50,14 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "update doc by id and fields" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
+      """index into "test-parser-name" / "test-parser-type" doc { "name" : "hello", "ppp":"fff" } id "123"""")
 
     EQL {
       refresh index "*"
     }.await
 
     runEngine.run(
-      """update on "test-parser-name" / "test-parser-type" fields { "name" : "chengpohi"} id "123"""")
+      """update on "test-parser-name" / "test-parser-type" doc { "name" : "chengpohi"} id "123"""")
 
     EQL {
       refresh index "*"
@@ -67,9 +67,9 @@ class EQLParserTest extends EQLTestTrait {
     assert(result.contains(""""name":"chengpohi""""))
   }
 
-  "ELKParser" should "reindex by sourceIndex targetIndex sourceType fields" in {
+  "ELKParser" should "reindex by sourceIndex targetIndex sourceType doc" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
+      """index into "test-parser-name" / "test-parser-type" doc {"name":"hello"} """)
     EQL {
       refresh index "*"
     }.await
@@ -87,7 +87,7 @@ class EQLParserTest extends EQLTestTrait {
   }
   "ELKParser" should "delete doc by id" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields { "name" : "hello", "ppp":"fff" } id "123"""")
+      """index into "test-parser-name" / "test-parser-type" doc { "name" : "hello", "ppp":"fff" } id "123"""")
 
     EQL {
       refresh index "*"
@@ -105,12 +105,12 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "update doc by indexName indexType tuple" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} """)
+      """index into "test-parser-name" / "test-parser-type" doc {"name":"hello"} """)
     EQL {
       refresh index "*"
     }.await
     runEngine.run(
-      """update on "test-parser-name" / "test-parser-type" fields {"name":"elasticservice"} """)
+      """update on "test-parser-name" / "test-parser-type" doc {"name":"elasticservice"} """)
     EQL {
       refresh index "*"
     }.await
@@ -128,7 +128,7 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "index and get doc by id" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"}  id "HJJJJJJH"""")
+      """index into "test-parser-name" / "test-parser-type" doc {"name":"hello"}  id "HJJJJJJH"""")
     val result = runEngine.run(
       """get from "test-parser-name" / "test-parser-type" id "hJJJJJJH"""")
     assert(result.contains(""""_id":"hJJJJJJH""""))
@@ -136,7 +136,7 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "extract json data" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name":"hello"} id "HJJJJJJH" """)
+      """index into "test-parser-name" / "test-parser-type" doc {"name":"hello"} id "HJJJJJJH" """)
     EQL {
       refresh index "*"
     }.await
@@ -147,7 +147,7 @@ class EQLParserTest extends EQLTestTrait {
 
   "ELKParser" should "search data by json" in {
     runEngine.run(
-      """index into "test-parser-name" / "test-parser-type" fields {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
+      """index into "test-parser-name" / "test-parser-type" doc {"name":"Hello world", "text": "foo bar"} id "HJJJJJJH" """)
     EQL {
       refresh index "*"
     }.await
