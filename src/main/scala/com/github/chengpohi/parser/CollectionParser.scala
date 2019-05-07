@@ -1,11 +1,11 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.collection.JsonCollection
+import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.noApi._
 import org.apache.commons.lang3.StringEscapeUtils
 
 /**
-  * elasticdsl
+  * elasticeql
   * Created by chengpohi on 2/1/16.
   */
 class CollectionParser extends Basic {

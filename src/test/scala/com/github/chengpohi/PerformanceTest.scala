@@ -3,16 +3,16 @@ package com.github.chengpohi
 import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicLong
 
-import com.github.chengpohi.helper.ELKTestTrait
+import com.github.chengpohi.helper.EQLTestTrait
 
 import scala.util.{Failure, Success}
 
 /**
   * Created by xiachen on 31/12/2016.
   */
-class PerformanceTest extends ELKTestTrait {
+class PerformanceTest extends EQLTestTrait {
 
-  import elasticdsl._
+  import eql._
 
   ignore should "pressure test" in {
     val permits = 1000
@@ -31,7 +31,7 @@ class PerformanceTest extends ELKTestTrait {
         }
         semaphore.acquire()
         println("index id: " + i)
-        DSL {
+        EQL {
           index into "testindex" / "testmap" doc Map("Hello" -> List(
             "world",
             "&lt;p&gt;I want to use a track-bar to change a form's opacity.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;This is my code:&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;decimal trans = trackBar1.Value / 5000;&#xA;this.Opacity = trans;&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&#xA;&lt;p&gt;When I try to build it, I get this error:&lt;/p&gt;&#xA;&#xA;&lt;blockquote&gt;&#xA;  &lt;p&gt;Cannot implicitly convert type 'decimal' to 'double'.&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&#xA;&lt;p&gt;I tried making &lt;code&gt;trans&lt;/code&gt; a &lt;code&gt;double&lt;/code&gt;, but then the control doesn't work. This code has worked fine for me in VB.NET in the past. &lt;/p&gt;&#xA;"
