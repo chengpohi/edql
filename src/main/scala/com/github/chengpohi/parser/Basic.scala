@@ -3,7 +3,7 @@ package com.github.chengpohi.parser
 import fastparse.all._
 
 /**
-  * elasticdsl
+  * eql
   * Created by chengpohi on 7/11/16.
   */
 trait Basic {
