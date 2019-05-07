@@ -9,7 +9,7 @@ case "$1" in
     sbt assembly
     ;;
   "pb")
-    sbt publishLocal
+    sbt clean publishLocal
     ;;
   *)
     sbt compile
