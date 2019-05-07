@@ -3,7 +3,7 @@
 
 case "$1" in
   "build")
-    sbt build
+    sbt compile
     ;;
   "assembly")
     sbt assembly
@@ -12,6 +12,6 @@ case "$1" in
     sbt publishLocal
     ;;
   *)
-    sbt build
+    sbt compile
     ;;
 esac
