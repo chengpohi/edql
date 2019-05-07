@@ -1,4 +1,4 @@
-name := "elasticdsl"
+name := "eql"
 
 organization := "com.github.chengpohi"
 
@@ -8,7 +8,7 @@ unmanagedBase := baseDirectory.value / "lib"
 
 resolvers += Resolver.mavenLocal
 
-version in ThisBuild := "0.2.3-SNAPSHOT"
+version in ThisBuild := "6.x-SNAPSHOT"
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
