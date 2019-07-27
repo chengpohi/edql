@@ -11,10 +11,12 @@ class EQLParser(eql: EQLClient) extends EQLInstructionParser {
 
   import WhitespaceApi._
 
+  type PSI = Parsed[Seq[interceptFunction.Instruction]]
+
   val instructionParser: P[Seq[interceptFunction.Instruction]] = P(
     WL0 ~ instrument.rep ~ End)
 
-  def generateDefinitions(parsed: Parsed[Seq[interceptFunction.Instruction]])
+  def generateDefinitions(parsed: PSI)
   : Seq[interceptFunction.Instruction] = {
     val instructions = parsed match {
       case Success(ins, state) => ins
@@ -23,7 +25,7 @@ class EQLParser(eql: EQLClient) extends EQLInstructionParser {
           interceptFunction.Instruction(
             "error",
             interceptFunction.error,
-//            Seq(Str(t.traced.trace), Str(t.traced.trace)))
+            //            Seq(Str(t.traced.trace), Str(t.traced.trace)))
             Seq(Str("command not found")))
         )
     }
