@@ -1,8 +1,8 @@
 package com.github.chengpohi.repl
 
 import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.parser.EQLParser
 import com.github.chengpohi.context.EQLContext
+import com.github.chengpohi.parser.EQLParser
 
 import scala.io.Source
 
@@ -10,7 +10,9 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
 
   import elkParser._
 
-  def interceptDefinitions(instructions: Seq[elkParser.interceptFunction.Instruction]): String = {
+  def render(parsed: PSI): String = {
+    val instructions = generateDefinitions(parsed)
+
     val res = for {
       instruction <- instructions
     } yield {
@@ -23,16 +25,12 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
     res.mkString("\n")
   }
 
+  def parse: String => PSI = (s: String) => instructionParser.parse(s)
+
   def run(source: String): String = {
-    val parsed = instructionParser.parse(source)
-    val instruments = generateDefinitions(parsed)
-    interceptDefinitions(instruments)
+    (parse andThen render).apply(source)
   }
 
-  def run(str: String, parameters: String*): String = {
-    val s = String.format(str, parameters: _*)
-    run(s)
-  }
 }
 
 object EQLInterpreter extends EQLContext with EQLConfig {
