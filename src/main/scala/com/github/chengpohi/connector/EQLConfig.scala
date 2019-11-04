@@ -25,9 +25,9 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 import scala.collection.JavaConverters._
 
 /**
-  * eql
-  * Created by chengpohi on 16/06/16.
-  */
+ * eql
+ * Created by chengpohi on 16/06/16.
+ */
 trait EQLConfig {
   private val log = LogManager.getLogger(this.getClass)
 
@@ -61,12 +61,19 @@ trait EQLConfig {
       settings,
       plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
     clientNode.start()
+
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
       IOUtils.close(clientNode)
     }))
 
-    val restClient = buildRestClient(clientNode.client())
-    EQLClient(clientNode.client(), restClient)
+    config.getConfig("local")
+      .getBoolean("http.enabled") match {
+      case true =>
+        val restClient = buildRestClient(clientNode.client())
+        EQLClient(clientNode.client(), restClient)
+      case false =>
+        EQLClient(clientNode.client(), null)
+    }
   }
 
   private def buildRemoteClient(config: Config): EQLClient = {
@@ -79,8 +86,14 @@ trait EQLConfig {
         address
       )
 
-    val restClient: RestClient = buildRestClient(client)
-    EQLClient(client, restClient)
+    config.getConfig("local")
+      .getBoolean("http.enabled") match {
+      case true =>
+        val restClient: RestClient = buildRestClient(client)
+        EQLClient(client, restClient)
+      case false =>
+        EQLClient(client, null)
+    }
   }
 
   private def buildRestClient(client: Client) = {

@@ -6,7 +6,7 @@ import sbtassembly.{MergeStrategy, PathList}
 
 object Settings {
   lazy val commonSettings = Seq(
-    version := "6.x.1-SNAPSHOT",
+    version := "6.4.X-SNAPSHOT",
     organization := "com.github.chengpohi",
     scalaVersion := "2.12.1",
     scalacOptions ++= Seq("-Ywarn-unused",
