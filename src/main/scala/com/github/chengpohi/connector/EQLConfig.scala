@@ -81,10 +81,14 @@ trait EQLConfig {
     val port: Int = config.getInt("port")
 
     val address = new TransportAddress(new InetSocketAddress(host, port))
-    val client = new PreBuiltTransportClient(Settings.EMPTY)
-      .addTransportAddress(
-        address
-      )
+
+    val client = new PreBuiltTransportClient(Settings.builder()
+      .put("cluster.name",
+        config.getString("cluster.name")
+      ).build()
+    ).addTransportAddress(
+      address
+    )
 
     config.getConfig("local")
       .getBoolean("http.enabled") match {
