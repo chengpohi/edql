@@ -1,7 +1,11 @@
 package com.github.chengpohi.dsl.eql
 
 import com.github.chengpohi.parser.collection.JsonCollection.Val
-import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders, RangeQueryBuilder}
+import org.elasticsearch.index.query.{
+  QueryBuilder,
+  QueryBuilders,
+  RangeQueryBuilder
+}
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 
 private[dsl] trait EQLContext extends EQLExecutor with FutureOps {

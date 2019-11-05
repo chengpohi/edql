@@ -1,11 +1,15 @@
 package com.github.chengpohi.dsl
 
 import com.github.chengpohi.dsl.eql._
-import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient, RestClient}
-
+import org.elasticsearch.client.{
+  Client,
+  ClusterAdminClient,
+  IndicesAdminClient,
+  RestClient
+}
 
 trait EQLs
-  extends AggsEQL
+    extends AggsEQL
     with AnalyzeEQL
     with DeleterEQL
     with IndexEQL

@@ -16,17 +16,15 @@ class EQLParser(eql: EQLClient) extends EQLInstructionParser {
   val instructionParser: P[Seq[interceptFunction.Instruction]] = P(
     WL0 ~ instrument.rep ~ End)
 
-  def generateDefinitions(parsed: PSI)
-  : Seq[interceptFunction.Instruction] = {
+  def generateDefinitions(parsed: PSI): Seq[interceptFunction.Instruction] = {
     val instructions = parsed match {
       case Success(ins, state) => ins
       case Failure(_, _, t) =>
         Seq(
-          interceptFunction.Instruction(
-            "error",
-            interceptFunction.error,
-            //            Seq(Str(t.traced.trace), Str(t.traced.trace)))
-            Seq(Str("command not found")))
+          interceptFunction.Instruction("error",
+                                        interceptFunction.error,
+                                        //            Seq(Str(t.traced.trace), Str(t.traced.trace)))
+                                        Seq(Str("command not found")))
         )
     }
     instructions

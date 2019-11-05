@@ -15,7 +15,6 @@ import org.elasticsearch.action.search.{
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
-
 trait QueryEQL extends EQLDefinition with IndexEQL {
 
   case object get {
@@ -105,7 +104,7 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
   }
 
   case class ReindexRequestDefinition(indexPath: IndexPath)
-    extends Definition[String] {
+      extends Definition[String] {
     var _sourceIndex: String = _
     var _fields: List[String] = _
 
@@ -142,7 +141,7 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
   }
 
   case class BulkUpdateRequestDefinition(indexPath: IndexPath)
-    extends Definition[String] {
+      extends Definition[String] {
     var _fields: List[(String, String)] = _
 
     def fields(_uf: List[(String, String)]): BulkUpdateRequestDefinition = {
@@ -156,7 +155,7 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
       }
       searchResponse.map(f => {
         f.filter(s =>
-          s.getType == indexPath.indexName || indexPath.indexType == "*")
+            s.getType == indexPath.indexName || indexPath.indexType == "*")
           .map { s =>
             EQL {
               update id s.getId doc _fields in indexPath
@@ -170,7 +169,7 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
   }
 
   case class BulkIndexRequestDefinition(indexPath: IndexPath)
-    extends Definition[String] {
+      extends Definition[String] {
     var _fields: List[List[(String, String)]] = _
 
     def doc(_f: List[List[(String, String)]]): BulkIndexRequestDefinition = {
@@ -195,7 +194,7 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
   }
 
   case class DumpIndexRequestDefinition(indexName: String)
-    extends Definition[String] {
+      extends Definition[String] {
     var _fileName: String = _
 
     def into(file: String): DumpIndexRequestDefinition = {
@@ -211,8 +210,8 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
       }
       searchResponse.map(j => {
         j.map(i => {
-          s"""index into "${i.getIndex}" / "${i.getType}" doc ${i.getSourceAsString} id "${i.getId}" """
-        })
+            s"""index into "${i.getIndex}" / "${i.getType}" doc ${i.getSourceAsString} id "${i.getId}" """
+          })
           .foreach(l => {
             writer.write(l + System.lineSeparator())
           })

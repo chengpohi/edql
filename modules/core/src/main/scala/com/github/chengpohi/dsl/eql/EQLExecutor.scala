@@ -8,9 +8,9 @@ import org.json4s.jackson.Serialization.write
 import scala.concurrent.Future
 
 /**
- * eql
- * Created by chengpohi on 6/28/16.
- */
+  * eql
+  * Created by chengpohi on 6/28/16.
+  */
 trait EQLExecutor extends FutureOps {
 
   trait Definition[A] {
@@ -24,7 +24,7 @@ trait EQLExecutor extends FutureOps {
   }
 
   case class ExtractDefinition(definition: Definition[_], path: String)
-    extends Definition[String] {
+      extends Definition[String] {
 
     override def execute: Future[String] = {
       val jObj = parse(definition.json)
