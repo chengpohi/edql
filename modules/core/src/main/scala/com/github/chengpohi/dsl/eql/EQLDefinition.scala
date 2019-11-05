@@ -2,6 +2,7 @@ package com.github.chengpohi.dsl.eql
 
 import java.io.Serializable
 
+import cats.implicits._
 import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
@@ -44,12 +45,13 @@ import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.elasticsearch.search.sort.SortBuilder
-import scalaz.Scalaz._
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.reflect.runtime.universe
+
+
 
 /**
  * eql
@@ -1181,10 +1183,9 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
     extends Definition[Map[String, AnyRef]] {
 
     override def execute: Future[Map[String, AnyRef]] = {
-      (List("error_msg", "caused_by") fzip parameters
-        .take(2)
-        .map(_.extract[String])
-        .toList).toMap
+      List("error_msg", "caused_by")
+        .zip(parameters.take(2).map(_.extract[String]).toList)
+        .toMap
         .pure[Future]
     }
 

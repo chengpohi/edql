@@ -1,17 +1,18 @@
 package com.github.chengpohi.dsl.eql
 
+import cats.implicits._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization.write
-import scalaz.Scalaz._
 
 import scala.concurrent.Future
 
 /**
-  * eql
-  * Created by chengpohi on 6/28/16.
-  */
+ * eql
+ * Created by chengpohi on 6/28/16.
+ */
 trait EQLExecutor extends FutureOps {
+
   trait Definition[A] {
     def execute: Future[A]
 
@@ -23,7 +24,7 @@ trait EQLExecutor extends FutureOps {
   }
 
   case class ExtractDefinition(definition: Definition[_], path: String)
-      extends Definition[String] {
+    extends Definition[String] {
 
     override def execute: Future[String] = {
       val jObj = parse(definition.json)
