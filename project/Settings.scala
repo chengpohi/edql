@@ -27,8 +27,9 @@ object Settings {
     "org.scalactic" %% "scalactic" % "3.0.1",
     "com.lihaoyi" %% "fastparse" % "0.4.2",
     "org.json4s" %% "json4s-jackson" % "3.5.0",
-    "org.scalaz" %% "scalaz-core" % "7.3.0-M9",
     "org.apache.logging.log4j" % "log4j-core" % "2.11.1",
+    "org.typelevel" %% "cats-core" % "2.0.0",
+    "org.typelevel" %% "cats-effect" % "2.0.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 
