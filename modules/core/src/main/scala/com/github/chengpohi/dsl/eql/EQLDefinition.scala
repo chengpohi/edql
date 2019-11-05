@@ -52,9 +52,9 @@ import scala.concurrent.Future
 import scala.reflect.runtime.universe
 
 /**
-  * eql
-  * Created by chengpohi on 6/28/16.
-  */
+ * eql
+ * Created by chengpohi on 6/28/16.
+ */
 trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
@@ -238,6 +238,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       _settings = Some(settings)
       this
     }
+
     def settings(settings: IndexSettings): CreateIndexDefinition = {
       this._s = Some(settings)
       this
@@ -678,9 +679,11 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   trait CatDefinition extends Definition[String] {
     val path: String
+
     override def execute: Future[String] = {
       GET(path).execute
     }
+
     override def json: String = execute.await
   }
 
@@ -1108,23 +1111,28 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   object Mappings {
     def apply[A](implicit typeTag: TypeTag[A]) = MappingsDefinition(typeTag)
+
     def apply[A, B](implicit typeTagA: TypeTag[A], typeTagB: TypeTag[B]) =
       MappingsDefinition(typeTagA, typeTagB)
+
     def apply[A, B, C](implicit typeTagA: TypeTag[A],
                        typeTagB: TypeTag[B],
                        typeTagC: TypeTag[C]) =
       MappingsDefinition(typeTagA, typeTagB, typeTagC)
+
     def apply[A, B, C, D](implicit typeTagA: TypeTag[A],
                           typeTagB: TypeTag[B],
                           typeTagC: TypeTag[C],
                           typeTagD: TypeTag[D]) =
       MappingsDefinition(typeTagA, typeTagB, typeTagC, typeTagD)
+
     def apply[A, B, C, D, E](implicit typeTagA: TypeTag[A],
                              typeTagB: TypeTag[B],
                              typeTagC: TypeTag[C],
                              typeTagD: TypeTag[D],
                              typeTagE: TypeTag[E]) =
       MappingsDefinition(typeTagA, typeTagB, typeTagC, typeTagD, typeTagE)
+
     def apply[A, B, C, D, E, F](implicit typeTagA: TypeTag[A],
                                 typeTagB: TypeTag[B],
                                 typeTagC: TypeTag[C],
@@ -1179,6 +1187,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
         .toList).toMap
         .pure[Future]
     }
+
     override def json: String = execute.await.json
   }
 
