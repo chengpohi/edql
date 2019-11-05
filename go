@@ -6,10 +6,10 @@ case "$1" in
     sbt compile
     ;;
   "assembly")
-    sbt assembly
+    sbt binary
     ;;
   "pb")
-    sbt clean publishLocal
+    sbt clean pbCore
     ;;
   *)
     sbt compile

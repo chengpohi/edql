@@ -32,9 +32,13 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
 
     while (true) {
       val line = reader.readLine()
-      line.trim match {
-        case "exit" => System.exit(0)
-        case l => println(run(interpret(l)))
+      Option(line).map(_.trim) match {
+        case Some("exit") =>
+          System.exit(0)
+        case Some(l) =>
+          println(run(interpret(l)))
+        case None =>
+          System.exit(0)
       }
     }
   }
@@ -60,6 +64,7 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
       }
     })
   }
+
   def buildReader: ConsoleReader = {
     val reader = new ConsoleReader()
     reader.setPrompt(ANSI_GREEN + "eql>" + ANSI_RESET)
