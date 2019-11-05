@@ -15,20 +15,24 @@ import org.apache.lucene.util.IOUtils
 
 import scala.io.Source
 
-
-//noinspection ScalaStyle
 object EQLRepl extends EQLConfig with EQLContext with JSONOps {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val ANSI_GREEN = "\u001B[32m"
   val ANSI_RESET = "\u001B[0m"
 
-  private val completions = Resource.fromAutoCloseable(IO {
-    Source.fromURL(getClass.getResource("/completions.txt"))
-  }).use(i => IO(i.getLines().toSet)).unsafeRunSync()
+  private val completions = Resource
+    .fromAutoCloseable(IO {
+      Source.fromURL(getClass.getResource("/completions.txt"))
+    })
+    .use(i => IO(i.getLines().toSet))
+    .unsafeRunSync()
 
-  private val words: Set[String] = Resource.fromAutoCloseable(IO {
-    Source.fromURL(getClass.getResource("/words.txt"))
-  }).use(i => IO(i.getLines().toSet)).unsafeRunSync()
+  private val words: Set[String] = Resource
+    .fromAutoCloseable(IO {
+      Source.fromURL(getClass.getResource("/words.txt"))
+    })
+    .use(i => IO(i.getLines().toSet))
+    .unsafeRunSync()
   val terms = new StringsCompleter(completions, words)
   val elkInterpreter = new EQLInterpreter()
 

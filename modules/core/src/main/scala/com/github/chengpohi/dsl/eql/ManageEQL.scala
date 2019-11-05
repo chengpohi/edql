@@ -9,7 +9,10 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksRequestBuilder
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.settings.put.{UpdateSettingsRequestBuilder, UpdateSettingsResponse}
+import org.elasticsearch.action.admin.indices.settings.put.{
+  UpdateSettingsRequestBuilder,
+  UpdateSettingsResponse
+}
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
 
 import scala.concurrent.{Future, Promise}
@@ -82,7 +85,11 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
 
     def settings: ClusterStateRequestDefinition = {
       val stateRequestBuilder: ClusterStateRequestBuilder =
-        clusterClient.prepareState().setNodes(false).setRoutingTable(false).setLocal(true)
+        clusterClient
+          .prepareState()
+          .setNodes(false)
+          .setRoutingTable(false)
+          .setLocal(true)
       ClusterStateRequestDefinition(stateRequestBuilder)
     }
   }
@@ -164,7 +171,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case class CreateFilterRequestDefinition(analyzerSetting: String)
-    extends Definition[UpdateSettingsResponse] {
+      extends Definition[UpdateSettingsResponse] {
     var keepwords: String = _
     var tpe: String = _
 
@@ -183,7 +190,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case class CreateAnalyzerRequestDefinition(analyzerSetting: String)
-    extends Definition[UpdateSettingsResponse] {
+      extends Definition[UpdateSettingsResponse] {
     var tpe: String = _
 
     var tokenizer: String = _

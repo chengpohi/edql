@@ -4,7 +4,10 @@ import java.io.IOException
 import java.util
 
 import jline.console.ConsoleReader
-import jline.console.completer.{CandidateListCompletionHandler, CompletionHandler}
+import jline.console.completer.{
+  CandidateListCompletionHandler,
+  CompletionHandler
+}
 
 import scala.collection.JavaConverters._
 

@@ -11,6 +11,10 @@ case "$1" in
   "pb")
     sbt clean pbCore
     ;;
+  "fmt")
+    sbt eqlCore/scalafmt
+    sbt eqlRepl/scalafmt
+    ;;
   *)
     sbt compile
     ;;
