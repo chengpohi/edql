@@ -5,9 +5,9 @@ import fastparse.core.Parsed
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 /**
-  * elasticeql
-  * Created by chengpohi on 2/1/16.
-  */
+ * elasticeql
+ * Created by chengpohi on 2/1/16.
+ */
 class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   val collectionParser = new CollectionParser
 
@@ -25,7 +25,7 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
 
     assert(
       value === Arr(Arr(Num(1.0), Num(2.0), Num(3.0)),
-                    Arr(Num(4.0), Num(5.0), Num(6.0))))
+        Arr(Num(4.0), Num(5.0), Num(6.0))))
     assert(
       value2 === Arr(Arr(Num(1.0), Num(2.0), Num(3.0)), Num(7.0), Num(6.0)))
     assert(
@@ -43,7 +43,8 @@ class CollectionParserTest extends FlatSpec with BeforeAndAfter {
   }
 
   "jVal get" should "get field by name" in {
-    val Parsed.Success(value, _) = jsonExpr.parse("""{
+    val Parsed.Success(value, _) = jsonExpr.parse(
+      """{
         |"user":{
         |"name" : "\\s+" , "age":23
         |}
