@@ -13,5 +13,11 @@ trait IndexEQL extends EQLDefinition {
         client.prepareIndex(indexPath.indexName, indexPath.indexType)
       IndexRequestDefinition(indexRequestBuilder)
     }
+
+    def into(indexPath: String): IndexRequestDefinition = {
+      val indexRequestBuilder: IndexRequestBuilder =
+        client.prepareIndex(indexPath, "_doc")
+      IndexRequestDefinition(indexRequestBuilder)
+    }
   }
 }
