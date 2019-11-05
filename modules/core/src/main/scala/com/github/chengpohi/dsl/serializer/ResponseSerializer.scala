@@ -8,7 +8,12 @@ import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.support.broadcast.BroadcastResponse
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.common.bytes.BytesReference
-import org.elasticsearch.common.xcontent.{ToXContent, XContentFactory, XContentHelper, XContentType}
+import org.elasticsearch.common.xcontent.{
+  ToXContent,
+  XContentFactory,
+  XContentHelper,
+  XContentType
+}
 import org.elasticsearch.search.SearchHit
 import org.json4s.jackson.Serialization.write
 
@@ -23,7 +28,7 @@ trait ResponseSerializer extends JSONOps {
   object JSONSerializer {
 
     implicit object XContentResponseJSONSerializer
-      extends JSONSerializer[ToXContent] {
+        extends JSONSerializer[ToXContent] {
       override def json(a: ToXContent): String = {
         val bytes = XContentHelper.toXContent(a, XContentType.JSON, true)
         XContentHelper.convertToJson(bytes, true, XContentType.JSON)
@@ -31,7 +36,7 @@ trait ResponseSerializer extends JSONOps {
     }
 
     implicit object BulkResponseJSONSerializer
-      extends JSONSerializer[BulkResponse] {
+        extends JSONSerializer[BulkResponse] {
       override def json(response: BulkResponse): String = {
         val builder = XContentFactory.contentBuilder(XContentType.JSON)
         builder.startObject()
@@ -51,14 +56,14 @@ trait ResponseSerializer extends JSONOps {
     }
 
     implicit object AcknowledgedResponseJSONSerializer
-      extends JSONSerializer[AcknowledgedResponse] {
+        extends JSONSerializer[AcknowledgedResponse] {
       override def json(response: AcknowledgedResponse): String = {
         write(("acknowledged", response.isAcknowledged))
       }
     }
 
     implicit object GetSettingsResponseJSONSerializer
-      extends JSONSerializer[GetSettingsResponse] {
+        extends JSONSerializer[GetSettingsResponse] {
       override def json(response: GetSettingsResponse): String = {
         val builder = XContentFactory.contentBuilder(XContentType.JSON)
         builder.startObject()
@@ -72,15 +77,14 @@ trait ResponseSerializer extends JSONOps {
             builder.endObject()
           })
         builder.endObject()
-        XContentHelper.convertToJson(
-          BytesReference.bytes(builder),
-          true,
-          XContentType.JSON)
+        XContentHelper.convertToJson(BytesReference.bytes(builder),
+                                     true,
+                                     XContentType.JSON)
       }
     }
 
     implicit object GetMappingResponseJSONSerializer
-      extends JSONSerializer[GetMappingsResponse] {
+        extends JSONSerializer[GetMappingsResponse] {
       override def json(response: GetMappingsResponse): String = {
         val builder = XContentFactory.jsonBuilder()
         builder.startObject()
@@ -97,31 +101,30 @@ trait ResponseSerializer extends JSONOps {
             builder.endObject()
           })
         builder.endObject()
-        XContentHelper.convertToJson(
-          BytesReference.bytes(builder),
-          true,
-          XContentType.JSON)
+        XContentHelper.convertToJson(BytesReference.bytes(builder),
+                                     true,
+                                     XContentType.JSON)
       }
     }
 
     implicit object BroadcastResponseJSONSerializer
-      extends JSONSerializer[BroadcastResponse] {
+        extends JSONSerializer[BroadcastResponse] {
       override def json(response: BroadcastResponse): String = ""
     }
 
     implicit object StringResponseJSONSerializer
-      extends JSONSerializer[String] {
+        extends JSONSerializer[String] {
       override def json(response: String): String = response
     }
 
     implicit object ClusterStateResponseJSONSerializer
-      extends JSONSerializer[ClusterStateResponse] {
+        extends JSONSerializer[ClusterStateResponse] {
       override def json(response: ClusterStateResponse): String =
         XContentResponseJSONSerializer.json(response.getState)
     }
 
     implicit object StreamSearchHitResponseJSONSerializer
-      extends JSONSerializer[Stream[SearchHit]] {
+        extends JSONSerializer[Stream[SearchHit]] {
       override def json(response: Stream[SearchHit]): String = {
         val a = response.map(s => XContentResponseJSONSerializer.json(s))
         write(a)
@@ -129,14 +132,14 @@ trait ResponseSerializer extends JSONOps {
     }
 
     implicit object StreamMapSearchHitResponseJSONSerializer
-      extends JSONSerializer[Stream[Map[String, AnyRef]]] {
+        extends JSONSerializer[Stream[Map[String, AnyRef]]] {
       override def json(response: Stream[Map[String, AnyRef]]): String = {
         write(response)
       }
     }
 
     implicit object MapSearchHitResponseJSONSerializer
-      extends JSONSerializer[Map[String, AnyRef]] {
+        extends JSONSerializer[Map[String, AnyRef]] {
       override def json(response: Map[String, AnyRef]): String =
         toJson(response)
     }
@@ -150,35 +153,35 @@ trait ResponseSerializer extends JSONOps {
   }
 
   implicit def toSerializerOps[A: JSONSerializer](a: A)(
-    implicit F0: JSONSerializer[A]): SerializerOps[A] = new SerializerOps[A] {
+      implicit F0: JSONSerializer[A]): SerializerOps[A] = new SerializerOps[A] {
     override val F = F0
     override val value = a
   }
 
   implicit def toXContentSerializerOps[A <: ToXContent](a: A)(
-    implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
+      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
     new SerializerOps[ToXContent] {
       override val F = F0
       override val value = a
     }
 
   implicit def toAckSerializerOps[A <: AcknowledgedResponse](a: A)(
-    implicit F0: JSONSerializer[AcknowledgedResponse])
-  : SerializerOps[AcknowledgedResponse] =
+      implicit F0: JSONSerializer[AcknowledgedResponse])
+    : SerializerOps[AcknowledgedResponse] =
     new SerializerOps[AcknowledgedResponse] {
       override val F = F0
       override val value = a
     }
 
   implicit def toBroadSerializerOps[A <: BroadcastResponse](a: A)(
-    implicit F0: JSONSerializer[BroadcastResponse])
-  : SerializerOps[BroadcastResponse] = new SerializerOps[BroadcastResponse] {
+      implicit F0: JSONSerializer[BroadcastResponse])
+    : SerializerOps[BroadcastResponse] = new SerializerOps[BroadcastResponse] {
     override val F = F0
     override val value = a
   }
 
   implicit def toIndicesStatsSerializerOps(a: IndicesStatsResponse)(
-    implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
+      implicit F0: JSONSerializer[ToXContent]): SerializerOps[ToXContent] =
     new SerializerOps[ToXContent] {
       override val F = F0
       override val value = a

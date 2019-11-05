@@ -6,7 +6,6 @@ import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 
-
 class InterceptFunction(val elasticCommand: EQLClient) {
   val MAX_NUMBER: Int = 500
 
@@ -335,9 +334,7 @@ class InterceptFunction(val elasticCommand: EQLClient) {
 
   implicit def valToString(v: Val): String = v.extract[String]
 
-  case class Instruction(name: String,
-                         f: INSTRUMENT_TYPE,
-                         params: Seq[Val])
+  case class Instruction(name: String, f: INSTRUMENT_TYPE, params: Seq[Val])
 
   def buildExtractDefinition(f: INSTRUMENT_TYPE,
                              path: String): INSTRUMENT_TYPE = {

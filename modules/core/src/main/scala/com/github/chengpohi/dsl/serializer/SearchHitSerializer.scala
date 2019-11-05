@@ -6,11 +6,11 @@ import org.json4s.JsonAST.JObject
 import org.json4s.jackson.JsonMethods._
 
 class SearchHitSerializer
-  extends CustomSerializer[SearchHit](format =>
-    ( {
-      case JObject(x) => null
-    }, {
-      case x: SearchHit => {
-        parse(x.getSourceAsString)
-      }
-    }))
+    extends CustomSerializer[SearchHit](format =>
+      ({
+        case JObject(x) => null
+      }, {
+        case x: SearchHit => {
+          parse(x.getSourceAsString)
+        }
+      }))

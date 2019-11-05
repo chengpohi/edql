@@ -1,6 +1,11 @@
 package com.github.chengpohi.dsl
 
-import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient, RestClient}
+import org.elasticsearch.client.{
+  Client,
+  ClusterAdminClient,
+  IndicesAdminClient,
+  RestClient
+}
 
 /**
   * ElasticBase function
