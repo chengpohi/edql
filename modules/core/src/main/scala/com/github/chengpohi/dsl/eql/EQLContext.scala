@@ -14,6 +14,10 @@ private[dsl] trait EQLContext extends EQLExecutor with FutureOps {
     def /(indexType: String): IndexPath = {
       IndexPath(indexName, indexType)
     }
+
+    def /(indexType: Option[String]): IndexPath = {
+      IndexPath(indexName, indexType.getOrElse("*"))
+    }
   }
 
   implicit class IndexNameAndIndexTypeVal(indexName: Val) {

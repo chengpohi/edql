@@ -5,7 +5,7 @@ import com.github.chengpohi.parser.collection.JsonCollection.Str
 import fastparse.core.Parsed.{Failure, Success}
 import fastparse.noApi._
 
-class EQLParser(eql: EQLClient) extends EQLInstructionParser {
+class EQLParser(override val eql: EQLClient) extends EQLInstructionParser() {
 
   override val interceptFunction: InterceptFunction = new InterceptFunction(eql)
 

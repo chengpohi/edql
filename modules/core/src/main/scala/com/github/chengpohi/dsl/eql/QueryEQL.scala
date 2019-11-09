@@ -142,10 +142,15 @@ trait QueryEQL extends EQLDefinition with IndexEQL {
 
   case class BulkUpdateRequestDefinition(indexPath: IndexPath)
       extends Definition[String] {
-    var _fields: List[(String, String)] = _
+    var _fields: Map[String, String] = _
 
     def fields(_uf: List[(String, String)]): BulkUpdateRequestDefinition = {
-      _fields = _uf
+      _fields = _uf.toMap
+      this
+    }
+
+    def fields(_uf: Map[String, String]): BulkUpdateRequestDefinition = {
+      _fields = _uf.toMap
       this
     }
 
