@@ -1,163 +1,264 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.dsl.EQLClient
-import com.github.chengpohi.parser.collection.JsonCollection.{Obj, Val}
+import com.github.chengpohi.dsl.eql.{Definition, ExtractDefinition, PureStringDefinition}
+import com.github.chengpohi.parser.collection.JsonCollection.{Obj, Str, Val}
 import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.Future
+class InterceptFunction(val eql: EQLClient) {
 
-class InterceptFunction(val elasticCommand: EQLClient) {
   val MAX_NUMBER: Int = 500
 
-  import elasticCommand._
+  import eql._
 
-  type INSTRUMENT_TYPE = Seq[Val] => elasticCommand.Definition[_]
+  type INSTRUMENT_TYPE = Seq[Val] => Definition[_]
 
-  def getMapping: INSTRUMENT_TYPE = {
-    case Seq(indexName) => {
+
+  case class GetMappingInstruction(indexName: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       get mapping indexName
     }
   }
 
-  def createIndex: INSTRUMENT_TYPE = {
-    case Seq(indexName) => create index indexName
+  case class CreateIndexInstruction(indexName: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      create index indexName
+    }
   }
 
-  def getClusterSettings: INSTRUMENT_TYPE = _ => {
-    cluster state
-  }
-  def getClusterState: INSTRUMENT_TYPE = _ => {
-    cluster state
+
+  case class GetClusterStateInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cluster state
+    }
   }
 
-  def clusterStats: INSTRUMENT_TYPE = _ => {
-    cluster stats
+  case class GetClusterSettingsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cluster settings
+    }
   }
 
-  def catNodes: INSTRUMENT_TYPE = _ => {
-    cat nodes
+  case class GetClusterStatsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cluster stats
+    }
   }
 
-  def catAllocation: INSTRUMENT_TYPE = _ => {
-    cat allocation
-  }
-  def catMaster: INSTRUMENT_TYPE = _ => {
-    cat master
-  }
-  def catIndices: INSTRUMENT_TYPE = _ => {
-    cat indices
-  }
-  def catShards: INSTRUMENT_TYPE = _ => {
-    cat shards
+  case class CatNodesInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat nodes
+    }
   }
 
-  def catCount: INSTRUMENT_TYPE = _ => {
-    cat count
-  }
-  def catPendingTasks: INSTRUMENT_TYPE = _ => {
-    cat pending_tasks
-  }
-  def catRecovery: INSTRUMENT_TYPE = _ => {
-    cat recovery
+  case class GetAllocationInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat allocation
+    }
   }
 
-  def clusterHealth: INSTRUMENT_TYPE = _ => {
-    cluster health
+  case class CatMasterInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat master
+    }
   }
 
-  def indicesStats: INSTRUMENT_TYPE = _ => {
-    indice stats NodeType.ALL flag FlagType.ALL
+  case class CatIndicesInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat indices
+    }
   }
 
-  def nodeStats: INSTRUMENT_TYPE = _ => {
-    node stats NodeType.ALL flag FlagType.ALL
+  case class CatShardsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat shards
+    }
   }
 
-  def clusterSettings: INSTRUMENT_TYPE = _ => {
-    cluster settings
+  case class CatCountInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat count
+    }
   }
 
-  def nodeSettings: INSTRUMENT_TYPE = _ => {
-    node info
+  case class CatPendingInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat pending_tasks
+    }
   }
 
-  def pendingTasks: INSTRUMENT_TYPE = _ => {
-    pending tasks
+  case class CatRecoveryInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cat recovery
+    }
   }
 
-  def indexSettings: INSTRUMENT_TYPE = {
-    case Seq(indexName) => {
+  case class IndicesStatsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      indice stats NodeType.ALL flag FlagType.ALL
+    }
+  }
+
+
+  case class NodeStatsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      node stats NodeType.ALL flag FlagType.ALL
+    }
+  }
+
+
+  case class ClusterSettingsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      cluster settings
+    }
+  }
+
+
+  case class NodeSettingsInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      node info
+    }
+  }
+
+  case class PendingTasksInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      pending tasks
+    }
+  }
+
+  case class IndexSettingsInstruction(indexName: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       get settings indexName
     }
   }
 
-  def health: INSTRUMENT_TYPE = _ => {
-    cluster health
+
+  case class ShutdownInstruction(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      ShutDownRequestDefinition()
+    }
   }
 
-  def shutdown: INSTRUMENT_TYPE = _ => {
-    ShutDownRequestDefinition()
+  case class CountInstruction(indexName: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      get settings indexName
+    }
   }
 
-  def count: INSTRUMENT_TYPE = {
-    case Seq(indexName) =>
-      search in indexName size 0
-  }
 
-  def deleteIndex: INSTRUMENT_TYPE = {
-    case Seq(indexName) => {
+  case class DeleteIndexInstruction(indexName: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       delete index indexName
     }
   }
 
-  def deleteDoc: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType, _id) => {
+  case class DeleteDocInstruction(indexName: String, indexType: String, _id: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       delete in indexName / indexType id _id
     }
   }
 
-  def matchQuery: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType, queryData) => {
-      search in indexName / indexType must queryData
-        .extract[Map[String, String]]
-        .toList
-        .head from 0 size MAX_NUMBER
-    }
-    case Seq(indexName, queryData) => {
-      search in indexName must queryData
-        .extract[Map[String, String]]
-        .toList
-        .head from 0 size MAX_NUMBER
+  case class MatchQueryInstruction(indexName: String, indexType: Option[String], queryData: Map[String, String])(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      search in indexName / indexType must queryData from 0 size MAX_NUMBER
     }
   }
 
-  def query: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType) =>
-      search in indexName / indexType query "*" from 0 size MAX_NUMBER
-    case Seq(indexName, indexType, queryData) =>
-      search in indexName / indexType must queryData
-        .extract[Map[String, String]]
-        .toList from 0 size MAX_NUMBER
-    case Seq(indexName) =>
-      search in indexName / "*" query "*" from 0 size MAX_NUMBER
+  case class QueryInstruction(indexName: String, indexType: Option[String],
+                              queryData: Map[String, String])(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: SearchRequestDefinition = {
+      search in indexName / indexType must queryData from 0 size MAX_NUMBER
+    }
   }
 
-  def joinQuery: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType, joinIndexName, joinIndexType, field) =>
-      search in indexName / indexType size MAX_RETRIEVE_SIZE scroll "10m" join joinIndexName / joinIndexType by field
+  case class JoinQueryInstruction(indexName: String,
+                                  indexType: Option[String],
+                                  joinIndexName: String,
+                                  joinIndexType: String,
+                                  joinField: String,
+                                  queryData: Map[String, String])(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      QueryInstruction(indexName, indexType, queryData).execute scroll "10m" join (joinIndexName / joinIndexType) by joinField
+    }
   }
 
-  def bulkUpdateDoc: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType, updateFields) => {
+  case class BulkUpdateInstruction(indexName: String,
+                                   indexType: Option[String],
+                                   updateFields: Map[String, String])(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       bulk update indexName / indexType fields updateFields
-        .extract[List[(String, String)]]
     }
   }
 
-  def updateDoc: INSTRUMENT_TYPE = {
-    case Seq(indexName, indexType, updateFields, _id) => {
+
+  case class UpdateDocInstruction(indexName: String, indexType: Option[String],
+                              updateFields: Map[String, String], _id: String)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
       update id _id in indexName / indexType docAsUpsert updateFields
-        .extract[List[(String, String)]]
+    }
+  }
+
+  case class ReIndexInstruction(sourceIndex: String,)(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "GetMapping"
+
+    override def execute: Definition[_] = {
+      search in indexName / indexType must queryData from 0 size MAX_NUMBER
     }
   }
 
@@ -303,38 +404,44 @@ class InterceptFunction(val elasticCommand: EQLClient) {
     ParserErrorDefinition(parameters)
   }
 
-  /*  def findJSONElements(c: String): String => String = {
-    extractJSON(_, c)
-  }
-
-  def beautyJson(): String => String = {
-    beautyJSON
-  }*/
-  val instrumentations = ConfigFactory.load("instrumentations.json")
-
-  def help: Seq[Val] => Future[String] = {
-    {
-      case Seq(input) =>
-        Future {
-          val s = input.extract[String]
-          val example: String =
-            instrumentations.getConfig(s.trim).getString("example")
-          val description: String =
-            instrumentations.getConfig(s.trim).getString("description")
-          val r: Map[String, AnyRef] =
-            Map(("example", example), ("description", description))
-          r.json
-        }
-      case _ =>
-        Future {
-          "I have no idea for this."
-        }
-    }
-  }
-
   implicit def valToString(v: Val): String = v.extract[String]
 
   case class Instruction(name: String, f: INSTRUMENT_TYPE, params: Seq[Val])
+
+  trait Instruction2 {
+    val eql: EQLClient
+
+    def name: String
+
+    def execute: Definition[_]
+  }
+
+  lazy val instrumentations = ConfigFactory.load("instrumentations.json")
+
+  case class HelpInstruction(params: Seq[Str])(implicit val eql: EQLClient) extends Instruction2 {
+    override def name = "help"
+
+    def execute: PureStringDefinition = params match {
+      case Seq(i) =>
+        val example: String =
+          instrumentations.getConfig(i.extract[String]).getString("example")
+        val description: String =
+          instrumentations.getConfig(i.extract[String]).getString("description")
+        val r: Map[String, AnyRef] =
+          Map(("example", example), ("description", description))
+        PureStringDefinition(r.json)
+      case _ =>
+        PureStringDefinition("I have no idea for this.")
+    }
+  }
+
+  case class HealthInstruction()(implicit val eql: EQLClient) extends Instruction2 {
+    override def name: String = "health"
+
+    def execute: ClusterHealthRequestDefinition = {
+      cluster health
+    }
+  }
 
   def buildExtractDefinition(f: INSTRUMENT_TYPE,
                              path: String): INSTRUMENT_TYPE = {

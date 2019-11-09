@@ -8,7 +8,7 @@ import scala.util.Try
 
 trait JSONOps {
   DefaultFormats.preservingEmptyValues
-  implicit val formats = DefaultFormats + new NumberSerializer
+  implicit val formats = DefaultFormats + new NumberSerializer ++ JavaTimeSerializers.defaults
 
   def toJson[T](t: T): String = {
     val decompose = Extraction.decompose(t)
