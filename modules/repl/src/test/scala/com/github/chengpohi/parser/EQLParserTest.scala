@@ -158,7 +158,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   ignore should "set mapping for indexname indextype" in {
-    val r = runEngine.run("""mapping "test-mapping" {
+    val r = runEngine.run(
+      """mapping "test-mapping" {
         |  "mappings": {
         |    "bookmark": {
         |      "properties": {
@@ -183,7 +184,8 @@ class EQLParserTest extends EQLTestTrait {
 
   ignore should "update mapping" in {
 
-    runEngine.run("""update mapping "test-parser-name" "bookmark" {
+    runEngine.run(
+      """update mapping "test-parser-name" "bookmark" {
         |      "properties": {
         |        "created_at": {
         |          "type": "date"
@@ -203,7 +205,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   "ELKParser" should "bulk index docs" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23},
@@ -220,6 +223,25 @@ class EQLParserTest extends EQLTestTrait {
     assert(result.contains("false"))
   }
 
+  "ELKParser" should "search with sort docs" in {
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23},
+        |{"name": "hello","age": 23}
+        |] """.stripMargin)
+    EQL {
+      refresh index "*"
+    }.await
+    val result = runEngine.run(""" search in "test-parser-name" """)
+    assert(result.contains("7"))
+    assert(result.contains("false"))
+  }
+
   "ELKParser" should "index newline" in {
     runEngine.run(
       """bulk index "test-parser-name" "test-parser-type" [{"price": 10000, "color": "red"}]""".stripMargin)
@@ -230,7 +252,8 @@ class EQLParserTest extends EQLTestTrait {
     assert(result.contains(""))
   }
   "ELKParser" should "aggs avg" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 24},
         |{"name": "hello","age": 23},
@@ -248,7 +271,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   "ELKParser" should "hist aggs" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello1","created_at": 1478844495882},
         |{"name": "hello2","created_at": 1478844595882},
         |{"name": "hello3","created_at": 1478844695882},
@@ -265,7 +289,8 @@ class EQLParserTest extends EQLTestTrait {
     assert(result.contains("""aggregations"""))
   }
   "ELKParser" should "dump index" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello1","created_at": 1478844495882},
         |{"name": "hello2","created_at": 1478844595882},
         |{"name": "hello3","created_at": 1478844695882},
@@ -289,12 +314,13 @@ class EQLParserTest extends EQLTestTrait {
       refresh index "*"
     }.await
     val result = runEngine.run("""count "test-parser-name"""")
-    result should contain inOrder ('1', '4')
+    result should contain inOrder('1', '4')
     Files.delete(Paths.get(u))
   }
 
   ignore should "aggs terms" in {
-    val p = runEngine.run("""mapping "test-index2" {
+    val p = runEngine.run(
+      """mapping "test-index2" {
         |  "mappings": {
         |    "test-parser-type": {
         |      "properties": {
@@ -315,7 +341,8 @@ class EQLParserTest extends EQLTestTrait {
     EQL {
       refresh index "*"
     }.await
-    runEngine.run("""bulk index "test-index2" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-index2" "test-parser-type" [
         |{"title": "programming in java"},
         |{"title": "programming in scala"},
         |{"title": "programming in c++"},
@@ -331,7 +358,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   ignore should "alias index" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 24},
         |{"name": "hello","age": 23},
@@ -442,7 +470,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   ignore should "wait for status" in {
-    runEngine.run("""bulk index "test-parser-name" "test-parser-type" [
+    runEngine.run(
+      """bulk index "test-parser-name" "test-parser-type" [
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23},
         |{"name": "hello","age": 23},
@@ -471,7 +500,8 @@ class EQLParserTest extends EQLTestTrait {
   }
 
   ignore should "multi search" in {
-    runEngine.run("""bulk index "test-index-name" "test-index-type" [
+    runEngine.run(
+      """bulk index "test-index-name" "test-index-type" [
         |{"name": "test","title":"foo bar","_tip_id": "1"},
         |{"name": "foo","title": "hello world","_tip_id": "2"},
         |{"name": "bar","title": "test po","_tip_id": "1"},
@@ -485,11 +515,13 @@ class EQLParserTest extends EQLTestTrait {
     result.contains(""""name" : "test"""") should be(true)
   }
   "ELKParser" should "join search" in {
-    runEngine.run("""bulk index "test-index-name-1" "test-index-type-1" [
+    runEngine.run(
+      """bulk index "test-index-name-1" "test-index-type-1" [
         |{"tip": "hello","_tip_id": "1"},
         |{"tip": "world","_tip_id": "2"}
         |] """.stripMargin)
-    runEngine.run("""bulk index "test-index-name" "test-index-type" [
+    runEngine.run(
+      """bulk index "test-index-name" "test-index-type" [
         |{"name": "test","_tip_id": "1"},
         |{"name": "foo","_tip_id": "2"},
         |{"name": "bar","_tip_id": "1"},
