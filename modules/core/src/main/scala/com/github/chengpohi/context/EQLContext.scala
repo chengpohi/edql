@@ -1,11 +1,19 @@
 package com.github.chengpohi.context
 
-import com.github.chengpohi.connector.EQLConfig
 import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.dsl.eql._
 import com.github.chengpohi.parser.EQLParser
 
-trait EQLContext {
+trait EQLContext
+  extends AggsEQL
+    with AnalyzeEQL
+    with DeleterEQL
+    with IndexEQL
+    with ManageEQL
+    with QueryEQL {
   this: EQLConfig =>
-  implicit lazy val eql: EQLClient = buildClient(config)
-  implicit lazy val elkParser = new EQLParser(eql)
+  val ALL_INDEX: String = "*"
+  val ALL_TYPE: String = "_all"
+  override implicit lazy val eqlClient: EQLClient = buildClient(config)
+  implicit lazy val elkParser: EQLParser = new EQLParser(this)
 }

@@ -7,7 +7,7 @@ import scala.io.Source
 object NgramUsage extends EQLTestTrait {
 
   def main(args: Array[String]): Unit = {
-    import eql._
+    import com.github.chengpohi.helper.EQLTestContext._
 
     val corpus = Source
       .fromInputStream(

@@ -11,12 +11,12 @@ import scala.io.Source
 
 
 class EQLParserTest extends EQLTestTrait {
+  import com.github.chengpohi.helper.EQLTestContext._
   val runEngine: EQLInterpreter = new EQLInterpreter()
 
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()
 
-  import eql._
 
   "ELKParser" should "get health of elasticsearch" in {
     val result = runEngine.run("health")

@@ -9,11 +9,9 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsRequestBuilder
 import org.elasticsearch.action.admin.cluster.tasks.PendingClusterTasksRequestBuilder
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.settings.put.{
-  UpdateSettingsRequestBuilder,
-  UpdateSettingsResponse
-}
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequestBuilder
+import org.elasticsearch.action.support.master.AcknowledgedResponse
 
 import scala.concurrent.{Future, Promise}
 import scala.util.Success
@@ -171,7 +169,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
   }
 
   case class CreateFilterRequestDefinition(analyzerSetting: String)
-      extends Definition[UpdateSettingsResponse] {
+      extends Definition[AcknowledgedResponse] {
     var keepwords: String = _
     var tpe: String = _
 
@@ -185,12 +183,12 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
       this
     }
 
-    override def execute: Future[UpdateSettingsResponse] = ???
+    override def execute: Future[AcknowledgedResponse] = ???
     override def json: String = ???
   }
 
   case class CreateAnalyzerRequestDefinition(analyzerSetting: String)
-      extends Definition[UpdateSettingsResponse] {
+      extends Definition[AcknowledgedResponse] {
     var tpe: String = _
 
     var tokenizer: String = _
@@ -217,8 +215,8 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
       this
     }
 
-    override def execute: Future[UpdateSettingsResponse] = {
-      val p = Promise[UpdateSettingsResponse]()
+    override def execute: Future[AcknowledgedResponse] = {
+      val p = Promise[AcknowledgedResponse]()
       EQL {
         close index ELASTIC_SHELL_INDEX_NAME
       } andThen {

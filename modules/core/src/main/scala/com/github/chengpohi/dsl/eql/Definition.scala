@@ -35,6 +35,14 @@ case class ExtractDefinition(definition: Definition[_], path: String)
 }
 
 
+case class ErrorHealthRequestDefinition(error: String)
+  extends Definition[String] {
+  override def execute: Future[String] = Future.failed(new RuntimeException(error))
+
+  override def json: String = error
+}
+
+
 case class PureStringDefinition(s: String) extends Definition[String] {
   override def execute: Future[String] = Future.successful(s)
 

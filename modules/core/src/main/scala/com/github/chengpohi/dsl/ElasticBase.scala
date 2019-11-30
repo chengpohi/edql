@@ -12,10 +12,11 @@ import org.elasticsearch.client.{
   * Created by chengpohi on 6/28/15.
   */
 trait ElasticBase {
-  val client: Client
-  val clusterClient: ClusterAdminClient
-  val indicesClient: IndicesAdminClient
-  val restClient: RestClient
+  implicit val eqlClient: EQLClient
+  val client: Client = eqlClient.client
+  val clusterClient: ClusterAdminClient = eqlClient.clusterClient
+  val indicesClient: IndicesAdminClient = eqlClient.indicesClient
+  val restClient: RestClient = eqlClient.restClient
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
     import scala.collection.JavaConverters._
