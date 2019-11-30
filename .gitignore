@@ -21,3 +21,4 @@ project/target/*
 lib/*
 local/
 release/elasticdsl-*/*
+esdata/

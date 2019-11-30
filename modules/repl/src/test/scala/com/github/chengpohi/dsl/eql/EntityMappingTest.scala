@@ -10,8 +10,8 @@ import com.github.chengpohi.helper.EQLTestTrait
   * Created by chengpohi on 10/04/17.
   */
 class EntityMappingTest extends EQLTestTrait {
+  import com.github.chengpohi.helper.EQLTestContext._
 
-  import eql._
 
   case class Bookmark(@Analyzer("tag_analyzer") comment: String,
                       created: Date,

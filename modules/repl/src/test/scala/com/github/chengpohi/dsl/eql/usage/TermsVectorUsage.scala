@@ -8,6 +8,7 @@ import scala.io.Source
 
 object TermsVectorUsage extends EQLTestTrait {
   def main(args: Array[String]): Unit = {
+    import com.github.chengpohi.helper.EQLTestContext._
     val corpus = Source
       .fromInputStream(
         this.getClass.getResourceAsStream("/training/corpus.txt"))
@@ -16,7 +17,6 @@ object TermsVectorUsage extends EQLTestTrait {
       .map(s => Map("text" -> s._1, "id" -> s._2))
       .toList
 
-    import eql._
 
     val _indexType = "foo"
     val _indexName = "bar"

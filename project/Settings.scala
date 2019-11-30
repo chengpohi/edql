@@ -21,8 +21,8 @@ object Settings {
 
   val coreDependencies = Seq(
     "com.typesafe" % "config" % "1.3.0",
-    "org.elasticsearch.client" % "transport" % "6.4.0",
-    "org.codelibs.elasticsearch.module" % "analysis-common" % "6.4.0",
+    "org.elasticsearch.client" % "transport" % "7.3.0",
+    "org.codelibs.elasticsearch.module" % "analysis-common" % "7.3.0",
     "org.apache.commons" % "commons-lang3" % "3.5",
     "org.scalactic" %% "scalactic" % "3.0.1",
     "com.lihaoyi" %% "fastparse" % "0.4.2",

@@ -11,8 +11,7 @@ import scala.util.{Failure, Success}
   * Created by xiachen on 31/12/2016.
   */
 class PerformanceTest extends EQLTestTrait {
-
-  import eql._
+  import com.github.chengpohi.helper.EQLTestContext._
 
   ignore should "pressure test" in {
     val permits = 1000

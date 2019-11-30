@@ -1,7 +1,6 @@
 package com.github.chengpohi.repl
 
-import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.context.EQLContext
+import com.github.chengpohi.context.{EQLConfig, EQLContext}
 import com.github.chengpohi.parser.EQLParser
 
 import scala.io.Source
@@ -17,7 +16,7 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
       instruction <- instructions
     } yield {
       try {
-        instruction.f.apply(instruction.params).json
+        instruction.execute.json
       } catch {
         case ex: Exception => s"unhandle error: ${ex.getMessage}"
       }

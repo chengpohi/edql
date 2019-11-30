@@ -1,9 +1,10 @@
-package com.github.chengpohi.connector
+package com.github.chengpohi.context
 
 import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 
+import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
 import org.apache.http.HttpHost
@@ -25,9 +26,9 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 import scala.collection.JavaConverters._
 
 /**
-  * eql
-  * Created by chengpohi on 16/06/16.
-  */
+ * eql
+ * Created by chengpohi on 16/06/16.
+ */
 trait EQLConfig {
   private val log = LogManager.getLogger(this.getClass)
 
@@ -36,7 +37,7 @@ trait EQLConfig {
 
   def buildClient(config: Config): EQLClient =
     config.getBoolean("standalone") match {
-      case true  => buildLocalClient(config)
+      case true => buildLocalClient(config)
       case false => buildRemoteClient(config)
     }
 
@@ -53,10 +54,10 @@ trait EQLConfig {
     val plugins =
       Collections.unmodifiableList(
         util.Arrays.asList(classOf[Netty4Plugin],
-                           classOf[ReindexPlugin],
-                           classOf[CommonAnalysisPlugin],
-                           classOf[PercolatorPlugin],
-                           classOf[MustachePlugin]))
+          classOf[ReindexPlugin],
+          classOf[CommonAnalysisPlugin],
+          classOf[PercolatorPlugin],
+          classOf[MustachePlugin]))
     val clientNode: ClientNode = new ClientNode(
       settings,
       plugins.asInstanceOf[util.List[Class[_ <: Plugin]]])
@@ -66,15 +67,8 @@ trait EQLConfig {
       IOUtils.close(clientNode)
     }))
 
-    config
-      .getConfig("local")
-      .getBoolean("http.enabled") match {
-      case true =>
-        val restClient = buildRestClient(clientNode.client())
-        EQLClient(clientNode.client(), restClient)
-      case false =>
-        EQLClient(clientNode.client(), null)
-    }
+    val restClient = buildRestClient(clientNode.client())
+    EQLClient(clientNode.client(), restClient)
   }
 
   private def buildRemoteClient(config: Config): EQLClient = {
@@ -91,15 +85,8 @@ trait EQLConfig {
       address
     )
 
-    config
-      .getConfig("local")
-      .getBoolean("http.enabled") match {
-      case true =>
-        val restClient: RestClient = buildRestClient(client)
-        EQLClient(client, restClient)
-      case false =>
-        EQLClient(client, null)
-    }
+    val restClient: RestClient = buildRestClient(client)
+    EQLClient(client, restClient)
   }
 
   private def buildRestClient(client: Client) = {

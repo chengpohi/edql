@@ -15,10 +15,7 @@ trait EQLTestTrait
     with BeforeAndAfter
     with JsonMethods {
 
-  implicit val elkParser = EQLTestClient.elkParser
-  val eql = EQLTestClient.eql
-
-  import eql._
+  import EQLTestContext._
 
   before {
     EQL {
