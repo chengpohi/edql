@@ -5,8 +5,7 @@ import java.io.File
 import cats.Id
 import cats.data.Reader
 import cats.effect._
-import com.github.chengpohi.connector.EQLConfig
-import com.github.chengpohi.context.EQLContext
+import com.github.chengpohi.context.{EQLConfig, EQLContext}
 import com.github.chengpohi.dsl.serializer.JSONOps
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
@@ -16,7 +15,6 @@ import org.apache.lucene.util.IOUtils
 import scala.io.Source
 
 object EQLRepl extends EQLConfig with EQLContext with JSONOps {
-  val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val ANSI_GREEN = "\u001B[32m"
   val ANSI_RESET = "\u001B[0m"
 
@@ -35,8 +33,6 @@ object EQLRepl extends EQLConfig with EQLContext with JSONOps {
     .unsafeRunSync()
   val terms = new StringsCompleter(completions, words)
   val elkInterpreter = new EQLInterpreter()
-
-  import eql._
 
   def main(args: Array[String]): Unit = {
     println(ANSI_GREEN + "Welcome to EQL Repl :)" + ANSI_RESET)

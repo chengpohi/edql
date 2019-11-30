@@ -7,120 +7,44 @@ import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
 import com.github.chengpohi.parser.collection.JsonCollection.Val
-import org.elasticsearch.action.admin.cluster.health.{
-  ClusterHealthRequestBuilder,
-  ClusterHealthResponse
-}
-import org.elasticsearch.action.admin.cluster.node.info.{
-  NodesInfoRequestBuilder,
-  NodesInfoResponse
-}
-import org.elasticsearch.action.admin.cluster.node.stats.{
-  NodesStatsRequestBuilder,
-  NodesStatsResponse
-}
-import org.elasticsearch.action.admin.cluster.repositories.put.{
-  PutRepositoryRequestBuilder,
-  PutRepositoryResponse
-}
-import org.elasticsearch.action.admin.cluster.settings.{
-  ClusterUpdateSettingsRequestBuilder,
-  ClusterUpdateSettingsResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.create.{
-  CreateSnapshotRequestBuilder,
-  CreateSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.delete.{
-  DeleteSnapshotRequestBuilder,
-  DeleteSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.get.{
-  GetSnapshotsRequestBuilder,
-  GetSnapshotsResponse
-}
-import org.elasticsearch.action.admin.cluster.snapshots.restore.{
-  RestoreSnapshotRequestBuilder,
-  RestoreSnapshotResponse
-}
-import org.elasticsearch.action.admin.cluster.state.{
-  ClusterStateRequestBuilder,
-  ClusterStateResponse
-}
-import org.elasticsearch.action.admin.cluster.stats.{
-  ClusterStatsRequestBuilder,
-  ClusterStatsResponse
-}
-import org.elasticsearch.action.admin.cluster.tasks.{
-  PendingClusterTasksRequestBuilder,
-  PendingClusterTasksResponse
-}
-import org.elasticsearch.action.admin.indices.alias.{
-  IndicesAliasesRequestBuilder,
-  IndicesAliasesResponse
-}
-import org.elasticsearch.action.admin.indices.analyze.{
-  AnalyzeRequestBuilder,
-  AnalyzeResponse
-}
-import org.elasticsearch.action.admin.indices.close.{
-  CloseIndexRequestBuilder,
-  CloseIndexResponse
-}
-import org.elasticsearch.action.admin.indices.create.{
-  CreateIndexRequestBuilder,
-  CreateIndexResponse
-}
-import org.elasticsearch.action.admin.indices.delete.{
-  DeleteIndexRequestBuilder,
-  DeleteIndexResponse
-}
+import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
+import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
+import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
+import org.elasticsearch.action.admin.cluster.repositories.put.PutRepositoryRequestBuilder
+import org.elasticsearch.action.admin.cluster.settings.{ClusterUpdateSettingsRequestBuilder, ClusterUpdateSettingsResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.create.{CreateSnapshotRequestBuilder, CreateSnapshotResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.delete.DeleteSnapshotRequestBuilder
+import org.elasticsearch.action.admin.cluster.snapshots.get.{GetSnapshotsRequestBuilder, GetSnapshotsResponse}
+import org.elasticsearch.action.admin.cluster.snapshots.restore.{RestoreSnapshotRequestBuilder, RestoreSnapshotResponse}
+import org.elasticsearch.action.admin.cluster.state.{ClusterStateRequestBuilder, ClusterStateResponse}
+import org.elasticsearch.action.admin.cluster.stats.{ClusterStatsRequestBuilder, ClusterStatsResponse}
+import org.elasticsearch.action.admin.cluster.tasks.{PendingClusterTasksRequestBuilder, PendingClusterTasksResponse}
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder
+import org.elasticsearch.action.admin.indices.analyze.{AnalyzeAction, AnalyzeRequestBuilder}
+import org.elasticsearch.action.admin.indices.close.{CloseIndexRequestBuilder, CloseIndexResponse}
+import org.elasticsearch.action.admin.indices.create.{CreateIndexRequestBuilder, CreateIndexResponse}
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
-import org.elasticsearch.action.admin.indices.mapping.get.{
-  GetMappingsRequestBuilder,
-  GetMappingsResponse
-}
-import org.elasticsearch.action.admin.indices.mapping.put.{
-  PutMappingRequestBuilder,
-  PutMappingResponse
-}
-import org.elasticsearch.action.admin.indices.open.{
-  OpenIndexRequestBuilder,
-  OpenIndexResponse
-}
+import org.elasticsearch.action.admin.indices.mapping.get.{GetMappingsRequestBuilder, GetMappingsResponse}
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder
+import org.elasticsearch.action.admin.indices.open.{OpenIndexRequestBuilder, OpenIndexResponse}
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse
-import org.elasticsearch.action.admin.indices.settings.get.{
-  GetSettingsRequestBuilder,
-  GetSettingsResponse
-}
-import org.elasticsearch.action.admin.indices.settings.put.{
-  UpdateSettingsRequestBuilder,
-  UpdateSettingsResponse
-}
-import org.elasticsearch.action.admin.indices.stats.{
-  IndicesStatsRequestBuilder,
-  IndicesStatsResponse
-}
+import org.elasticsearch.action.admin.indices.settings.get.{GetSettingsRequestBuilder, GetSettingsResponse}
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder
+import org.elasticsearch.action.admin.indices.stats.{IndicesStatsRequestBuilder, IndicesStatsResponse}
 import org.elasticsearch.action.bulk.{BulkRequestBuilder, BulkResponse}
 import org.elasticsearch.action.delete.{DeleteRequestBuilder, DeleteResponse}
 import org.elasticsearch.action.get.{GetRequestBuilder, GetResponse}
 import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
-import org.elasticsearch.action.search.{
-  SearchRequestBuilder,
-  SearchResponse,
-  SearchScrollRequestBuilder,
-  SearchType
-}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
+import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.histogram.{
-  DateHistogramAggregationBuilder,
-  DateHistogramInterval
-}
+import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.elasticsearch.search.sort.SortBuilder
 
 import scala.collection.JavaConverters._
@@ -132,7 +56,7 @@ import scala.reflect.runtime.universe
  * eql
  * Created by chengpohi on 6/28/16.
  */
-trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
+trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
   val ELASTIC_SHELL_INDEX_NAME: String = ".eql"
   val DEFAULT_RETRIEVE_SIZE: Int = 500
   val MAX_ALL_NUMBER: Int = 10000
@@ -250,13 +174,13 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   case class UpdateSettingsRequestDefinition(
                                               updateSettingsRequestBuilder: UpdateSettingsRequestBuilder)
-    extends Definition[UpdateSettingsResponse] {
+    extends Definition[AcknowledgedResponse] {
     def settings(st: String): UpdateSettingsRequestDefinition = {
       updateSettingsRequestBuilder.setSettings(st, XContentType.JSON)
       this
     }
 
-    override def execute: Future[UpdateSettingsResponse] = {
+    override def execute: Future[AcknowledgedResponse] = {
       updateSettingsRequestBuilder.execute
     }
 
@@ -265,7 +189,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   case class PutRepositoryDefinition(
                                       putRepositoryRequestBuilder: PutRepositoryRequestBuilder)
-    extends Definition[PutRepositoryResponse] {
+    extends Definition[AcknowledgedResponse] {
     def tpe(`type`: String): PutRepositoryDefinition = {
       putRepositoryRequestBuilder.setType(`type`)
       this
@@ -276,7 +200,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       this
     }
 
-    override def execute: Future[PutRepositoryResponse] = {
+    override def execute: Future[AcknowledgedResponse] = {
       putRepositoryRequestBuilder.execute
     }
 
@@ -422,7 +346,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   }
 
   case class DeleteSnapshotDefinition(snapshotName: String)
-    extends Definition[DeleteSnapshotResponse] {
+    extends Definition[AcknowledgedResponse] {
     var deleteSnapshotRequestBuilder: DeleteSnapshotRequestBuilder = _
 
     def from(repositoryName: String): DeleteSnapshotDefinition = {
@@ -431,7 +355,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       this
     }
 
-    override def execute: Future[DeleteSnapshotResponse] = {
+    override def execute: Future[AcknowledgedResponse] = {
       deleteSnapshotRequestBuilder.execute
     }
 
@@ -450,13 +374,13 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   case class PutMappingRequestDefinition(
                                           putMappingRequestBuilder: PutMappingRequestBuilder)
-    extends Definition[PutMappingResponse] {
+    extends Definition[AcknowledgedResponse] {
     def mapping(m: String): PutMappingRequestDefinition = {
       putMappingRequestBuilder.setSource(m)
       this
     }
 
-    override def execute: Future[PutMappingResponse] = {
+    override def execute: Future[AcknowledgedResponse] = {
       putMappingRequestBuilder.execute
     }
 
@@ -484,7 +408,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
   }
 
   case class AddAliasRequestDefinition(targetAlias: String)
-    extends Definition[IndicesAliasesResponse] {
+    extends Definition[AcknowledgedResponse] {
     var indicesAliasesRequestBuilder: IndicesAliasesRequestBuilder = _
 
     def on(sourceIndex: String): AddAliasRequestDefinition = {
@@ -493,7 +417,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       this
     }
 
-    override def execute: Future[IndicesAliasesResponse] = {
+    override def execute: Future[AcknowledgedResponse] = {
       indicesAliasesRequestBuilder.execute
     }
 
@@ -819,7 +743,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   case class AnalyzeRequestDefinition(
                                        analyzeRequestBuilder: AnalyzeRequestBuilder)
-    extends Definition[AnalyzeResponse] {
+    extends Definition[AnalyzeAction.Response] {
     def in(indexName: String): AnalyzeRequestDefinition = {
       analyzeRequestBuilder.setIndex(indexName)
       this
@@ -835,7 +759,7 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
       this
     }
 
-    override def execute: Future[AnalyzeResponse] = {
+    override def execute: Future[AnalyzeAction.Response] = {
       analyzeRequestBuilder.execute
     }
 
@@ -844,8 +768,8 @@ trait EQLDefinition extends ElasticBase with EQLContext with HttpContext {
 
   case class DeleteIndexRequestDefinition(
                                            deleteIndexRequestBuilder: DeleteIndexRequestBuilder)
-    extends Definition[DeleteIndexResponse] {
-    override def execute: Future[DeleteIndexResponse] = {
+    extends Definition[AcknowledgedResponse] {
+    override def execute: Future[AcknowledgedResponse] = {
       deleteIndexRequestBuilder.execute
     }
 

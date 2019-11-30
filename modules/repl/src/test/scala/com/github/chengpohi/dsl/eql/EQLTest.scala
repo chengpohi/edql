@@ -35,8 +35,7 @@ case class User(name: String,
                 token: Option[String] = None)
 
 class EQLTest extends EQLTestTrait {
-
-  import eql._
+  import com.github.chengpohi.helper.EQLTestContext._
 
   it should "parse response to json" in {
     val res = EQL {

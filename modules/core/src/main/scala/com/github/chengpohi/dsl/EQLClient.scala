@@ -1,22 +1,9 @@
 package com.github.chengpohi.dsl
 
-import com.github.chengpohi.dsl.eql._
-import org.elasticsearch.client.{
-  Client,
-  ClusterAdminClient,
-  IndicesAdminClient,
-  RestClient
-}
+import org.elasticsearch.client.{Client, ClusterAdminClient, IndicesAdminClient, RestClient}
 
-trait EQLs
-    extends AggsEQL
-    with AnalyzeEQL
-    with DeleterEQL
-    with IndexEQL
-    with ManageEQL
-    with QueryEQL
 
-class EQLClient(cl: Client, rc: RestClient) extends EQLs {
+class EQLClient(cl: Client, rc: RestClient) {
   val client: Client = cl
   val clusterClient: ClusterAdminClient = client.admin.cluster()
   val indicesClient: IndicesAdminClient = client.admin.indices()

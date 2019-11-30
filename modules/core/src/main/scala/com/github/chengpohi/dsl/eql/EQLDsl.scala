@@ -8,7 +8,7 @@ import org.elasticsearch.index.query.{
 }
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilder, SortOrder}
 
-private[dsl] trait EQLContext extends EQLExecutor with FutureOps {
+private[dsl] trait EQLDsl extends EQLExecutor with FutureOps {
 
   implicit class IndexNameAndIndexType(indexName: String) {
     def /(indexType: String): IndexPath = {
