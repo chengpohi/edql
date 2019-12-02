@@ -16,4 +16,10 @@ trait EQLContext
   val ALL_TYPE: String = "_all"
   override implicit lazy val eqlClient: EQLClient = buildClient(config)
   implicit lazy val elkParser: EQLParser = new EQLParser(this)
+
+
+  def shutdown: Unit = {
+    eqlClient.client.close()
+    eqlClient.restClient.close()
+  }
 }
