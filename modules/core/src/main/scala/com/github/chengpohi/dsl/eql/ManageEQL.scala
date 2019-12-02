@@ -267,11 +267,4 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
       CatRecoveryDefinition()
     }
   }
-
-  case object context {
-    def shutdown: ShutDownRequestDefinition = {
-      ShutDownRequestDefinition()
-    }
-  }
-
 }
