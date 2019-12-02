@@ -268,4 +268,10 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
     }
   }
 
+  case object context {
+    def shutdown: ShutDownRequestDefinition = {
+      ShutDownRequestDefinition()
+    }
+  }
+
 }

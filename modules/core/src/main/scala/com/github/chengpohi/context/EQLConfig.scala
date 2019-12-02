@@ -81,9 +81,8 @@ trait EQLConfig {
       Settings
         .builder()
         .put("cluster.name", config.getString("cluster.name"))
-        .build()).addTransportAddress(
-      address
-    )
+        .build()
+    ).addTransportAddress(address)
 
     val restClient: RestClient = buildRestClient(client)
     EQLClient(client, restClient)
