@@ -832,6 +832,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
 
   case class ShutDownRequestDefinition() extends Definition[String] {
     override def execute: Future[String] = {
+      restClient.close()
       client.close()
       Future {
         "shutdown"
