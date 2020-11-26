@@ -1,18 +1,18 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.context.EQLContext
-import fastparse.core.Parsed.{Failure, Success}
-import fastparse.noApi._
+import fastparse.Parsed.{Failure, Success}
+import fastparse._
+import fastparse.NoWhitespace._
+
 
 class EQLParser(e: EQLContext) extends EQLInstructionParser {
   override val eql: EQLContext = e
 
-  import WhitespaceApi._
-
   type PSI = Parsed[Seq[Instruction2]]
 
-  val instructionParser: P[Seq[Instruction2]] = P(
-    WL0 ~ instrument.rep ~ End)
+  def instructionParser[_: P]: P[Seq[Instruction2]] = P(instrument.rep)
+  def instruction(s: String): PSI = parse(s, instructionParser(_))
 
   def generateDefinitions(parsed: PSI): Seq[Instruction2] = {
     parsed match {

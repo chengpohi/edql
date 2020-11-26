@@ -1,93 +1,99 @@
 package com.github.chengpohi.parser
 
-import fastparse.noApi._
+import fastparse.NoWhitespace._
+import fastparse._
 
 trait EQLInstructionParser extends CollectionParser with InterceptFunction {
 
-  import WhitespaceApi._
-
-  val helpP = P(alphaChars.rep(1).! ~ "?")
+  def helpP[_: P] = P(alphaChars.rep(1).! ~ "?")
     .map(s => {
       HelpInstruction(Seq(s))
     })
 
-  val healthP = P("health").map(
+  def healthP[_: P] = P("health").map(
     s => HealthInstruction())
 
 
-  val shutdown = P("shutdown").map(
+  def shutdown[_: P] = P("shutdown").map(
     _ =>
       ShutdownInstruction())
 
-  val count = P("count" ~/ ioParser)
+  def count[_: P] = P("count" ~/ ioParser)
     .map(i => i.head.extract[String])
     .map(c => CountInstruction(c))
 
   //memory, jvm, nodes, cpu etc
-  val clusterStats = P("cluster stats").map(
+  def clusterStats[_: P] = P("cluster stats").map(
     _ => GetClusterStatsInstruction())
 
-  val catNodes = P("cat nodes").map(
+  def catNodes[_: P] = P("cat nodes").map(
     _ =>
       CatNodesInstruction())
 
-  val catAllocation = P("cat allocation").map(
+  def catAllocation[_: P] = P("cat allocation").map(
     _ =>
       CatAllocationInstruction())
-  val catMaster = P("cat master").map(
+
+  def catMaster[_: P] = P("cat master").map(
     _ =>
       CatMasterInstruction())
 
-  val catIndices = P("cat indices").map(
+  def catIndices[_: P] = P("cat indices").map(
     _ => CatIndicesInstruction())
 
-  val catShards = P("cat shards").map(
+  def catShards[_: P] = P("cat shards").map(
     _ =>
       CatShardsInstruction())
 
-  val catCount = P("cat count").map(
+  def catCount[_: P] = P("cat count").map(
     _ => CatCountInstruction())
-  val catRecovery = P("cat recovery").map(
+
+  def catRecovery[_: P] = P("cat recovery").map(
     _ =>
       CatRecoveryInstruction())
-  val catPendingTasks = P("cat pending_tasks")
+
+  def catPendingTasks[_: P] = P("cat pending_tasks")
     .map(_ =>
       CatPendingInstruction())
 
   //indices, aliases, restore, snapshots, routing nodes etc
-  val clusterState = P("cluster state").map(
+  def clusterState[_: P] = P("cluster state").map(
     _ =>
       GetClusterStateInstruction())
 
-  val indicesStats = P("indices stats").map(
+  def indicesStats[_: P] = P("indices stats").map(
     s =>
       IndicesStatsInstruction())
-  val nodeStats = P("node stats").map(
+
+  def nodeStats[_: P] = P("node stats").map(
     s =>
       NodeStatsInstruction())
 
-  val clusterSettings = P("cluster settings").map(
+  def clusterSettings[_: P] = P("cluster settings").map(
     s =>
       ClusterSettingsInstruction())
-  val nodeSettings = P("node settings").map(
+
+  def nodeSettings[_: P] = P("node settings").map(
     s =>
       NodeSettingsInstruction())
-  val indexSettings = P(ioParser ~ "settings")
+
+  def indexSettings[_: P] = P(ioParser ~ "settings")
     .map(i => i.head.extract[String])
     .map(
       s =>
         IndexSettingsInstruction(s))
-  val pendingTasks = P("pending tasks").map(
+
+  def pendingTasks[_: P] = P("pending tasks").map(
     s =>
       PendingTasksInstruction())
 
-  val deleteDoc =
-    P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
-      .map(
-        c =>
-          DeleteDocInstruction(c._1.extract[String], c._2.extract[String], c._3.extract[String])
-      )
-  val deleteIndex = P("delete" ~ "index" ~/ strOrVar).map(
+  def deleteDoc[_: P] = P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
+    .map(
+      c =>
+        DeleteDocInstruction(c._1.extract[String], c._2.extract[String], c._3.extract[String])
+    )
+
+  def deleteIndex[_: P] = P("delete" ~ "index" ~/ strOrVar).map(
     c =>
       DeleteIndexInstruction(c.extract[String]))
 
@@ -103,32 +109,15 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
   //      c =>
   //        interceptFunction
   //          .Instruction("matchQuery", interceptFunction.matchQuery, Seq(c)))
-  //
-  //  val search: P[interceptFunction.Instruction] = P(
-  //    "search" ~ "in" ~/ strOrVar ~ ("/" ~ strOrVar).? ~ (matchQuery | joinSearch).?)
-  //    .map(c =>
-  //      c._2 match {
-  //        case None =>
-  //          c._3 match {
-  //            case None =>
-  //              interceptFunction.Instruction("query",
-  //                interceptFunction.query,
-  //                Seq(c._1))
-  //            case Some(t) =>
-  //              interceptFunction.Instruction(t.name, t.f, Seq(c._1) ++ t.params)
-  //          }
-  //        case Some(f) =>
-  //          c._3 match {
-  //            case None =>
-  //              interceptFunction.Instruction("query",
-  //                interceptFunction.query,
-  //                Seq(c._1, f))
-  //            case Some(t) =>
-  //              interceptFunction.Instruction(t.name,
-  //                t.f,
-  //                Seq(c._1, f) ++ t.params)
-  //          }
-  //      })
+
+  def search[_: P] = P(
+    "search" ~ "in" ~/ strOrVar)
+    .map(c => {
+      val indexName = c.extract[String]
+      QueryInstruction(indexName, None, Map())
+    }
+    )
+
   //
   //  val reindex = P(
   //    "reindex" ~ "into" ~ strOrVar ~ "/" ~/ strOrVar ~ "from" ~/ strOrVar ~ "fields" ~/ jsonExpr)
@@ -242,12 +231,14 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
   //        interceptFunction.Instruction("dumpIndex",
   //          interceptFunction.dumpIndex,
   //          Seq(c._1, JsonCollection.Str(c._2))))
-  val extractJSON = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
+  def extractJSON[_: P]: P[(String, String)] = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
+
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
-  val instrument: P[Instruction2] = P(
+  def instrument[_: P]: P[Instruction2] = P(
     (
       healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
+        | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | count

@@ -4,13 +4,15 @@ import org.json4s.JValue
 import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods
 import org.scalatest.matchers.{MatchResult, Matcher}
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.io.Source
 
 
 trait EQLTestTrait
-    extends FlatSpec
+  extends AnyFlatSpec
     with Matchers
     with BeforeAndAfter
     with JsonMethods {
@@ -50,6 +52,7 @@ trait EQLTestTrait
         .getLines()
         .mkString(""))
     val prettyJSON: String = pretty(render(expectJSONObj))
+
     def apply(left: String): MatchResult = {
       val diff = parse(left) diff expectJSONObj
       MatchResult(
