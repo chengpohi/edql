@@ -24,7 +24,7 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
     res.mkString("\n")
   }
 
-  def parse: String => PSI = (s: String) => instructionParser.parse(s)
+  def parse: String => PSI = (s: String) => instruction(s)
 
   def run(source: String): String = {
     (parse andThen render).apply(source)
@@ -37,7 +37,7 @@ object EQLInterpreter extends EQLContext with EQLConfig {
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {
-      println("usage elk file.elk")
+      println("usage eql file.eql")
       System.exit(0)
     }
     val parseFile: String = Source

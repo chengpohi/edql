@@ -20,7 +20,7 @@ trait ElasticBase {
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
     import scala.collection.JavaConverters._
-    val res = m.map(b => {
+    val res = m.map((b: (A, _)) => {
       val r = b._2 match {
         case a: Iterable[_] => a.asJava
         case a: Int         => Integer.parseInt(a.toString)
