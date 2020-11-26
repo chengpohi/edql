@@ -22,3 +22,4 @@ lib/*
 local/
 release/elasticdsl-*/*
 esdata/
+.bsp/

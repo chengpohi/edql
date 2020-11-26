@@ -11,6 +11,7 @@ lazy val eql = project
 lazy val eqlRepl = project
   .in(file("modules/repl"))
   .settings(commonSettings: _*)
+  .enablePlugins(NativeImagePlugin)
   .settings(
     name := "eql-repl",
     version := Versions.eqlVersion,
@@ -18,8 +19,10 @@ lazy val eqlRepl = project
     libraryDependencies ++= replDependencies,
     assemblyJarName in assembly := "eql-repl",
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript())),
+    nativeImageOptions ++= List("--initialize-at-build-time", "--no-fallback"),
     assemblyMergeStrategy in assembly := {
       case "META-INF/io.netty.versions.properties" => MergeStrategy.discard
+      case "module-info.class" => MergeStrategy.first
       case PathList("META-INF/MANIFEST.MF") => MergeStrategy.discard
       case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
@@ -38,5 +41,6 @@ lazy val eqlCore = project
   )
 
 
-addCommandAlias("pbCore", "; eqlCore/publishLocal ")
+addCommandAlias("pbCore", "; eqlCore/publishLocal")
 addCommandAlias("binary", "; eqlRepl/assembly")
+addCommandAlias("ni", "; eqlRepl/nativeImage")

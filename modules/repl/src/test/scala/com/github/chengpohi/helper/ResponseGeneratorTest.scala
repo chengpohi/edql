@@ -1,10 +1,10 @@
 package com.github.chengpohi.helper
 
 import com.github.chengpohi.dsl.serializer.JSONOps
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 
-class ResponseGeneratorTest extends FlatSpec with JSONOps {
+class ResponseGeneratorTest extends AnyFlatSpec with JSONOps {
   "extractJSON" should "extract json by paths" in {
     val json =
       """{"_index":"chengpohi",
