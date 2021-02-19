@@ -14,7 +14,7 @@ object Settings {
       "-language:higherKinds",
       "-language:postfixOps"),
     resolvers += Resolver.mavenLocal,
-    //resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases",
+    //resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
     test in assembly := {}
   )
 
