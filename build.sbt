@@ -21,9 +21,8 @@ lazy val eqlRepl = project
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript())),
     nativeImageOptions ++= List("--initialize-at-build-time", "--no-fallback"),
     assemblyMergeStrategy in assembly := {
-      case "META-INF/io.netty.versions.properties" => MergeStrategy.discard
-      case "module-info.class" => MergeStrategy.first
-      case PathList("META-INF/MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case PathList("module-info.class") => MergeStrategy.first
       case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
