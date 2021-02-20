@@ -6,7 +6,7 @@ case "$1" in
     sbt compile
     ;;
   "assembly")
-    sbt ni
+    sbt binary
     ;;
   "pb")
     sbt clean pbCore
