@@ -1,13 +1,1 @@
-#HOST: localhost:9200
-#ENV: my.env
-
-POST myindex/_search
-{
-    "query": {
-        "match": {
-            "name": "hello"
-        }
-    }
-}
-
-DELETE myindex/_doc/1
+cat indices
