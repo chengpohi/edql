@@ -95,9 +95,11 @@ object EQLRepl extends EQLConfig
 
   def main(args: Array[String]): Unit = {
     try {
-      scriptRunner.run match {
-        case Some(res) => {
-          println(res)
+      val file = scriptRunner.getScriptFilePathFromEnv
+      file match {
+        case Some(f) => {
+          val res = scriptRunner.run(new File(f))
+          println(res.get)
           System.exit(0)
         }
         case None => runRepl()
