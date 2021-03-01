@@ -1,1 +1,7 @@
-cat indices
+HOST localhost:9200
+GET stocks/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}

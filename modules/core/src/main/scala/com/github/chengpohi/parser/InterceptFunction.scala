@@ -432,6 +432,14 @@ trait InterceptFunction {
     }
   }
 
+  case class HostBindInstruction(host: String) extends Instruction2 {
+    override def name = "host"
+
+    def execute: PureStringDefinition =
+        PureStringDefinition(s"$host")
+  }
+
+
   case class HealthInstruction() extends Instruction2 {
 
     override def name: String = "health"

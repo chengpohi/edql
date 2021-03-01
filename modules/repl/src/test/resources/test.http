@@ -1,0 +1,8 @@
+### Send POST request with json body
+POST https://httpbin.org/post
+Content-Type: application/json
+
+{
+  "id": 999,
+  "value": "content"
+}
