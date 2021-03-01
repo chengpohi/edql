@@ -22,6 +22,9 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
     .map(i => i.head.extract[String])
     .map(c => CountInstruction(c))
 
+  def hostBind[_: P] = P("HOST" ~ strOrVar).map(
+    c => HostBindInstruction(c.extract[String]))
+
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster stats").map(
     _ => GetClusterStatsInstruction())
@@ -241,6 +244,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
+        | hostBind
         | count
       ) ~ extractJSON.?
   ).map(t => {
