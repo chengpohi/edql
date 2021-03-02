@@ -27,14 +27,16 @@ class CollectionParser {
 
   //val string =
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-  def string[_: P] = P(space ~ "\"" ~ strChars.rep(1).! ~ "\"" ~ space).map(i =>
+  def unQuoteString[_: P] = P(space ~ strChars.rep(1).! ~ space).map(i =>
+    JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+  def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(1).! ~ "\"" ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
   def variable[_: P] =
     P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
 
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
-  def strOrVar[_: P] = P(string | variable)
+  def strOrVar[_: P] = P(quoteString | variable)
 
   def Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
 
@@ -50,7 +52,7 @@ class CollectionParser {
     x => JsonCollection.Num(x.toDouble)
   )
 
-  def pair[_: P]: P[(String, JsonCollection.Val)] = P(string.map(_.value) ~/ ":" ~/ jsonExpr)
+  def pair[_: P]: P[(String, JsonCollection.Val)] = P(quoteString.map(_.value) ~/ ":" ~/ jsonExpr)
 
   def obj[_: P] =
     P("{" ~/ pair.rep(sep = ","./) ~ "}").map(JsonCollection.Obj(_: _*))
@@ -70,9 +72,11 @@ class CollectionParser {
   def space[_: P] = P(CharsWhileIn(" \r\n", 0))
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    space ~ (obj | array | tuple | string | `true` | `false` | `null` | number) ~ space)
+    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number) ~ space)
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
+
+  def newline[_: P] = P( "\n" | "\r\n" | "\r" | "\f")
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
