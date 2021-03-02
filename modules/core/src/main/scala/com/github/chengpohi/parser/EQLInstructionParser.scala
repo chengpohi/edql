@@ -22,63 +22,69 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
     .map(i => i.head.extract[String])
     .map(c => CountInstruction(c))
 
-  def hostBind[_: P] = P("HOST" ~ strOrVar).map(
+  def hostBind[_: P] = P("HOST" ~ space ~ unQuoteString ~/ newline.?).map(
     c => HostBindInstruction(c.extract[String]))
 
   //memory, jvm, nodes, cpu etc
-  def clusterStats[_: P] = P("cluster stats").map(
+  def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
     _ => GetClusterStatsInstruction())
 
-  def catNodes[_: P] = P("cat nodes").map(
+  def catNodes[_: P] = P("cat" ~ space ~ "nodes" ~ newline.?).map(
     _ =>
       CatNodesInstruction())
 
-  def catAllocation[_: P] = P("cat allocation").map(
+  def catAllocation[_: P] = P("cat" ~ space ~ "allocation" ~ newline.?).map(
     _ =>
       CatAllocationInstruction())
 
-  def catMaster[_: P] = P("cat master").map(
+  def catMaster[_: P] = P("cat" ~ space ~ "master" ~ newline.?).map(
     _ =>
       CatMasterInstruction())
 
-  def catIndices[_: P] = P("cat indices").map(
+  def catIndices[_: P] = P("cat" ~ space ~ "indices" ~/ newline.?).map(
     _ => CatIndicesInstruction())
 
-  def catShards[_: P] = P("cat shards").map(
+  def catShards[_: P] = P("cat" ~ space ~ "shards" ~/ newline.?).map(
     _ =>
       CatShardsInstruction())
 
-  def catCount[_: P] = P("cat count").map(
+  def catCount[_: P] = P("cat" ~ space ~ "count" ~/ newline.?).map(
     _ => CatCountInstruction())
 
-  def catRecovery[_: P] = P("cat recovery").map(
+  def catRecovery[_: P] = P("cat" ~ space ~ "recovery" ~/ newline.?).map(
     _ =>
       CatRecoveryInstruction())
 
-  def catPendingTasks[_: P] = P("cat pending_tasks")
+  def catPendingTasks[_: P] = P("cat" ~ space ~ "pending_tasks" ~/ newline.?)
     .map(_ =>
       CatPendingInstruction())
 
   //indices, aliases, restore, snapshots, routing nodes etc
-  def clusterState[_: P] = P("cluster state").map(
+  def clusterState[_: P] = P("cluster" ~ space ~ "state" ~/ newline.?).map(
     _ =>
       GetClusterStateInstruction())
 
-  def indicesStats[_: P] = P("indices stats").map(
-    s =>
-      IndicesStatsInstruction())
-
-  def nodeStats[_: P] = P("node stats").map(
-    s =>
-      NodeStatsInstruction())
-
-  def clusterSettings[_: P] = P("cluster settings").map(
+  def clusterSettings[_: P] = P("cluster" ~ space ~ "settings" ~/ newline.?).map(
     s =>
       ClusterSettingsInstruction())
 
-  def nodeSettings[_: P] = P("node settings").map(
+  def indicesStats[_: P] = P("indices" ~ space ~ "stats" ~/ newline.?).map(
+    s =>
+      IndicesStatsInstruction())
+
+  def nodeStats[_: P] = P("node" ~ space ~ "stats" ~/ newline.?).map(
+    s =>
+      NodeStatsInstruction())
+
+
+  def nodeSettings[_: P] = P("node" ~ space ~ "settings" ~/ newline.?).map(
     s =>
       NodeSettingsInstruction())
+
+
+  def pendingTasks[_: P] = P("pending" ~ space ~ "tasks" ~/ newline.?).map(
+    s =>
+      PendingTasksInstruction())
 
   def indexSettings[_: P] = P(ioParser ~ "settings")
     .map(i => i.head.extract[String])
@@ -86,9 +92,6 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
       s =>
         IndexSettingsInstruction(s))
 
-  def pendingTasks[_: P] = P("pending tasks").map(
-    s =>
-      PendingTasksInstruction())
 
   def deleteDoc[_: P] = P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
     .map(
@@ -238,7 +241,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
 
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
-  def instrument[_: P]: P[Instruction2] = P(
+  def instrument[_: P]: P[Seq[Instruction2]] = P(
     (
       healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
         | search
@@ -246,9 +249,6 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind
         | count
-      ) ~ extractJSON.?
-  ).map(t => {
-    t._1
-  })
-
+      ).rep
+  )
 }

@@ -11,8 +11,7 @@ class EQLParser(e: EQLContext) extends EQLInstructionParser {
 
   type PSI = Parsed[Seq[Instruction2]]
 
-  def instructionParser[_: P]: P[Seq[Instruction2]] = P(instrument.rep(min = 1, sep = System.lineSeparator()))
-  def instruction(s: String): PSI = parse(s, instructionParser(_))
+  def instruction(s: String): PSI = parse(s, instrument(_))
 
   def generateDefinitions(parsed: PSI): Seq[Instruction2] = {
     parsed match {
