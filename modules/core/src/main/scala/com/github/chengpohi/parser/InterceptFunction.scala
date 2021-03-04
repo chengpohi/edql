@@ -439,6 +439,34 @@ trait InterceptFunction {
         PureStringDefinition(s"$host")
   }
 
+  case class PostActionInstruction(path: String, action: String) extends Instruction2 {
+    override def name = "post"
+
+    def execute: PureStringDefinition =
+      PureStringDefinition(s"$path, $action")
+  }
+
+  case class DeleteActionInstruction(path: String, action: String) extends Instruction2 {
+    override def name = "delete"
+
+    def execute: PureStringDefinition =
+      PureStringDefinition(s"$path, $action")
+  }
+
+  case class PutActionInstruction(path: String, action: String) extends Instruction2 {
+    override def name = "put"
+
+    def execute: PureStringDefinition =
+      PureStringDefinition(s"$path, $action")
+  }
+
+  case class GetActionInstruction(path: String, action: String) extends Instruction2 {
+    override def name = "get"
+
+    def execute: PureStringDefinition =
+      PureStringDefinition(s"$path, $action")
+  }
+
 
   case class HealthInstruction() extends Instruction2 {
 
