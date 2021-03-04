@@ -10,7 +10,7 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
   import elkParser._
 
   def render(parsed: PSI): String = {
-    val instructions = generateDefinitions(parsed)
+    val instructions = generateInstructions(parsed)
 
     val res = for {
       instruction <- instructions
