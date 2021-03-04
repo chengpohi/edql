@@ -25,6 +25,18 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
   def hostBind[_: P] = P("HOST" ~ space ~ unQuoteString ~/ newline.?).map(
     c => HostBindInstruction(c.extract[String]))
 
+  def postAction[_: P] = P("POST" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+    c => PostActionInstruction(c._1.extract[String], c._2.toJson))
+
+  def getAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+    c => GetActionInstruction(c._1.extract[String], c._2.toJson))
+
+  def deleteAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+    c => DeleteActionInstruction(c._1.extract[String], c._2.toJson))
+
+  def putAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+    c => PutActionInstruction(c._1.extract[String], c._2.toJson))
+
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
     _ => GetClusterStatsInstruction())
@@ -247,7 +259,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind
+        | hostBind | postAction | getAction | deleteAction | putAction
         | count
       ).rep
   )
