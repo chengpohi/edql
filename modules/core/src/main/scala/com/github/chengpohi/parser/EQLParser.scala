@@ -13,7 +13,7 @@ class EQLParser(e: EQLContext) extends EQLInstructionParser {
 
   def instruction(s: String): PSI = parse(s, instrument(_))
 
-  def generateDefinitions(parsed: PSI): Seq[Instruction2] = {
+  def generateInstructions(parsed: PSI): Seq[Instruction2] = {
     parsed match {
       case Success(ins, state) => ins
       case Failure(_, _, t) =>

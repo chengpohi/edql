@@ -21,7 +21,7 @@ class EQLScriptRunner(eqlInterpreter: EQLInterpreter) extends EQLConfig with EQL
       })
       .use(i => IO(i.getLines().mkString(System.lineSeparator())))
       .unsafeRunSync()
-    val result = eqlInterpreter.run(script)
+    val result = eqlInterpreter.parse(script)
     Some(result)
   }
 
