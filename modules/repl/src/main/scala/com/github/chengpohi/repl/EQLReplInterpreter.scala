@@ -5,18 +5,19 @@ import com.github.chengpohi.parser.EQLParser
 
 import scala.io.Source
 
-class EQLInterpreter(implicit val elkParser: EQLParser) {
+class EQLReplInterpreter(eql: EQLContext) {
+  val eqlParser: EQLParser = new EQLParser
 
-  import elkParser._
+  import eqlParser._
 
   def render(parsed: PSI): String = {
-    val instructions = generateInstructions(parsed)
+    val instructions = gi(parsed)
 
     val res = for {
       instruction <- instructions
     } yield {
       try {
-        instruction.execute.json
+        instruction.execute(eql).json
       } catch {
         case ex: Exception => s"unhandle error: ${ex.getMessage}"
       }
@@ -29,11 +30,10 @@ class EQLInterpreter(implicit val elkParser: EQLParser) {
   def run(source: String): String = {
     (parse andThen render).apply(source)
   }
-
 }
 
-object EQLInterpreter extends EQLContext with EQLConfig {
-  private val runEngine: EQLInterpreter = new EQLInterpreter()
+object EQLReplInterpreter extends EQLContext with EQLConfig {
+  private val runEngine: EQLReplInterpreter = new EQLReplInterpreter(this)
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {

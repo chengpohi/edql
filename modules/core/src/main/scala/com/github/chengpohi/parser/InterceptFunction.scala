@@ -1,21 +1,17 @@
 package com.github.chengpohi.parser
 
 import com.github.chengpohi.context.EQLContext
-import com.github.chengpohi.dsl.EQLClient
 import com.github.chengpohi.dsl.eql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
 import com.typesafe.config.ConfigFactory
 
 trait InterceptFunction {
-  val eql: EQLContext
-
-  import eql._
-
   val MAX_NUMBER: Int = 500
 
   case class GetMappingInstruction(indexName: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       get mapping indexName
     }
   }
@@ -23,7 +19,8 @@ trait InterceptFunction {
   case class CreateIndexInstruction(indexName: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       create index indexName
     }
   }
@@ -32,7 +29,8 @@ trait InterceptFunction {
   case class GetClusterStateInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cluster state
     }
   }
@@ -40,7 +38,8 @@ trait InterceptFunction {
   case class GetClusterSettingsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cluster settings
     }
   }
@@ -48,7 +47,8 @@ trait InterceptFunction {
   case class GetClusterStatsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cluster stats
     }
   }
@@ -56,7 +56,8 @@ trait InterceptFunction {
   case class CatNodesInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat nodes
     }
   }
@@ -64,7 +65,8 @@ trait InterceptFunction {
   case class GetAllocationInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat allocation
     }
   }
@@ -72,7 +74,8 @@ trait InterceptFunction {
   case class CatMasterInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat master
     }
   }
@@ -80,7 +83,8 @@ trait InterceptFunction {
   case class CatIndicesInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat indices
     }
   }
@@ -88,7 +92,8 @@ trait InterceptFunction {
   case class CatShardsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat shards
     }
   }
@@ -96,7 +101,8 @@ trait InterceptFunction {
   case class CatCountInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat count
     }
   }
@@ -104,7 +110,8 @@ trait InterceptFunction {
   case class CatAllocationInstruction() extends Instruction2 {
     override def name: String = "Allocation"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat allocation
     }
   }
@@ -112,7 +119,8 @@ trait InterceptFunction {
   case class CatPendingInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat pending_tasks
     }
   }
@@ -120,7 +128,8 @@ trait InterceptFunction {
   case class CatRecoveryInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cat recovery
     }
   }
@@ -128,7 +137,8 @@ trait InterceptFunction {
   case class IndicesStatsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       indice stats NodeType.ALL flag FlagType.ALL
     }
   }
@@ -137,7 +147,8 @@ trait InterceptFunction {
   case class NodeStatsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       node stats NodeType.ALL flag FlagType.ALL
     }
   }
@@ -146,7 +157,8 @@ trait InterceptFunction {
   case class ClusterSettingsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cluster settings
     }
   }
@@ -155,7 +167,8 @@ trait InterceptFunction {
   case class NodeSettingsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       node info
     }
   }
@@ -163,7 +176,8 @@ trait InterceptFunction {
   case class PendingTasksInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       pending tasks
     }
   }
@@ -171,7 +185,8 @@ trait InterceptFunction {
   case class IndexSettingsInstruction(indexName: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       get settings indexName
     }
   }
@@ -180,7 +195,8 @@ trait InterceptFunction {
   case class ShutdownInstruction() extends Instruction2 {
     override def name: String = "ShutDown"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       ShutDownRequestDefinition()
     }
   }
@@ -188,7 +204,8 @@ trait InterceptFunction {
   case class CountInstruction(indexName: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       get settings indexName
     }
   }
@@ -197,7 +214,8 @@ trait InterceptFunction {
   case class DeleteIndexInstruction(indexName: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       delete index indexName
     }
   }
@@ -205,7 +223,8 @@ trait InterceptFunction {
   case class DeleteDocInstruction(indexName: String, indexType: String, _id: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       delete in indexName / indexType id _id
     }
   }
@@ -213,7 +232,8 @@ trait InterceptFunction {
   case class MatchQueryInstruction(indexName: String, indexType: Option[String], queryData: Map[String, String]) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       search in indexName / indexType must queryData from 0 size MAX_NUMBER
     }
   }
@@ -222,30 +242,19 @@ trait InterceptFunction {
                               queryData: Map[String, String]) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: SearchRequestDefinition = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       search in indexName / indexType must queryData from 0 size MAX_NUMBER
-    }
-  }
-
-  case class JoinQueryInstruction(indexName: String,
-                                  indexType: Option[String],
-                                  joinIndexName: String,
-                                  joinIndexType: String,
-                                  joinField: String,
-                                  queryData: Map[String, String]) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    override def execute: Definition[_] = {
-      QueryInstruction(indexName, indexType, queryData).execute scroll "10m" join (joinIndexName / joinIndexType) by joinField
     }
   }
 
   case class BulkUpdateInstruction(indexName: String,
                                    indexType: Option[String],
-                                   updateFields: Map[String, String])(implicit val eql: EQLContext) extends Instruction2 {
+                                   updateFields: Map[String, String]) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       bulk update indexName / indexType fields updateFields
     }
   }
@@ -255,7 +264,8 @@ trait InterceptFunction {
                                   updateFields: Map[String, String], _id: String) extends Instruction2 {
     override def name: String = "GetMapping"
 
-    override def execute: Definition[_] = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       update id _id in indexName / indexType docAsUpsert updateFields
     }
   }
@@ -410,7 +420,7 @@ trait InterceptFunction {
   trait Instruction2 {
     def name: String
 
-    def execute: Definition[_]
+    def execute(implicit eql: EQLContext): Definition[_]
   }
 
   lazy val instrumentations = ConfigFactory.load("instrumentations.json")
@@ -418,53 +428,64 @@ trait InterceptFunction {
   case class HelpInstruction(params: Seq[String]) extends Instruction2 {
     override def name = "help"
 
-    def execute: PureStringDefinition = params match {
-      case Seq(i) =>
-        val example: String =
-          instrumentations.getConfig(i).getString("example")
-        val description: String =
-          instrumentations.getConfig(i).getString("description")
-        val r: Map[String, AnyRef] =
-          Map(("example", example), ("description", description))
-        PureStringDefinition(r.json)
-      case _ =>
-        PureStringDefinition("I have no idea for this.")
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
+      params match {
+        case Seq(i) =>
+          val example: String =
+            instrumentations.getConfig(i).getString("example")
+          val description: String =
+            instrumentations.getConfig(i).getString("description")
+          val r: Map[String, AnyRef] =
+            Map(("example", example), ("description", description))
+          PureStringDefinition("help")
+        case _ =>
+          PureStringDefinition("I have no idea for this.")
+      }
     }
   }
 
-  case class HostBindInstruction(host: String) extends Instruction2 {
+
+  trait ScriptContextInstruction2 extends Instruction2
+
+  case class HostBindInstruction(host: String) extends ScriptContextInstruction2 {
     override def name = "host"
 
-    def execute: PureStringDefinition =
-        PureStringDefinition(s"$host")
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$host")
+    }
   }
 
   case class PostActionInstruction(path: String, action: String) extends Instruction2 {
     override def name = "post"
 
-    def execute: PureStringDefinition =
+    def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"$path, $action")
+    }
   }
 
   case class DeleteActionInstruction(path: String, action: String) extends Instruction2 {
     override def name = "delete"
 
-    def execute: PureStringDefinition =
+    def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"$path, $action")
+    }
   }
 
   case class PutActionInstruction(path: String, action: String) extends Instruction2 {
     override def name = "put"
 
-    def execute: PureStringDefinition =
+    def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"$path, $action")
+    }
   }
 
   case class GetActionInstruction(path: String, action: String) extends Instruction2 {
     override def name = "get"
 
-    def execute: PureStringDefinition =
+    def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"$path, $action")
+    }
   }
 
 
@@ -472,7 +493,8 @@ trait InterceptFunction {
 
     override def name: String = "health"
 
-    def execute: ClusterHealthRequestDefinition = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
       cluster health
     }
   }
@@ -481,9 +503,10 @@ trait InterceptFunction {
 
     override def name: String = "error"
 
-    def execute: ErrorHealthRequestDefinition = {
+    def execute(implicit eql: EQLContext): Definition[_] = {
       ErrorHealthRequestDefinition(error)
     }
   }
 
 }
+
