@@ -70,7 +70,7 @@ trait EQLConfig {
     }))
 
     val restClient = buildRestClientByTransportClient(clientNode.client())
-    EQLClient(clientNode.client(), restClient)
+    EQLClient(Some(clientNode.client()), restClient)
   }
 
   def buildRemoteClient(host: String, port: Int, clusterName: String): EQLClient = {
