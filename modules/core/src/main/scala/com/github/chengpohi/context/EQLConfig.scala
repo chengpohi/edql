@@ -38,10 +38,13 @@ trait EQLConfig {
   def buildClient(config: Config): EQLClient =
     config.getBoolean("standalone") match {
       case true => buildLocalClient(config)
-      case false => buildRemoteClient(config)
+      case false => buildRemoteClient(
+        config.getString("host"),
+        config.getInt("port"),
+        config.getString("cluster.name"))
     }
 
-  private def buildLocalClient(config: Config): EQLClient = {
+  def buildLocalClient(config: Config): EQLClient = {
     val settings: Settings = Settings
       .builder()
       .loadFromSource(
@@ -71,16 +74,13 @@ trait EQLConfig {
     EQLClient(clientNode.client(), restClient)
   }
 
-  private def buildRemoteClient(config: Config): EQLClient = {
-    val host: String = config.getString("host")
-    val port: Int = config.getInt("port")
-
+  def buildRemoteClient(host: String, port: Int, clusterName: String): EQLClient = {
     val address = new TransportAddress(new InetSocketAddress(host, port))
 
     val client = new PreBuiltTransportClient(
       Settings
         .builder()
-        .put("cluster.name", config.getString("cluster.name"))
+        .put("cluster.name", clusterName)
         .build()
     ).addTransportAddress(address)
 
