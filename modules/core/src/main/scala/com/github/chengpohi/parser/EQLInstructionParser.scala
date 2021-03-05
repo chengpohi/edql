@@ -22,7 +22,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
     .map(c => CountInstruction(c))
 
   def hostBind[_: P] = P("HOST" ~ space ~ unQuoteString ~/ newline.?).map(
-    c => HostBindInstruction(c.extract[String]))
+    c => EndpointBindInstruction(c.extract[String]))
 
   def postAction[_: P] = P("POST" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
     c => PostActionInstruction(c._1.extract[String], c._2.toJson))

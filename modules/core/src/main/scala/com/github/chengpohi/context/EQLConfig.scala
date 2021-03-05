@@ -1,9 +1,5 @@
 package com.github.chengpohi.context
 
-import java.net.InetSocketAddress
-import java.util
-import java.util.Collections
-
 import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
@@ -23,6 +19,9 @@ import org.elasticsearch.script.mustache.MustachePlugin
 import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
+import java.net.InetSocketAddress
+import java.util
+import java.util.Collections
 import scala.collection.JavaConverters._
 
 /**
@@ -70,7 +69,7 @@ trait EQLConfig {
       IOUtils.close(clientNode)
     }))
 
-    val restClient = buildRestClient(clientNode.client())
+    val restClient = buildRestClientByTransportClient(clientNode.client())
     EQLClient(clientNode.client(), restClient)
   }
 
@@ -84,11 +83,11 @@ trait EQLConfig {
         .build()
     ).addTransportAddress(address)
 
-    val restClient: RestClient = buildRestClient(client)
-    EQLClient(client, restClient)
+    val restClient: RestClient = buildRestClientByTransportClient(client)
+    EQLClient(Some(client), restClient)
   }
 
-  private def buildRestClient(client: Client) = {
+  def buildRestClientByTransportClient(client: Client) = {
     val request = new NodesInfoRequest()
     request.http(true)
     val resp = client.admin().cluster().nodesInfo(request).get()
@@ -103,5 +102,11 @@ trait EQLConfig {
         log.error("rest client not enabled")
         null
       })
+  }
+
+  def buildRestClient(host: String, port: Int) = {
+    val restClient = RestClient.builder(new HttpHost(host, port)).build()
+
+    EQLClient(null, restClient)
   }
 }

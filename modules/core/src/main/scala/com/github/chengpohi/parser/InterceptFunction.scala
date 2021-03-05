@@ -448,11 +448,11 @@ trait InterceptFunction {
 
   trait ScriptContextInstruction2 extends Instruction2
 
-  case class HostBindInstruction(host: String) extends ScriptContextInstruction2 {
+  case class EndpointBindInstruction(endpoint: String) extends ScriptContextInstruction2 {
     override def name = "host"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      PureStringDefinition(s"$host")
+      PureStringDefinition(s"$endpoint")
     }
   }
 
@@ -484,7 +484,8 @@ trait InterceptFunction {
     override def name = "get"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      PureStringDefinition(s"$path, $action")
+      import eql._
+      GetActionDefinition(path, action)
     }
   }
 

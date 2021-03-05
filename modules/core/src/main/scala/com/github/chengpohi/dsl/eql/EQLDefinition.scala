@@ -1,12 +1,12 @@
 package com.github.chengpohi.dsl.eql
 
 import java.io.Serializable
-
 import cats.implicits._
 import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
 import com.github.chengpohi.parser.collection.JsonCollection.Val
+import org.apache.http.util.EntityUtils
 import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequestBuilder, ClusterHealthResponse}
 import org.elasticsearch.action.admin.cluster.node.info.{NodesInfoRequestBuilder, NodesInfoResponse}
 import org.elasticsearch.action.admin.cluster.node.stats.{NodesStatsRequestBuilder, NodesStatsResponse}
@@ -39,6 +39,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
+import org.elasticsearch.client.Request
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
@@ -409,9 +410,18 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
 
   case class GetActionDefinition(path: String, action: String)
     extends Definition[String] {
-    override def execute: Future[String] = ???
+    override def execute: Future[String] = {
+      val request = new Request(
+        "GET",
+        path);
+      request.setJsonEntity(action)
+      Future {
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
 
-    override def json: String = ???
+    override def json: String = execute.await.json
   }
 
   case class AddAliasRequestDefinition(targetAlias: String)
