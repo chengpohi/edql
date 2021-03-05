@@ -7,13 +7,13 @@ import com.github.chengpohi.parser.EQLParser
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
+import java.net.URL
 import scala.io.Source
 
 class EQLScriptRunner {
   val eqlParser: EQLParser = new EQLParser
 
   import eqlParser._
-
 
   def parse: String => PSI = (s: String) => instruction(s)
 
@@ -28,13 +28,12 @@ class EQLScriptRunner {
 
     val script: String = this.readFile(file)
     val instructions = generateInstructions(script)
-    val result = instructions.find(i => i.isInstanceOf[HostBindInstruction]) match {
+    val result = instructions.find(i => i.isInstanceOf[EndpointBindInstruction]) match {
       case Some(hi) =>
-        val hostInstruction2 = hi.asInstanceOf[HostBindInstruction]
-        val host = hostInstruction2.host
-        val context = new ScriptEQLContext(host, 9200);
+        val hostInstruction2 = hi.asInstanceOf[EndpointBindInstruction]
+        val context = ScriptEQLContext(hostInstruction2.endpoint)
         val res = instructions
-          .filter(i => !i.isInstanceOf[HostBindInstruction])
+          .filter(i => !i.isInstanceOf[EndpointBindInstruction])
           .map(i => i.execute(context).json)
           .mkString(System.lineSeparator())
         res
@@ -63,12 +62,13 @@ class EQLScriptRunner {
 }
 
 class ScriptEQLContext(host: String, port: Int) extends EQLConfig with EQLContext {
-  override implicit lazy val eqlClient: EQLClient = buildRemoteClient(host, port, null)
-
+  override implicit lazy val eqlClient: EQLClient =
+    buildRemoteClient(host, port, null)
 }
 
 object ScriptEQLContext {
-  def apply(host: String, port: Integer): ScriptEQLContext = {
-    new ScriptEQLContext(host, port)
+  def apply(endpoint: String): ScriptEQLContext = {
+    val url = new URL(endpoint)
+    new ScriptEQLContext(url.getHost, url.getPort)
   }
 }
