@@ -1,3 +1,2 @@
 HOST localhost
-cat indices
-node stats
+GET stocks/_search
