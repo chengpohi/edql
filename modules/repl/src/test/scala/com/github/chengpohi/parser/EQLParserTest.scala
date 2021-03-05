@@ -5,14 +5,14 @@ import java.net.URI
 import java.nio.file.{Files, Paths}
 
 import com.github.chengpohi.helper.EQLTestTrait
-import com.github.chengpohi.repl.EQLInterpreter
+import com.github.chengpohi.repl.EQLReplInterpreter
 
 import scala.io.Source
 
 
 class EQLParserTest extends EQLTestTrait {
   import com.github.chengpohi.helper.EQLTestContext._
-  val runEngine: EQLInterpreter = new EQLInterpreter()
+  val runEngine: EQLReplInterpreter = new EQLReplInterpreter(com.github.chengpohi.helper.EQLTestContext)
 
   val outContent = new ByteArrayOutputStream()
   val errContent = new ByteArrayOutputStream()

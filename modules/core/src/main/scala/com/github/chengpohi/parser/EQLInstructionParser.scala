@@ -4,7 +4,6 @@ import fastparse.NoWhitespace._
 import fastparse._
 
 trait EQLInstructionParser extends CollectionParser with InterceptFunction {
-
   def helpP[_: P] = P(alphaChars.rep(1).! ~ "?")
     .map(s => {
       HelpInstruction(Seq(s))

@@ -2,27 +2,55 @@ package com.github.chengpohi.script
 
 import cats.effect.{IO, Resource}
 import com.github.chengpohi.context.{EQLConfig, EQLContext}
-import com.github.chengpohi.dsl.serializer.JSONOps
-import com.github.chengpohi.repl.EQLInterpreter
+import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.parser.EQLParser
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
 import scala.io.Source
 
-class EQLScriptRunner(eqlInterpreter: EQLInterpreter) extends EQLConfig with EQLContext with JSONOps {
+class EQLScriptRunner {
+  val eqlParser: EQLParser = new EQLParser
+
+  import eqlParser._
+
+
+  def parse: String => PSI = (s: String) => instruction(s)
+
+  def generateInstructions(source: String): Seq[Instruction2] = {
+    (parse andThen gi).apply(source)
+  }
+
   def run(file: File): Option[String] = {
     if (!file.exists()) {
       return None
     }
 
+    val script: String = this.readFile(file)
+    val instructions = generateInstructions(script)
+    val result = instructions.find(i => i.isInstanceOf[HostBindInstruction]) match {
+      case Some(hi) =>
+        val hostInstruction2 = hi.asInstanceOf[HostBindInstruction]
+        val host = hostInstruction2.host
+        val context = new ScriptEQLContext(host, 9200);
+        val res = instructions
+          .filter(i => !i.isInstanceOf[HostBindInstruction])
+          .map(i => i.execute(context).json)
+          .mkString(System.lineSeparator())
+        res
+      case None => "Please set host bind"
+    }
+    Some(result)
+  }
+
+  private def readFile(file: File) = {
     val script = Resource
       .fromAutoCloseable(IO {
         Source.fromFile(file)
       })
       .use(i => IO(i.getLines().mkString(System.lineSeparator())))
       .unsafeRunSync()
-    val result = eqlInterpreter.parse(script)
-    Some(result)
+    script
   }
 
   def getScriptFilePathFromEnv: Option[String] = {
@@ -31,5 +59,16 @@ class EQLScriptRunner(eqlInterpreter: EQLInterpreter) extends EQLConfig with EQL
       case true => Some(config.getString("eql.file"))
       case false => None
     }
+  }
+}
+
+class ScriptEQLContext(host: String, port: Int) extends EQLConfig with EQLContext {
+  override implicit lazy val eqlClient: EQLClient = buildRemoteClient(host, port, null)
+
+}
+
+object ScriptEQLContext {
+  def apply(host: String, port: Integer): ScriptEQLContext = {
+    new ScriptEQLContext(host, port)
   }
 }

@@ -407,6 +407,13 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     override def json: String = execute.await.json
   }
 
+  case class GetActionDefinition(path: String, action: String)
+    extends Definition[String] {
+    override def execute: Future[String] = ???
+
+    override def json: String = ???
+  }
+
   case class AddAliasRequestDefinition(targetAlias: String)
     extends Definition[AcknowledgedResponse] {
     var indicesAliasesRequestBuilder: IndicesAliasesRequestBuilder = _
