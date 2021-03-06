@@ -448,6 +448,14 @@ trait InterceptFunction {
 
   trait ScriptContextInstruction2 extends Instruction2
 
+  case class CommentInstruction() extends ScriptContextInstruction2 {
+    override def name = "comment"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition("")
+    }
+  }
+
   case class EndpointBindInstruction(endpoint: String) extends ScriptContextInstruction2 {
     override def name = "host"
 
@@ -456,27 +464,30 @@ trait InterceptFunction {
     }
   }
 
-  case class PostActionInstruction(path: String, action: String) extends Instruction2 {
+  case class PostActionInstruction(path: String, action: Option[String]) extends Instruction2 {
     override def name = "post"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      PureStringDefinition(s"$path, $action")
+      import eql._
+      PostActionDefinition(path, action)
     }
   }
 
-  case class DeleteActionInstruction(path: String, action: String) extends Instruction2 {
+  case class DeleteActionInstruction(path: String, action: Option[String]) extends Instruction2 {
     override def name = "delete"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      PureStringDefinition(s"$path, $action")
+      import eql._
+      DeleteActionDefinition(path, action)
     }
   }
 
-  case class PutActionInstruction(path: String, action: String) extends Instruction2 {
+  case class PutActionInstruction(path: String, action: Option[String]) extends Instruction2 {
     override def name = "put"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      PureStringDefinition(s"$path, $action")
+      import eql._
+      PutActionDefinition(path, action)
     }
   }
 
