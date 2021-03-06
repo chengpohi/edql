@@ -33,7 +33,7 @@ class EQLScriptRunner {
         val hostInstruction2 = hi.asInstanceOf[EndpointBindInstruction]
         val context = ScriptEQLContext(hostInstruction2.endpoint)
         val res = instructions
-          .filter(i => !i.isInstanceOf[EndpointBindInstruction])
+          .filter(i => !i.isInstanceOf[EndpointBindInstruction] && !i.isInstanceOf[CommentInstruction])
           .map(i => i.execute(context).json)
           .mkString(System.lineSeparator())
         res

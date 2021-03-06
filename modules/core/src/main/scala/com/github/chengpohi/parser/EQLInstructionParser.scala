@@ -21,20 +21,23 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
     .map(i => i.head.extract[String])
     .map(c => CountInstruction(c))
 
+  def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
+    c => CommentInstruction())
+
   def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
 
-  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
-    c => PostActionInstruction(c._1.extract[String], c._2.toJson))
+  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.?).map(
+    c => PostActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
   def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => GetActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
-  def deleteAction[_: P] = P("GET" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
-    c => DeleteActionInstruction(c._1.extract[String], c._2.toJson))
+  def deleteAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+    c => DeleteActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
-  def putAction[_: P] = P("GET" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
-    c => PutActionInstruction(c._1.extract[String], c._2.toJson))
+  def putAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+    c => PutActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
@@ -258,7 +261,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | postAction | getAction | deleteAction | putAction
+        | comment | hostBind | postAction | getAction | deleteAction | putAction
         | count
       ).rep
   )

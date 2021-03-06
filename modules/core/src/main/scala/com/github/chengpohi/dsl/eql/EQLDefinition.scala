@@ -424,6 +424,55 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     override def json: String = execute.await.json
   }
 
+  case class PostActionDefinition(path: String, action: Option[String])
+    extends Definition[String] {
+    override def execute: Future[String] = {
+      val request = new Request(
+        "POST",
+        path);
+      request.setJsonEntity(action.orNull)
+      Future {
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+
+    override def json: String = execute.await.json
+  }
+
+  case class PutActionDefinition(path: String, action: Option[String])
+    extends Definition[String] {
+    override def execute: Future[String] = {
+      val request = new Request(
+        "PUT",
+        path);
+      request.setJsonEntity(action.orNull)
+      Future {
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+
+    override def json: String = execute.await.json
+  }
+
+  case class DeleteActionDefinition(path: String, action: Option[String])
+    extends Definition[String] {
+    override def execute: Future[String] = {
+      val request = new Request(
+        "DELETE",
+        path);
+      request.setJsonEntity(action.orNull)
+      Future {
+        val entity = restClient.performRequest(request).getEntity
+        EntityUtils.toString(entity)
+      }
+    }
+
+    override def json: String = execute.await.json
+  }
+
+
   case class AddAliasRequestDefinition(targetAlias: String)
     extends Definition[AcknowledgedResponse] {
     var indicesAliasesRequestBuilder: IndicesAliasesRequestBuilder = _
