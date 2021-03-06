@@ -21,13 +21,15 @@ class CollectionParser {
 
   def hexDigit[_: P] = P(CharIn("0-9a-fA-F"))
 
+  def actionChars[_: P] = P(CharIn("0-9a-zA-Z:/_@&."))
+
   def unicodeEscape[_: P] = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
 
   def escape[_: P] = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
 
   //val string =
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-  def unQuoteString[_: P] = P(space ~ strChars.rep(1).! ~ space).map(i =>
+  def actionPath[_: P] = P(space ~ actionChars.rep(1).! ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
   def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(1).! ~ "\"" ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))

@@ -21,19 +21,19 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
     .map(i => i.head.extract[String])
     .map(c => CountInstruction(c))
 
-  def hostBind[_: P] = P("HOST" ~ space ~ unQuoteString ~/ newline.?).map(
+  def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
 
-  def postAction[_: P] = P("POST" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
     c => PostActionInstruction(c._1.extract[String], c._2.toJson))
 
-  def getAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
-    c => GetActionInstruction(c._1.extract[String], c._2.toJson))
+  def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+    c => GetActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
-  def deleteAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+  def deleteAction[_: P] = P("GET" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2.toJson))
 
-  def putAction[_: P] = P("GET" ~ space ~ unQuoteString ~/ newline ~/ jsonExpr).map(
+  def putAction[_: P] = P("GET" ~ space ~ actionPath ~/ newline ~/ jsonExpr).map(
     c => PutActionInstruction(c._1.extract[String], c._2.toJson))
 
   //memory, jvm, nodes, cpu etc
