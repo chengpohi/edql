@@ -15,7 +15,7 @@ lazy val eqlRepl = project
   .settings(
     name := "eql-repl",
     version := Versions.eqlVersion,
-    mainClass in Compile := Some("com.github.chengpohi.repl.EQLCommand"),
+    mainClass in Compile := Some("com.github.chengpohi.EQLCommand"),
     libraryDependencies ++= replDependencies,
     assemblyJarName in assembly := "eql-repl",
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript())),

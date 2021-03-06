@@ -107,6 +107,6 @@ trait EQLConfig {
   def buildRestClient(host: String, port: Int) = {
     val restClient = RestClient.builder(new HttpHost(host, port)).build()
 
-    EQLClient(null, restClient)
+    EQLClient(None, restClient)
   }
 }

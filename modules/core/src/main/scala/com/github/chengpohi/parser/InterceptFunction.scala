@@ -480,7 +480,7 @@ trait InterceptFunction {
     }
   }
 
-  case class GetActionInstruction(path: String, action: String) extends Instruction2 {
+  case class GetActionInstruction(path: String, action: Option[String]) extends Instruction2 {
     override def name = "get"
 
     def execute(implicit eql: EQLContext): Definition[_] = {

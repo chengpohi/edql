@@ -408,13 +408,13 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     override def json: String = execute.await.json
   }
 
-  case class GetActionDefinition(path: String, action: String)
+  case class GetActionDefinition(path: String, action: Option[String])
     extends Definition[String] {
     override def execute: Future[String] = {
       val request = new Request(
         "GET",
         path);
-      request.setJsonEntity(action)
+      request.setJsonEntity(action.orNull)
       Future {
         val entity = restClient.performRequest(request).getEntity
         EntityUtils.toString(entity)
@@ -549,6 +549,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
       m.foreach(term => {
         val termQuery: TermQueryBuilder =
           QueryBuilders.termQuery(term._1, term._2)
+
         searchRequestBuilder.setQuery(boolQuery)
       })
       this
