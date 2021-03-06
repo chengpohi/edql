@@ -63,7 +63,7 @@ class EQLScriptRunner {
 
 class ScriptEQLContext(host: String, port: Int) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
-    buildRemoteClient(host, port, null)
+    buildRestClient(host, port)
 }
 
 object ScriptEQLContext {
