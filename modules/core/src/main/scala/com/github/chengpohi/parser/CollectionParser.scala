@@ -8,10 +8,13 @@ import org.apache.commons.lang3.StringEscapeUtils
 class CollectionParser {
   val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
+  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
   val CollectionChars: NamedFunction[Char, Boolean] =
     NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
 
   def strChars[_: P] = P(CharsWhile(StringChars))
+
+  def noNewlineChars[_: P] = P(CharsWhile(NotNewlineChars))
 
   def alphaChars[_: P] = P(CharsWhile(AlphaChars))
 
