@@ -45,3 +45,26 @@ eql>
 
 eql>
 #+END_SRC
+
+Use with EQL file:
+
+#+BEGIN_SRC shell
+eql -Deql.file=test.eql
+#+END_SRC
+
+test.eql:
+
+
+#+BEGIN_SRC text
+HOST http://localhost:9200
+GET stocks/_search
+{
+  "query": {
+	"match_all": {}
+  }
+}
+#+END_SRC
+
+
+
+
