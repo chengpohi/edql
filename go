@@ -3,15 +3,19 @@
 
 case "$1" in
   "build")
-    sbt build
+    sbt compile
     ;;
   "assembly")
-    sbt assembly
+    sbt binary
     ;;
   "pb")
-    sbt publishLocal
+    sbt clean pbCore
+    ;;
+  "fmt")
+    sbt eqlCore/scalafmt
+    sbt eqlRepl/scalafmt
     ;;
   *)
-    sbt build
+    sbt compile
     ;;
 esac
