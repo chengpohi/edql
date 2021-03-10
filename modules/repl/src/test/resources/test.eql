@@ -1,2 +1,2 @@
-HOST localhost
+HOST http://localhost:9200
 GET stocks/_search

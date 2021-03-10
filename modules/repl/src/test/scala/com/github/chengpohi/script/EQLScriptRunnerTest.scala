@@ -9,7 +9,8 @@ class EQLScriptRunnerTest extends EQLTestTrait {
 
   "ELKParser" should "get health of elasticsearch" in {
     val file = new File(this.getClass.getResource("/test.eql").toURI)
-    val result = runner.run(file)
+
+    val result = runner.run(runner.readFile(file).get)
 
     println(result.get)
   }
