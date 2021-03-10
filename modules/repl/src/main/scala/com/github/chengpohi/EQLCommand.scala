@@ -4,6 +4,7 @@ import com.github.chengpohi.repl.EQLReplRunner
 import com.github.chengpohi.script.EQLScriptRunner
 
 import java.io.File
+import scala.util.{Failure, Success}
 
 object EQLCommand {
   def main(args: Array[String]): Unit = {
@@ -12,8 +13,16 @@ object EQLCommand {
       val file = scriptRunner.getScriptFilePathFromEnv
       file match {
         case Some(f) =>
-          val res = scriptRunner.run(new File(f))
-          println(res.get)
+          val result =
+            scriptRunner.readFile(new File(f))
+              .flatMap(s => scriptRunner.run(s))
+
+          result match {
+            case Success(value) =>
+              println(value)
+            case Failure(exception) =>
+              println(exception.getMessage)
+          }
           System.exit(0)
         case None =>
           EQLReplRunner().runRepl()
