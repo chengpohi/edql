@@ -4,6 +4,7 @@ import com.github.chengpohi.context.{EQLConfig, EQLContext}
 import com.github.chengpohi.parser.EQLParser
 
 import scala.io.Source
+import scala.util.{Failure, Success}
 
 class EQLReplInterpreter(eql: EQLContext) {
   val eqlParser: EQLParser = new EQLParser
@@ -13,16 +14,10 @@ class EQLReplInterpreter(eql: EQLContext) {
   def render(parsed: PSI): String = {
     val instructions = gi(parsed)
 
-    val res = for {
-      instruction <- instructions
-    } yield {
-      try {
-        instruction.execute(eql).json
-      } catch {
-        case ex: Exception => s"unhandle error: ${ex.getMessage}"
-      }
+    instructions.map(_.map(j => j.execute(eql).json)) match {
+      case Success(value) => value.mkString(System.lineSeparator())
+      case Failure(exception) => exception.getMessage
     }
-    res.mkString("\n")
   }
 
   def parse: String => PSI = (s: String) => instruction(s)
