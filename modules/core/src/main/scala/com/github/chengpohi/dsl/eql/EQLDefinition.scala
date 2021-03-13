@@ -39,7 +39,7 @@ import org.elasticsearch.action.index.{IndexRequestBuilder, IndexResponse}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchScrollRequestBuilder, SearchType}
 import org.elasticsearch.action.support.master.AcknowledgedResponse
 import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
-import org.elasticsearch.client.Request
+import org.elasticsearch.client.{Request, ResponseException}
 import org.elasticsearch.cluster.health.ClusterHealthStatus
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query._
@@ -416,8 +416,14 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
       request.setJsonEntity(action.orNull)
       Future {
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
+        try {
+          val entity = restClient.performRequest(request).getEntity
+          EntityUtils.toString(entity)
+        } catch {
+          case ex: ResponseException => {
+            EntityUtils.toString(ex.getResponse.getEntity)
+          }
+        }
       }
     }
 
@@ -432,8 +438,14 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
       request.setJsonEntity(action.orNull)
       Future {
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
+        try {
+          val entity = restClient.performRequest(request).getEntity
+          EntityUtils.toString(entity)
+        } catch {
+          case ex: ResponseException => {
+            EntityUtils.toString(ex.getResponse.getEntity)
+          }
+        }
       }
     }
 
@@ -448,8 +460,14 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
       request.setJsonEntity(action.orNull)
       Future {
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
+        try {
+          val entity = restClient.performRequest(request).getEntity
+          EntityUtils.toString(entity)
+        } catch {
+          case ex: ResponseException => {
+            EntityUtils.toString(ex.getResponse.getEntity)
+          }
+        }
       }
     }
 
@@ -464,8 +482,14 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
       request.setJsonEntity(action.orNull)
       Future {
-        val entity = restClient.performRequest(request).getEntity
-        EntityUtils.toString(entity)
+        try {
+          val entity = restClient.performRequest(request).getEntity
+          EntityUtils.toString(entity)
+        } catch {
+          case ex: ResponseException => {
+            EntityUtils.toString(ex.getResponse.getEntity)
+          }
+        }
       }
     }
 

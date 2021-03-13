@@ -263,6 +263,6 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | comment | hostBind | postAction | getAction | deleteAction | putAction
         | count
-      ).rep
+      ).rep(1) ~ End
   )
 }
