@@ -26,6 +26,8 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
 
   def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
+  def authorizationBind[_: P] = P("Authorization" ~ space ~ actionPath).map(
+    c => EndpointBindInstruction(c.extract[String]))
 
   def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => PostActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
@@ -261,7 +263,7 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | comment | hostBind | postAction | getAction | deleteAction | putAction
+        | comment | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction
         | count
       ).rep(1) ~ End
   )

@@ -34,19 +34,26 @@ class EQLScriptRunner {
 
   def run(script: String): Try[String] = {
     val instructions = this.generateInstructions(script)
-    val result = instructions.flatMap(_.find(i => i.isInstanceOf[EndpointBindInstruction]) match {
-      case Some(hi) =>
-        val hostInstruction2 = hi.asInstanceOf[EndpointBindInstruction]
-        val context = ScriptEQLContext(hostInstruction2.endpoint)
-        val res = instructions
-          .map(_.filter(i => !i.isInstanceOf[EndpointBindInstruction] && !i.isInstanceOf[CommentInstruction])
-            .map(i => i.execute(context).json)
-            .mkString(System.lineSeparator()))
-        res
-      case None =>
-        return Failure(new RuntimeException("Please set host bind"))
+    instructions.map(ins => {
+      val rIns = ins.filter(!_.isInstanceOf[ScriptContextInstruction2])
+      val cIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
+
+      cIns.find(_.isInstanceOf[EndpointBindInstruction]) match {
+        case Some(h) =>
+          val hostInstruction2 = h.asInstanceOf[EndpointBindInstruction]
+          val aInstruction2 = cIns.find(_.isInstanceOf[AuthorizationBindInstruction])
+            .map(i => i.asInstanceOf[AuthorizationBindInstruction]).map(i => i.auth)
+
+          val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2)
+          rIns.map(i => i.execute(context).json).mkString(System.lineSeparator())
+        case None =>
+          return Failure(new RuntimeException("Please set host bind"))
+      }
     })
-    result
+  }
+
+  private def scriptContextInstruction(i: eqlParser.Instruction2) = {
+    i.isInstanceOf[ScriptContextInstruction2]
   }
 
   def getScriptFilePathFromEnv: Option[String] = {
@@ -58,14 +65,14 @@ class EQLScriptRunner {
   }
 }
 
-class ScriptEQLContext(host: String, port: Int) extends EQLConfig with EQLContext {
+class ScriptEQLContext(host: String, port: Int, auth: Option[String]) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
-    buildRestClient(host, port)
+    buildRestClient(host, port, auth)
 }
 
 object ScriptEQLContext {
-  def apply(endpoint: String): ScriptEQLContext = {
+  def apply(endpoint: String, auth: Option[String] = None): ScriptEQLContext = {
     val url = new URL(endpoint)
-    new ScriptEQLContext(url.getHost, url.getPort)
+    new ScriptEQLContext(url.getHost, url.getPort, auth)
   }
 }

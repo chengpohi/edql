@@ -3,7 +3,8 @@ package com.github.chengpohi.context
 import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
-import org.apache.http.HttpHost
+import org.apache.http.message.BasicHeader
+import org.apache.http.{Header, HttpHost}
 import org.apache.logging.log4j.LogManager
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest
@@ -104,9 +105,15 @@ trait EQLConfig {
       })
   }
 
-  def buildRestClient(host: String, port: Int) = {
-    val restClient = RestClient.builder(new HttpHost(host, port)).build()
+  def buildRestClient(host: String, port: Int, auth: Option[String]) = {
+    val restClientBuilder =
+      RestClient.builder(new HttpHost(host, port))
 
-    EQLClient(None, restClient)
+    auth.map(a => {
+      val defaultHeaders = Array[Header](new BasicHeader("Authorization", a))
+      restClientBuilder.setDefaultHeaders(defaultHeaders)
+    })
+
+    EQLClient(None, restClientBuilder.build())
   }
 }
