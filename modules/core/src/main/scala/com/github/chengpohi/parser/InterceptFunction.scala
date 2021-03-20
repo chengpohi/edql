@@ -463,6 +463,13 @@ trait InterceptFunction {
       PureStringDefinition(s"$endpoint")
     }
   }
+  case class AuthorizationBindInstruction(auth: String) extends ScriptContextInstruction2 {
+    override def name = "authorization"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$auth")
+    }
+  }
 
   case class PostActionInstruction(path: String, action: Option[String]) extends Instruction2 {
     override def name = "post"
