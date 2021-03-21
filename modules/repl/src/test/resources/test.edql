@@ -1,0 +1,9 @@
+HOST http://localhost:9200
+
+POST minute_stock/_search
+{
+  "query": {
+    "match_all": {
+    }
+  }
+}
