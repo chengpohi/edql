@@ -3,7 +3,7 @@ package com.github.chengpohi.parser
 import fastparse.NoWhitespace._
 import fastparse._
 
-trait EQLInstructionParser extends CollectionParser with InterceptFunction {
+trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def helpP[_: P] = P(alphaChars.rep(1).! ~ "?")
     .map(s => {
       HelpInstruction(Seq(s))

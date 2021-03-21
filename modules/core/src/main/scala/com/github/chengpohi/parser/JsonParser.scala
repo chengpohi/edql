@@ -5,7 +5,7 @@ import fastparse.NoWhitespace._
 import fastparse._
 import org.apache.commons.lang3.StringEscapeUtils
 
-class CollectionParser {
+class JsonParser {
   val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
   val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
@@ -34,6 +34,7 @@ class CollectionParser {
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
   def actionPath[_: P] = P(space ~ actionChars.rep(1).! ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+
   def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(1).! ~ "\"" ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
@@ -53,14 +54,16 @@ class CollectionParser {
 
   def integral[_: P] = P("0" | CharIn("1-9") ~ digits.?)
 
-  def number[_: P]: P[JsonCollection.Num] = P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
-    x => JsonCollection.Num(x.toDouble)
-  )
+  def number[_: P]: P[JsonCollection.Num] =
+    P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
+      x => JsonCollection.Num(x.toDouble)
+    )
 
-  def pair[_: P]: P[(String, JsonCollection.Val)] = P(quoteString.map(_.value) ~/ ":" ~/ jsonExpr)
+  def pair[_: P]: P[(String, JsonCollection.Val)] =
+    P(quoteString.map(_.value) ~/ ":" ~ newline.? ~/ jsonExpr)
 
   def obj[_: P] =
-    P("{" ~/ pair.rep(sep = ","./) ~ "}").map(JsonCollection.Obj(_: _*))
+    P("{" ~ newline.? ~/ pair.rep(sep = ","./) ~ newline.? ~ "}").map(JsonCollection.Obj(_: _*))
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
 
@@ -69,10 +72,10 @@ class CollectionParser {
   def `true`[_: P] = P("true").map(_ => JsonCollection.True)
 
   def tuple[_: P] =
-    P("(" ~ jsonExpr.rep(1, sep = ","./) ~ ")").map(JsonCollection.Arr(_: _*))
+    P("(" ~ newline.? ~ jsonExpr.rep(1, sep = ","./) ~ newline.? ~ ")").map(JsonCollection.Arr(_: _*))
 
   def array[_: P] =
-    P("[" ~ jsonExpr.rep(1, sep = ","./) ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~ newline.? ~ jsonExpr.rep(1, sep = ","./) ~ newline.? ~ "]").map(JsonCollection.Arr(_: _*))
 
   def space[_: P] = P(CharsWhileIn(" \r\n\t", 0))
 
@@ -83,7 +86,7 @@ class CollectionParser {
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 
-  def newline[_: P] = P( "\n" | "\r\n" | "\r" | "\f" | "\t")
+  def newline[_: P] = P("\n" | "\r\n" | "\r" | "\f" | "\t").rep(1)
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {

@@ -5,8 +5,8 @@ import fastparse.{Parsed, _}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.flatspec.AnyFlatSpec
 
-class CollectionParserTest extends AnyFlatSpec with BeforeAndAfter {
-  val collectionParser = new CollectionParser
+class JsonParserTest extends AnyFlatSpec with BeforeAndAfter {
+  val collectionParser = new JsonParser
 
   import collectionParser._
 
