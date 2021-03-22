@@ -24,7 +24,7 @@ class CollectionParser {
 
   def hexDigit[_: P] = P(CharIn("0-9a-fA-F"))
 
-  def actionChars[_: P] = P(CharIn("0-9a-zA-Z:/_@&."))
+  def actionChars[_: P] = P(CharIn("0-9a-zA-Z:/_@&.= "))
 
   def unicodeEscape[_: P] = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
 
@@ -74,14 +74,16 @@ class CollectionParser {
   def array[_: P] =
     P("[" ~ jsonExpr.rep(1, sep = ","./) ~ "]").map(JsonCollection.Arr(_: _*))
 
-  def space[_: P] = P(CharsWhileIn(" \r\n", 0))
+  def space[_: P] = P(CharsWhileIn(" \r\n\t", 0))
+
+  def colon[_: P] = P( space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
     space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number) ~ space)
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 
-  def newline[_: P] = P( "\n" | "\r\n" | "\r" | "\f")
+  def newline[_: P] = P( "\n" | "\r\n" | "\r" | "\f" | "\t")
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {

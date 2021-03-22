@@ -24,9 +24,9 @@ trait EQLInstructionParser extends CollectionParser with InterceptFunction {
   def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
     c => CommentInstruction())
 
-  def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
+  def hostBind[_: P] = P("HOST" ~ colon ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
-  def authorizationBind[_: P] = P("Authorization" ~ space ~ actionPath).map(
+  def authorizationBind[_: P] = P("Authorization" ~ colon ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
 
   def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.?).map(
