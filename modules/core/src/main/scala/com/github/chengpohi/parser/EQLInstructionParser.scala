@@ -24,10 +24,13 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
     c => CommentInstruction())
 
-  def hostBind[_: P] = P("HOST" ~ colon ~ space ~ actionPath).map(
+  def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
-  def authorizationBind[_: P] = P("Authorization" ~ colon ~ space ~ actionPath).map(
-    c => EndpointBindInstruction(c.extract[String]))
+
+  def authorizationBind[_: P] = P("Authorization" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      EndpointBindInstruction(c.extract[String])
+    })
 
   def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => PostActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
