@@ -1,8 +1,30 @@
 [![Build Status](https://travis-ci.org/chengpohi/elasticdsl.svg)](https://travis-ci.org/chengpohi/elasticdsl)
 
 * EQL
-
 ** Usage
+
+Use with EQL file:
+
+#+BEGIN_SRC shell
+eql -Deql.file=test.eql
+#+END_SRC
+
+test.eql:
+
+#+BEGIN_SRC text
+HOST http://localhost:9200
+Authorization ""
+GET stocks/_search
+{
+  "query": {
+	"match_all": {}
+  }
+}
+#+END_SRC
+
+
+
+
 
 #+BEGIN_SRC shell
 eql>cat indices
@@ -45,26 +67,5 @@ eql>
 
 eql>
 #+END_SRC
-
-Use with EQL file:
-
-#+BEGIN_SRC shell
-eql -Deql.file=test.eql
-#+END_SRC
-
-test.eql:
-
-
-#+BEGIN_SRC text
-HOST http://localhost:9200
-GET stocks/_search
-{
-  "query": {
-	"match_all": {}
-  }
-}
-#+END_SRC
-
-
 
 
