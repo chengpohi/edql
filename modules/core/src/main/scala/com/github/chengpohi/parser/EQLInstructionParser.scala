@@ -32,17 +32,20 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       EndpointBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.?).map(
-    c => PostActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.rep.?).map(
+    c => PostActionInstruction(c._1.extract[String], c._2.map(_.map(_.toJson))))
 
   def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => GetActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
-  def deleteAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def deleteAction[_: P] = P("DELETE" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
-  def putAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def putAction[_: P] = P("PUT" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => PutActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+
+  def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ jsonExpr.?).map(
+    c => HeadActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
@@ -143,119 +146,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     }
     )
 
-  //
-  //  val reindex = P(
-  //    "reindex" ~ "into" ~ strOrVar ~ "/" ~/ strOrVar ~ "from" ~/ strOrVar ~ "fields" ~/ jsonExpr)
-  //    .map(
-  //      c =>
-  //        interceptFunction.Instruction("reindex",
-  //          interceptFunction.reindexIndex,
-  //          Seq(c._1, c._2, c._3, c._4)))
-  //  val index = P(
-  //    "index" ~ "into" ~/ strOrVar ~ "/" ~ strOrVar ~/ "doc" ~ jsonExpr ~ ("id" ~ strOrVar).?)
-  //    .map(
-  //      c =>
-  //        interceptFunction.Instruction("index",
-  //          interceptFunction.createDoc,
-  //          Seq(c._1, c._2, c._3) ++ c._4.toSeq))
-  //  val bulkIndex = P("bulk index" ~/ ioParser).map(c =>
-  //    interceptFunction.Instruction("bulkIndex", interceptFunction.bulkIndex, c))
-  //  val updateMapping = P("update mapping" ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("umapping", interceptFunction.updateMapping, c))
-  //  val update = P(
-  //    "update" ~ "on" ~/ strOrVar ~ "/" ~ strOrVar ~ "doc" ~/ jsonExpr ~ ("id" ~ strOrVar).?)
-  //    .map(c => {
-  //      c._4 match {
-  //        case None =>
-  //          interceptFunction.Instruction("update",
-  //            interceptFunction.bulkUpdateDoc,
-  //            Seq(c._1, c._2, c._3))
-  //        case Some(id) =>
-  //          interceptFunction.Instruction("update",
-  //            interceptFunction.updateDoc,
-  //            Seq(c._1, c._2, c._3) ++ c._4.toSeq)
-  //      }
-  //    })
-  //  val createIndex = P("create" ~ "index" ~/ strOrVar).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("createIndex", interceptFunction.createIndex, Seq(c)))
-  //  val getMapping = P(strOrVar ~ "mapping").map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("getMapping", interceptFunction.getMapping, Seq(c)))
-  //  val analysis = P("analysis" ~/ strOrVar ~/ "by" ~/ strOrVar).map(c =>
-  //    interceptFunction
-  //      .Instruction("analysis", interceptFunction.analysisText, Seq(c._1, c._2)))
-  //  val createAnalyzer = P("create analyzer" ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("createAnalyzer", interceptFunction.createAnalyzer, c))
-  //  val getDocById =
-  //    P("get" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~/ strOrVar)
-  //      .map(
-  //        c =>
-  //          interceptFunction.Instruction("getDocById",
-  //            interceptFunction.getDocById,
-  //            Seq(c._1, c._2, c._3)))
-  //  val mapping = P("mapping" ~/ ioParser).map(c =>
-  //    interceptFunction.Instruction("mapping", interceptFunction.mapping, c))
-  //  val avgAggs = P("avg" ~/ strOrVar).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("avgAggs", interceptFunction.aggsCount, Seq(c)))
-  //  val termsAggs = P("term" ~/ strOrVar).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("termAggs", interceptFunction.aggsTerm, Seq(c)))
-  //  val histAggs =
-  //    P("hist" ~/ strOrVar ~ "interval" ~/ strOrVar ~/ "field" ~ strOrVar)
-  //      .map(
-  //        c =>
-  //          interceptFunction.Instruction("histAggs",
-  //            interceptFunction.histAggs,
-  //            Seq(c._1, c._2, c._3)))
-  //  val aggs = P(
-  //    "aggs in" ~/ strOrVar ~ "/" ~ strOrVar ~/ (avgAggs | termsAggs | histAggs))
-  //    .map(c =>
-  //      interceptFunction
-  //        .Instruction(c._3.name, c._3.f, Seq(c._1, c._2) ++ c._3.params))
-  //  val alias = P("alias" ~/ ioParser).map(c =>
-  //    interceptFunction.Instruction("alias", interceptFunction.alias, c))
-  //  val createRepository = P("create repository" ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("createRepository", interceptFunction.createRepository, c))
-  //  val createSnapshot = P("create snapshot " ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("createSnapshot", interceptFunction.createSnapshot, c))
-  //  val deleteSnapshot = P("delete snapshot " ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("deleteSnapshot", interceptFunction.deleteSnapshot, c))
-  //  val getSnapshot = P("get snapshot " ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("getSnapshot", interceptFunction.getSnapshot, c))
-  //  val restoreSnapshot = P("restore snapshot " ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("restoreSnapshot", interceptFunction.restoreSnapshot, c))
-  //  val closeIndex = P("close index" ~/ ioParser).map(
-  //    c =>
-  //      interceptFunction
-  //        .Instruction("closeIndex", interceptFunction.closeIndex, c))
-  //  val openIndex = P("open index" ~/ ioParser).map(c =>
-  //    interceptFunction.Instruction("openIndex", interceptFunction.openIndex, c))
-  //  val dumpIndex = P("dump index" ~/ strOrVar ~/ ">" ~/ strChars.rep(1).!)
-  //    .map(
-  //      c =>
-  //        interceptFunction.Instruction("dumpIndex",
-  //          interceptFunction.dumpIndex,
-  //          Seq(c._1, JsonCollection.Str(c._2))))
   def extractJSON[_: P]: P[(String, String)] = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
 
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
@@ -266,7 +156,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | comment | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction
+        | comment | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
         | count
       ).rep(1) ~ End
   )
