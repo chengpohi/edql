@@ -24,7 +24,7 @@ class JsonParser {
 
   def hexDigit[_: P] = P(CharIn("0-9a-fA-F"))
 
-  def actionChars[_: P] = P(CharIn("0-9a-zA-Z:/_@&.= ?"))
+  def actionChars[_: P] = P(CharIn("0-9a-zA-Z:/_@?%*= ,\\.\\&\\-"))
 
   def unicodeEscape[_: P] = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
 

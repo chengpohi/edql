@@ -430,13 +430,45 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     override def json: String = execute.await.json
   }
 
-  case class PostActionDefinition(path: String, action: Option[String])
+  case class HeadActionDefinition(path: String, action: Option[String])
+    extends Definition[String] {
+    override def execute: Future[String] = {
+      val request = new Request(
+        "HEAD",
+        path);
+      request.setJsonEntity(action.orNull)
+      Future {
+        try {
+          val entity = restClient.performRequest(request).getEntity
+          EntityUtils.toString(entity)
+        } catch {
+          case ex: ResponseException => {
+            EntityUtils.toString(ex.getResponse.getEntity)
+          }
+        }
+      }
+    }
+
+    override def json: String = execute.await.json
+  }
+
+
+  case class PostActionDefinition(path: String, action: Option[Seq[String]])
     extends Definition[String] {
     override def execute: Future[String] = {
       val request = new Request(
         "POST",
         path);
-      request.setJsonEntity(action.orNull)
+
+      action match {
+        case Some(a) =>
+          if (a.size > 1) {
+            request.setJsonEntity(a.mkString(System.lineSeparator()) + System.lineSeparator())
+          } else {
+            request.setJsonEntity(a.head)
+          }
+        case None =>
+      }
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
