@@ -471,7 +471,7 @@ trait InterceptFunction {
     }
   }
 
-  case class PostActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+  case class PostActionInstruction(path: String, action: Option[Seq[String]]) extends Instruction2 {
     override def name = "post"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
@@ -504,6 +504,15 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
       GetActionDefinition(path, action)
+    }
+  }
+
+  case class HeadActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+    override def name = "head"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      import eql._
+      HeadActionDefinition(path, action)
     }
   }
 
