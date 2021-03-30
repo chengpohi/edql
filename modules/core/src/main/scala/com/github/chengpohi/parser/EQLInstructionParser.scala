@@ -152,11 +152,11 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def instrument[_: P]: P[Seq[Instruction2]] = P(
     (
-      healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
+      comment | healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | comment | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
+        | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
         | count
       ).rep(1) ~ End
   )
