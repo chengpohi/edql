@@ -19,7 +19,7 @@ object EQLCommand {
 
           result match {
             case Success(value) =>
-              println(value)
+              println(value.mkString(System.lineSeparator()))
             case Failure(exception) =>
               println(exception.getMessage)
           }

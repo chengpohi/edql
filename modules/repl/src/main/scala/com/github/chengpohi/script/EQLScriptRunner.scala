@@ -32,7 +32,7 @@ class EQLScriptRunner {
     script
   }
 
-  def run(script: String): Try[String] = {
+  def run(script: String): Try[Seq[String]] = {
     val instructions = this.generateInstructions(script)
     instructions.map(ins => {
       val rIns = ins.filter(!_.isInstanceOf[ScriptContextInstruction2])
@@ -45,7 +45,7 @@ class EQLScriptRunner {
             .map(i => i.asInstanceOf[AuthorizationBindInstruction]).map(i => i.auth)
 
           val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2)
-          rIns.map(i => i.execute(context).json).mkString(System.lineSeparator())
+          rIns.map(i => i.execute(context).json)
         case None =>
           return Failure(new RuntimeException("Please set host bind"))
       }
