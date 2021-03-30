@@ -12,6 +12,6 @@ class EQLScriptRunnerTest extends EQLTestTrait {
 
     val result = runner.run(runner.readFile(file).get)
 
-    println(result.get)
+    println(result.get.mkString(System.lineSeparator()))
   }
 }
