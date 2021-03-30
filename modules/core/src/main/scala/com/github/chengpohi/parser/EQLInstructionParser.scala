@@ -125,19 +125,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     c =>
       DeleteIndexInstruction(c.extract[String]))
 
-  //  val joinSearch = P("join" ~ strOrVar ~ "/" ~ strOrVar ~ "by" ~ strOrVar)
-  //    .map(
-  //      c =>
-  //        JoinQueryInstruction()
-  //        interceptFunction.Instruction("joinQuery",
-  //          interceptFunction.joinQuery,
-  //          Seq(c._1, c._2, c._3)))
-  //  val matchQuery = P("match" ~/ jsonExpr)
-  //    .map(
-  //      c =>
-  //        interceptFunction
-  //          .Instruction("matchQuery", interceptFunction.matchQuery, Seq(c)))
-
   def search[_: P] = P(
     "search" ~ "in" ~/ strOrVar)
     .map(c => {
@@ -152,12 +139,12 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def instrument[_: P]: P[Seq[Instruction2]] = P(
     (
-      comment | healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
+      healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
-        | count
+        | count | comment
       ).rep(1) ~ End
   )
 }

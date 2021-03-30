@@ -30,9 +30,6 @@ object JsonCollection {
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
     override def toJson: String = {
-      if (value.isEmpty) {
-        return ""
-      }
       "{" + value
         .map {
           case (n, v) => "\"" + n + "\":" + v.toJson
