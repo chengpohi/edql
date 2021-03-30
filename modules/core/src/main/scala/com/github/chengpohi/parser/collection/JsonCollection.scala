@@ -29,12 +29,16 @@ object JsonCollection {
   }
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
-    override def toJson: String =
+    override def toJson: String = {
+      if (value.isEmpty) {
+        return ""
+      }
       "{" + value
         .map {
           case (n, v) => "\"" + n + "\":" + v.toJson
         }
         .mkString(",") + "}"
+    }
 
     override def get(path: String): Option[Val] =
       value.find(p => p._1 == path).map(_._2)
@@ -77,6 +81,14 @@ object JsonCollection {
   }
 
   case object Null extends Val {
+    def value: Option[Nothing] = None
+
+    override def toJson: String = value.toString
+
+    override def get(path: String): Option[Val] = None
+  }
+
+  case object Comment extends Val {
     def value: Option[Nothing] = None
 
     override def toJson: String = value.toString
