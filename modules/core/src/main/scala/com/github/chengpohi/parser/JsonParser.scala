@@ -87,11 +87,11 @@ class JsonParser {
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 
-  def newline[_: P] = P(" " | "\n" | "\r\n" | "\r" | "\f" | "\t").rep(1)
+  def newline[_: P] = P(" " | "\n" | "\r\n" | "\r" | "\f" | "\t")
 
-  def commentString[_: P] = P("#" ~ noNewlineChars.rep(0) ~/ newline).rep
+  def commentString[_: P] = P("#" ~/ noNewlineChars.rep(0) ~/ newline)
 
-  def newlineOrComment[_: P] = P(newline | commentString).rep
+  def newlineOrComment[_: P] = P(newline | commentString).rep(1)
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
