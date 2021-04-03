@@ -1,18 +1,18 @@
-* EQL
+* EDQL
 ** Usage
 
-Use with EQL file:
+Use with EDQL file:
 
 #+BEGIN_SRC shell
-eql -Deql.file=test.eql
+eql -Deql.file=test.edql
 #+END_SRC
 
-test.eql:
+test.edql:
 
 #+BEGIN_SRC text
 HOST http://localhost:9200
 Authorization ""
-GET stocks/_search
+GET myindex/_search
 {
   "query": {
 	"match_all": {}
