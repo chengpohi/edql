@@ -464,7 +464,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         case Some(a) =>
           if (a.size > 1) {
             request.setJsonEntity(a.mkString(System.lineSeparator()) + System.lineSeparator())
-          } else {
+          } else if (a.size == 1) {
             request.setJsonEntity(a.head)
           }
         case None =>
