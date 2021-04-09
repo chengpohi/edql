@@ -29,7 +29,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def authorizationBind[_: P] = P("Authorization" ~ space ~ (actionPath | quoteString)).map(
     c => {
-      EndpointBindInstruction(c.extract[String])
+      AuthorizationBindInstruction(c.extract[String])
     })
 
   def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.rep.?).map(
