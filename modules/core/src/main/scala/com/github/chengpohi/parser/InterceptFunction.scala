@@ -2,6 +2,7 @@ package com.github.chengpohi.parser
 
 import com.github.chengpohi.context.EQLContext
 import com.github.chengpohi.dsl.eql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
+import com.github.chengpohi.parser.collection.JsonCollection
 import com.typesafe.config.ConfigFactory
 
 trait InterceptFunction {
@@ -429,7 +430,6 @@ trait InterceptFunction {
     override def name = "help"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
       params match {
         case Seq(i) =>
           val example: String =
@@ -463,6 +463,7 @@ trait InterceptFunction {
       PureStringDefinition(s"$endpoint")
     }
   }
+
   case class AuthorizationBindInstruction(auth: String) extends ScriptContextInstruction2 {
     override def name = "authorization"
 
@@ -513,6 +514,14 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
       HeadActionDefinition(path, action)
+    }
+  }
+
+  case class VariableInstruction(variableName: String, value: Option[JsonCollection.Val]) extends ScriptContextInstruction2 {
+    override def name = "variable"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
     }
   }
 

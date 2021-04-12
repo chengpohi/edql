@@ -28,6 +28,12 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
   }
 
+  case class Var(value: java.lang.String) extends AnyVal with Val {
+    override def toJson: String = value
+
+    override def get(path: String): Option[Val] = None
+  }
+
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
     override def toJson: String = {
       "{" + value
