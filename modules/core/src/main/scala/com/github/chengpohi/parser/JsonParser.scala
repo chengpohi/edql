@@ -85,7 +85,7 @@ class JsonParser {
   def colon[_: P] = P(space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | ("$" ~ variableChars.rep(1)).!.map(JsonCollection.Var)) ~ space)
+    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ space)
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 

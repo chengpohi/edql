@@ -1,6 +1,5 @@
 package com.github.chengpohi.dsl.eql
 
-import java.io.Serializable
 import cats.implicits._
 import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
@@ -48,6 +47,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogramAggregationBuilder, DateHistogramInterval}
 import org.elasticsearch.search.sort.SortBuilder
 
+import java.io.Serializable
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.Future

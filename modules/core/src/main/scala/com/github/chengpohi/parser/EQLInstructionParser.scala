@@ -33,21 +33,21 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     })
 
   def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.rep.?).map(
-    c => PostActionInstruction(c._1.extract[String], c._2.map(_.map(_.toJson))))
+    c => PostActionInstruction(c._1.extract[String], c._2))
 
   def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
-    c => GetActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+    c => GetActionInstruction(c._1.extract[String], c._2))
 
   def deleteAction[_: P] = P("DELETE" ~ space ~ actionPath ~/ jsonExpr.?).map(
-    c => DeleteActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+    c => DeleteActionInstruction(c._1.extract[String], c._2))
 
   def putAction[_: P] = P("PUT" ~ space ~ actionPath ~/ jsonExpr.?).map(
-    c => PutActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+    c => PutActionInstruction(c._1.extract[String], c._2))
 
   def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ jsonExpr.?).map(
-    c => HeadActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
+    c => HeadActionInstruction(c._1.extract[String], c._2))
 
-  def variableAction[_: P] = P("local" ~ space ~ variableName ~/ "=" ~/ jsonExpr.?).map(
+  def variableAction[_: P] = P("local" ~ space ~ variableName ~/ "=" ~/ jsonExpr).map(
     c => VariableInstruction(c._1, c._2))
 
   //memory, jvm, nodes, cpu etc
