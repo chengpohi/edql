@@ -481,7 +481,17 @@ trait InterceptFunction {
         val realVal = eql.variables.get(k.value)
         k.realValue = realVal
       })))
-      PostActionDefinition(path, action.map(_.map(_.toJson)))
+      val newPath = eql.variables.foldLeft(path)((i, o) => {
+        val vName = "\\$" + o._1;
+        val v = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
+          }
+          case s => s.toJson
+        }
+        i.replaceAll(vName, v)
+      })
+      PostActionDefinition(newPath, action.map(_.map(_.toJson)))
     }
   }
 
@@ -494,7 +504,17 @@ trait InterceptFunction {
         val realVal = eql.variables.get(k.value)
         k.realValue = realVal
       }))
-      DeleteActionDefinition(path, action.map(_.toJson))
+      val newPath = eql.variables.foldLeft(path)((i, o) => {
+        val vName = "\\$" + o._1;
+        val v = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
+          }
+          case s => s.toJson
+        }
+        i.replaceAll(vName, v)
+      })
+      DeleteActionDefinition(newPath, action.map(_.toJson))
     }
   }
 
@@ -507,7 +527,17 @@ trait InterceptFunction {
         val realVal = eql.variables.get(k.value)
         k.realValue = realVal
       }))
-      PutActionDefinition(path, action.map(_.toJson))
+      val newPath = eql.variables.foldLeft(path)((i, o) => {
+        val vName = "\\$" + o._1;
+        val v = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
+          }
+          case s => s.toJson
+        }
+        i.replaceAll(vName, v)
+      })
+      PutActionDefinition(newPath, action.map(_.toJson))
     }
   }
 
@@ -520,7 +550,17 @@ trait InterceptFunction {
         val realVal = eql.variables.get(k.value)
         k.realValue = realVal
       }))
-      GetActionDefinition(path, action.map(_.toJson))
+      val newPath = eql.variables.foldLeft(path)((i, o) => {
+        val vName = "\\$" + o._1;
+        val v = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
+          }
+          case s => s.toJson
+        }
+        i.replaceAll(vName, v)
+      })
+      GetActionDefinition(newPath, action.map(_.toJson))
     }
   }
 
@@ -533,7 +573,17 @@ trait InterceptFunction {
         val realVal = eql.variables.get(k.value)
         k.realValue = realVal
       }))
-      HeadActionDefinition(path, action.map(_.toJson))
+      val newPath = eql.variables.foldLeft(path)((i, o) => {
+        val vName = "\\$" + o._1;
+        val v = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
+          }
+          case s => s.toJson
+        }
+        i.replaceAll(vName, v)
+      })
+      HeadActionDefinition(newPath, action.map(_.toJson))
     }
   }
 
