@@ -20,7 +20,7 @@ class JsonParser {
 
   def collectionChars[_: P] = P(CharsWhile(CollectionChars))
 
-  def variableChars[_: P] = P(CharIn("a-zA-Z"))
+  def variableChars[_: P] = P(CharIn("a-zA-Z_"))
 
   def hexDigit[_: P] = P(CharIn("0-9a-fA-F"))
 
@@ -35,8 +35,10 @@ class JsonParser {
   def actionPath[_: P] = P(space ~ actionChars.rep(1).! ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
-  def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(1).! ~ "\"" ~ space).map(i =>
+  def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(0).! ~ "\"" ~ space).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
+
+  def variableName[_: P] = P(variableChars.rep(1)).!
 
   def variable[_: P] =
     P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
@@ -83,7 +85,7 @@ class JsonParser {
   def colon[_: P] = P(space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number) ~ space)
+    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | ("$" ~ variableChars.rep(1)).!.map(JsonCollection.Var)) ~ space)
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 

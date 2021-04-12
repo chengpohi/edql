@@ -47,6 +47,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ jsonExpr.?).map(
     c => HeadActionInstruction(c._1.extract[String], c._2.map(_.toJson)))
 
+  def variableAction[_: P] = P("local" ~ space ~ variableName ~/ "=" ~/ jsonExpr.?).map(
+    c => VariableInstruction(c._1, c._2))
+
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
     _ => GetClusterStatsInstruction())
@@ -143,7 +146,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
+        | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
         | count | comment
       ).rep(1) ~ End
   )
