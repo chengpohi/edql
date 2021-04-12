@@ -3,9 +3,9 @@ package com.github.chengpohi.parser.collection
 import scala.reflect.runtime.universe._
 
 /**
-  * eql
-  * Created by chengpohi on 2/17/16.
-  */
+ * eql
+ * Created by chengpohi on 2/17/16.
+ */
 object JsonCollection {
 
   sealed trait Val extends Any {
@@ -18,7 +18,10 @@ object JsonCollection {
 
     def toJson: String
 
+    def vars: Seq[Var] = Seq()
+
     def get(path: String): Option[Val]
+
     def \\(path: String): Option[Val] = get(path)
   }
 
@@ -28,10 +31,13 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
   }
 
-  case class Var(value: java.lang.String) extends AnyVal with Val {
-    override def toJson: String = value
+  case class Var(value: java.lang.String) extends Val {
+    var realValue: Option[JsonCollection.Val] = None
+    override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
     override def get(path: String): Option[Val] = None
+
+    override def vars: Seq[Var] = Seq(this)
   }
 
   case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
@@ -45,6 +51,8 @@ object JsonCollection {
 
     override def get(path: String): Option[Val] =
       value.find(p => p._1 == path).map(_._2)
+
+    override def vars: Seq[Var] = this.value.flatMap(_._2.vars)
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
@@ -52,6 +60,8 @@ object JsonCollection {
       "[" + value.map(i => i.toJson).mkString(",") + "]"
 
     override def get(path: String): Option[Val] = None
+
+    override def vars: Seq[Var] = this.value.flatMap(_.vars)
   }
 
   case class Tuple(value: Val*) extends AnyVal with Val {
@@ -59,6 +69,8 @@ object JsonCollection {
       "(" + value.map(i => i.toJson).mkString(",") + ")"
 
     override def get(path: String): Option[Val] = None
+
+    override def vars: Seq[Var] = value.flatMap(_.vars)
   }
 
   case class Num(value: Double) extends AnyVal with Val {
@@ -81,6 +93,7 @@ object JsonCollection {
     override def toJson: String = value.toString
 
     override def get(path: String): Option[Val] = None
+
   }
 
   case object Null extends Val {

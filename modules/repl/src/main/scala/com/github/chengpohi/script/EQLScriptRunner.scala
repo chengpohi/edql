@@ -4,6 +4,7 @@ import cats.effect.{IO, Resource}
 import com.github.chengpohi.context.{EQLConfig, EQLContext}
 import com.github.chengpohi.dsl.EQLClient
 import com.github.chengpohi.parser.EQLParser
+import com.github.chengpohi.parser.collection.JsonCollection
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
@@ -40,11 +41,15 @@ class EQLScriptRunner {
 
       cIns.find(_.isInstanceOf[EndpointBindInstruction]) match {
         case Some(h) =>
+
           val hostInstruction2 = h.asInstanceOf[EndpointBindInstruction]
           val aInstruction2 = cIns.find(_.isInstanceOf[AuthorizationBindInstruction])
             .map(i => i.asInstanceOf[AuthorizationBindInstruction]).map(i => i.auth)
+          val vars = cIns.filter(_.isInstanceOf[VariableInstruction])
+            .map(i => i.asInstanceOf[VariableInstruction])
+            .map(i => i.variableName -> i.value).toMap
 
-          val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2)
+          val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2, vars)
           rIns.map(i => i.execute(context).json)
         case None =>
           return Failure(new RuntimeException("Please set host bind"))
@@ -65,14 +70,16 @@ class EQLScriptRunner {
   }
 }
 
-class ScriptEQLContext(host: String, port: Int, auth: Option[String]) extends EQLConfig with EQLContext {
+class ScriptEQLContext(host: String, port: Int, auth: Option[String], vars: Map[String, JsonCollection.Val]) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
     buildRestClient(host, port, auth)
+
+  override val variables: Map[String, JsonCollection.Val] = vars
 }
 
 object ScriptEQLContext {
-  def apply(endpoint: String, auth: Option[String] = None): ScriptEQLContext = {
+  def apply(endpoint: String, auth: Option[String] = None, vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val url = new URL(endpoint)
-    new ScriptEQLContext(url.getHost, url.getPort, auth)
+    new ScriptEQLContext(url.getHost, url.getPort, auth, vars)
   }
 }

@@ -472,52 +472,72 @@ trait InterceptFunction {
     }
   }
 
-  case class PostActionInstruction(path: String, action: Option[Seq[String]]) extends Instruction2 {
+  case class PostActionInstruction(path: String, action: Option[Seq[JsonCollection.Val]]) extends Instruction2 {
     override def name = "post"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      PostActionDefinition(path, action)
+      action.foreach(i => i.foreach(j => j.vars.foreach(k => {
+        val realVal = eql.variables.get(k.value)
+        k.realValue = realVal
+      })))
+      PostActionDefinition(path, action.map(_.map(_.toJson)))
     }
   }
 
-  case class DeleteActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+  case class DeleteActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "delete"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      DeleteActionDefinition(path, action)
+      action.foreach(_.vars.foreach(k => {
+        val realVal = eql.variables.get(k.value)
+        k.realValue = realVal
+      }))
+      DeleteActionDefinition(path, action.map(_.toJson))
     }
   }
 
-  case class PutActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+  case class PutActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "put"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      PutActionDefinition(path, action)
+      action.foreach(_.vars.foreach(k => {
+        val realVal = eql.variables.get(k.value)
+        k.realValue = realVal
+      }))
+      PutActionDefinition(path, action.map(_.toJson))
     }
   }
 
-  case class GetActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+  case class GetActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "get"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      GetActionDefinition(path, action)
+      action.foreach(_.vars.foreach(k => {
+        val realVal = eql.variables.get(k.value)
+        k.realValue = realVal
+      }))
+      GetActionDefinition(path, action.map(_.toJson))
     }
   }
 
-  case class HeadActionInstruction(path: String, action: Option[String]) extends Instruction2 {
+  case class HeadActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "head"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      HeadActionDefinition(path, action)
+      action.foreach(_.vars.foreach(k => {
+        val realVal = eql.variables.get(k.value)
+        k.realValue = realVal
+      }))
+      HeadActionDefinition(path, action.map(_.toJson))
     }
   }
 
-  case class VariableInstruction(variableName: String, value: Option[JsonCollection.Val]) extends ScriptContextInstruction2 {
+  case class VariableInstruction(variableName: String, value: JsonCollection.Val) extends ScriptContextInstruction2 {
     override def name = "variable"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
