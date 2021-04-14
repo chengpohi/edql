@@ -22,7 +22,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     .map(c => CountInstruction(c))
 
   def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
-    c => CommentInstruction())
+    _ => CommentInstruction())
 
   def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
@@ -90,25 +90,25 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       GetClusterStateInstruction())
 
   def clusterSettings[_: P] = P("cluster" ~ space ~ "settings" ~/ newline.?).map(
-    s =>
+    _ =>
       ClusterSettingsInstruction())
 
   def indicesStats[_: P] = P("indices" ~ space ~ "stats" ~/ newline.?).map(
-    s =>
+    _ =>
       IndicesStatsInstruction())
 
   def nodeStats[_: P] = P("node" ~ space ~ "stats" ~/ newline.?).map(
-    s =>
+    _ =>
       NodeStatsInstruction())
 
 
   def nodeSettings[_: P] = P("node" ~ space ~ "settings" ~/ newline.?).map(
-    s =>
+    _ =>
       NodeSettingsInstruction())
 
 
   def pendingTasks[_: P] = P("pending" ~ space ~ "tasks" ~/ newline.?).map(
-    s =>
+    _ =>
       PendingTasksInstruction())
 
   def indexSettings[_: P] = P(ioParser ~ "settings")
@@ -142,12 +142,13 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def instrument[_: P]: P[Seq[Instruction2]] = P(
     (
-      healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
+      comment |
+        healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
-        | count | comment
+        | count
       ).rep(1) ~ End
   )
 }
