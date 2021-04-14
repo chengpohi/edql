@@ -434,10 +434,10 @@ trait InterceptFunction {
         case Seq(i) =>
           val example: String =
             instrumentations.getConfig(i).getString("example")
-          val description: String =
-            instrumentations.getConfig(i).getString("description")
-          val r: Map[String, AnyRef] =
-            Map(("example", example), ("description", description))
+//          val description: String =
+//            instrumentations.getConfig(i).getString("description")
+          //          val r: Map[String, AnyRef] =
+          //            Map(("example", example), ("description", description))
           PureStringDefinition("help")
         case _ =>
           PureStringDefinition("I have no idea for this.")

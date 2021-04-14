@@ -1052,7 +1052,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         .indices()
         .prepareFlush()
         .execute
-        .flatMap(i =>
+        .flatMap(_ =>
           indices match {
             case "*" => client.admin().indices().prepareRefresh().execute
             case _ => client.admin().indices().prepareRefresh(indices).execute

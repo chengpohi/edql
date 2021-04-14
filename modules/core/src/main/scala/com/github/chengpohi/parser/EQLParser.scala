@@ -13,7 +13,7 @@ class EQLParser extends EQLInstructionParser {
 
   def gi(parsed: PSI): Try[Seq[Instruction2]] = {
     parsed match {
-      case Success(ins, state) =>
+      case Success(ins, _) =>
         scala.util.Success(ins)
       case failure: Failure =>
         scala.util.Failure(new RuntimeException(failure.msg));

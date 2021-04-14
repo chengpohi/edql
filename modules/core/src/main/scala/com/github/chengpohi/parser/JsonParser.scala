@@ -62,10 +62,10 @@ class JsonParser {
     )
 
   def pair[_: P]: P[(String, JsonCollection.Val)] =
-    P(quoteString.map(_.value) ~/ ":" ~ newlineOrComment.? ~/ jsonExpr)
+    P(newlineOrComment ~ quoteString.map(_.value) ~/ ":" ~ newlineOrComment ~/ jsonExpr)
 
   def obj[_: P] =
-    P("{" ~ newlineOrComment.? ~/ pair.rep(sep = ","./) ~ newlineOrComment.? ~ "}").map(JsonCollection.Obj(_: _*))
+    P("{" ~ newlineOrComment ~/ pair.rep(sep = ","./) ~ newlineOrComment ~ "}").map(JsonCollection.Obj(_: _*))
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
 
@@ -74,21 +74,19 @@ class JsonParser {
   def `true`[_: P] = P("true").map(_ => JsonCollection.True)
 
   def tuple[_: P] =
-    P("(" ~ newlineOrComment.? ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment.? ~ ")").map(JsonCollection.Arr(_: _*))
+    P("(" ~ newlineOrComment ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
 
 
   def array[_: P] =
-    P("[" ~ newlineOrComment.? ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment.? ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~ newlineOrComment ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
 
 
   def colon[_: P] = P(space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | newlineOrComment |
-      ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ space
-  ).filter(i => i.isInstanceOf[JsonCollection.Val]).map {
-    case t: JsonCollection.Val => t
-  }
+    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number |
+      ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ newlineOrComment
+  )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 
@@ -100,7 +98,7 @@ class JsonParser {
 
   def commentString[_: P] = P("#" ~/ noNewlineChars.rep(0) ~/ newlineChars)
 
-  def newlineOrComment[_: P] = P(newlineChars | commentString).rep(1)
+  def newlineOrComment[_: P] = P(newlineChars | commentString).rep(0)
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
