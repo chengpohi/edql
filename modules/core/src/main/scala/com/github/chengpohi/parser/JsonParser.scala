@@ -80,14 +80,19 @@ class JsonParser {
   def array[_: P] =
     P("[" ~ newlineOrComment.? ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment.? ~ "]").map(JsonCollection.Arr(_: _*))
 
-  def space[_: P] = P(CharsWhileIn(" \r\n\t", 0))
 
   def colon[_: P] = P(space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ space)
+    space ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | newlineOrComment |
+      ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ space
+  ).filter(i => i.isInstanceOf[JsonCollection.Val]).map {
+    case t: JsonCollection.Val => t
+  }
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
+
+  def space[_: P] = P(CharsWhileIn(" \r\n\t", 0))
 
   def newlineChars[_: P] = P(" " | "\n" | "\r\n" | "\r" | "\f" | "\t")
 
