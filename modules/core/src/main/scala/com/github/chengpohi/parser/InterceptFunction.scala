@@ -434,8 +434,8 @@ trait InterceptFunction {
         case Seq(i) =>
           val example: String =
             instrumentations.getConfig(i).getString("example")
-//          val description: String =
-//            instrumentations.getConfig(i).getString("description")
+          //          val description: String =
+          //            instrumentations.getConfig(i).getString("description")
           //          val r: Map[String, AnyRef] =
           //            Map(("example", example), ("description", description))
           PureStringDefinition("help")
@@ -477,43 +477,23 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i => i.foreach(j => j.vars.foreach(k => {
-        val realVal = eql.variables.get(k.value)
-        k.realValue = realVal
-      })))
-      val newPath = eql.variables.foldLeft(path)((i, o) => {
-        val vName = "\\$" + o._1;
-        val v = o._2 match {
-          case s: JsonCollection.Str => {
-            s.value
-          }
-          case s => s.toJson
-        }
-        i.replaceAll(vName, v)
-      })
+      action.foreach(i =>
+        i.foreach(j => mapRealValue(eql.variables, j)))
+      val newPath = mapNewPath(eql.variables, path)
+
       PostActionDefinition(newPath, action.map(_.map(_.toJson)))
     }
   }
+
 
   case class DeleteActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "delete"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(_.vars.foreach(k => {
-        val realVal = eql.variables.get(k.value)
-        k.realValue = realVal
-      }))
-      val newPath = eql.variables.foldLeft(path)((i, o) => {
-        val vName = "\\$" + o._1;
-        val v = o._2 match {
-          case s: JsonCollection.Str => {
-            s.value
-          }
-          case s => s.toJson
-        }
-        i.replaceAll(vName, v)
-      })
+      action.foreach(i => mapRealValue(eql.variables, i))
+      val newPath = mapNewPath(eql.variables, path)
+
       DeleteActionDefinition(newPath, action.map(_.toJson))
     }
   }
@@ -523,20 +503,9 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(_.vars.foreach(k => {
-        val realVal = eql.variables.get(k.value)
-        k.realValue = realVal
-      }))
-      val newPath = eql.variables.foldLeft(path)((i, o) => {
-        val vName = "\\$" + o._1;
-        val v = o._2 match {
-          case s: JsonCollection.Str => {
-            s.value
-          }
-          case s => s.toJson
-        }
-        i.replaceAll(vName, v)
-      })
+      action.foreach(i => mapRealValue(eql.variables, i))
+      val newPath = mapNewPath(eql.variables, path)
+
       PutActionDefinition(newPath, action.map(_.toJson))
     }
   }
@@ -546,20 +515,9 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(_.vars.foreach(k => {
-        val realVal = eql.variables.get(k.value)
-        k.realValue = realVal
-      }))
-      val newPath = eql.variables.foldLeft(path)((i, o) => {
-        val vName = "\\$" + o._1;
-        val v = o._2 match {
-          case s: JsonCollection.Str => {
-            s.value
-          }
-          case s => s.toJson
-        }
-        i.replaceAll(vName, v)
-      })
+      action.foreach(i => mapRealValue(eql.variables, i))
+      val newPath = mapNewPath(eql.variables, path)
+
       GetActionDefinition(newPath, action.map(_.toJson))
     }
   }
@@ -569,23 +527,13 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(_.vars.foreach(k => {
-        val realVal = eql.variables.get(k.value)
-        k.realValue = realVal
-      }))
-      val newPath = eql.variables.foldLeft(path)((i, o) => {
-        val vName = "\\$" + o._1;
-        val v = o._2 match {
-          case s: JsonCollection.Str => {
-            s.value
-          }
-          case s => s.toJson
-        }
-        i.replaceAll(vName, v)
-      })
+      action.foreach(i => mapRealValue(eql.variables, i))
+      val newPath = mapNewPath(eql.variables, path)
       HeadActionDefinition(newPath, action.map(_.toJson))
     }
+
   }
+
 
   case class VariableInstruction(variableName: String, value: JsonCollection.Val) extends ScriptContextInstruction2 {
     override def name = "variable"
@@ -614,6 +562,34 @@ trait InterceptFunction {
       ErrorHealthRequestDefinition(error)
     }
   }
+
+  def mapRealValue(variables: Map[String, JsonCollection.Val], v: JsonCollection.Val) = {
+    v.vars.foreach(k => {
+      val realVal = variables.get(k.value)
+      realVal.map(_.vars).foreach(t => {
+        t.foreach(p => {
+          val realVal = variables.get(p.value)
+          p.realValue = realVal
+        })
+      })
+      k.realValue = realVal
+    })
+  }
+
+
+  private def mapNewPath(variables: Map[String, JsonCollection.Val], path: String) = {
+    variables.foldLeft(path)((i, o) => {
+      val vName = "\\$" + o._1;
+      val v = o._2 match {
+        case s: JsonCollection.Str => {
+          s.value
+        }
+        case s => s.toJson
+      }
+      i.replaceAll(vName, v)
+    })
+  }
+
 
 }
 

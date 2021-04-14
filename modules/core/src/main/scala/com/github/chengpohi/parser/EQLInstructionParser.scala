@@ -10,7 +10,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     })
 
   def healthP[_: P] = P("health").map(
-    s => HealthInstruction())
+    _ => HealthInstruction())
 
 
   def shutdown[_: P] = P("shutdown").map(
@@ -32,19 +32,19 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       AuthorizationBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ jsonExpr.rep.?).map(
+  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
-  def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => GetActionInstruction(c._1.extract[String], c._2))
 
-  def deleteAction[_: P] = P("DELETE" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def deleteAction[_: P] = P("DELETE" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2))
 
-  def putAction[_: P] = P("PUT" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def putAction[_: P] = P("PUT" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => PutActionInstruction(c._1.extract[String], c._2))
 
-  def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ jsonExpr.?).map(
+  def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
   def variableAction[_: P] = P("local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
