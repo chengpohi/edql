@@ -40,7 +40,7 @@ trait JSONOps {
   }
 
   class NumberSerializer
-      extends CustomSerializer[Int](format =>
+      extends CustomSerializer[Int](_ =>
         ({
           case JInt(x)    => x.toInt
           case JString(x) => x.toInt

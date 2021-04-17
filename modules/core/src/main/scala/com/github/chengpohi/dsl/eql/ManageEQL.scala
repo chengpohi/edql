@@ -29,7 +29,7 @@ trait ManageEQL extends DeleterEQL with QueryEQL {
       NodeStatsRequestDefinition(prepareNodesStats)
     }
 
-    def stats(nodeIds: NodeType): NodeStatsRequestDefinition = {
+    def stats(nodeType: NodeType): NodeStatsRequestDefinition = {
       val prepareNodesStats: NodesStatsRequestBuilder =
         clusterClient.prepareNodesStats()
       NodeStatsRequestDefinition(prepareNodesStats)

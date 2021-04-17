@@ -4,13 +4,13 @@ import scala.annotation.StaticAnnotation
 import scala.annotation.meta.field
 
 @field
-final class Analyzer(name: String = "standard") extends StaticAnnotation
+final class Analyzer extends StaticAnnotation
 
 @field
-final class CopyTo(name: String) extends StaticAnnotation
+final class CopyTo extends StaticAnnotation
 
 @field
-final class Index(name: String) extends StaticAnnotation
+final class Index extends StaticAnnotation
 
 @field
-final class Alias(name: String) extends StaticAnnotation
+final class Alias extends StaticAnnotation
