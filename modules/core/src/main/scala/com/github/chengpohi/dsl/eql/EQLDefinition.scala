@@ -652,9 +652,10 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     def must(m: Map[String, AnyRef]): SearchRequestDefinition = {
       val boolQuery: BoolQueryBuilder = QueryBuilders.boolQuery()
       m.foreach(term => {
-        val termQuery: TermQueryBuilder =
+        val termQuery: TermQueryBuilder = {
           QueryBuilders.termQuery(term._1, term._2)
-
+        }
+        boolQuery.must(termQuery)
         searchRequestBuilder.setQuery(boolQuery)
       })
       this
@@ -740,7 +741,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
       val fetch1: Stream[SearchHit] = fetch(scrollId)
       fetch1.length match {
         case 0 => Stream.empty
-        case i => fetch1 #::: toStream(scrollId)
+        case _ => fetch1 #::: toStream(scrollId)
       }
     }
 

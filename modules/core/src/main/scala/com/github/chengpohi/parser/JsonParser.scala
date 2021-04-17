@@ -64,8 +64,6 @@ class JsonParser {
   def pair[_: P]: P[(String, JsonCollection.Val)] =
     P(newlineOrComment ~ quoteString.map(_.value) ~/ ":" ~ newlineOrComment ~/ jsonExpr)
 
-  def obj[_: P] =
-    P("{" ~ newlineOrComment ~/ pair.rep(sep = ","./) ~ newlineOrComment ~ "}").map(JsonCollection.Obj(_: _*))
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
 
@@ -73,12 +71,15 @@ class JsonParser {
 
   def `true`[_: P] = P("true").map(_ => JsonCollection.True)
 
+  def obj[_: P] =
+    P("{" ~/ newlineOrComment ~/ pair.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ "}").map(JsonCollection.Obj(_: _*))
+
   def tuple[_: P] =
-    P("(" ~ newlineOrComment ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
+    P("(" ~/ newlineOrComment ~/ jsonExpr.rep(1, sep = ",") ~ ",".? ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
 
 
   def array[_: P] =
-    P("[" ~ newlineOrComment ~ jsonExpr.rep(1, sep = ","./) ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(1, sep = ",")  ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
 
 
   def colon[_: P] = P(space ~ ":" ~ space)
