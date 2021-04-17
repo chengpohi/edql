@@ -4,8 +4,6 @@ import com.github.chengpohi.dsl.EQLClient
 import com.github.chengpohi.dsl.eql._
 import com.github.chengpohi.parser.collection.JsonCollection
 
-import scala.collection.mutable
-
 trait EQLContext
   extends AggsEQL
     with AnalyzeEQL

@@ -431,9 +431,9 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       params match {
-        case Seq(i) =>
-          val example: String =
-            instrumentations.getConfig(i).getString("example")
+        case Seq(_) =>
+//          val example: String =
+//            instrumentations.getConfig(i).getString("example")
           //          val description: String =
           //            instrumentations.getConfig(i).getString("description")
           //          val r: Map[String, AnyRef] =
