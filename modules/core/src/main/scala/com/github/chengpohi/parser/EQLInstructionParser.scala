@@ -149,6 +149,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
         | count
-      ).rep(1) ~ End
+      ).rep(0) ~ End
   )
 }

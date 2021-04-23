@@ -97,7 +97,7 @@ class JsonParser {
 
   def newline[_: P] = P(newlineChars).rep(1)
 
-  def commentString[_: P] = P("#" ~/ noNewlineChars.rep(0) ~/ newlineChars)
+  def commentString[_: P] = P("#" ~/ noNewlineChars.rep(0) ~/ (newlineChars | End))
 
   def newlineOrComment[_: P] = P(newlineChars | commentString).rep(0)
 }
