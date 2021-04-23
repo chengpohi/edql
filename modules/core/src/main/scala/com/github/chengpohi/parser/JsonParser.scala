@@ -75,11 +75,11 @@ class JsonParser {
     P("{" ~/ newlineOrComment ~/ pair.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ "}").map(JsonCollection.Obj(_: _*))
 
   def tuple[_: P] =
-    P("(" ~/ newlineOrComment ~/ jsonExpr.rep(1, sep = ",") ~ ",".? ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
+    P("(" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
 
 
   def array[_: P] =
-    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(1, sep = ",")  ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",")  ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
 
 
   def colon[_: P] = P(space ~ ":" ~ space)
