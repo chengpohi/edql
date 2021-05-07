@@ -464,6 +464,14 @@ trait InterceptFunction {
     }
   }
 
+  case class TimeoutInstruction(timeout: Int) extends ScriptContextInstruction2 {
+    override def name = "timeout"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"timeout $timeout")
+    }
+  }
+
   case class AuthorizationBindInstruction(auth: String) extends ScriptContextInstruction2 {
     override def name = "authorization"
 

@@ -3,13 +3,14 @@ package com.github.chengpohi.context
 import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.message.BasicHeader
 import org.apache.http.{Header, HttpHost}
 import org.apache.logging.log4j.LogManager
 import org.apache.lucene.util.IOUtils
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest
 import org.elasticsearch.analysis.common.CommonAnalysisPlugin
-import org.elasticsearch.client.{Client, RestClient}
+import org.elasticsearch.client.{Client, RestClient, RestClientBuilder}
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.common.xcontent.XContentType
@@ -105,9 +106,15 @@ trait EQLConfig {
       })
   }
 
-  def buildRestClient(host: String, port: Int, auth: Option[String]) = {
+  def buildRestClient(host: String, port: Int, auth: Option[String], timeout: Option[Int]) = {
     val restClientBuilder =
       RestClient.builder(new HttpHost(host, port))
+        .setRequestConfigCallback(
+          new RestClientBuilder.RequestConfigCallback() {
+            override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = return requestConfigBuilder
+              .setConnectTimeout(timeout.getOrElse(5000))
+              .setSocketTimeout(timeout.getOrElse(5000));
+          })
 
     auth.map(a => {
       val defaultHeaders = Array[Header](new BasicHeader("Authorization", a))
