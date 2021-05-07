@@ -58,7 +58,13 @@ class JsonParser {
 
   def number[_: P]: P[JsonCollection.Num] =
     P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
-      x => JsonCollection.Num(x.toDouble)
+      x => {
+        val double = x.toDouble
+        double % 1 match {
+          case 0 => JsonCollection.Num(double.toInt)
+          case _ => JsonCollection.Num(double)
+        }
+      }
     )
 
   def pair[_: P]: P[(String, JsonCollection.Val)] =
@@ -79,7 +85,7 @@ class JsonParser {
 
 
   def array[_: P] =
-    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",")  ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
 
 
   def colon[_: P] = P(space ~ ":" ~ space)
