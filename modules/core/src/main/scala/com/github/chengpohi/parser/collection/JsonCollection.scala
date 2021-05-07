@@ -73,7 +73,7 @@ object JsonCollection {
     override def vars: Seq[Var] = value.flatMap(_.vars)
   }
 
-  case class Num(value: Double) extends AnyVal with Val {
+  case class Num(value: Number) extends AnyVal with Val {
     override def toJson: String = value.toString
 
     override def get(path: String): Option[Val] = None
