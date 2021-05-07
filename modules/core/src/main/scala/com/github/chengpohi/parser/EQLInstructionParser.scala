@@ -27,6 +27,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
 
+  def timeoutBind[_: P] = P("Timeout" ~ space ~ number ~ space).map(
+    c => TimeoutInstruction(c.extract[Int]))
+
   def authorizationBind[_: P] = P("Authorization" ~ space ~ (actionPath | quoteString)).map(
     c => {
       AuthorizationBindInstruction(c.extract[String])
@@ -147,7 +150,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
+        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
         | count
       ).rep(0) ~ End
   )
