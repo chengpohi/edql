@@ -45,11 +45,13 @@ class EQLScriptRunner {
           val hostInstruction2 = h.asInstanceOf[EndpointBindInstruction]
           val aInstruction2 = cIns.find(_.isInstanceOf[AuthorizationBindInstruction])
             .map(i => i.asInstanceOf[AuthorizationBindInstruction]).map(i => i.auth)
+          val timeout = cIns.find(_.isInstanceOf[TimeoutInstruction])
+            .map(i => i.asInstanceOf[TimeoutInstruction]).map(i => i.timeout)
           val vars = cIns.filter(_.isInstanceOf[VariableInstruction])
             .map(i => i.asInstanceOf[VariableInstruction])
             .map(i => i.variableName -> i.value).toMap
 
-          val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2, vars)
+          val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2, timeout, vars)
           rIns.map(i => i.execute(context).json)
         case None =>
           return Failure(new RuntimeException("Please set host bind"))
@@ -70,16 +72,16 @@ class EQLScriptRunner {
   }
 }
 
-class ScriptEQLContext(host: String, port: Int, auth: Option[String], vars: Map[String, JsonCollection.Val]) extends EQLConfig with EQLContext {
+class ScriptEQLContext(host: String, port: Int, auth: Option[String], timeout: Option[Int], vars: Map[String, JsonCollection.Val]) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
-    buildRestClient(host, port, auth)
+    buildRestClient(host, port, auth, timeout)
 
   override val variables: Map[String, JsonCollection.Val] = vars
 }
 
 object ScriptEQLContext {
-  def apply(endpoint: String, auth: Option[String] = None, vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
+  def apply(endpoint: String, auth: Option[String] = None, timeout: Option[Int], vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val url = new URL(endpoint)
-    new ScriptEQLContext(url.getHost, url.getPort, auth, vars)
+    new ScriptEQLContext(url.getHost, url.getPort, auth, timeout, vars)
   }
 }
