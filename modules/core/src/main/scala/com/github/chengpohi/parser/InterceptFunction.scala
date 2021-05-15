@@ -432,8 +432,8 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       params match {
         case Seq(_) =>
-//          val example: String =
-//            instrumentations.getConfig(i).getString("example")
+          //          val example: String =
+          //            instrumentations.getConfig(i).getString("example")
           //          val description: String =
           //            instrumentations.getConfig(i).getString("description")
           //          val r: Map[String, AnyRef] =
@@ -563,17 +563,20 @@ trait InterceptFunction {
     }
   }
 
-  def mapRealValue(variables: Map[String, JsonCollection.Val], v: JsonCollection.Val) = {
-    v.vars.foreach(k => {
-      val realVal = variables.get(k.value)
-      realVal.map(_.vars).foreach(t => {
-        t.foreach(p => {
-          val realVal = variables.get(p.value)
-          p.realValue = realVal
+  def mapRealValue(variables: Map[String, JsonCollection.Val], v: JsonCollection.Val): Unit = {
+    if (v.vars.nonEmpty) {
+      v.vars.foreach(k => {
+        val realValue = variables.get(k.value)
+        realValue.foreach(r => {
+          if (r.vars.nonEmpty) {
+            r.vars.foreach(t => {
+              mapRealValue(variables, t)
+            })
+          }
         })
+        k.realValue = realValue
       })
-      k.realValue = realVal
-    })
+    }
   }
 
 
