@@ -1,9 +1,11 @@
+#my elasticsearch host
 HOST http://localhost:9200
+#my basicauthorization
+Authorization "Basic xxx"
 
-POST minute_stock/_search
+POST daily_stock/_search
 {
   "query": {
-    "match_all": {
-    }
+    "match_all": {}
   }
 }
