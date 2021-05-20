@@ -10,7 +10,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import java.io.File
 import java.net.URL
 import scala.io.Source
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 class EQLScriptRunner {
   val eqlParser: EQLParser = new EQLParser
@@ -33,6 +33,24 @@ class EQLScriptRunner {
     script
   }
 
+  def parseJson(text: String): Try[JsonCollection.Val] = {
+    eqlParser.parseJson(text)
+  }
+
+  def extractVars(text: String): Map[String, JsonCollection.Val] = {
+    val instructions = this.generateInstructions(text)
+    instructions.map(ins => {
+      val cIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
+      cIns.filter(_.isInstanceOf[VariableInstruction])
+        .map(i => i.asInstanceOf[VariableInstruction])
+        .map(i => i.variableName -> i.value)
+        .toMap
+    }) match {
+      case Success(value) => value
+      case Failure(_) => Map[String, JsonCollection.Val]()
+    }
+  }
+
   def run(script: String): Try[Seq[String]] = {
     val instructions = this.generateInstructions(script)
     instructions.map(ins => {
@@ -41,7 +59,6 @@ class EQLScriptRunner {
 
       cIns.find(_.isInstanceOf[EndpointBindInstruction]) match {
         case Some(h) =>
-
           val hostInstruction2 = h.asInstanceOf[EndpointBindInstruction]
           val aInstruction2 = cIns.find(_.isInstanceOf[AuthorizationBindInstruction])
             .map(i => i.asInstanceOf[AuthorizationBindInstruction]).map(i => i.auth)
