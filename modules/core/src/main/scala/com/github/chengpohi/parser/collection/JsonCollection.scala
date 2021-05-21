@@ -99,7 +99,7 @@ object JsonCollection {
   case object Null extends Val {
     def value: Option[Nothing] = None
 
-    override def toJson: String = value.toString
+    override def toJson: String = value.map(_.toString).orNull
 
     override def get(path: String): Option[Val] = None
   }
