@@ -14,7 +14,7 @@ trait EQLContext
   this: EQLConfig =>
   val ALL_INDEX: String = "*"
   val ALL_TYPE: String = "_all"
-  val variables: Map[String, JsonCollection.Val] = Map()
+  var variables: Map[String, JsonCollection.Val] = Map()
   override implicit lazy val eqlClient: EQLClient = buildClient(config)
 
   def shutdown: Unit = {
