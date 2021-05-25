@@ -551,6 +551,22 @@ trait InterceptFunction {
     }
   }
 
+  case class FunctionInstruction(funcName: String, variableNames: Seq[String], instructions: Seq[Instruction2]) extends ScriptContextInstruction2 {
+    override def name = "function"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+  }
+
+  case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
+    override def name = "functionInvoke"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+  }
+
 
   case class HealthInstruction() extends Instruction2 {
 
@@ -575,6 +591,10 @@ trait InterceptFunction {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         val realValue = variables.get(k.value)
+        if (realValue.isEmpty) {
+          throw new RuntimeException("could not find variable: " + k.value)
+        }
+
         realValue.foreach(r => {
           if (r.vars.nonEmpty) {
             r.vars.foreach(t => {
