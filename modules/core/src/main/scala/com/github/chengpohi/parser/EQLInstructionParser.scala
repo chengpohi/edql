@@ -24,34 +24,42 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
 
-  def hostBind[_: P] = P("HOST" ~ space ~ actionPath).map(
+  def hostBind[_: P] = P(space ~ "HOST" ~ space ~ actionPath).map(
     c => EndpointBindInstruction(c.extract[String]))
 
-  def timeoutBind[_: P] = P("Timeout" ~ space ~ number ~ space).map(
+  def timeoutBind[_: P] = P(space ~ "Timeout" ~ space ~ number ~ space).map(
     c => TimeoutInstruction(c.extract[Int]))
 
-  def authorizationBind[_: P] = P("Authorization" ~ space ~ (actionPath | quoteString)).map(
+  def authorizationBind[_: P] = P(space ~ "Authorization" ~ space ~ (actionPath | quoteString)).map(
     c => {
       AuthorizationBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P("POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
+  def postAction[_: P] = P(space ~ "POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
-  def getAction[_: P] = P("GET" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def getAction[_: P] = P(space ~ "GET" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => GetActionInstruction(c._1.extract[String], c._2))
 
-  def deleteAction[_: P] = P("DELETE" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def deleteAction[_: P] = P(space ~ "DELETE" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2))
 
-  def putAction[_: P] = P("PUT" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def putAction[_: P] = P(space ~ "PUT" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => PutActionInstruction(c._1.extract[String], c._2))
 
-  def headAction[_: P] = P("HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def headAction[_: P] = P(space ~ "HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
-  def variableAction[_: P] = P("local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
+  def variableAction[_: P] = P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
     c => VariableInstruction(c._1, c._2))
+
+  def functionExpr[_: P] = P("function" ~ space ~ variableName ~ space ~/ "(" ~
+    space ~ variableName.rep(sep = space ~ "," ~ space) ~ space ~ ")" ~/
+    space ~ "{" ~/ space ~ inses ~ space ~ "}")
+    .map(c => FunctionInstruction(c._1, c._2, c._3))
+
+  def functionInvokeExpr[_: P] = P(space ~ variableName ~ space ~ "(" ~ jsonExpr.rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
+    .map(c => FunctionInvokeInstruction(c._1, c._2))
 
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
@@ -144,14 +152,18 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
   def instrument[_: P]: P[Seq[Instruction2]] = P(
+    inses ~ End
+  )
+
+  private def inses[_: P]: P[Seq[Instruction2]] = {
     (
       comment |
         healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction
+        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction | functionExpr | functionInvokeExpr
         | count
-      ).rep(0) ~ End
-  )
+      ).rep(0)
+  }
 }

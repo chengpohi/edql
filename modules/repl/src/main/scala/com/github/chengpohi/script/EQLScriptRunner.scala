@@ -51,7 +51,7 @@ class EQLScriptRunner {
     }
   }
 
-  def run(script: String): Try[Seq[String]] = {
+  def run(script: String): Try[Seq[Seq[String]]] = {
     val instructions = this.generateInstructions(script)
     instructions.map(ins => {
       val rIns = ins.filter(!_.isInstanceOf[ScriptContextInstruction2])
@@ -68,12 +68,51 @@ class EQLScriptRunner {
             .map(i => i.asInstanceOf[VariableInstruction])
             .map(i => i.variableName -> i.value).toMap
 
+          val functions = cIns.filter(_.isInstanceOf[FunctionInstruction])
+            .map(i => i.asInstanceOf[FunctionInstruction])
+            .map(i => i.funcName + i.variableNames.size -> i).toMap
+
           val context = ScriptEQLContext(hostInstruction2.endpoint, aInstruction2, timeout, vars)
-          rIns.map(i => i.execute(context).json)
+          rIns.map {
+            case f: FunctionInvokeInstruction =>
+              functionInvoke(functions, context, f)
+            case i => {
+              Seq(i.execute(context).json)
+            }
+          }
         case None =>
           return Failure(new RuntimeException("Please set host bind"))
       }
     })
+  }
+
+  private def functionInvoke(functions: Map[String, eqlParser.FunctionInstruction],
+                             context: ScriptEQLContext,
+                             invoke: eqlParser.FunctionInvokeInstruction): Seq[String] = {
+    val values = invoke.vals
+    val maybeInstruction = functions.get(invoke.funcName + values.size)
+    if (maybeInstruction.isEmpty) {
+      throw new RuntimeException("Could found method: " + invoke.funcName + " with parameters" + values.toString())
+    }
+
+    val func = maybeInstruction.get
+    val vars = func.variableNames.zip(values).toMap
+    val variables = context.variables
+    val funcVars = func.instructions.filter(_.isInstanceOf[VariableInstruction])
+      .map(i => i.asInstanceOf[VariableInstruction])
+      .map(i => i.variableName -> i.value).toMap
+
+    context.variables = (variables.toSeq ++ vars.toSeq ++ funcVars).groupBy(_._1).view.mapValues(_.map(_._2).head).toMap
+    val response = func.instructions.filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
+      case f: FunctionInvokeInstruction =>
+        functionInvoke(functions, context, f)
+      case i => {
+        Seq(i.execute(context).json)
+      }
+    }
+
+    context.variables = variables
+    response
   }
 
   private def scriptContextInstruction(i: eqlParser.Instruction2) = {
@@ -89,16 +128,16 @@ class EQLScriptRunner {
   }
 }
 
-class ScriptEQLContext(host: String, port: Int, auth: Option[String], timeout: Option[Int], vars: Map[String, JsonCollection.Val]) extends EQLConfig with EQLContext {
+class ScriptEQLContext(host: String, port: Int, auth: Option[String], timeout: Option[Int]) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
     buildRestClient(host, port, auth, timeout)
-
-  override val variables: Map[String, JsonCollection.Val] = vars
 }
 
 object ScriptEQLContext {
   def apply(endpoint: String, auth: Option[String] = None, timeout: Option[Int], vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val url = new URL(endpoint)
-    new ScriptEQLContext(url.getHost, url.getPort, auth, timeout, vars)
+    val context = new ScriptEQLContext(url.getHost, url.getPort, auth, timeout)
+    context.variables = vars
+    context
   }
 }
