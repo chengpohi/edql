@@ -4,6 +4,8 @@ import com.github.chengpohi.dsl.EQLClient
 import com.github.chengpohi.dsl.eql._
 import com.github.chengpohi.parser.collection.JsonCollection
 
+import scala.collection.mutable
+
 trait EQLContext
   extends AggsEQL
     with AnalyzeEQL
@@ -14,7 +16,7 @@ trait EQLContext
   this: EQLConfig =>
   val ALL_INDEX: String = "*"
   val ALL_TYPE: String = "_all"
-  var variables: Map[String, JsonCollection.Val] = Map()
+  var variables: mutable.Map[String, JsonCollection.Val] = mutable.Map()
   override implicit lazy val eqlClient: EQLClient = buildClient(config)
 
   def shutdown: Unit = {

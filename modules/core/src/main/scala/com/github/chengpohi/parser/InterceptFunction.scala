@@ -543,7 +543,7 @@ trait InterceptFunction {
   }
 
 
-  case class VariableInstruction(variableName: String, value: JsonCollection.Val) extends ScriptContextInstruction2 {
+  case class VariableInstruction(variableName: String, value: Either[JsonCollection.Val, FunctionInvokeInstruction]) extends ScriptContextInstruction2 {
     override def name = "variable"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
@@ -553,6 +553,14 @@ trait InterceptFunction {
 
   case class FunctionInstruction(funcName: String, variableNames: Seq[String], instructions: Seq[Instruction2]) extends ScriptContextInstruction2 {
     override def name = "function"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+  }
+
+  case class ReturnInstruction(value: Either[JsonCollection.Val, FunctionInvokeInstruction]) extends Instruction2 {
+    override def name = "return"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
@@ -587,7 +595,7 @@ trait InterceptFunction {
     }
   }
 
-  def mapRealValue(variables: Map[String, JsonCollection.Val], v: JsonCollection.Val): Unit = {
+  def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val], v: JsonCollection.Val): Unit = {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         val realValue = variables.get(k.value)
@@ -608,12 +616,22 @@ trait InterceptFunction {
   }
 
 
-  private def mapNewPath(variables: Map[String, JsonCollection.Val], path: String) = {
+  private def mapNewPath(variables: scala.collection.mutable.Map[String, JsonCollection.Val], path: String) = {
     variables.foldLeft(path)((i, o) => {
       val vName = "\\$" + o._1;
       val v = o._2 match {
         case s: JsonCollection.Str => {
           s.value
+        }
+        case va: JsonCollection.Var => {
+          mapRealValue(variables, va)
+          va.realValue match {
+            case Some(fa) => fa match {
+              case s: JsonCollection.Str => s.value
+              case j => j.toJson
+            }
+            case None => va.value
+          }
         }
         case s => s.toJson
       }
