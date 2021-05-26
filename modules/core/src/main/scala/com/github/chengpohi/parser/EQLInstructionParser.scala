@@ -1,5 +1,6 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
 
@@ -50,10 +51,22 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def headAction[_: P] = P(space ~ "HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
-  def variableAction[_: P] = P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
-    c => VariableInstruction(c._1, c._2))
+  def variableAction[_: P] = P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ (jsonExpr | functionInvokeExpr)).map(
+    c => c._2 match {
+      case f: FunctionInvokeInstruction =>
+        VariableInstruction(c._1, Right(f))
+      case v: JsonCollection.Val =>
+        VariableInstruction(c._1, Left(v))
+    })
 
-  def functionExpr[_: P] = P("function" ~ space ~ variableName ~ space ~/ "(" ~
+  def returnExpr[_: P] = P(space ~ "return" ~ space ~/ (jsonExpr | functionInvokeExpr).map {
+    case f: FunctionInvokeInstruction =>
+      ReturnInstruction(Right(f))
+    case v: JsonCollection.Val =>
+      ReturnInstruction(Left(v))
+  })
+
+  def functionExpr[_: P] = P(space ~ "function" ~ space ~ variableName ~ space ~/ "(" ~
     space ~ variableName.rep(sep = space ~ "," ~ space) ~ space ~ ")" ~/
     space ~ "{" ~/ space ~ inses ~ space ~ "}")
     .map(c => FunctionInstruction(c._1, c._2, c._3))
@@ -162,7 +175,8 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction | variableAction | functionExpr | functionInvokeExpr
+        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
+        | variableAction | functionExpr | functionInvokeExpr | returnExpr
         | count
       ).rep(0)
   }
