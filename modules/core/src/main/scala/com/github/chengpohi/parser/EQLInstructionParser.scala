@@ -51,13 +51,14 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def headAction[_: P] = P(space ~ "HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
-  def variableAction[_: P] = P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ (jsonExpr | functionInvokeExpr)).map(
-    c => c._2 match {
-      case f: FunctionInvokeInstruction =>
-        VariableInstruction(c._1, Right(f))
-      case v: JsonCollection.Val =>
-        VariableInstruction(c._1, Left(v))
-    })
+  def variableAction[_: P] =
+    P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ (jsonExpr | functionInvokeExpr)).map(
+      c => c._2 match {
+        case f: FunctionInvokeInstruction =>
+          VariableInstruction(c._1, Right(f))
+        case v: JsonCollection.Val =>
+          VariableInstruction(c._1, Left(v))
+      })
 
   def returnExpr[_: P] = P(space ~ "return" ~ space ~/ (jsonExpr | functionInvokeExpr).map {
     case f: FunctionInvokeInstruction =>
@@ -71,8 +72,17 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     space ~ "{" ~/ space ~ inses ~ space ~ "}")
     .map(c => FunctionInstruction(c._1, c._2, c._3))
 
-  def functionInvokeExpr[_: P] = P(space ~ variableName ~ space ~ "(" ~ jsonExpr.rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
-    .map(c => FunctionInvokeInstruction(c._1, c._2))
+  def functionInvokeExpr[_: P]: P[FunctionInvokeInstruction] =
+    P(space ~ variableName ~ space ~ "(" ~ (jsonExpr | functionInvokeExpr).rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
+      .map(c => {
+        val vs = c._2 map {
+          case v: JsonCollection.Val =>
+            Left(v)
+          case f: FunctionInvokeInstruction =>
+            Right(f)
+        }
+        FunctionInvokeInstruction(c._1, vs)
+      })
 
   //memory, jvm, nodes, cpu etc
   def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
