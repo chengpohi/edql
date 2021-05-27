@@ -542,8 +542,9 @@ trait InterceptFunction {
 
   }
 
+  type ContextVal = Either[JsonCollection.Val, FunctionInvokeInstruction]
 
-  case class VariableInstruction(variableName: String, value: Either[JsonCollection.Val, FunctionInvokeInstruction]) extends ScriptContextInstruction2 {
+  case class VariableInstruction(variableName: String, value: ContextVal) extends ScriptContextInstruction2 {
     override def name = "variable"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
@@ -559,7 +560,7 @@ trait InterceptFunction {
     }
   }
 
-  case class ReturnInstruction(value: Either[JsonCollection.Val, FunctionInvokeInstruction]) extends Instruction2 {
+  case class ReturnInstruction(value: ContextVal) extends Instruction2 {
     override def name = "return"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
@@ -567,7 +568,7 @@ trait InterceptFunction {
     }
   }
 
-  case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
+  case class FunctionInvokeInstruction(funcName: String, vals: Seq[ContextVal]) extends Instruction2 {
     override def name = "functionInvoke"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
