@@ -472,6 +472,14 @@ trait InterceptFunction {
     }
   }
 
+  case class ImportInstruction(imp: String) extends ScriptContextInstruction2 {
+    override def name = "import"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$imp")
+    }
+  }
+
   case class AuthorizationBindInstruction(auth: String) extends ScriptContextInstruction2 {
     override def name = "authorization"
 
@@ -562,6 +570,14 @@ trait InterceptFunction {
 
   case class ReturnInstruction(value: ContextVal) extends Instruction2 {
     override def name = "return"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+  }
+
+  case class EchoInstruction(value: ContextVal) extends Instruction2 {
+    override def name = "echo"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
