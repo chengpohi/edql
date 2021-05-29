@@ -1,0 +1,9 @@
+function query(index) {
+  POST $index/_search
+  {
+  }
+}
+
+function catIndices() {
+  GET _cat/indices
+}
