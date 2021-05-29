@@ -21,6 +21,13 @@ class EQLParser extends EQLInstructionParser {
     }
   }
 
+
+  def parsePSI: String => PSI = (s: String) => instruction(s)
+
+  def generateInstructions(source: String): Try[Seq[Instruction2]] = {
+    (parsePSI andThen gi).apply(source)
+  }
+
   def parseJson(source: String): Try[JsonCollection.Val] = {
     parse(source, jsonExpr(_)) match {
       case Success(ins, _) =>

@@ -31,6 +31,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def timeoutBind[_: P] = P(space ~ "Timeout" ~ space ~ number ~ space).map(
     c => TimeoutInstruction(c.extract[Int]))
 
+  def importExpr[_: P] = P(space ~ "import" ~ space ~ quoteString ~ space).map(
+    c => ImportInstruction(c.extract[String]))
+
   def authorizationBind[_: P] = P(space ~ "Authorization" ~ space ~ (actionPath | quoteString)).map(
     c => {
       AuthorizationBindInstruction(c.extract[String])
@@ -65,6 +68,13 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       ReturnInstruction(Right(f))
     case v: JsonCollection.Val =>
       ReturnInstruction(Left(v))
+  })
+
+  def echoExpr[_: P] = P(space ~ "echo" ~ space ~/ (jsonExpr | functionInvokeExpr).map {
+    case f: FunctionInvokeInstruction =>
+      EchoInstruction(Right(f))
+    case v: JsonCollection.Val =>
+      EchoInstruction(Left(v))
   })
 
   def functionExpr[_: P] = P(space ~ "function" ~ space ~ variableName ~ space ~/ "(" ~
@@ -186,7 +196,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
-        | variableAction | functionExpr | functionInvokeExpr | returnExpr
+        | variableAction | functionExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
         | count
       ).rep(0)
   }
