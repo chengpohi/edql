@@ -12,7 +12,7 @@ test.edql:
 #+BEGIN_SRC text
 HOST http://localhost:9200
 Authorization ""
-GET myindex/_search
+POST myindex/_search
 {
   "query": {
 	"match_all": {}
