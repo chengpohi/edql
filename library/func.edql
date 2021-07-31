@@ -7,3 +7,7 @@ function query(index) {
 function catIndices() {
   GET _cat/indices
 }
+
+local myData = readFile("test.json")
+
+writeFile($myData, "~/fff.json")

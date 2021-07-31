@@ -53,7 +53,8 @@ trait InstructionInvoker {
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
-                           endPoint: String, runDir: String) = {
+                           endPoint: String,
+                           runDir: String) = {
     val importIns = parseImports(cIns, runDir)
 
     val invokeIns = cIns ++ importIns
@@ -78,9 +79,9 @@ trait InstructionInvoker {
       invokeIns.filter(_.isInstanceOf[FunctionInstruction])
         .map(i => i.asInstanceOf[FunctionInstruction])
         .map(i => i.funcName + i.variableNames.size -> i)
-        .toMap
+        .toMap ++ systemFunction
 
-    val globalVars = vars.filter(_._2.isLeft).map(i => i._1 -> i._2.left.get)
+    val globalVars = vars.filter(_._2.isLeft).map(i => i._1 -> i._2.left.get) + ("CONTEXT_PATH" -> JsonCollection.Str(runDir))
 
     val context = ScriptEQLContext(
       endPoint,
@@ -174,7 +175,7 @@ trait InstructionInvoker {
 
     val foundFunction = functions.get(invoke.funcName + values.size)
     if (foundFunction.isEmpty) {
-      throw new RuntimeException("Could found method: " + invoke.funcName + " with parameters " + values.toString())
+      throw new RuntimeException("Could not found method: " + invoke.funcName + " with parameters " + values.map(_.left).mkString(","))
     }
 
     val func = foundFunction.get
