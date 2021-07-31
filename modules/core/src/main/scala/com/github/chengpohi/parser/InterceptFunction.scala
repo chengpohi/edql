@@ -626,7 +626,7 @@ trait InterceptFunction {
         Paths.get(currentDir + targetPath.replaceAll("^\"|\"$", "")),
         data.toJson.getBytes())
 
-      PureStringDefinition(s"\"\"")
+      PureStringDefinition("")
     }
   }
 

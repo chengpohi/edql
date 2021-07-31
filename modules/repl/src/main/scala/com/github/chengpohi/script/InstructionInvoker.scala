@@ -49,7 +49,7 @@ trait InstructionInvoker {
         Seq(i.execute(context).json)
     }
 
-    Success(invokeResult)
+    Success(invokeResult.map(_.filter(_.nonEmpty)))
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
