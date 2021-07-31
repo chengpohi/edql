@@ -5,6 +5,9 @@ import com.github.chengpohi.dsl.eql.{Definition, ErrorHealthRequestDefinition, P
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.typesafe.config.ConfigFactory
 
+import java.nio.file.{Files, Paths}
+import java.util.stream.Collectors
+
 trait InterceptFunction {
   val MAX_NUMBER: Int = 500
 
@@ -592,6 +595,41 @@ trait InterceptFunction {
     }
   }
 
+  case class ReadJSONInstruction(filePath: JsonCollection.Var) extends Instruction2 {
+    override def name = "readJSONInstruction"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      val contextPath = eql.variables.get("CONTEXT_PATH")
+      val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
+      mapRealValue(eql.variables, filePath)
+      val targetPath = filePath.toJson
+      val content =
+        Files.readAllLines(Paths.get(currentDir + targetPath.replaceAll("^\"|\"$", "")))
+          .stream()
+          .collect(Collectors.joining(System.lineSeparator()))
+
+      PureStringDefinition(content)
+    }
+  }
+
+  case class WriteJSONInstruction(filePath: JsonCollection.Val, data: JsonCollection.Val) extends Instruction2 {
+    override def name = "writeJSONInstruction"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      val contextPath = eql.variables.get("CONTEXT_PATH")
+      val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
+      mapRealValue(eql.variables, filePath)
+      val targetPath = filePath.toJson
+
+      mapRealValue(eql.variables, data)
+      Files.write(
+        Paths.get(currentDir + targetPath.replaceAll("^\"|\"$", "")),
+        data.toJson.getBytes())
+
+      PureStringDefinition(s"\"\"")
+    }
+  }
+
 
   case class HealthInstruction() extends Instruction2 {
 
@@ -654,6 +692,14 @@ trait InterceptFunction {
       }
       i.replaceAll(vName, v)
     })
+  }
+
+
+  def systemFunction: Map[String, FunctionInstruction] = {
+    Map(
+      "readJSON1" -> FunctionInstruction("readJSON", Seq("filePath"), Seq(ReadJSONInstruction(JsonCollection.Var("filePath")))),
+      "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
+    )
   }
 
 
