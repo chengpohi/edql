@@ -1,12 +1,12 @@
 package com.github.chengpohi.script
 
-import cats.effect.{IO, Resource}
 import com.github.chengpohi.parser.EQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
-import scala.io.Source
+import java.nio.file.Files
+import java.util.stream.Collectors
 import scala.util.{Failure, Success, Try}
 
 class EQLScriptRunner extends InstructionInvoker {
@@ -15,12 +15,8 @@ class EQLScriptRunner extends InstructionInvoker {
   import eqlParser._
 
   def readFile(file: File): Try[String] = Try {
-    val script = Resource
-      .fromAutoCloseable(IO {
-        Source.fromFile(file)
-      })
-      .use(i => IO(i.getLines().mkString(System.lineSeparator())))
-      .unsafeRunSync()
+    val script =
+      Files.readAllLines(file.toPath).stream().collect(Collectors.joining(System.lineSeparator()))
     script
   }
 

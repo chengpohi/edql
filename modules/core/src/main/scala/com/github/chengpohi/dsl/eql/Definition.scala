@@ -1,6 +1,5 @@
 package com.github.chengpohi.dsl.eql
 
-import cats.implicits._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization.write
@@ -30,7 +29,7 @@ case class ExtractDefinition(definition: Definition[_], path: String)
     val result = path.split("\\.").foldLeft(jObj) { (o, i) =>
       o \ i
     }
-    write(result).pure[Future]
+    Future.successful(write(result))
   }
 
   override def json: String = execute.await

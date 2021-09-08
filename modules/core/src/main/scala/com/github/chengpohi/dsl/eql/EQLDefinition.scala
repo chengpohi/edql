@@ -1,6 +1,5 @@
 package com.github.chengpohi.dsl.eql
 
-import cats.implicits._
 import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
@@ -1318,10 +1317,10 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
     extends Definition[Map[String, AnyRef]] {
 
     override def execute: Future[Map[String, AnyRef]] = {
-      List("error_msg", "caused_by")
+      val res = List("error_msg", "caused_by")
         .zip(parameters.take(2).map(_.extract[String]).toList)
         .toMap
-        .pure[Future]
+      Future.successful(res)
     }
 
     override def json: String = execute.await.json
