@@ -3,6 +3,7 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.context.EQLContext
 import com.github.chengpohi.dsl.eql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
+import com.jayway.jsonpath.JsonPath
 import com.typesafe.config.ConfigFactory
 
 import java.nio.file.{Files, Paths}
@@ -619,14 +620,26 @@ trait InterceptFunction {
       val contextPath = eql.variables.get("CONTEXT_PATH")
       val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
       mapRealValue(eql.variables, filePath)
-      val targetPath = filePath.toJson
-
       mapRealValue(eql.variables, data)
+
       Files.write(
-        Paths.get(currentDir + targetPath.replaceAll("^\"|\"$", "")),
+        Paths.get(currentDir + filePath.toJson.replaceAll("^\"|\"$", "")),
         data.toJson.getBytes())
 
       PureStringDefinition("")
+    }
+  }
+
+  case class JQInstruction(data: JsonCollection.Val, path: JsonCollection.Val) extends Instruction2 {
+    override def name = "jqInstruction"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      mapRealValue(eql.variables, data)
+      val jsonO = data.toJson
+      mapRealValue(eql.variables, path)
+      val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
+      val value = JsonPath.parse(jsonO).read(jsonPath, classOf[String])
+      PureStringDefinition(value)
     }
   }
 
@@ -697,6 +710,7 @@ trait InterceptFunction {
 
   def systemFunction: Map[String, FunctionInstruction] = {
     Map(
+      "jq" -> FunctionInstruction("jq", Seq("data", "path"), Seq(JQInstruction(JsonCollection.Var("path"), JsonCollection.Var("data")))),
       "readJSON1" -> FunctionInstruction("readJSON", Seq("filePath"), Seq(ReadJSONInstruction(JsonCollection.Var("filePath")))),
       "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
     )
