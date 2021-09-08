@@ -29,7 +29,7 @@ object Settings {
     "org.apache.logging.log4j" % "log4j-core" % "2.11.1",
     "org.typelevel" %% "cats-core" % "2.0.0",
     "org.typelevel" %% "cats-effect" % "2.0.0",
-    "com.jayway.jsonpath" % "json-path" % "2.6.0",
+    "com.jayway.jsonpath" % "json-path" % "2.6.0" exclude("org.slf4j", "slf4j-api"),
     "org.scalatest" %% "scalatest" % "3.2.3" % "test"
   )
 
