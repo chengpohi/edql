@@ -572,6 +572,16 @@ trait InterceptFunction {
     }
   }
 
+  case class ForInstruction(tempVariable: String,
+                            iterVariable: JsonCollection.Val,
+                            instructions: Seq[Instruction2]) extends ScriptContextInstruction2 {
+    override def name = "for"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+  }
+
   case class ReturnInstruction(value: ContextVal) extends Instruction2 {
     override def name = "return"
 

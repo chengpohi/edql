@@ -82,6 +82,11 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     space ~ "{" ~/ space ~ inses ~ space ~ "}")
     .map(c => FunctionInstruction(c._1, c._2, c._3))
 
+  def forExpr[_: P] = P(space ~ "for" ~ space ~/ "(" ~
+    space ~ variableName ~ space ~ "in" ~ space ~ jsonExpr ~ ")" ~/
+    space ~ "{" ~/ space ~ inses ~ space ~ "}")
+    .map(c => ForInstruction(c._1, c._2, c._3))
+
   def functionInvokeExpr[_: P]: P[FunctionInvokeInstruction] =
     P(space ~ variableName ~ space ~ "(" ~ (jsonExpr | functionInvokeExpr).rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
       .map(c => {
@@ -196,7 +201,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
-        | variableAction | functionExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
+        | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
         | count
       ).rep(0)
   }
