@@ -190,7 +190,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
 
   def instrument[_: P]: P[Seq[Instruction2]] = P(
-    inses ~ End
+    inses ~ newlineOrComment.? ~ End
   )
 
   private def inses[_: P]: P[Seq[Instruction2]] = {
