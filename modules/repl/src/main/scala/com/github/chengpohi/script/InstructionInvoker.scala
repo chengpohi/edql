@@ -45,6 +45,9 @@ trait InstructionInvoker {
           case Right(f) => functionInvoke(functions, context, f)
         }
       }
+      case it: ForInstruction => {
+        iterCollection(functions, context, it)
+      }
       case i =>
         Seq(i.execute(context).json)
     }
