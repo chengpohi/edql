@@ -33,6 +33,7 @@ object JsonCollection {
 
   case class Var(value: java.lang.String) extends Val {
     var realValue: Option[JsonCollection.Val] = None
+
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
     override def get(path: String): Option[Val] = None

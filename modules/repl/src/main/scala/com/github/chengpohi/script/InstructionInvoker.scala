@@ -5,8 +5,8 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
 
 import java.net.URI
-import java.net.http.{HttpClient, HttpRequest}
 import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.{HttpClient, HttpRequest}
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 import scala.collection.mutable
@@ -167,6 +167,36 @@ trait InstructionInvoker {
     context.variables.addAll(valVars)
   }
 
+  def extractCollection(iterVariable: JsonCollection.Val): JsonCollection.Arr = {
+    iterVariable match {
+      case c: JsonCollection.Arr => c
+      case t: JsonCollection.Var if t.realValue.get.isInstanceOf[JsonCollection.Arr] =>
+        t.realValue.get.asInstanceOf[JsonCollection.Arr]
+      case _ =>
+        throw new RuntimeException("iter variable not a collection")
+    }
+  }
+
+
+  def iterCollection(functions: Map[String, eqlParser.FunctionInstruction],
+                     context: ScriptEQLContext,
+                     r: eqlParser.ForInstruction): Seq[String] = {
+    val cachedVariables = context.variables
+
+    val iterVariable = r.iterVariable
+    mapRealValue(context.variables, iterVariable)
+
+    val instructions = extractCollection(iterVariable).value.flatMap(i => {
+      context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
+      context.variables.put(r.tempVariable, i)
+      runInstructions(functions, context, r.instructions)
+    })
+
+    context.variables = cachedVariables
+    instructions
+  }
+
+
   def functionInvoke(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
                      invoke: eqlParser.FunctionInvokeInstruction): Seq[String] = {
@@ -185,14 +215,27 @@ trait InstructionInvoker {
 
     context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
 
-    val funcBodyVars = func.instructions.filter(_.isInstanceOf[VariableInstruction])
+    val instructions = func.instructions
+    val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
       .map(i => i.asInstanceOf[VariableInstruction])
       .map(i => i.variableName -> i.value).toMap
 
     evaluateFunctionVars(functions, context, funcBodyVars)
 
-    val response = func.instructions
+    val response = runInstructions(functions, context, instructions)
+
+    context.variables = cachedVariables
+    response
+  }
+
+  def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
+                      context: ScriptEQLContext,
+                      instructions: Seq[eqlParser.Instruction2]): Seq[String] = {
+    instructions
       .filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
+      case r: ForInstruction => {
+        iterCollection(functions, context, r)
+      }
       case f: FunctionInvokeInstruction =>
         functionInvoke(functions, context, f)
       case r: ReturnInstruction => {
@@ -216,7 +259,5 @@ trait InstructionInvoker {
         Seq(i.execute(context).json)
       }
     }
-    context.variables = cachedVariables
-    response
   }
 }
