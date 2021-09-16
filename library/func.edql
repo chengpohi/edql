@@ -8,6 +8,32 @@ function catIndices() {
   GET _cat/indices
 }
 
-local myData = readFile("test.json")
 
-writeFile($myData, "~/fff.json")
+function groupByAndCount(index, field) {
+  POST $index/_search
+  {
+    "size": 0,
+    "aggs": {
+      "f": {
+        "terms": {
+          "size": 200,
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function cardinality(index, field) {
+  POST $index/_search
+  {
+    "size": 0,
+    "aggs": {
+      "c": {
+        "cardinality": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
