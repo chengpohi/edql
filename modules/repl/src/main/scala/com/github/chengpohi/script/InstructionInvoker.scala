@@ -10,7 +10,7 @@ import java.net.http.{HttpClient, HttpRequest}
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 import scala.collection.mutable
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 trait InstructionInvoker {
   val eqlParser: EQLParser
@@ -18,17 +18,15 @@ trait InstructionInvoker {
 
   import eqlParser._
 
-
   def invokeInstruction(invokeIns: Seq[eqlParser.Instruction2],
                         scriptContextIns: Seq[eqlParser.Instruction2],
-                        runDir: String): Try[Seq[Seq[String]]] = {
+                        runDir: String): EQLRunResult = {
 
     val endpointBind = scriptContextIns.find(_.isInstanceOf[EndpointBindInstruction])
       .map(i => i.asInstanceOf[eqlParser.EndpointBindInstruction])
     if (endpointBind.isEmpty) {
-      return Failure(new RuntimeException("Should bind host"))
+      return EQLRunResult(Failure(new RuntimeException("need bind host")))
     }
-
 
     val (functions, context) =
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, runDir)
@@ -52,7 +50,7 @@ trait InstructionInvoker {
         Seq(i.execute(context).json)
     }
 
-    Success(invokeResult.map(_.filter(_.nonEmpty)))
+    EQLRunResult(invokeResult.map(_.filter(_.nonEmpty)), context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],

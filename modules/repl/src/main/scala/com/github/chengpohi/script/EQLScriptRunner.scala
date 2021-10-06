@@ -38,29 +38,31 @@ class EQLScriptRunner extends InstructionInvoker {
     }
   }
 
-  def run(script: String,
-          targetInstruction: Option[String] = None,
-          runDir: Option[String] = None): Try[Seq[Seq[String]]] = {
+  def run(script: String, eqlRunContext: EQLRunContext = EQLRunContext()): EQLRunResult = {
     val instructions = eqlParser.generateInstructions(script)
-    val selectedInstruction = targetInstruction.map(i => eqlParser.generateInstructions(i))
+    val selectedInstruction = eqlRunContext.targetInstruction.map(i => eqlParser.generateInstructions(i))
 
     if (selectedInstruction.exists(_.isFailure)) {
-      return Failure(selectedInstruction.get.failed.get)
+      return EQLRunResult(Failure(selectedInstruction.get.failed.get))
     }
 
-    instructions.flatMap(ins => {
-      val invokeIns = ins.filter(!_.isInstanceOf[ScriptContextInstruction2])
-      val scriptContextIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
-      selectedInstruction match {
-        case Some(select) => {
-          this.invokeInstruction(select.get, scriptContextIns, runDir.getOrElse(""))
+    instructions match {
+      case Success(ins) => {
+        val invokeIns = ins.filter(!_.isInstanceOf[ScriptContextInstruction2])
+        val scriptContextIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
+        selectedInstruction match {
+          case Some(select) => {
+            this.invokeInstruction(select.get, scriptContextIns, eqlRunContext.runDir)
+          }
+          case None =>
+            this.invokeInstruction(invokeIns, scriptContextIns, eqlRunContext.runDir)
         }
-        case None =>
-          this.invokeInstruction(invokeIns, scriptContextIns, runDir.getOrElse(""))
       }
-    })
+      case Failure(f) => {
+        EQLRunResult(Failure(f))
+      }
+    }
   }
-
 
   def getScriptFilePathFromEnv: Option[String] = {
     val config: Config = ConfigFactory.load()

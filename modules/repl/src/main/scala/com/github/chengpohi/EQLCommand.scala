@@ -15,7 +15,7 @@ object EQLCommand {
         case Some(f) =>
           val result =
             scriptRunner.readFile(new File(f))
-              .flatMap(s => scriptRunner.run(s))
+              .flatMap(s => scriptRunner.run(s).response)
 
           result match {
             case Success(value) =>
