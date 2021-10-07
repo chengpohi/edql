@@ -23,7 +23,7 @@ object EQLRunResult {
             context: ScriptEQLContext): EQLRunResult = {
     new EQLRunResult(Success(response), Map(
       "HOST" -> context.endpoint,
-      "Authorization" -> context.auth.orNull,
+      "Authorization" -> context.auth.map(i => s"\"$i\"").orNull,
       "Timeout" -> context.timeout.orNull
     ))
   }
