@@ -5,6 +5,7 @@ lazy val eql = project
   .settings(commonSettings: _*)
   .dependsOn(
     eqlRepl,
+    eqlScript,
     eqlCore
   )
 
@@ -22,12 +23,22 @@ lazy val eqlRepl = project
     nativeImageOptions ++= List("--initialize-at-build-time", "--no-fallback"),
     assemblyMergeStrategy in assembly := {
       case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
-      case PathList("META-INF", xs @ _*) => MergeStrategy.first
+      case PathList("META-INF", xs@_*) => MergeStrategy.first
       case PathList("module-info.class") => MergeStrategy.first
       case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
     }
+  )
+  .dependsOn(eqlScript)
+
+lazy val eqlScript = project
+  .in(file("modules/script"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "eql-script",
+    version := Versions.eqlVersion,
+    libraryDependencies ++= scriptDependencies
   )
   .dependsOn(eqlCore)
 
