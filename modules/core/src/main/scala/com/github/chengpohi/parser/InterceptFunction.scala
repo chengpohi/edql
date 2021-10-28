@@ -648,7 +648,7 @@ trait InterceptFunction {
       val jsonO = data.toJson
       mapRealValue(eql.variables, path)
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
-      val value = JsonPath.parse(jsonO).read(jsonPath, classOf[String])
+      val value = JsonPath.parse(jsonO).read(jsonPath).toString
       PureStringDefinition(value)
     }
   }
