@@ -65,6 +65,24 @@ trait InstructionInvoker {
         .map(i => i.asInstanceOf[AuthorizationBindInstruction])
         .map(i => i.auth)
 
+    val username =
+      invokeIns.find(_.isInstanceOf[UsernameBindInstruction])
+        .map(i => i.asInstanceOf[UsernameBindInstruction])
+        .map(i => i.username)
+
+    val password =
+      invokeIns.find(_.isInstanceOf[PasswordBindInstruction])
+        .map(i => i.asInstanceOf[PasswordBindInstruction])
+        .map(i => i.password)
+    val apikeyId =
+      invokeIns.find(_.isInstanceOf[ApiKeyIdBindInstruction])
+        .map(i => i.asInstanceOf[ApiKeyIdBindInstruction])
+        .map(i => i.apikeyId)
+    val apikeySecret =
+      invokeIns.find(_.isInstanceOf[ApiKeSecretBindInstruction])
+        .map(i => i.asInstanceOf[ApiKeSecretBindInstruction])
+        .map(i => i.apiSecret)
+
     val timeout =
       invokeIns.find(_.isInstanceOf[TimeoutInstruction])
         .map(i => i.asInstanceOf[TimeoutInstruction])
@@ -87,6 +105,10 @@ trait InstructionInvoker {
     val context = ScriptEQLContext(
       endPoint,
       authorization,
+      username,
+      password,
+      apikeyId,
+      apikeySecret,
       timeout,
       globalVars)
 
