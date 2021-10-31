@@ -39,6 +39,24 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       AuthorizationBindInstruction(c.extract[String])
     })
 
+  def usernameBind[_: P] = P(space ~ "Username" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      UsernameBindInstruction(c.extract[String])
+    })
+
+  def passwordBind[_: P] = P(space ~ "Password" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      PasswordBindInstruction(c.extract[String])
+    })
+  def apiKeyIdBind[_: P] = P(space ~ "ApiKeyId" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      ApiKeyIdBindInstruction(c.extract[String])
+    })
+  def apiKeySecretBind[_: P] = P(space ~ "ApiKeySecret" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      ApiKeSecretBindInstruction(c.extract[String])
+    })
+
   def postAction[_: P] = P(space ~ "POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
@@ -200,7 +218,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         | search
         | clusterSettings | nodeSettings | indexSettings | clusterState
         | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | timeoutBind | authorizationBind | postAction | getAction | deleteAction | putAction | headAction
+        | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
         | count
       ).rep(0)

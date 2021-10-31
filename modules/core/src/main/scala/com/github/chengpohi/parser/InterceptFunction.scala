@@ -492,6 +492,38 @@ trait InterceptFunction {
     }
   }
 
+  case class UsernameBindInstruction(username: String) extends ScriptContextInstruction2 {
+    override def name = "Username"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$username")
+    }
+  }
+
+  case class PasswordBindInstruction(password: String) extends ScriptContextInstruction2 {
+    override def name = "Password"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$password")
+    }
+  }
+
+  case class ApiKeyIdBindInstruction(apikeyId: String) extends ScriptContextInstruction2 {
+    override def name = "apikeyId"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$apikeyId")
+    }
+  }
+
+  case class ApiKeSecretBindInstruction(apiSecret: String) extends ScriptContextInstruction2 {
+    override def name = "Password"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$apiSecret")
+    }
+  }
+
   case class PostActionInstruction(path: String, action: Option[Seq[JsonCollection.Val]]) extends Instruction2 {
     override def name = "post"
 

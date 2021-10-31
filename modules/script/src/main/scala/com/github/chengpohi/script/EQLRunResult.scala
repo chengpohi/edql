@@ -1,5 +1,6 @@
 package com.github.chengpohi.script
 
+import scala.collection.SeqMap
 import scala.util.{Success, Try}
 
 
@@ -21,10 +22,14 @@ object EQLRunResult {
 
   def apply(response: Seq[Seq[String]],
             context: ScriptEQLContext): EQLRunResult = {
-    new EQLRunResult(Success(response), Map(
+    new EQLRunResult(Success(response), SeqMap(
       "HOST" -> context.endpoint,
       "Authorization" -> context.auth.map(i => s""""$i"""").orNull,
-      "Timeout" -> context.timeout.orNull
-    ))
+      "Username" -> context.username.map(i => s""""$i"""").orNull,
+      "Password" -> context.password.map(i => s""""$i"""").orNull,
+      "ApiKeyId" -> context.apiKeyId.map(i => s""""$i"""").orNull,
+      "ApiKeySecret" -> context.apiKeySecret.map(i => s""""$i"""").orNull,
+      "Timeout" -> context.timeout.getOrElse(5000)
+    ).filter(_._2 != null))
   }
 }
