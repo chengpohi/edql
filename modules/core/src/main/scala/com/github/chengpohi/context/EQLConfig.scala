@@ -3,7 +3,10 @@ package com.github.chengpohi.context
 import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
+import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
 import org.apache.http.{Header, HttpHost}
 import org.apache.logging.log4j.LogManager
@@ -25,6 +28,8 @@ import java.net.InetSocketAddress
 import java.util
 import java.util.Collections
 import scala.collection.JavaConverters._
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 
 /**
  * eql
@@ -106,7 +111,13 @@ trait EQLConfig {
       })
   }
 
-  def buildRestClient(host: String, port: Int, auth: Option[String], timeout: Option[Int]) = {
+  def buildRestClient(host: String, port: Int,
+                      auth: Option[String],
+                      username: Option[String],
+                      password: Option[String],
+                      apiKeyId: Option[String],
+                      apiKeySecret: Option[String],
+                      timeout: Option[Int]) = {
     val restClientBuilder =
       RestClient.builder(new HttpHost(host, port))
         .setRequestConfigCallback(
@@ -117,9 +128,33 @@ trait EQLConfig {
           })
 
     auth.map(a => {
-      val defaultHeaders = Array[Header](new BasicHeader("Authorization", a))
+      val defaultHeaders = Array[Header](
+        new BasicHeader("Authorization", a)
+      )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     })
+
+    if (apiKeyId.isDefined && apiKeySecret.isDefined) {
+      val apiKeyAuth = Base64.getEncoder.encodeToString((apiKeyId.get + ":" + apiKeySecret.get).getBytes(StandardCharsets.UTF_8))
+
+      val defaultHeaders = Array[Header](
+        new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)
+      )
+      restClientBuilder.setDefaultHeaders(defaultHeaders)
+    }
+
+    if (username.isDefined && password.isDefined) {
+      val credentialsProvider = new BasicCredentialsProvider
+      credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username.get, password.get))
+      restClientBuilder.setHttpClientConfigCallback(
+        new RestClientBuilder.HttpClientConfigCallback() {
+          override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            httpClientBuilder.disableAuthCaching
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+          }
+        })
+    }
+
 
     EQLClient(None, restClientBuilder.build())
   }
