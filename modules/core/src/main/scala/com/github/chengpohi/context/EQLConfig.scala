@@ -3,6 +3,7 @@ package com.github.chengpohi.context
 import com.github.chengpohi.connector.ClientNode
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory, ConfigRenderOptions}
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.BasicCredentialsProvider
@@ -24,12 +25,11 @@ import org.elasticsearch.script.mustache.MustachePlugin
 import org.elasticsearch.transport.Netty4Plugin
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
-import java.net.InetSocketAddress
-import java.util
-import java.util.Collections
-import scala.collection.JavaConverters._
+import java.net.{InetSocketAddress, URI}
 import java.nio.charset.StandardCharsets
-import java.util.Base64
+import java.util
+import java.util.{Base64, Collections}
+import scala.collection.JavaConverters._
 
 /**
  * eql
@@ -111,7 +111,7 @@ trait EQLConfig {
       })
   }
 
-  def buildRestClient(host: String, port: Int,
+  def buildRestClient(uri: URI,
                       auth: Option[String],
                       username: Option[String],
                       password: Option[String],
@@ -119,7 +119,7 @@ trait EQLConfig {
                       apiKeySecret: Option[String],
                       timeout: Option[Int]) = {
     val restClientBuilder =
-      RestClient.builder(new HttpHost(host, port))
+      RestClient.builder(new HttpHost(uri.getHost, uri.getPort, uri.getScheme))
         .setRequestConfigCallback(
           new RestClientBuilder.RequestConfigCallback() {
             override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = return requestConfigBuilder
@@ -143,6 +143,16 @@ trait EQLConfig {
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
 
+    if (StringUtils.isNotBlank(uri.getUserInfo)) {
+      val credentialsProvider = new BasicCredentialsProvider
+      credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(uri.getUserInfo))
+      restClientBuilder.setHttpClientConfigCallback(
+        new RestClientBuilder.HttpClientConfigCallback() {
+          override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+          }
+        })
+    }
     if (username.isDefined && password.isDefined) {
       val credentialsProvider = new BasicCredentialsProvider
       credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username.get, password.get))
