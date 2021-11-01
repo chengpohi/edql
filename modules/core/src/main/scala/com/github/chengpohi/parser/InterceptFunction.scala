@@ -533,7 +533,11 @@ trait InterceptFunction {
         i.foreach(j => mapRealValue(eql.variables, j)))
       val newPath = mapNewPath(eql.variables, path)
 
-      PostActionDefinition(newPath, action.map(_.map(_.toJson)))
+      if (newPath.startsWith("/")) {
+        PostActionDefinition(newPath, action.map(_.map(_.toJson)))
+      } else {
+        PostActionDefinition("/" + newPath, action.map(_.map(_.toJson)))
+      }
     }
   }
 
@@ -546,7 +550,11 @@ trait InterceptFunction {
       action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
-      DeleteActionDefinition(newPath, action.map(_.toJson))
+      if (newPath.startsWith("/")) {
+        DeleteActionDefinition(newPath, action.map(_.toJson))
+      } else {
+        DeleteActionDefinition("/" + newPath, action.map(_.toJson))
+      }
     }
   }
 
@@ -558,7 +566,11 @@ trait InterceptFunction {
       action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
-      PutActionDefinition(newPath, action.map(_.toJson))
+      if (newPath.startsWith("/")) {
+        PutActionDefinition(newPath, action.map(_.toJson))
+      } else {
+        PutActionDefinition("/" + newPath, action.map(_.toJson))
+      }
     }
   }
 
@@ -570,7 +582,11 @@ trait InterceptFunction {
       action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
-      GetActionDefinition(newPath, action.map(_.toJson))
+      if (newPath.startsWith("/")) {
+        GetActionDefinition(newPath, action.map(_.toJson))
+      } else {
+        GetActionDefinition("/" + newPath, action.map(_.toJson))
+      }
     }
   }
 
@@ -581,7 +597,12 @@ trait InterceptFunction {
       import eql._
       action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
-      HeadActionDefinition(newPath, action.map(_.toJson))
+
+      if (newPath.startsWith("/")) {
+        HeadActionDefinition(newPath, action.map(_.toJson))
+      } else {
+        HeadActionDefinition("/" + newPath, action.map(_.toJson))
+      }
     }
 
   }
