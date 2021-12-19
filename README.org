@@ -1,7 +1,13 @@
 * EDQL
 ** Usage
 
-Use with EDQL file:
+*** Use with EDQL Intellij Gui Client
+Please find more on: [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][EDQL]]
+
+[[https://raw.githubusercontent.com/wiki/chengpohi/edql/images/tutorial.gif]]
+[[https://raw.githubusercontent.com/wiki/chengpohi/edql/images/visual-editor.gif]]
+
+*** Use with EDQL file:
 
 #+BEGIN_SRC shell
 eql -Deql.file=test.edql
