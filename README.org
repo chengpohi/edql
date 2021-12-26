@@ -1,5 +1,8 @@
 [[https://gitter.im/fedql/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge][Gitter]]
 * EDQL
+
+  #+ATTR_HTML: title="Join the chat at https://gitter.im/fedql/community"
+  [[https://gitter.im/fedql/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge][file:https://badges.gitter.im/fedql/community.svg]]
 ** Usage
 
 *** Use with EDQL Intellij Gui Client
