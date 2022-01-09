@@ -30,6 +30,7 @@ case class ScriptEQLContext(endpoint: String,
 }
 
 object ScriptEQLContext {
+  val cache: mutable.Map[String, ScriptEQLContext] = mutable.Map[String, ScriptEQLContext]()
   def apply(endpoint: String,
             auth: Option[String] = None,
             username: Option[String] = None,
@@ -41,6 +42,15 @@ object ScriptEQLContext {
             timeout: Option[Int],
             vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val uri = URI.create(endpoint)
+
+    val cacheKey = s"$endpoint-${auth.getOrElse("")}-${username.getOrElse("")}" +
+      s"-${password.getOrElse("")}-${apiKeyId.getOrElse("")}-${apiKeySecret.getOrElse("")}-${timeout.getOrElse("")}"
+    val cacheContext = cache.get(cacheKey)
+    if (cacheContext.isDefined) {
+      val c = cacheContext.get
+      c.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
+      return c
+    }
     val context = new ScriptEQLContext(endpoint, uri,
       auth,
       username,
@@ -52,6 +62,7 @@ object ScriptEQLContext {
       timeout
     )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
+    cache.put(cacheKey, context)
     context
   }
 }
