@@ -1,5 +1,7 @@
 package com.github.chengpohi.context
 
+import com.amazonaws.auth.{AWS4Signer, AWSCredentialsProviderChain}
+import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain}
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils
@@ -9,7 +11,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
 import org.apache.http.{Header, HttpHost}
-import org.apache.logging.log4j.LogManager
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
 import java.net.URI
@@ -34,6 +35,8 @@ trait EQLConfig {
                       password: Option[String] = None,
                       apiKeyId: Option[String] = None,
                       apiKeySecret: Option[String] = None,
+                      apiSessionToken: Option[String] = None,
+                      awsRegion: Option[String] = None,
                       timeout: Option[Int] = None) = {
     val restClientBuilder =
       RestClient.builder(new HttpHost(uri.getHost, uri.getPort, uri.getScheme))
@@ -82,7 +85,28 @@ trait EQLConfig {
         })
     }
 
+    if (awsRegion.isDefined) {
+      val signer = new AWS4Signer
+      val serviceName = "es"
+      signer.setServiceName(serviceName)
+      signer.setRegionName(awsRegion.get)
 
+      val credentialsProvider = apiKeyId.map(i => {
+        new EDQLAWSCredentialsProviderChain(
+          i,
+          apiKeySecret.orNull,
+          apiSessionToken.orNull)
+      }).getOrElse(new EDQLAWSCredentialsProviderChain())
+
+      val interceptor =
+        new AWSRequestSigningApacheInterceptor(serviceName, signer, credentialsProvider)
+      restClientBuilder.setHttpClientConfigCallback(
+        new RestClientBuilder.HttpClientConfigCallback() {
+          override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            httpClientBuilder.addInterceptorLast(interceptor)
+          }
+        })
+    }
     EQLClient(restClientBuilder.build())
   }
 }

@@ -79,9 +79,17 @@ trait InstructionInvoker {
         .map(i => i.asInstanceOf[ApiKeyIdBindInstruction])
         .map(i => i.apikeyId)
     val apikeySecret =
-      invokeIns.find(_.isInstanceOf[ApiKeSecretBindInstruction])
-        .map(i => i.asInstanceOf[ApiKeSecretBindInstruction])
+      invokeIns.find(_.isInstanceOf[ApiKeySecretBindInstruction])
+        .map(i => i.asInstanceOf[ApiKeySecretBindInstruction])
         .map(i => i.apiSecret)
+    val apiSessionToken =
+      invokeIns.find(_.isInstanceOf[ApiSessionTokenBindInstruction])
+        .map(i => i.asInstanceOf[ApiSessionTokenBindInstruction])
+        .map(i => i.apiSessionToken)
+    val awsRegion =
+      invokeIns.find(_.isInstanceOf[AWSRegionBindInstruction])
+        .map(i => i.asInstanceOf[AWSRegionBindInstruction])
+        .map(i => i.awsRegion)
 
     val timeout =
       invokeIns.find(_.isInstanceOf[TimeoutInstruction])
@@ -109,6 +117,8 @@ trait InstructionInvoker {
       password,
       apikeyId,
       apikeySecret,
+      apiSessionToken,
+      awsRegion,
       timeout,
       globalVars)
 

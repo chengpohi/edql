@@ -29,6 +29,8 @@ object EQLRunResult {
       "Password" -> context.password.map(i => s""""$i"""").orNull,
       "ApiKeyId" -> context.apiKeyId.map(i => s""""$i"""").orNull,
       "ApiKeySecret" -> context.apiKeySecret.map(i => s""""$i"""").orNull,
+      "ApiSessionToken" -> context.apiSessionToken.map(i => s""""$i"""").orNull,
+      "AWSRegion" -> context.awsRegion.map(i => s""""$i"""").orNull,
       "Timeout" -> context.timeout.getOrElse(5000)
     ).filter(_._2 != null))
   }
