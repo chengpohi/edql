@@ -1,6 +1,6 @@
 package com.github.chengpohi.context
 
-import com.amazonaws.auth.{AWS4Signer, AWSCredentialsProviderChain}
+import com.amazonaws.auth.AWS4Signer
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain}
 import com.github.chengpohi.dsl.EQLClient
 import com.typesafe.config.{Config, ConfigFactory}
@@ -27,7 +27,7 @@ trait EQLConfig {
 
 
   def buildClient(config: Config): EQLClient =
-    buildRestClient(new URI(config.getString("host")))
+    buildRestClient(URI.create(config.getString("host")))
 
   def buildRestClient(uri: URI,
                       auth: Option[String] = None,
@@ -47,12 +47,12 @@ trait EQLConfig {
               .setSocketTimeout(timeout.getOrElse(5000));
           })
 
-    auth.map(a => {
+    if (auth.isDefined) {
       val defaultHeaders = Array[Header](
-        new BasicHeader("Authorization", a)
+        new BasicHeader("Authorization", auth.get)
       )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
-    })
+    }
 
     if (apiKeyId.isDefined && apiKeySecret.isDefined) {
       val apiKeyAuth = Base64.getEncoder.encodeToString((apiKeyId.get + ":" + apiKeySecret.get).getBytes(StandardCharsets.UTF_8))
