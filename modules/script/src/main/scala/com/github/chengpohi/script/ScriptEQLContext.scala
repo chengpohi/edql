@@ -37,14 +37,19 @@ object ScriptEQLContext {
             password: Option[String] = None,
             apiKeyId: Option[String] = None,
             apiKeySecret: Option[String] = None,
-            apiRegion: Option[String] = None,
             apiSessionToken: Option[String] = None,
+            apiRegion: Option[String] = None,
             timeout: Option[Int],
             vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val uri = URI.create(endpoint)
 
     val cacheKey = s"$endpoint-${auth.getOrElse("")}-${username.getOrElse("")}" +
-      s"-${password.getOrElse("")}-${apiKeyId.getOrElse("")}-${apiKeySecret.getOrElse("")}-${timeout.getOrElse("")}"
+      s"-${password.getOrElse("")}" +
+      s"-${apiKeyId.getOrElse("")}" +
+      s"-${apiKeySecret.getOrElse("")}" +
+      s"-${apiSessionToken.getOrElse("")}" +
+      s"-${apiRegion.getOrElse("")}" +
+      s"-${timeout.getOrElse("")}"
     val cacheContext = cache.get(cacheKey)
     if (cacheContext.isDefined) {
       val c = cacheContext.get
@@ -57,8 +62,8 @@ object ScriptEQLContext {
       password,
       apiKeyId,
       apiKeySecret,
-      apiRegion,
       apiSessionToken,
+      apiRegion,
       timeout
     )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
