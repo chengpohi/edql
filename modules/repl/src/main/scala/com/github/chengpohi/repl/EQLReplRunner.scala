@@ -8,7 +8,6 @@ import com.github.chengpohi.dsl.serializer.JSONOps
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration
-import org.apache.lucene.util.IOUtils
 
 import java.io.File
 import scala.io.Source
@@ -30,17 +29,6 @@ class EQLReplRunner extends EQLConfig
   }
 
   def addShutdownHook(reader: ConsoleReader): Unit = {
-    EQL {
-      create index ELASTIC_SHELL_INDEX_NAME not exist
-    }.await
-
-    Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run(): Unit = {
-        println(ANSI_GREEN + "exiting..." + ANSI_RESET)
-        IOUtils.close(client)
-        reader.getHistory.asInstanceOf[FileHistory].flush()
-      }
-    })
   }
 
   def buildReader: ConsoleReader = {

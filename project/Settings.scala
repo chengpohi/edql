@@ -20,15 +20,15 @@ object Settings {
 
   val coreDependencies = Seq(
     "com.typesafe" % "config" % "1.3.0",
-    "org.elasticsearch.client" % "transport" % "7.3.0",
-    "org.codelibs.elasticsearch.module" % "analysis-common" % "7.3.0",
     "org.apache.commons" % "commons-lang3" % "3.5",
     "org.scalactic" %% "scalactic" % "3.2.3",
     "com.lihaoyi" %% "fastparse" % "2.3.0",
     "org.json4s" %% "json4s-jackson" % "3.7.0-M1",
     "org.apache.logging.log4j" % "log4j-core" % "2.11.1",
+    "org.elasticsearch.client" % "elasticsearch-rest-client" % "7.13.0",
     "com.jayway.jsonpath" % "json-path" % "2.6.0" exclude("org.slf4j", "slf4j-api"),
-    "org.scalatest" %% "scalatest" % "3.2.3" % "test"
+    "org.scalatest" %% "scalatest" % "3.2.3" % "test",
+    "org.elasticsearch" % "elasticsearch" % "7.16.3" % "test"
   )
 
   val replDependencies = Seq(
