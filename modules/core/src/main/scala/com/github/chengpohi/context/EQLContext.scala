@@ -9,7 +9,7 @@ import scala.collection.mutable
 trait EQLContext
   extends AggsEQL
     with AnalyzeEQL
-    with DeleterEQL
+    with DeleteEQL
     with IndexEQL
     with ManageEQL
     with QueryEQL {
@@ -20,7 +20,6 @@ trait EQLContext
   override implicit lazy val eqlClient: EQLClient = buildClient(config)
 
   def shutdown: Unit = {
-    eqlClient.client.close()
     eqlClient.restClient.close()
   }
 }
