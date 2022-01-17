@@ -10,18 +10,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       HelpInstruction(Seq(s))
     })
 
-  def healthP[_: P] = P("health").map(
-    _ => HealthInstruction())
-
-
-  def shutdown[_: P] = P("shutdown").map(
-    _ =>
-      ShutdownInstruction())
-
-  def count[_: P] = P("count" ~/ ioParser)
-    .map(i => i.head.extract[String])
-    .map(c => CountInstruction(c))
-
   def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
 
@@ -48,10 +36,12 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     c => {
       PasswordBindInstruction(c.extract[String])
     })
+
   def apiKeyIdBind[_: P] = P(space ~ "ApiKeyId" ~ space ~ (actionPath | quoteString)).map(
     c => {
       ApiKeyIdBindInstruction(c.extract[String])
     })
+
   def apiKeySecretBind[_: P] = P(space ~ "ApiKeySecret" ~ space ~ (actionPath | quoteString)).map(
     c => {
       ApiKeSecretBindInstruction(c.extract[String])
@@ -117,10 +107,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
         FunctionInvokeInstruction(c._1, vs)
       })
 
-  //memory, jvm, nodes, cpu etc
-  def clusterStats[_: P] = P("cluster" ~ space ~ "stats").map(
-    _ => GetClusterStatsInstruction())
-
   def catNodes[_: P] = P("cat" ~ space ~ "nodes" ~ newline.?).map(
     _ =>
       CatNodesInstruction())
@@ -151,58 +137,6 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     .map(_ =>
       CatPendingInstruction())
 
-  //indices, aliases, restore, snapshots, routing nodes etc
-  def clusterState[_: P] = P("cluster" ~ space ~ "state" ~/ newline.?).map(
-    _ =>
-      GetClusterStateInstruction())
-
-  def clusterSettings[_: P] = P("cluster" ~ space ~ "settings" ~/ newline.?).map(
-    _ =>
-      ClusterSettingsInstruction())
-
-  def indicesStats[_: P] = P("indices" ~ space ~ "stats" ~/ newline.?).map(
-    _ =>
-      IndicesStatsInstruction())
-
-  def nodeStats[_: P] = P("node" ~ space ~ "stats" ~/ newline.?).map(
-    _ =>
-      NodeStatsInstruction())
-
-
-  def nodeSettings[_: P] = P("node" ~ space ~ "settings" ~/ newline.?).map(
-    _ =>
-      NodeSettingsInstruction())
-
-
-  def pendingTasks[_: P] = P("pending" ~ space ~ "tasks" ~/ newline.?).map(
-    _ =>
-      PendingTasksInstruction())
-
-  def indexSettings[_: P] = P(ioParser ~ "settings")
-    .map(i => i.head.extract[String])
-    .map(
-      s =>
-        IndexSettingsInstruction(s))
-
-
-  def deleteDoc[_: P] = P("delete" ~ "from" ~/ strOrVar ~ "/" ~/ strOrVar ~ "id" ~ strOrVar)
-    .map(
-      c =>
-        DeleteDocInstruction(c._1.extract[String], c._2.extract[String], c._3.extract[String])
-    )
-
-  def deleteIndex[_: P] = P("delete" ~ "index" ~/ strOrVar).map(
-    c =>
-      DeleteIndexInstruction(c.extract[String]))
-
-  def search[_: P] = P(
-    "search" ~ "in" ~/ strOrVar)
-    .map(c => {
-      val indexName = c.extract[String]
-      QueryInstruction(indexName, None, Map())
-    }
-    )
-
   def extractJSON[_: P]: P[(String, String)] = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
 
   //val beauty = P("beauty").map(c => ("beauty", beautyJson))
@@ -213,14 +147,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   private def inses[_: P]: P[Seq[Instruction2]] = {
     (
-      comment |
-        healthP | shutdown | clusterStats | indicesStats | nodeStats | pendingTasks
-        | search
-        | clusterSettings | nodeSettings | indexSettings | clusterState
-        | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
+      comment | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
         | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
-        | count
       ).rep(0)
   }
 }

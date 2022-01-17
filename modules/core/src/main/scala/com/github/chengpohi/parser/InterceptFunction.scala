@@ -12,52 +12,6 @@ import java.util.stream.Collectors
 trait InterceptFunction {
   val MAX_NUMBER: Int = 500
 
-  case class GetMappingInstruction(indexName: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      get mapping indexName
-    }
-  }
-
-  case class CreateIndexInstruction(indexName: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      create index indexName
-    }
-  }
-
-
-  case class GetClusterStateInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      cluster state
-    }
-  }
-
-  case class GetClusterSettingsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      cluster settings
-    }
-  }
-
-  case class GetClusterStatsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      cluster stats
-    }
-  }
-
   case class CatNodesInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
@@ -138,143 +92,6 @@ trait InterceptFunction {
       cat recovery
     }
   }
-
-  case class IndicesStatsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      indice stats NodeType.ALL flag FlagType.ALL
-    }
-  }
-
-
-  case class NodeStatsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      node stats NodeType.ALL flag FlagType.ALL
-    }
-  }
-
-
-  case class ClusterSettingsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      cluster settings
-    }
-  }
-
-
-  case class NodeSettingsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      node info
-    }
-  }
-
-  case class PendingTasksInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      pending tasks
-    }
-  }
-
-  case class IndexSettingsInstruction(indexName: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      get settings indexName
-    }
-  }
-
-
-  case class ShutdownInstruction() extends Instruction2 {
-    override def name: String = "ShutDown"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      ShutDownRequestDefinition()
-    }
-  }
-
-  case class CountInstruction(indexName: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      get settings indexName
-    }
-  }
-
-
-  case class DeleteIndexInstruction(indexName: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      delete index indexName
-    }
-  }
-
-  case class DeleteDocInstruction(indexName: String, indexType: String, _id: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      delete in indexName / indexType id _id
-    }
-  }
-
-  case class MatchQueryInstruction(indexName: String, indexType: Option[String], queryData: Map[String, String]) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      search in indexName / indexType must queryData from 0 size MAX_NUMBER
-    }
-  }
-
-  case class QueryInstruction(indexName: String, indexType: Option[String],
-                              queryData: Map[String, String]) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      search in indexName / indexType must queryData from 0 size MAX_NUMBER
-    }
-  }
-
-  case class BulkUpdateInstruction(indexName: String,
-                                   indexType: Option[String],
-                                   updateFields: Map[String, String]) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      bulk update indexName / indexType fields updateFields
-    }
-  }
-
-
-  case class UpdateDocInstruction(indexName: String, indexType: Option[String],
-                                  updateFields: Map[String, String], _id: String) extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      update id _id in indexName / indexType docAsUpsert updateFields
-    }
-  }
-
 
   //  def reindexIndex: INSTRUMENT_TYPE = {
   //    case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
@@ -706,17 +523,6 @@ trait InterceptFunction {
     }
   }
 
-
-  case class HealthInstruction() extends Instruction2 {
-
-    override def name: String = "health"
-
-    def execute(implicit eql: EQLContext): Definition[_] = {
-      import eql._
-      cluster health
-    }
-  }
-
   case class ErrorInstruction(error: String) extends Instruction2 {
 
     override def name: String = "error"
@@ -778,7 +584,5 @@ trait InterceptFunction {
       "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
     )
   }
-
-
 }
 
