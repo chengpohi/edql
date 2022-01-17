@@ -44,7 +44,17 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def apiKeySecretBind[_: P] = P(space ~ "ApiKeySecret" ~ space ~ (actionPath | quoteString)).map(
     c => {
-      ApiKeSecretBindInstruction(c.extract[String])
+      ApiKeySecretBindInstruction(c.extract[String])
+    })
+
+  def apiSessionTokenBind[_: P] = P(space ~ "ApiSessionToken" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      ApiSessionTokenBindInstruction(c.extract[String])
+    })
+
+  def awsRegionBind[_: P] = P(space ~ "AWSRegion" ~ space ~ (actionPath | quoteString)).map(
+    c => {
+      AWSRegionBindInstruction(c.extract[String])
     })
 
   def postAction[_: P] = P(space ~ "POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
@@ -148,7 +158,8 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   private def inses[_: P]: P[Seq[Instruction2]] = {
     (
       comment | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | postAction | getAction | deleteAction | putAction | headAction
+        | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
+        | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
       ).rep(0)
   }

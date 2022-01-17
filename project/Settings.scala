@@ -27,8 +27,8 @@ object Settings {
     "org.apache.logging.log4j" % "log4j-core" % "2.11.1",
     "org.elasticsearch.client" % "elasticsearch-rest-client" % "7.13.0",
     "com.jayway.jsonpath" % "json-path" % "2.6.0" exclude("org.slf4j", "slf4j-api"),
-    "org.scalatest" %% "scalatest" % "3.2.3" % "test",
-    "org.elasticsearch" % "elasticsearch" % "7.16.3" % "test"
+    "com.amazonaws" % "aws-java-sdk-core" % "1.12.141",
+    "org.scalatest" %% "scalatest" % "3.2.3" % "test"
   )
 
   val replDependencies = Seq(
