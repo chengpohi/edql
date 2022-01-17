@@ -14,9 +14,19 @@ case class ScriptEQLContext(endpoint: String,
                             password: Option[String],
                             apiKeyId: Option[String],
                             apiKeySecret: Option[String],
+                            apiSessionToken: Option[String],
+                            awsRegion: Option[String],
                             timeout: Option[Int]) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
-    buildRestClient(uri, auth, username, password, apiKeyId, apiKeySecret, timeout)
+    buildRestClient(uri,
+      auth,
+      username,
+      password,
+      apiKeyId,
+      apiKeySecret,
+      apiSessionToken,
+      awsRegion,
+      timeout)
 }
 
 object ScriptEQLContext {
@@ -26,6 +36,8 @@ object ScriptEQLContext {
             password: Option[String] = None,
             apiKeyId: Option[String] = None,
             apiKeySecret: Option[String] = None,
+            apiRegion: Option[String] = None,
+            apiSessionToken: Option[String] = None,
             timeout: Option[Int],
             vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
     val uri = URI.create(endpoint)
@@ -35,7 +47,10 @@ object ScriptEQLContext {
       password,
       apiKeyId,
       apiKeySecret,
-      timeout)
+      apiRegion,
+      apiSessionToken,
+      timeout
+    )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
     context
   }

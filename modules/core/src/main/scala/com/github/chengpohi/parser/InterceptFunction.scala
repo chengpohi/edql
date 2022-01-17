@@ -333,11 +333,27 @@ trait InterceptFunction {
     }
   }
 
-  case class ApiKeSecretBindInstruction(apiSecret: String) extends ScriptContextInstruction2 {
-    override def name = "Password"
+  case class ApiKeySecretBindInstruction(apiSecret: String) extends ScriptContextInstruction2 {
+    override def name = "secret"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"$apiSecret")
+    }
+  }
+
+  case class ApiSessionTokenBindInstruction(apiSessionToken: String) extends ScriptContextInstruction2 {
+    override def name = "session"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$apiSessionToken")
+    }
+  }
+
+  case class AWSRegionBindInstruction(awsRegion: String) extends ScriptContextInstruction2 {
+    override def name = "region"
+
+    def execute(implicit eql: EQLContext): Definition[_] = {
+      PureStringDefinition(s"$awsRegion")
     }
   }
 
