@@ -40,8 +40,7 @@ class JsonParser {
 
   def variableName[_: P] = P(variableChars.rep(1)).!
 
-  def variable[_: P] =
-    P(variableChars.rep(1)).!.map(s => "$" + s).map(JsonCollection.Str)
+  def variable[_: P] = P(space ~ "$" ~ variableChars.rep(1).! ~ space).map(JsonCollection.Var)
 
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   def strOrVar[_: P] = P(quoteString | variable)
@@ -67,8 +66,8 @@ class JsonParser {
       }
     )
 
-  def pair[_: P]: P[(String, JsonCollection.Val)] =
-    P(newlineOrComment ~ quoteString.map(_.value) ~/ ":" ~ newlineOrComment ~/ jsonExpr)
+  def pair[_: P]: P[(JsonCollection.Val, JsonCollection.Val)] =
+    P(newlineOrComment ~ (quoteString | variable) ~/ ":" ~ newlineOrComment ~/ jsonExpr)
 
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
@@ -91,8 +90,7 @@ class JsonParser {
   def colon[_: P] = P(space ~ ":" ~ space)
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number |
-      ("$" ~ variableChars.rep(1).!).map(JsonCollection.Var)) ~ newlineOrComment
+    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable) ~ newlineOrComment
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
