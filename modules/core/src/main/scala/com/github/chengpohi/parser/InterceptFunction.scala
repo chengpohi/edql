@@ -548,7 +548,8 @@ trait InterceptFunction {
     }
   }
 
-  def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val], v: JsonCollection.Val): Unit = {
+  def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val],
+                   v: JsonCollection.Val): Unit = {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         val realValue = variables.get(k.value)

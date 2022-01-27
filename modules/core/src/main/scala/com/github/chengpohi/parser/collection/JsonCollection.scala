@@ -14,7 +14,7 @@ object JsonCollection {
     def apply(i: Int): Val = this.asInstanceOf[Arr].value(i)
 
     def apply(s: java.lang.String): Val =
-      this.asInstanceOf[Obj].value.find(_._1 == s).get._2
+      this.asInstanceOf[Obj].value.find(_._1.value == s).get._2
 
     def toJson: String
 
@@ -41,19 +41,19 @@ object JsonCollection {
     override def vars: Seq[Var] = Seq(this)
   }
 
-  case class Obj(value: (java.lang.String, Val)*) extends AnyVal with Val {
+  case class Obj(value: (Val, Val)*) extends AnyVal with Val {
     override def toJson: String = {
       "{" + value
         .map {
-          case (n, v) => "\"" + n + "\":" + v.toJson
+          case (n, v) => "\"" + n.value + "\":" + v.toJson
         }
         .mkString(",") + "}"
     }
 
     override def get(path: String): Option[Val] =
-      value.find(p => p._1 == path).map(_._2)
+      value.find(p => p._1.value == path).map(_._2)
 
-    override def vars: Seq[Var] = this.value.flatMap(_._2.vars)
+    override def vars: Seq[Var] = this.value.flatMap(i => i._1.vars ++ i._2.vars)
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
