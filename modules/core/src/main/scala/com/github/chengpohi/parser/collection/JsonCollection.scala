@@ -45,7 +45,7 @@ object JsonCollection {
     override def toJson: String = {
       "{" + value
         .map {
-          case (n, v) => "\"" + n.value + "\":" + v.toJson
+          case (n, v) => n.toJson + ":" + v.toJson
         }
         .mkString(",") + "}"
     }
