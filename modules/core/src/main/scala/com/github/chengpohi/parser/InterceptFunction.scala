@@ -93,156 +93,12 @@ trait InterceptFunction {
     }
   }
 
-  //  def reindexIndex: INSTRUMENT_TYPE = {
-  //    case Seq(sourceIndex, targetIndex, sourceIndexType, fields) => {
-  //      reindex into targetIndex / sourceIndexType from sourceIndex fields fields
-  //        .extract[List[String]]
-  //    }
-  //  }
-  //
-  //  def bulkIndex: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, fields) => {
-  //      bulk index indexName / indexType doc fields
-  //        .extract[List[List[(String, String)]]]
-  //    }
-  //  }
-  //
-  //  def createDoc: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, fields) => {
-  //      index into indexName / indexType fields fields
-  //        .extract[List[(String, String)]]
-  //    }
-  //    case Seq(indexName, indexType, fields, _id) => {
-  //      index into indexName / indexType fields fields
-  //        .extract[List[(String, String)]] id _id
-  //    }
-  //  }
-  //
-  //  def analysisText: INSTRUMENT_TYPE = {
-  //    case Seq(doc, analyzer) => {
-  //      analyze text doc in ELASTIC_SHELL_INDEX_NAME analyzer analyzer
-  //    }
-  //  }
-  //
-  //  def createAnalyzer: INSTRUMENT_TYPE = {
-  //    case Seq(analyzer) => {
-  //      val analysisSettings = Obj(("analysis", analyzer))
-  //      create analyzer analysisSettings.toJson
-  //    }
-  //  }
-  //
-  //  def mapping: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, mapping) => {
-  //      create index indexName mappings mapping.toJson
-  //    }
-  //  }
-  //
-  //  def updateMapping: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, mapping) => {
-  //      update index indexName / indexType mapping mapping.toJson
-  //    }
-  //  }
-  //
-  //  def aggsCount: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, name) => {
-  //      aggs in indexName / indexType avg name
-  //    }
-  //  }
-  //
-  //  def aggsTerm: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, name) => {
-  //      aggs in indexName / indexType term name
-  //    }
-  //  }
-  //
-  //  def histAggs: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, name, _interval, _field) => {
-  //      aggs in indexName / indexType hist name interval _interval field _field
-  //    }
-  //  }
-  //
-  //  def alias: INSTRUMENT_TYPE = {
-  //    case Seq(targetIndex, sourceIndex) => {
-  //      add alias targetIndex on sourceIndex
-  //    }
-  //  }
-  //
-  //  def getDocById: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, indexType, _id) => {
-  //      search in indexName / indexType where id equal _id
-  //    }
-  //  }
-  //
-  //  def createRepository: INSTRUMENT_TYPE = {
-  //    case Seq(repositoryName, repositoryType, settings) => {
-  //      create repository repositoryName tpe repositoryType settings settings
-  //        .extract[Map[String, String]]
-  //    }
-  //  }
-  //
-  //  def createSnapshot: INSTRUMENT_TYPE = {
-  //    case Seq(snapshotName, repositoryName) => {
-  //      create snapshot snapshotName in repositoryName
-  //    }
-  //  }
-  //
-  //  def deleteSnapshot: INSTRUMENT_TYPE = {
-  //    case Seq(snapshotName, repositoryName) => {
-  //      delete snapshot snapshotName from repositoryName
-  //    }
-  //  }
-  //
-  //  def restoreSnapshot: INSTRUMENT_TYPE = {
-  //    case Seq(snapshotName, repositoryName) => {
-  //      restore snapshot snapshotName from repositoryName
-  //    }
-  //  }
-  //
-  //  def closeIndex: INSTRUMENT_TYPE = {
-  //    case Seq(indexName) => {
-  //      close index indexName
-  //    }
-  //  }
-  //
-  //  def openIndex: INSTRUMENT_TYPE = {
-  //    case Seq(indexName) => {
-  //      open index indexName
-  //    }
-  //  }
-  //
-  //  def dumpIndex: INSTRUMENT_TYPE = {
-  //    case Seq(indexName, fileName) => {
-  //      dump index indexName into fileName
-  //    }
-  //  }
-  //
-  //  def getSnapshot: INSTRUMENT_TYPE = {
-  //    case Seq(snapshotName, repositoryName) => {
-  //      get snapshot snapshotName from repositoryName
-  //    }
-  //    case Seq(repositoryName) => {
-  //      get snapshot "*" from repositoryName
-  //    }
-  //  }
-  //
-  //  def waitForStatus: INSTRUMENT_TYPE = {
-  //    case Seq(status) => {
-  //      waiting index "*" timeout "100s" status "GREEN"
-  //    }
-  //  }
-  //
-  //  def error: INSTRUMENT_TYPE = parameters => {
-  //    ParserErrorDefinition(parameters)
-  //  }
-  //
-  //  implicit def valToString(v: Val): String = v.extract[String]
-  //
-  //  case class Instruction(name: String, f: INSTRUMENT_TYPE, params: Seq[Val])
-
   trait Instruction2 {
     def name: String
 
     def execute(implicit eql: EQLContext): Definition[_]
+
+    def vars: Seq[JsonCollection.Dynamic] = Seq()
   }
 
   lazy val instrumentations = ConfigFactory.load("instrumentations.json")
@@ -362,8 +218,6 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i =>
-        i.foreach(j => mapRealValue(eql.variables, j)))
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
@@ -372,6 +226,9 @@ trait InterceptFunction {
         PostActionDefinition("/" + newPath, action.map(_.map(_.toJson)))
       }
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      action.getOrElse(Seq()).flatMap(i => i.vars).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
   }
 
 
@@ -380,7 +237,6 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
@@ -389,6 +245,9 @@ trait InterceptFunction {
         DeleteActionDefinition("/" + newPath, action.map(_.toJson))
       }
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
   }
 
   case class PutActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -396,7 +255,6 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
@@ -405,6 +263,9 @@ trait InterceptFunction {
         PutActionDefinition("/" + newPath, action.map(_.toJson))
       }
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
   }
 
   case class GetActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -412,7 +273,6 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
@@ -421,6 +281,9 @@ trait InterceptFunction {
         GetActionDefinition("/" + newPath, action.map(_.toJson))
       }
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
   }
 
   case class HeadActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -428,7 +291,6 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       import eql._
-      action.foreach(i => mapRealValue(eql.variables, i))
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
@@ -438,15 +300,20 @@ trait InterceptFunction {
       }
     }
 
+    override def vars: Seq[JsonCollection.Dynamic] =
+      action.map(i => Seq(i)).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+
   }
 
-  type ContextVal = Either[JsonCollection.Val, FunctionInvokeInstruction]
-
-  case class VariableInstruction(variableName: String, value: ContextVal) extends ScriptContextInstruction2 {
+  case class VariableInstruction(variableName: String, value: JsonCollection.Val) extends ScriptContextInstruction2 {
     override def name = "variable"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
+    }
+
+    override def vars: Seq[JsonCollection.Dynamic] = {
+      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
     }
   }
 
@@ -466,29 +333,44 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      Seq(iterVariable).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(_.asInstanceOf[JsonCollection.Dynamic])
   }
 
-  case class ReturnInstruction(value: ContextVal) extends Instruction2 {
+  case class ReturnInstruction(value: JsonCollection.Val) extends Instruction2 {
     override def name = "return"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] = {
+      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+    }
   }
 
-  case class EchoInstruction(value: ContextVal) extends Instruction2 {
+  case class EchoInstruction(value: JsonCollection.Val) extends Instruction2 {
     override def name = "echo"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] = {
+      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+    }
   }
 
-  case class FunctionInvokeInstruction(funcName: String, vals: Seq[ContextVal]) extends Instruction2 {
+  case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
     override def name = "functionInvoke"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
       PureStringDefinition(s"")
+    }
+
+    override def vars: Seq[JsonCollection.Dynamic] = {
+      vals.filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
     }
   }
 
@@ -498,7 +380,6 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       val contextPath = eql.variables.get("CONTEXT_PATH")
       val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
-      mapRealValue(eql.variables, filePath)
       val targetPath = filePath.toJson
       val content =
         Files.readAllLines(Paths.get(currentDir + targetPath.replaceAll("^\"|\"$", "")))
@@ -507,6 +388,9 @@ trait InterceptFunction {
 
       PureStringDefinition(content)
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      Seq(filePath).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
   }
 
   case class WriteJSONInstruction(filePath: JsonCollection.Val, data: JsonCollection.Val) extends Instruction2 {
@@ -515,8 +399,6 @@ trait InterceptFunction {
     def execute(implicit eql: EQLContext): Definition[_] = {
       val contextPath = eql.variables.get("CONTEXT_PATH")
       val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
-      mapRealValue(eql.variables, filePath)
-      mapRealValue(eql.variables, data)
 
       Files.write(
         Paths.get(currentDir + filePath.toJson.replaceAll("^\"|\"$", "")),
@@ -524,19 +406,23 @@ trait InterceptFunction {
 
       PureStringDefinition("")
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      Seq(filePath, data).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
   }
 
   case class JQInstruction(data: JsonCollection.Val, path: JsonCollection.Val) extends Instruction2 {
     override def name = "jqInstruction"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
-      mapRealValue(eql.variables, data)
       val jsonO = data.toJson
-      mapRealValue(eql.variables, path)
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
       val value = JsonPath.parse(jsonO).read(jsonPath).toString
       PureStringDefinition(value)
     }
+
+    override def vars: Seq[JsonCollection.Dynamic] =
+      Seq(path, data).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
   }
 
   case class ErrorInstruction(error: String) extends Instruction2 {
@@ -552,9 +438,13 @@ trait InterceptFunction {
                    v: JsonCollection.Val): Unit = {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
-        val realValue = variables.get(k.value)
+        var realValue = variables.get(k.value)
         if (realValue.isEmpty) {
           throw new RuntimeException("could not find variable: " + k.value)
+        }
+
+        if (realValue.get.isInstanceOf[JsonCollection.Fun]) {
+          realValue = realValue.asInstanceOf[JsonCollection.Fun].realValue
         }
 
         realValue.foreach(r => {

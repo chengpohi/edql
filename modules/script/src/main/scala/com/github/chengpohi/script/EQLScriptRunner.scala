@@ -24,7 +24,7 @@ class EQLScriptRunner extends InstructionInvoker {
     eqlParser.parseJson(text)
   }
 
-  def extractVars(text: String): Map[String, Either[JsonCollection.Val, FunctionInvokeInstruction]] = {
+  def extractVars(text: String): Map[String, JsonCollection.Val] = {
     val instructions = eqlParser.generateInstructions(text)
     instructions.map(ins => {
       val cIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])

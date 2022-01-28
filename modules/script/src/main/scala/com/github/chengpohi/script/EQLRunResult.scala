@@ -4,7 +4,7 @@ import scala.collection.SeqMap
 import scala.util.{Success, Try}
 
 
-case class EQLRunResult(response: Try[Seq[Seq[String]]],
+case class EQLRunResult(response: Try[Seq[String]],
                         context: Map[String, Any] = Map()) {
   def isSuccess: Boolean = response.isSuccess
 
@@ -12,15 +12,15 @@ case class EQLRunResult(response: Try[Seq[Seq[String]]],
 
   def failed: Throwable = response.failed.get
 
-  def success: Seq[Seq[String]] = response.get
+  def success: Seq[String] = response.get
 }
 
 object EQLRunResult {
-  def apply(response: Try[Seq[Seq[String]]]): EQLRunResult = {
+  def apply(response: Try[Seq[String]]): EQLRunResult = {
     new EQLRunResult(response)
   }
 
-  def apply(response: Seq[Seq[String]],
+  def apply(response: Seq[String],
             context: ScriptEQLContext): EQLRunResult = {
     new EQLRunResult(Success(response), SeqMap(
       "HOST" -> context.endpoint,

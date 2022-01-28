@@ -25,32 +25,15 @@ trait InstructionInvoker {
     val endpointBind = scriptContextIns.find(_.isInstanceOf[EndpointBindInstruction])
       .map(i => i.asInstanceOf[eqlParser.EndpointBindInstruction])
     if (endpointBind.isEmpty) {
-      return EQLRunResult(Failure(new RuntimeException("need bind host")))
+      return EQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
     val (functions, context) =
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, runDir)
 
-    val invokeResult = invokeIns.map {
-      case invokeFunction: FunctionInvokeInstruction =>
-        functionInvoke(functions, context, invokeFunction)
-      case e: EchoInstruction => {
-        e.value match {
-          case Left(jv) => {
-            mapRealValue(context.variables, jv)
-            Seq(jv.toJson)
-          }
-          case Right(f) => functionInvoke(functions, context, f)
-        }
-      }
-      case it: ForInstruction => {
-        iterCollection(functions, context, it)
-      }
-      case i =>
-        Seq(i.execute(context).json)
-    }
+    val invokeResult = runInstructions(functions, context, invokeIns)
 
-    EQLRunResult(invokeResult.filter(i => i != null).map(_.filter(_.nonEmpty)), context)
+    EQLRunResult(invokeResult.filter(i => i != null).filter(_.nonEmpty), context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
@@ -108,7 +91,7 @@ trait InstructionInvoker {
         .map(i => i.funcName + i.variableNames.size -> i)
         .toMap ++ systemFunction
 
-    val globalVars = vars.filter(_._2.isLeft).map(i => i._1 -> i._2.left.get) + ("CONTEXT_PATH" -> JsonCollection.Str(runDir))
+    val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runDir))
 
     val context = ScriptEQLContext(
       endPoint,
@@ -185,18 +168,25 @@ trait InstructionInvoker {
 
   private def evaluateFunctionVars(globalFunctions: Map[String, eqlParser.FunctionInstruction],
                                    context: ScriptEQLContext,
-                                   vars: Map[String, eqlParser.ContextVal]
+                                   vars: Map[String, JsonCollection.Val]
                                   ) = {
-    val evaluateVars = vars.filter(_._2.isRight).map(i => i._1 -> i._2.right.get)
+    val evaluateVars = vars.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
     evaluateVars.foreach(fVar => {
-      val value = functionInvoke(globalFunctions, context, fVar._2).last
+      val value = functionInvoke(globalFunctions, context, FunctionInvokeInstruction(fVar.value._1, fVar.value._2)).last
       val fVal = parseJson(value)
       if (fVal.isFailure) {
         throw new RuntimeException(fVal.failed.get)
       }
-      context.variables.put(fVar._1, fVal.get)
+      fVar.realValue = Some(fVal.get)
+      context.variables.put(fVar.value._1, fVal.get)
     })
-    val valVars = vars.filter(_._2.isLeft).map(i => i._1 -> i._2.left.get)
+
+    val valVars = vars.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
+      if (i._2.isInstanceOf[JsonCollection.Var]) {
+        mapRealValue(context.variables, i._2)
+      }
+      i._1 -> i._2
+    })
     context.variables.addAll(valVars)
   }
 
@@ -217,7 +207,6 @@ trait InstructionInvoker {
     val cachedVariables = context.variables
 
     val iterVariable = r.iterVariable
-    mapRealValue(context.variables, iterVariable)
 
     val instructions = extractCollection(iterVariable).value.flatMap(i => {
       context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
@@ -238,7 +227,8 @@ trait InstructionInvoker {
 
     val foundFunction = functions.get(invoke.funcName + values.size)
     if (foundFunction.isEmpty) {
-      throw new RuntimeException("Could not found method: " + invoke.funcName + " with parameters " + values.map(_.left).mkString(","))
+      throw new RuntimeException("Could not found method: " + invoke.funcName + " with parameters "
+        + values.map(_.toJson).mkString(","))
     }
 
     val func = foundFunction.get
@@ -264,6 +254,11 @@ trait InstructionInvoker {
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
                       context: ScriptEQLContext,
                       instructions: Seq[eqlParser.Instruction2]): Seq[String] = {
+
+    instructions.foreach(po => {
+      evalJsonVars(functions, context, po.vars)
+    })
+
     instructions
       .filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
       case r: ForInstruction => {
@@ -272,24 +267,31 @@ trait InstructionInvoker {
       case f: FunctionInvokeInstruction =>
         functionInvoke(functions, context, f)
       case r: ReturnInstruction => {
-        r.value match {
-          case Left(jv) => {
-            mapRealValue(context.variables, jv)
-            Seq(jv.toJson)
-          }
-          case Right(f) => functionInvoke(functions, context, f)
-        }
+        Seq(r.value.toJson)
       }
       case r: EchoInstruction =>
-        r.value match {
-          case Left(jv) => {
-            mapRealValue(context.variables, jv)
-            Seq(jv.toJson)
-          }
-          case Right(f) => functionInvoke(functions, context, f)
-        }
+        Seq(r.value.toJson)
       case i => {
         Seq(i.execute(context).json)
+      }
+    }
+  }
+
+  def evalJsonVars(functions: Map[String, eqlParser.FunctionInstruction],
+                   context: ScriptEQLContext,
+                   vars: Seq[JsonCollection.Dynamic]) = {
+    vars.foreach {
+      case vr: JsonCollection.Var => {
+        mapRealValue(context.variables, vr)
+      }
+      case f: JsonCollection.Fun => {
+        val res = functionInvoke(functions, context,
+          FunctionInvokeInstruction(f.value._1, f.value._2)).last
+        val fVal = parseJson(res)
+        if (fVal.isFailure) {
+          throw new RuntimeException(fVal.failed.get)
+        }
+        f.realValue = Some(fVal.get)
       }
     }
   }
