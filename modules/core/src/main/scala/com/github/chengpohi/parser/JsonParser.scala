@@ -5,7 +5,7 @@ import fastparse.NoWhitespace._
 import fastparse._
 import org.apache.commons.lang3.StringEscapeUtils
 
-class JsonParser {
+class JsonParser extends InterceptFunction {
   val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
   val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
@@ -89,8 +89,14 @@ class JsonParser {
 
   def colon[_: P] = P(space ~ ":" ~ space)
 
+  def fun[_: P]: P[JsonCollection.Fun] =
+    P(space ~ variableName ~ space ~ "(" ~ (jsonExpr | fun).rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
+      .map(c => {
+        JsonCollection.Fun((c._1, c._2))
+      })
+
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable) ~ newlineOrComment
+    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ newlineOrComment
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))

@@ -73,26 +73,17 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
   def variableAction[_: P] =
-    P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ (jsonExpr | functionInvokeExpr)).map(
+    P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
       c => c._2 match {
-        case f: FunctionInvokeInstruction =>
-          VariableInstruction(c._1, Right(f))
         case v: JsonCollection.Val =>
-          VariableInstruction(c._1, Left(v))
+          VariableInstruction(c._1, v)
       })
 
-  def returnExpr[_: P] = P(space ~ "return" ~ space ~/ (jsonExpr | functionInvokeExpr).map {
-    case f: FunctionInvokeInstruction =>
-      ReturnInstruction(Right(f))
-    case v: JsonCollection.Val =>
-      ReturnInstruction(Left(v))
-  })
+  def returnExpr[_: P] = P(space ~ "return" ~ space ~/ jsonExpr.map(v => ReturnInstruction(v)))
 
-  def echoExpr[_: P] = P(space ~ "echo" ~ space ~/ (jsonExpr | functionInvokeExpr).map {
-    case f: FunctionInvokeInstruction =>
-      EchoInstruction(Right(f))
-    case v: JsonCollection.Val =>
-      EchoInstruction(Left(v))
+  def echoExpr[_: P] = P(space ~ "echo" ~ space ~/ jsonExpr.map {
+    v: JsonCollection.Val =>
+      EchoInstruction(v)
   })
 
   def functionExpr[_: P] = P(space ~ "function" ~ space ~ variableName ~ space ~/ "(" ~
@@ -106,15 +97,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
     .map(c => ForInstruction(c._1, c._2, c._3))
 
   def functionInvokeExpr[_: P]: P[FunctionInvokeInstruction] =
-    P(space ~ variableName ~ space ~ "(" ~ (jsonExpr | functionInvokeExpr).rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
+    P(space ~ fun ~ newlineOrComment.?)
       .map(c => {
-        val vs = c._2 map {
-          case v: JsonCollection.Val =>
-            Left(v)
-          case f: FunctionInvokeInstruction =>
-            Right(f)
-        }
-        FunctionInvokeInstruction(c._1, vs)
+        FunctionInvokeInstruction(c.value._1, c.value._2)
       })
 
   def catNodes[_: P] = P("cat" ~ space ~ "nodes" ~ newline.?).map(

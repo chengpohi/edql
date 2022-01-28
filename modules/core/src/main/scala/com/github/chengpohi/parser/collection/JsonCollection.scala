@@ -31,7 +31,9 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
   }
 
-  case class Var(value: java.lang.String) extends Val {
+  abstract class Dynamic extends Val
+
+  case class Var(value: java.lang.String) extends Dynamic {
     var realValue: Option[JsonCollection.Val] = None
 
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
@@ -39,6 +41,14 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
 
     override def vars: Seq[Var] = Seq(this)
+  }
+
+  case class Fun(value: (String, Seq[Val])) extends Dynamic {
+    var realValue: Option[JsonCollection.Val] = None
+
+    override def toJson: String = realValue.map(_.toJson).getOrElse("")
+
+    override def get(path: String): Option[Val] = None
   }
 
   case class Obj(value: (Val, Val)*) extends AnyVal with Val {
