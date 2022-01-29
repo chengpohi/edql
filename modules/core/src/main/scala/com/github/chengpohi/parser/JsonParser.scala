@@ -5,16 +5,20 @@ import fastparse.NoWhitespace._
 import fastparse._
 import org.apache.commons.lang3.StringEscapeUtils
 
+
 class JsonParser extends InterceptFunction {
   val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
-  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
+  val NewlineChars: NamedFunction[Char, Boolean] = NamedFunction("\n\r\n\r\f".contains(_: Char), "StringChars")
+  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!" \n\r\n\r\f".contains(_: Char), "StringChars")
   val CollectionChars: NamedFunction[Char, Boolean] =
     NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
 
+  def newline[_: P] = P(CharsWhile(NewlineChars))
+
   def strChars[_: P] = P(CharsWhile(StringChars))
 
-  def noNewlineChars[_: P] = P(CharsWhile(NotNewlineChars))
+  def notNewlineChars[_: P] = P(CharsWhile(NotNewlineChars))
 
   def alphaChars[_: P] = P(CharsWhile(AlphaChars))
 
@@ -32,15 +36,15 @@ class JsonParser extends InterceptFunction {
 
   //val string =
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-  def actionPath[_: P] = P(space ~ actionChars.rep(1).! ~ space).map(i =>
+  def actionPath[_: P] = P(WS ~ actionChars.rep(1).! ~ WS).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
-  def quoteString[_: P] = P(space ~ "\"" ~ strChars.rep(0).! ~ "\"" ~ space).map(i =>
+  def quoteString[_: P] = P(WS ~ "\"" ~ strChars.rep(0).! ~ "\"" ~ WS).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
 
   def variableName[_: P] = P(variableChars.rep(1)).!
 
-  def variable[_: P] = P(space ~ "$" ~ variableChars.rep(1).! ~ space).map(JsonCollection.Var)
+  def variable[_: P] = P(WS ~ "$" ~ variableChars.rep(1).! ~ WS).map(JsonCollection.Var)
 
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   def strOrVar[_: P] = P(quoteString | variable)
@@ -67,7 +71,7 @@ class JsonParser extends InterceptFunction {
     )
 
   def pair[_: P]: P[(JsonCollection.Val, JsonCollection.Val)] =
-    P(newlineOrComment ~ (quoteString | variable) ~/ ":" ~ newlineOrComment ~/ jsonExpr)
+    P(WS ~ (quoteString | variable) ~/ ":" ~ WS ~/ jsonExpr)
 
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
@@ -77,39 +81,33 @@ class JsonParser extends InterceptFunction {
   def `true`[_: P] = P("true").map(_ => JsonCollection.True)
 
   def obj[_: P] =
-    P("{" ~/ newlineOrComment ~/ pair.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ "}").map(JsonCollection.Obj(_: _*))
+    P("{" ~/ WS ~/ pair.rep(sep = ",") ~ ",".? ~ WS ~ "}").map(JsonCollection.Obj(_: _*))
 
   def tuple[_: P] =
-    P("(" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ ")").map(JsonCollection.Arr(_: _*))
+    P("(" ~/ WS ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ WS ~ ")").map(JsonCollection.Arr(_: _*))
 
 
   def array[_: P] =
-    P("[" ~/ newlineOrComment ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ newlineOrComment ~ "]").map(JsonCollection.Arr(_: _*))
+    P("[" ~/ WS ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ WS ~ "]").map(JsonCollection.Arr(_: _*))
 
 
-  def colon[_: P] = P(space ~ ":" ~ space)
+  def colon[_: P] = P(WS ~ ":" ~ WS)
 
   def fun[_: P]: P[JsonCollection.Fun] =
-    P(space ~ variableName ~ space ~ "(" ~ (jsonExpr | fun).rep(sep = space ~ "," ~ space) ~ ")" ~ newlineOrComment.?)
+    P(WS ~ variableName ~ WS ~ "(" ~ (jsonExpr | fun).rep(sep = WS ~ "," ~ WS) ~ ")" ~ WS.?)
       .map(c => {
         JsonCollection.Fun((c._1, c._2))
       })
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    newlineOrComment ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ newlineOrComment
+    WS ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ WS
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
 
-  def space[_: P] = P(CharsWhileIn(" \r\n\t", 0))
+  def commentChars[_: P] = P("#" ~/ notNewlineChars.rep(0) ~/ End.?)
 
-  def newlineChars[_: P] = P(" " | "\n" | "\r\n" | "\r" | "\f" | "\t")
-
-  def newline[_: P] = P(newlineChars).rep(1)
-
-  def commentString[_: P] = P("#" ~/ noNewlineChars.rep(0) ~/ (newlineChars | End))
-
-  def newlineOrComment[_: P] = P(newlineChars | commentString).rep(0)
+  def WS[_: P] = P(" " | newline | commentChars).rep
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
