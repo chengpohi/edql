@@ -10,140 +10,105 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       HelpInstruction(Seq(s))
     })
 
-  def comment[_: P] = P("#" ~ noNewlineChars.rep(0).! ~/ newline.?).map(
+  def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
 
-  def hostBind[_: P] = P(space ~ "HOST" ~ space ~ actionPath).map(
+  def hostBind[_: P] = P(WS ~ "HOST" ~ WS ~ actionPath ~ WS).map(
     c => EndpointBindInstruction(c.extract[String]))
 
-  def timeoutBind[_: P] = P(space ~ "Timeout" ~ space ~ number ~ space).map(
+  def timeoutBind[_: P] = P(WS ~ "Timeout" ~ WS ~ number ~ WS).map(
     c => TimeoutInstruction(c.extract[Int]))
 
-  def importExpr[_: P] = P(space ~ "import" ~ space ~ quoteString ~ space).map(
+  def importExpr[_: P] = P(WS ~ "import" ~ WS ~ quoteString ~ WS).map(
     c => ImportInstruction(c.extract[String]))
 
-  def authorizationBind[_: P] = P(space ~ "Authorization" ~ space ~ (actionPath | quoteString)).map(
+  def authorizationBind[_: P] = P(WS ~ "Authorization" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       AuthorizationBindInstruction(c.extract[String])
     })
 
-  def usernameBind[_: P] = P(space ~ "Username" ~ space ~ (actionPath | quoteString)).map(
+  def usernameBind[_: P] = P(WS ~ "Username" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       UsernameBindInstruction(c.extract[String])
     })
 
-  def passwordBind[_: P] = P(space ~ "Password" ~ space ~ (actionPath | quoteString)).map(
+  def passwordBind[_: P] = P(WS ~ "Password" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       PasswordBindInstruction(c.extract[String])
     })
 
-  def apiKeyIdBind[_: P] = P(space ~ "ApiKeyId" ~ space ~ (actionPath | quoteString)).map(
+  def apiKeyIdBind[_: P] = P(WS ~ "ApiKeyId" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       ApiKeyIdBindInstruction(c.extract[String])
     })
 
-  def apiKeySecretBind[_: P] = P(space ~ "ApiKeySecret" ~ space ~ (actionPath | quoteString)).map(
+  def apiKeySecretBind[_: P] = P(WS ~ "ApiKeySecret" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       ApiKeySecretBindInstruction(c.extract[String])
     })
 
-  def apiSessionTokenBind[_: P] = P(space ~ "ApiSessionToken" ~ space ~ (actionPath | quoteString)).map(
+  def apiSessionTokenBind[_: P] = P(WS ~ "ApiSessionToken" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       ApiSessionTokenBindInstruction(c.extract[String])
     })
 
-  def awsRegionBind[_: P] = P(space ~ "AWSRegion" ~ space ~ (actionPath | quoteString)).map(
+  def awsRegionBind[_: P] = P(WS ~ "AWSRegion" ~ WS ~ (actionPath | quoteString) ~ WS).map(
     c => {
       AWSRegionBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P(space ~ "POST" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.rep.?).map(
+  def postAction[_: P] = P(WS ~ "POST" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.rep.? ~ WS).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
-  def getAction[_: P] = P(space ~ "GET" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def getAction[_: P] = P(WS ~ "GET" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
     c => GetActionInstruction(c._1.extract[String], c._2))
 
-  def deleteAction[_: P] = P(space ~ "DELETE" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def deleteAction[_: P] = P(WS ~ "DELETE" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2))
 
-  def putAction[_: P] = P(space ~ "PUT" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def putAction[_: P] = P(WS ~ "PUT" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
     c => PutActionInstruction(c._1.extract[String], c._2))
 
-  def headAction[_: P] = P(space ~ "HEAD" ~ space ~ actionPath ~/ newlineOrComment ~/ jsonExpr.?).map(
+  def headAction[_: P] = P(WS ~ "HEAD" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
   def variableAction[_: P] =
-    P(space ~ "local" ~ space ~ variableName ~ space ~/ "=" ~ space ~/ jsonExpr).map(
+    P(WS ~ "var" ~ WS ~ variableName ~ WS ~/ "=" ~ WS ~/ jsonExpr ~ WS).map(
       c => c._2 match {
         case v: JsonCollection.Val =>
           VariableInstruction(c._1, v)
       })
 
-  def returnExpr[_: P] = P(space ~ "return" ~ space ~/ jsonExpr.map(v => ReturnInstruction(v)))
+  def returnExpr[_: P] = P(WS ~ "return" ~ WS ~/ jsonExpr.map(v => ReturnInstruction(v)) ~ WS)
 
-  def echoExpr[_: P] = P(space ~ "echo" ~ space ~/ jsonExpr.map {
+  def echoExpr[_: P] = P(WS ~ "echo" ~ WS ~/ jsonExpr.map {
     v: JsonCollection.Val =>
       EchoInstruction(v)
-  })
+  } ~ WS)
 
-  def functionExpr[_: P] = P(space ~ "function" ~ space ~ variableName ~ space ~/ "(" ~
-    space ~ variableName.rep(sep = space ~ "," ~ space) ~ space ~ ")" ~/
-    space ~ "{" ~/ space ~ inses ~ space ~ "}")
+  def functionExpr[_: P] = P(WS ~ "function" ~ WS ~ variableName ~ WS ~/ "(" ~
+    WS ~ variableName.rep(sep = WS ~ "," ~ WS) ~ WS ~ ")" ~/
+    WS ~ "{" ~/ WS ~ inses ~ WS ~ "}" ~ WS)
     .map(c => FunctionInstruction(c._1, c._2, c._3))
 
-  def forExpr[_: P] = P(space ~ "for" ~ space ~/ "(" ~
-    space ~ variableName ~ space ~ "in" ~ space ~ jsonExpr ~ ")" ~/
-    space ~ "{" ~/ space ~ inses ~ space ~ "}")
+  def forExpr[_: P] = P(WS ~ "for" ~ WS ~/ "(" ~
+    WS ~ variableName ~ WS ~ "in" ~ WS ~ jsonExpr ~ ")" ~/
+    WS ~ "{" ~/ WS ~ inses ~ WS ~ "}")
     .map(c => ForInstruction(c._1, c._2, c._3))
 
   def functionInvokeExpr[_: P]: P[FunctionInvokeInstruction] =
-    P(space ~ fun ~ newlineOrComment.?)
+    P(WS ~ fun ~ WS)
       .map(c => {
         FunctionInvokeInstruction(c.value._1, c.value._2)
       })
 
-  def catNodes[_: P] = P("cat" ~ space ~ "nodes" ~ newline.?).map(
-    _ =>
-      CatNodesInstruction())
-
-  def catAllocation[_: P] = P("cat" ~ space ~ "allocation" ~ newline.?).map(
-    _ =>
-      CatAllocationInstruction())
-
-  def catMaster[_: P] = P("cat" ~ space ~ "master" ~ newline.?).map(
-    _ =>
-      CatMasterInstruction())
-
-  def catIndices[_: P] = P("cat" ~ space ~ "indices" ~/ newline.?).map(
-    _ => CatIndicesInstruction())
-
-  def catShards[_: P] = P("cat" ~ space ~ "shards" ~/ newline.?).map(
-    _ =>
-      CatShardsInstruction())
-
-  def catCount[_: P] = P("cat" ~ space ~ "count" ~/ newline.?).map(
-    _ => CatCountInstruction())
-
-  def catRecovery[_: P] = P("cat" ~ space ~ "recovery" ~/ newline.?).map(
-    _ =>
-      CatRecoveryInstruction())
-
-  def catPendingTasks[_: P] = P("cat" ~ space ~ "pending_tasks" ~/ newline.?)
-    .map(_ =>
-      CatPendingInstruction())
-
-  def extractJSON[_: P]: P[(String, String)] = P("\\\\" ~ strOrVar).map(c => ("extract", c.value))
-
-  //val beauty = P("beauty").map(c => ("beauty", beautyJson))
-
   def instrument[_: P]: P[Seq[Instruction2]] = P(
-    inses ~ newlineOrComment.? ~ End
+    inses ~ WS.? ~ End
   )
 
   private def inses[_: P]: P[Seq[Instruction2]] = {
     (
-      comment | catNodes | catAllocation | catIndices | catMaster | catShards | catCount | catPendingTasks | catRecovery
-        | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
+      comment | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
         | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
       ).rep(0)
