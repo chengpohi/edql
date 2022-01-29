@@ -105,7 +105,7 @@ trait InstructionInvoker {
       timeout,
       globalVars)
 
-    evaluateFunctionVars(globalFunctions, context, vars)
+    evalFunParams(globalFunctions, context, vars)
 
     (globalFunctions, context)
   }
@@ -166,28 +166,29 @@ trait InstructionInvoker {
     }
   }
 
-  private def evaluateFunctionVars(globalFunctions: Map[String, eqlParser.FunctionInstruction],
-                                   context: ScriptEQLContext,
-                                   vars: Map[String, JsonCollection.Val]
-                                  ) = {
-    val evaluateVars = vars.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
-    evaluateVars.foreach(fVar => {
-      val value = functionInvoke(globalFunctions, context, FunctionInvokeInstruction(fVar.value._1, fVar.value._2)).last
+  private def evalFunParams(globalFunctions: Map[String, eqlParser.FunctionInstruction],
+                            context: ScriptEQLContext,
+                            parms: Map[String, JsonCollection.Val],
+                            funName: Option[String] = None
+                           ) = {
+    val funParms = parms.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
+    funParms.foreach(fParam => {
+      val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
       val fVal = parseJson(value)
       if (fVal.isFailure) {
         throw new RuntimeException(fVal.failed.get)
       }
-      fVar.realValue = Some(fVal.get)
-      context.variables.put(fVar.value._1, fVal.get)
+      fParam.realValue = Some(fVal.get)
+      context.variables.put(fParam.value._1, fVal.get)
     })
 
-    val valVars = vars.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
+    val vals = parms.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
       if (i._2.isInstanceOf[JsonCollection.Var]) {
-        mapRealValue(context.variables, i._2)
+        mapRealValue(context.variables, i._2, funName)
       }
       i._1 -> i._2
     })
-    context.variables.addAll(valVars)
+    context.variables.addAll(vals)
   }
 
   def extractCollection(iterVariable: JsonCollection.Val): JsonCollection.Arr = {
@@ -219,9 +220,9 @@ trait InstructionInvoker {
   }
 
 
-  def functionInvoke(functions: Map[String, eqlParser.FunctionInstruction],
+  def invokeFunction(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
-                     invoke: eqlParser.FunctionInvokeInstruction): Seq[String] = {
+                     invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[String] = {
     val cachedVariables = context.variables
     val values = invoke.vals
 
@@ -231,21 +232,22 @@ trait InstructionInvoker {
         + values.map(_.toJson).mkString(","))
     }
 
-    val func = foundFunction.get
-    val funcMethodVars = func.variableNames.zip(values).toMap
+    val fun = foundFunction.get
+    val funName = fun.funcName + "_" + fun.variableNames.size
+    val funParams = fun.variableNames.map(i => funName + "$" + i).zip(values).toMap
 
-    evaluateFunctionVars(functions, context, funcMethodVars)
+    evalFunParams(functions, context, funParams, parentFunName.orElse(Some(funName)))
 
-    context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
-
-    val instructions = func.instructions
+    val instructions = fun.instructions
     val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
       .map(i => i.asInstanceOf[VariableInstruction])
-      .map(i => i.variableName -> i.value).toMap
+      .map(i => {
+        funName + "$" + i.variableName -> i.value
+      }).toMap
 
-    evaluateFunctionVars(functions, context, funcBodyVars)
+    evalFunParams(functions, context, funcBodyVars, Some(funName))
 
-    val response = runInstructions(functions, context, instructions)
+    val response = runInstructions(functions, context, instructions, Some(funName))
 
     context.variables = cachedVariables
     response
@@ -253,10 +255,10 @@ trait InstructionInvoker {
 
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
                       context: ScriptEQLContext,
-                      instructions: Seq[eqlParser.Instruction2]): Seq[String] = {
+                      instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[String] = {
 
     instructions.foreach(po => {
-      evalJsonVars(functions, context, po.vars)
+      evalVars(functions, context, po.vars, funName)
     })
 
     instructions
@@ -265,7 +267,7 @@ trait InstructionInvoker {
         iterCollection(functions, context, r)
       }
       case f: FunctionInvokeInstruction =>
-        functionInvoke(functions, context, f)
+        invokeFunction(functions, context, f, funName)
       case r: ReturnInstruction => {
         Seq(r.value.toJson)
       }
@@ -277,22 +279,20 @@ trait InstructionInvoker {
     }
   }
 
-  def evalJsonVars(functions: Map[String, eqlParser.FunctionInstruction],
-                   context: ScriptEQLContext,
-                   vars: Seq[JsonCollection.Dynamic]) = {
+  def evalVars(functions: Map[String, eqlParser.FunctionInstruction],
+               context: ScriptEQLContext,
+               vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
     vars.foreach {
-      case vr: JsonCollection.Var => {
-        mapRealValue(context.variables, vr)
-      }
-      case f: JsonCollection.Fun => {
-        val res = functionInvoke(functions, context,
-          FunctionInvokeInstruction(f.value._1, f.value._2)).last
+      case vr: JsonCollection.Var =>
+        mapRealValue(context.variables, vr, funName)
+      case f: JsonCollection.Fun =>
+        val res = invokeFunction(functions, context,
+          FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
         val fVal = parseJson(res)
         if (fVal.isFailure) {
           throw new RuntimeException(fVal.failed.get)
         }
         f.realValue = Some(fVal.get)
-      }
     }
   }
 }

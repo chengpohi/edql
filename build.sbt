@@ -53,5 +53,6 @@ lazy val eqlCore = project
 
 
 addCommandAlias("pbCore", "; eqlCore/publishLocal")
+addCommandAlias("pbm2", "; eqlCore/publishM2;eqlScript/publishM2")
 addCommandAlias("binary", "; eqlRepl/assembly")
 addCommandAlias("ni", "; eqlRepl/nativeImage")

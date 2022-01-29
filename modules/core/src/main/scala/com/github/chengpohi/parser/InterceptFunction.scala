@@ -435,26 +435,28 @@ trait InterceptFunction {
   }
 
   def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val],
-                   v: JsonCollection.Val): Unit = {
+                   v: JsonCollection.Val, funName: Option[String] = None): Unit = {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
-        var realValue = variables.get(k.value)
-        if (realValue.isEmpty) {
-          throw new RuntimeException("could not find variable: " + k.value)
-        }
-
-        if (realValue.get.isInstanceOf[JsonCollection.Fun]) {
-          realValue = realValue.asInstanceOf[JsonCollection.Fun].realValue
-        }
-
-        realValue.foreach(r => {
-          if (r.vars.nonEmpty) {
-            r.vars.foreach(t => {
-              mapRealValue(variables, t)
-            })
+        if (k.realValue.isEmpty) {
+          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value)
+          if (vl.isEmpty) {
+            throw new RuntimeException("could not find variable: " + k.value)
           }
-        })
-        k.realValue = realValue
+
+          if (vl.get.isInstanceOf[JsonCollection.Fun]) {
+            vl = vl.asInstanceOf[JsonCollection.Fun].realValue
+          }
+
+          vl.foreach(r => {
+            if (r.vars.nonEmpty) {
+              r.vars.foreach(t => {
+                mapRealValue(variables, t, funName)
+              })
+            }
+          })
+          k.realValue = vl
+        }
       })
     }
   }
