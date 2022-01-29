@@ -228,7 +228,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      action.getOrElse(Seq()).flatMap(i => i.vars).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
+      action.map(i => i.flatMap(j => extractDynamics(j))).getOrElse(Seq())
   }
 
 
@@ -247,7 +247,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
+      action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
   case class PutActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -265,7 +265,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
+      action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
   case class GetActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -283,7 +283,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      action.map(i => i.vars).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic])
+      action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
   case class HeadActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
@@ -301,7 +301,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      action.map(i => Seq(i)).getOrElse(Seq()).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      action.map(i => extractDynamics(i)).getOrElse(Seq())
 
   }
 
@@ -313,7 +313,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] = {
-      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      extractDynamics(value)
     }
   }
 
@@ -335,8 +335,9 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      Seq(iterVariable).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(_.asInstanceOf[JsonCollection.Dynamic])
+      extractDynamics(iterVariable)
   }
+
 
   case class ReturnInstruction(value: JsonCollection.Val) extends Instruction2 {
     override def name = "return"
@@ -346,7 +347,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] = {
-      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      extractDynamics(value)
     }
   }
 
@@ -358,7 +359,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] = {
-      Seq(value).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      extractDynamics(value)
     }
   }
 
@@ -370,7 +371,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] = {
-      vals.filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      vals.flatMap(i => extractDynamics(i))
     }
   }
 
@@ -390,7 +391,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      Seq(filePath).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      extractDynamics(filePath)
   }
 
   case class WriteJSONInstruction(filePath: JsonCollection.Val, data: JsonCollection.Val) extends Instruction2 {
@@ -408,7 +409,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      Seq(filePath, data).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      Seq(filePath, data).flatMap(i => extractDynamics(i))
   }
 
   case class JQInstruction(data: JsonCollection.Val, path: JsonCollection.Val) extends Instruction2 {
@@ -422,7 +423,7 @@ trait InterceptFunction {
     }
 
     override def vars: Seq[JsonCollection.Dynamic] =
-      Seq(path, data).filter(i => i.isInstanceOf[JsonCollection.Dynamic]).map(i => i.asInstanceOf[JsonCollection.Dynamic])
+      Seq(path, data).flatMap(i => extractDynamics(i))
   }
 
   case class ErrorInstruction(error: String) extends Instruction2 {
@@ -444,8 +445,10 @@ trait InterceptFunction {
             throw new RuntimeException("could not find variable: " + k.value)
           }
 
-          if (vl.get.isInstanceOf[JsonCollection.Fun]) {
-            vl = vl.asInstanceOf[JsonCollection.Fun].realValue
+          vl.get match {
+            case fun: JsonCollection.Fun =>
+              vl = fun.realValue
+            case _ =>
           }
 
           vl.foreach(r => {
@@ -485,6 +488,21 @@ trait InterceptFunction {
     })
   }
 
+
+  private def extractDynamics(iterVariable: JsonCollection.Val): Seq[JsonCollection.Dynamic] = {
+    iterVariable match {
+      case d: JsonCollection.Dynamic =>
+        Seq(d)
+      case obj: JsonCollection.Obj =>
+        obj.value.flatMap(v => extractDynamics(v._1) ++ extractDynamics(v._2))
+      case obj: JsonCollection.Tuple =>
+        obj.value.flatMap(v => extractDynamics(v))
+      case obj: JsonCollection.Arr =>
+        obj.value.flatMap(v => extractDynamics(v))
+      case _ =>
+        Seq()
+    }
+  }
 
   def systemFunction: Map[String, FunctionInstruction] = {
     Map(
