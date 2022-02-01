@@ -258,7 +258,7 @@ trait InstructionInvoker {
                       instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
 
     instructions.foreach(po => {
-      evalDynamics(functions, context, po.ds, funName)
+      evalDs(functions, context, po.ds, funName)
     })
 
     instructions
@@ -279,9 +279,9 @@ trait InstructionInvoker {
     }
   }
 
-  def evalDynamics(functions: Map[String, eqlParser.FunctionInstruction],
-                   context: ScriptEQLContext,
-                   vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
+  def evalDs(functions: Map[String, eqlParser.FunctionInstruction],
+             context: ScriptEQLContext,
+             vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
     vars.foreach {
       case vr: JsonCollection.Var =>
         mapRealValue(context.variables, vr, funName)
