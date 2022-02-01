@@ -116,7 +116,7 @@ class JsonParser extends InterceptFunction {
     }
   }
 
-  def divMul[_: P]: P[JsonCollection.ArithTree] = P(WS ~ factor ~ WS ~ (WS ~ CharIn("*/").! ~ WS ~/ factor ~ WS).rep ~ WS).map(v => {
+  def divMul[_: P]: P[JsonCollection.ArithTree] = P(WS ~ factor ~ WS ~ (WS ~ CharIn("*\\/").! ~ WS ~/ factor ~ WS).rep ~ WS).map(v => {
     v._2 match {
       case Seq() => {
         JsonCollection.ArithTree(v._1, None, None)
