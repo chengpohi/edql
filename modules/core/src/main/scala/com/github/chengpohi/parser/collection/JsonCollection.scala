@@ -25,10 +25,22 @@ object JsonCollection {
     def \\(path: String): Option[Val] = get(path)
   }
 
-  case class Str(value: java.lang.String) extends AnyVal with Val {
+  case class Str(value: java.lang.String) extends AnyVal with Arith {
     override def toJson: String = "\"" + value + "\""
 
     override def get(path: String): Option[Val] = None
+
+    override def plus(i: Arith): Arith = i match {
+      case n: JsonCollection.Num => JsonCollection.Str(value + n.value.toString)
+      case s: JsonCollection.Str => JsonCollection.Str(value + s.value)
+      case _ => throw new RuntimeException("not support + type: " + i)
+    }
+
+    override def minus(i: Arith): Arith = throw new RuntimeException("not support + type: " + i)
+
+    override def multiply(i: Arith): Arith = throw new RuntimeException("not support + type: " + i)
+
+    override def div(i: Arith): Arith = throw new RuntimeException("not support + type: " + i)
   }
 
   abstract class Dynamic extends Val
@@ -43,8 +55,23 @@ object JsonCollection {
     override def vars: Seq[Var] = Seq(this)
   }
 
+  case class Wrapper(value: java.lang.String) extends Val {
+    override def toJson: String = value
+
+    override def get(path: String): Option[Val] = None
+  }
+
+
   case class Fun(value: (String, Seq[Val])) extends Dynamic {
     var realValue: Option[JsonCollection.Val] = None
+
+    override def toJson: String = realValue.map(_.toJson).getOrElse("")
+
+    override def get(path: String): Option[Val] = None
+  }
+
+  case class ArithTree(value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val])) extends Dynamic {
+    var realValue: Option[JsonCollection.Arith] = None
 
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
@@ -84,14 +111,67 @@ object JsonCollection {
     override def vars: Seq[Var] = value.flatMap(_.vars)
   }
 
-  case class Num(value: Number) extends AnyVal with Val {
+  trait Arith extends Any with Val {
+    def plus(i: Arith): Arith
+
+    def minus(i: Arith): Arith
+
+    def multiply(i: Arith): Arith
+
+    def div(i: Arith): Arith
+  }
+
+  case class Num(value: Number) extends AnyVal with Arith {
     override def toJson: String = value.toString
 
     override def get(path: String): Option[Val] = None
+
+    override def plus(i: Arith): Arith = {
+      i match {
+        case n: JsonCollection.Num => JsonCollection.Num(addNumbers(value, n.value))
+        case s: JsonCollection.Str => JsonCollection.Str(value + s.value)
+        case _ => throw new RuntimeException("not support + type: " + i)
+      }
+    }
+
+    override def minus(i: Arith): Arith = {
+      i match {
+        case n: JsonCollection.Num => JsonCollection.Num(minusNumbers(value, n.value))
+        case _ => throw new RuntimeException("not support + type: " + i)
+      }
+    }
+
+    override def multiply(i: Arith): Arith = {
+      i match {
+        case n: JsonCollection.Num => JsonCollection.Num(multiplyNumbers(value, n.value))
+        case _ => throw new RuntimeException("not support + type: " + i)
+      }
+    }
+
+    override def div(i: Arith): Arith = {
+      i match {
+        case n: JsonCollection.Num => JsonCollection.Num(divNumbers(value, n.value))
+        case _ => throw new RuntimeException("not support + type: " + i)
+      }
+    }
+  }
+
+  def addNumbers(a: Number, b: Number): Number = {
+    if (a.isInstanceOf[Double] || b.isInstanceOf[Double]) a.doubleValue + b.doubleValue
+    else if (a.isInstanceOf[Float] || b.isInstanceOf[Float]) a.floatValue + b.floatValue
+    else if (a.isInstanceOf[Long] || b.isInstanceOf[Long]) a.longValue + b.longValue
+    else a.intValue + b.intValue
+  }
+
+  def minusNumbers(a: Number, b: Number): Number = {
+    if (a.isInstanceOf[Double] || b.isInstanceOf[Double]) a.doubleValue - b.doubleValue
+    else if (a.isInstanceOf[Float] || b.isInstanceOf[Float]) a.floatValue - b.floatValue
+    else if (a.isInstanceOf[Long] || b.isInstanceOf[Long]) a.longValue - b.longValue
+    else a.intValue - b.intValue
   }
 
   case object False extends Val {
-    def value: Boolean = false
+    def value = false
 
     override def toJson: String = value.toString
 
@@ -113,6 +193,21 @@ object JsonCollection {
     override def toJson: String = value.map(_.toString).orNull
 
     override def get(path: String): Option[Val] = None
+  }
+
+
+  def multiplyNumbers(a: Number, b: Number): Number = {
+    if (a.isInstanceOf[Double] || b.isInstanceOf[Double]) a.doubleValue * b.doubleValue
+    else if (a.isInstanceOf[Float] || b.isInstanceOf[Float]) a.floatValue * b.floatValue
+    else if (a.isInstanceOf[Long] || b.isInstanceOf[Long]) a.longValue * b.longValue
+    else a.intValue * b.intValue
+  }
+
+  def divNumbers(a: Number, b: Number): Number = {
+    if (a.isInstanceOf[Double] || b.isInstanceOf[Double]) a.doubleValue / b.doubleValue
+    else if (a.isInstanceOf[Float] || b.isInstanceOf[Float]) a.floatValue / b.floatValue
+    else if (a.isInstanceOf[Long] || b.isInstanceOf[Long]) a.longValue / b.longValue
+    else a.intValue / b.intValue
   }
 
   case object Comment extends Val {

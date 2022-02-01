@@ -98,7 +98,7 @@ trait InterceptFunction {
 
     def execute(implicit eql: EQLContext): Definition[_]
 
-    def vars: Seq[JsonCollection.Dynamic] = Seq()
+    def ds: Seq[JsonCollection.Dynamic] = Seq()
   }
 
   lazy val instrumentations = ConfigFactory.load("instrumentations.json")
@@ -213,7 +213,7 @@ trait InterceptFunction {
     }
   }
 
-  case class PostActionInstruction(path: String, action: Option[Seq[JsonCollection.Val]]) extends Instruction2 {
+  case class PostActionInstruction(path: String, action: Seq[JsonCollection.Val]) extends Instruction2 {
     override def name = "post"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
@@ -221,14 +221,14 @@ trait InterceptFunction {
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
-        PostActionDefinition(newPath, action.map(_.map(_.toJson)))
+        PostActionDefinition(newPath, action.map(_.toJson))
       } else {
-        PostActionDefinition("/" + newPath, action.map(_.map(_.toJson)))
+        PostActionDefinition("/" + newPath, action.map(_.toJson))
       }
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
-      action.map(i => i.flatMap(j => extractDynamics(j))).getOrElse(Seq())
+    override def ds: Seq[JsonCollection.Dynamic] =
+      action.flatMap(j => extractDynamics(j))
   }
 
 
@@ -246,7 +246,7 @@ trait InterceptFunction {
       }
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
@@ -264,7 +264,7 @@ trait InterceptFunction {
       }
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
@@ -282,7 +282,7 @@ trait InterceptFunction {
       }
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       action.map(i => extractDynamics(i)).getOrElse(Seq())
   }
 
@@ -300,7 +300,7 @@ trait InterceptFunction {
       }
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       action.map(i => extractDynamics(i)).getOrElse(Seq())
 
   }
@@ -312,7 +312,7 @@ trait InterceptFunction {
       PureStringDefinition(s"")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] = {
+    override def ds: Seq[JsonCollection.Dynamic] = {
       extractDynamics(value)
     }
   }
@@ -334,7 +334,7 @@ trait InterceptFunction {
       PureStringDefinition(s"")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       extractDynamics(iterVariable)
   }
 
@@ -346,7 +346,7 @@ trait InterceptFunction {
       PureStringDefinition(s"")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] = {
+    override def ds: Seq[JsonCollection.Dynamic] = {
       extractDynamics(value)
     }
   }
@@ -358,7 +358,7 @@ trait InterceptFunction {
       PureStringDefinition(s"")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] = {
+    override def ds: Seq[JsonCollection.Dynamic] = {
       extractDynamics(value)
     }
   }
@@ -370,7 +370,7 @@ trait InterceptFunction {
       PureStringDefinition(s"")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] = {
+    override def ds: Seq[JsonCollection.Dynamic] = {
       vals.flatMap(i => extractDynamics(i))
     }
   }
@@ -390,7 +390,7 @@ trait InterceptFunction {
       PureStringDefinition(content)
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       extractDynamics(filePath)
   }
 
@@ -408,7 +408,7 @@ trait InterceptFunction {
       PureStringDefinition("")
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       Seq(filePath, data).flatMap(i => extractDynamics(i))
   }
 
@@ -422,7 +422,7 @@ trait InterceptFunction {
       PureStringDefinition(value)
     }
 
-    override def vars: Seq[JsonCollection.Dynamic] =
+    override def ds: Seq[JsonCollection.Dynamic] =
       Seq(path, data).flatMap(i => extractDynamics(i))
   }
 
@@ -448,6 +448,8 @@ trait InterceptFunction {
           vl.get match {
             case fun: JsonCollection.Fun =>
               vl = fun.realValue
+            case arith: JsonCollection.ArithTree =>
+              vl = arith.realValue
             case _ =>
           }
 

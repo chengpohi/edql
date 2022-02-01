@@ -91,7 +91,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
   }
 
 
-  case class PostActionDefinition(path: String, action: Option[Seq[String]])
+  case class PostActionDefinition(path: String, action: Seq[String])
     extends Definition[String] {
     override def execute: Future[String] = {
       val request = new Request(
@@ -99,13 +99,13 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
 
       action match {
-        case Some(a) =>
+        case Seq() =>
+        case a =>
           if (a.size > 1) {
             request.setJsonEntity(a.mkString(System.lineSeparator()) + System.lineSeparator())
           } else if (a.size == 1) {
             request.setJsonEntity(a.head)
           }
-        case None =>
       }
       Future {
         try {
