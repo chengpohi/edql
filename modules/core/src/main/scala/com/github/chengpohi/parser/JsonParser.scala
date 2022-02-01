@@ -73,7 +73,6 @@ class JsonParser extends InterceptFunction {
   def pair[_: P]: P[(JsonCollection.Val, JsonCollection.Val)] =
     P(WS ~ (quoteString | variable) ~/ ":" ~ WS ~/ jsonExpr)
 
-
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
 
   def `false`[_: P] = P("false").map(_ => JsonCollection.False)
@@ -86,10 +85,8 @@ class JsonParser extends InterceptFunction {
   def tuple[_: P] =
     P("(" ~/ WS ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ WS ~ ")").map(JsonCollection.Arr(_: _*))
 
-
   def array[_: P] =
     P("[" ~/ WS ~/ jsonExpr.rep(sep = ",") ~ ",".? ~ WS ~ "]").map(JsonCollection.Arr(_: _*))
-
 
   def colon[_: P] = P(WS ~ ":" ~ WS)
 
@@ -99,8 +96,59 @@ class JsonParser extends InterceptFunction {
         JsonCollection.Fun((c._1, c._2))
       })
 
+  def parens[_: P]: P[JsonCollection.ArithTree] = P(WS ~ "(" ~/ WS ~/ addSub ~ WS ~ ")" ~ WS)
+
+  def factor[_: P]: P[JsonCollection.ArithTree] = P(quoteString | number | parens) map {
+    case n: JsonCollection.Num => JsonCollection.ArithTree((n, None, None))
+    case s: JsonCollection.Str => JsonCollection.ArithTree((s, None, None))
+    case p: JsonCollection.ArithTree => p
+  }
+
+  def divMulArith(h: JsonCollection.ArithTree, value: Seq[(String, JsonCollection.Val)]): JsonCollection.ArithTree = {
+    value match {
+      case Seq(i) => {
+        JsonCollection.ArithTree(h, Some(i._1), Some(i._2))
+      }
+      case i => {
+        val arith = JsonCollection.ArithTree((h, Some(i.head._1), Some(i.head._2)))
+        divMulArith(arith, i.drop(1))
+      }
+    }
+  }
+
+  def divMul[_: P]: P[JsonCollection.ArithTree] = P(WS ~ factor ~ WS ~ (WS ~ CharIn("*/").! ~ WS ~/ factor ~ WS).rep ~ WS).map(v => {
+    v._2 match {
+      case Seq() => {
+        JsonCollection.ArithTree(v._1, None, None)
+      }
+      case Seq(i) => {
+        JsonCollection.ArithTree(v._1, Some(i._1), Some(i._2))
+      }
+      case i => {
+        val h = JsonCollection.ArithTree(v._1, Some(i.head._1), Some(i.head._2))
+        divMulArith(h, i.drop(1))
+      }
+    }
+  })
+
+  // 3 + 2 * 5
+  def addSub[_: P]: P[JsonCollection.ArithTree] = P(WS ~ divMul ~ WS ~ (WS ~ CharIn("+\\-").! ~ WS ~/ divMul ~ WS).rep).map(v => {
+    v._2 match {
+      case Seq() => {
+        JsonCollection.ArithTree(v._1, None, None)
+      }
+      case Seq(i) => {
+        JsonCollection.ArithTree(v._1, Some(i._1), Some(i._2))
+      }
+      case i => {
+        val h = JsonCollection.ArithTree(v._1, Some(i.head._1), Some(i.head._2))
+        divMulArith(h, i.drop(1))
+      }
+    }
+  })
+
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    WS ~ (obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ WS
+    WS ~ (addSub | obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ WS
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))

@@ -32,8 +32,7 @@ trait InstructionInvoker {
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
-
-    EQLRunResult(invokeResult.filter(i => i != null).filter(_.nonEmpty), context)
+    EQLRunResult(invokeResult.map(i => i.toJson).filter(_.nonEmpty), context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
@@ -174,12 +173,13 @@ trait InstructionInvoker {
     val funParms = parms.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
     funParms.foreach(fParam => {
       val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
-      val fVal = parseJson(value)
-      if (fVal.isFailure) {
-        throw new RuntimeException(fVal.failed.get)
-      }
-      fParam.realValue = Some(fVal.get)
-      context.variables.put(fParam.value._1, fVal.get)
+      fParam.realValue = Some(value)
+      context.variables.put(fParam.value._1, value)
+    })
+
+    val arithes = parms.filter(_._2.isInstanceOf[JsonCollection.ArithTree]).map(i => i._2.asInstanceOf[JsonCollection.ArithTree])
+    arithes.foreach(a => {
+      evalArith(globalFunctions, context, a, funName)
     })
 
     val vals = parms.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
@@ -204,7 +204,7 @@ trait InstructionInvoker {
 
   def iterCollection(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
-                     r: eqlParser.ForInstruction): Seq[String] = {
+                     r: eqlParser.ForInstruction): Seq[JsonCollection.Val] = {
     val cachedVariables = context.variables
 
     val iterVariable = r.iterVariable
@@ -222,7 +222,7 @@ trait InstructionInvoker {
 
   def invokeFunction(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
-                     invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[String] = {
+                     invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[JsonCollection.Val] = {
     val cachedVariables = context.variables
     val values = invoke.vals
 
@@ -255,10 +255,10 @@ trait InstructionInvoker {
 
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
                       context: ScriptEQLContext,
-                      instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[String] = {
+                      instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
 
     instructions.foreach(po => {
-      evalVars(functions, context, po.vars, funName)
+      evalDynamics(functions, context, po.ds, funName)
     })
 
     instructions
@@ -269,30 +269,111 @@ trait InstructionInvoker {
       case f: FunctionInvokeInstruction =>
         invokeFunction(functions, context, f, funName)
       case r: ReturnInstruction => {
-        Seq(r.value.toJson)
+        Seq(r.value)
       }
       case r: EchoInstruction =>
-        Seq(r.value.toJson)
+        Seq(r.value)
       case i => {
-        Seq(i.execute(context).json)
+        Seq(JsonCollection.Wrapper(i.execute(context).json))
       }
     }
   }
 
-  def evalVars(functions: Map[String, eqlParser.FunctionInstruction],
-               context: ScriptEQLContext,
-               vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
+  def evalDynamics(functions: Map[String, eqlParser.FunctionInstruction],
+                   context: ScriptEQLContext,
+                   vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
     vars.foreach {
       case vr: JsonCollection.Var =>
         mapRealValue(context.variables, vr, funName)
+      case v: JsonCollection.ArithTree =>
+        evalArith(functions, context, v, funName)
       case f: JsonCollection.Fun =>
         val res = invokeFunction(functions, context,
           FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
-        val fVal = parseJson(res)
-        if (fVal.isFailure) {
-          throw new RuntimeException(fVal.failed.get)
-        }
-        f.realValue = Some(fVal.get)
+        f.realValue = Some(res)
     }
   }
+
+
+  def evalArith(functions: Map[String, eqlParser.FunctionInstruction],
+                context: ScriptEQLContext,
+                v: JsonCollection.ArithTree,
+                funName: Option[String] = None): Unit = {
+    val value = v.value
+    value._2 match {
+      case Some("+") =>
+        val v1 = evalBasicValue(functions, context, value._1, funName)
+        value._3 match {
+          case Some(v3) => {
+            val v2 = evalBasicValue(functions, context, v3, funName)
+            v.realValue = Some(v1.plus(v2))
+          }
+          case None => v.realValue = Some(v1)
+        }
+      case Some("-") =>
+        val v1 = evalBasicValue(functions, context, value._1, funName)
+        value._3 match {
+          case Some(v3) => {
+            val v2 = evalBasicValue(functions, context, v3, funName)
+            v.realValue = Some(v1.minus(v2))
+          }
+          case None => v.realValue = Some(v1)
+        }
+      case Some("*") =>
+        val v1 = evalBasicValue(functions, context, value._1, funName)
+        value._3 match {
+          case Some(v3) => {
+            val v2 = evalBasicValue(functions, context, v3, funName)
+            v.realValue = Some(v1.multiply(v2))
+          }
+          case None => v.realValue = Some(v1)
+        }
+      case Some("/") =>
+        val v1 = evalBasicValue(functions, context, value._1, funName)
+        value._3 match {
+          case Some(v3) => {
+            val v2 = evalBasicValue(functions, context, v3, funName)
+            v.realValue = Some(v1.div(v2))
+          }
+          case None => v.realValue = Some(v1)
+        }
+      case None if value._1.isInstanceOf[JsonCollection.ArithTree] => {
+        evalArith(functions, context, value._1.asInstanceOf[JsonCollection.ArithTree], funName)
+        v.realValue = value._1.asInstanceOf[JsonCollection.ArithTree].realValue
+      }
+      case i if value._1.isInstanceOf[JsonCollection.Arith] => {
+        v.realValue = Some(v.value._1.asInstanceOf[JsonCollection.Arith])
+      }
+    }
+  }
+
+
+  def evalBasicValue(functions: Map[String, eqlParser.FunctionInstruction],
+                     context: ScriptEQLContext,
+                     v: JsonCollection.Val,
+                     funName: Option[String]): JsonCollection.Arith =
+    v match {
+      case i: JsonCollection.ArithTree => {
+        i.value match {
+          case (t, None, None) => evalBasicValue(functions, context, t, funName)
+          case t => {
+            evalArith(functions, context, i, funName)
+            i.realValue.get
+          }
+        }
+      }
+      case i: JsonCollection.Num => i
+      case i: JsonCollection.Str => i
+      case i: JsonCollection.Var => {
+        mapRealValue(context.variables, i, funName)
+        evalBasicValue(functions, context, i.realValue.get, funName)
+      }
+      case f: JsonCollection.Fun => {
+        val res = invokeFunction(functions, context,
+          FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
+        f.realValue = Some(res)
+        evalBasicValue(functions, context, res, funName)
+      }
+      case _ => throw new RuntimeException("only support num and str arith expression")
+    }
 }
