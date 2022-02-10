@@ -5,11 +5,6 @@ import fastparse.NoWhitespace._
 import fastparse._
 
 trait EQLInstructionParser extends JsonParser with InterceptFunction {
-  def helpP[_: P] = P(alphaChars.rep(1).! ~ "?")
-    .map(s => {
-      HelpInstruction(Seq(s))
-    })
-
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
 

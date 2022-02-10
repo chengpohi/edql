@@ -10,7 +10,7 @@ class JsonParser extends InterceptFunction {
   val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
   val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
   val NewlineChars: NamedFunction[Char, Boolean] = NamedFunction("\n\r\n\r\f".contains(_: Char), "StringChars")
-  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!" \n\r\n\r\f".contains(_: Char), "StringChars")
+  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
   val CollectionChars: NamedFunction[Char, Boolean] =
     NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
 
