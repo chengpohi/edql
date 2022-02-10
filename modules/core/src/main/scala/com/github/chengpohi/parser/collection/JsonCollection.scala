@@ -73,7 +73,7 @@ object JsonCollection {
   case class ArithTree(value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val])) extends Dynamic {
     var realValue: Option[JsonCollection.Arith] = None
 
-    override def toJson: String = realValue.map(_.toJson).getOrElse("")
+    override def toJson: String = realValue.map(_.toJson).getOrElse(value._1.toJson)
 
     override def get(path: String): Option[Val] = None
   }
