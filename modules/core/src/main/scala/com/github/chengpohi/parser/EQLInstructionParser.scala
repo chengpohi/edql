@@ -3,6 +3,7 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
+import Lexical._
 
 trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
@@ -14,40 +15,40 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def timeoutBind[_: P] = P(WS ~ "Timeout" ~ WS ~ number ~ WS).map(
     c => TimeoutInstruction(c.extract[Int]))
 
-  def importExpr[_: P] = P(WS ~ "import" ~ WS ~ quoteString ~ WS).map(
+  def importExpr[_: P] = P(WS ~ "import" ~ WS ~ stringLiteral ~ WS).map(
     c => ImportInstruction(c.extract[String]))
 
-  def authorizationBind[_: P] = P(WS ~ "Authorization" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def authorizationBind[_: P] = P(WS ~ "Authorization" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       AuthorizationBindInstruction(c.extract[String])
     })
 
-  def usernameBind[_: P] = P(WS ~ "Username" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def usernameBind[_: P] = P(WS ~ "Username" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       UsernameBindInstruction(c.extract[String])
     })
 
-  def passwordBind[_: P] = P(WS ~ "Password" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def passwordBind[_: P] = P(WS ~ "Password" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       PasswordBindInstruction(c.extract[String])
     })
 
-  def apiKeyIdBind[_: P] = P(WS ~ "ApiKeyId" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def apiKeyIdBind[_: P] = P(WS ~ "ApiKeyId" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       ApiKeyIdBindInstruction(c.extract[String])
     })
 
-  def apiKeySecretBind[_: P] = P(WS ~ "ApiKeySecret" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def apiKeySecretBind[_: P] = P(WS ~ "ApiKeySecret" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       ApiKeySecretBindInstruction(c.extract[String])
     })
 
-  def apiSessionTokenBind[_: P] = P(WS ~ "ApiSessionToken" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def apiSessionTokenBind[_: P] = P(WS ~ "ApiSessionToken" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       ApiSessionTokenBindInstruction(c.extract[String])
     })
 
-  def awsRegionBind[_: P] = P(WS ~ "AWSRegion" ~ WS ~ (actionPath | quoteString) ~ WS).map(
+  def awsRegionBind[_: P] = P(WS ~ "AWSRegion" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {
       AWSRegionBindInstruction(c.extract[String])
     })

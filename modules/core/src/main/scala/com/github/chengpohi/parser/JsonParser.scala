@@ -1,5 +1,6 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.parser.Lexical._
 import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
@@ -7,57 +8,10 @@ import org.apache.commons.lang3.StringEscapeUtils
 
 
 class JsonParser extends InterceptFunction {
-  val StringChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"".contains(_: Char), "StringChars")
-  val AlphaChars: NamedFunction[Char, Boolean] = NamedFunction(!"\"\\?".contains(_: Char), "StringChars")
-  val NewlineChars: NamedFunction[Char, Boolean] = NamedFunction("\n\r\n\r\f".contains(_: Char), "StringChars")
-  val NotNewlineChars: NamedFunction[Char, Boolean] = NamedFunction(!"\n\r\n\r\f".contains(_: Char), "StringChars")
-  val CollectionChars: NamedFunction[Char, Boolean] =
-    NamedFunction(!"[],()\"\\".contains(_: Char), "CollectionChars")
-
-  def newline[_: P] = P(CharsWhile(NewlineChars))
-
-  def strChars[_: P] = P(CharsWhile(StringChars))
-
-  def notNewlineChars[_: P] = P(CharsWhile(NotNewlineChars))
-
-  def alphaChars[_: P] = P(CharsWhile(AlphaChars))
-
-  def collectionChars[_: P] = P(CharsWhile(CollectionChars))
-
-  def variableChars[_: P] = P(CharIn("a-zA-Z_"))
-
-  def hexDigit[_: P] = P(CharIn("0-9a-fA-F"))
-
-  def actionChars[_: P] = P(CharIn("0-9a-zA-Z$:/_@?%*= ,\\.\\&\\-"))
-
-  def unicodeEscape[_: P] = P("u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit)
-
-  def escape[_: P] = P("\\" ~ (CharIn("\"/\\bfnrt") | unicodeEscape))
-
   //val string =
   //P("\"" ~/ (strChars | escape).rep.! ~ "\"").map(i => JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
   def actionPath[_: P] = P(WS ~ actionChars.rep(1).! ~ WS).map(i =>
     JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-
-  def quoteString[_: P] = P(WS ~ "\"" ~ strChars.rep(0).! ~ "\"" ~ WS).map(i =>
-    JsonCollection.Str(StringEscapeUtils.unescapeJava(i)))
-
-  def variableName[_: P] = P(variableChars.rep(1)).!
-
-  def variable[_: P] = P(WS ~ "$" ~ variableChars.rep(1).! ~ WS).map(JsonCollection.Var)
-
-  //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
-  def strOrVar[_: P] = P(quoteString | variable)
-
-  def Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
-
-  def digits[_: P] = P(CharsWhile(Digits))
-
-  def exponent[_: P] = P(CharIn("eE") ~ CharIn("+\\-").? ~ digits)
-
-  def fractional[_: P] = P("." ~ digits)
-
-  def integral[_: P] = P("0" | CharIn("1-9") ~ digits.?)
 
   def number[_: P]: P[JsonCollection.Num] =
     P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
@@ -71,7 +25,7 @@ class JsonParser extends InterceptFunction {
     )
 
   def pair[_: P]: P[(JsonCollection.Val, JsonCollection.Val)] =
-    P(WS ~ (quoteString | variable) ~/ ":" ~ WS ~/ jsonExpr)
+    P(WS ~ (stringLiteral | variable) ~/ ":" ~ WS ~/ jsonExpr)
 
   def `null`[_: P] = P("null").map(_ => JsonCollection.Null)
 
@@ -98,7 +52,7 @@ class JsonParser extends InterceptFunction {
 
   def parens[_: P]: P[JsonCollection.ArithTree] = P(WS ~ "(" ~/ WS ~/ addSub ~ WS ~ ")" ~ WS)
 
-  def factor[_: P]: P[JsonCollection.ArithTree] = P(quoteString | number | parens) map {
+  def factor[_: P]: P[JsonCollection.ArithTree] = P(stringLiteral | number | parens) map {
     case n: JsonCollection.Num => JsonCollection.ArithTree((n, None, None))
     case s: JsonCollection.Str => JsonCollection.ArithTree((s, None, None))
     case p: JsonCollection.ArithTree => p
@@ -148,14 +102,10 @@ class JsonParser extends InterceptFunction {
   })
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    WS ~ (addSub | obj | array | tuple | quoteString | `true` | `false` | `null` | number | variable | fun) ~ WS
+    WS ~ (addSub | obj | array | tuple | stringLiteral | `true` | `false` | `null` | number | variable | fun) ~ WS
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
-
-  def commentChars[_: P] = P("#" ~/ notNewlineChars.rep(0) ~/ End.?)
-
-  def WS[_: P] = P(" " | newline | commentChars).rep
 }
 
 case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
