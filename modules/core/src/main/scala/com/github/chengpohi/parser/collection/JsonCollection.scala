@@ -91,6 +91,16 @@ object JsonCollection {
       value.find(p => p._1.value == path).map(_._2)
 
     override def vars: Seq[Var] = this.value.flatMap(i => i._1.vars ++ i._2.vars)
+
+    def remove(v: String): Obj = {
+      val nvs = value.filter(i => i._1.asInstanceOf[Str].value != v)
+      Obj(nvs: _*)
+    }
+
+    def add(k: String, v: Val): Obj = {
+      val nvs = value :+ (Str(k), v)
+      Obj(nvs: _*)
+    }
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
