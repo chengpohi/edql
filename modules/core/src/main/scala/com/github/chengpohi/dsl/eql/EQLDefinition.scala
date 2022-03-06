@@ -3,9 +3,13 @@ package com.github.chengpohi.dsl.eql
 import com.github.chengpohi.dsl.ElasticBase
 import com.github.chengpohi.dsl.annotation.{Alias, Analyzer, CopyTo, Index}
 import com.github.chengpohi.dsl.http.HttpContext
+import com.github.chengpohi.parser.collection.JsonCollection
 import com.github.chengpohi.parser.collection.JsonCollection.Val
 import org.apache.http.util.EntityUtils
 import org.elasticsearch.client.{Request, ResponseException}
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization.write
 
 import java.io.Serializable
 import scala.concurrent.Future
@@ -91,26 +95,41 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
   }
 
 
-  case class PostActionDefinition(path: String, action: Seq[String])
+  case class PostActionDefinition(path: String, action: Seq[JsonCollection.Val])
     extends Definition[String] {
     override def execute: Future[String] = {
       val request = new Request(
         "POST",
         path);
 
-      action match {
+      val as = action.map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
+      val ps = action.map(_.asInstanceOf[JsonCollection.Obj].get("plot"))
+      as match {
         case Seq() =>
         case a =>
           if (a.size > 1) {
-            request.setJsonEntity(a.mkString(System.lineSeparator()) + System.lineSeparator())
+            request.setJsonEntity(
+              a.map(_.toJson)
+                .mkString(System.lineSeparator()) + System.lineSeparator())
           } else if (a.size == 1) {
-            request.setJsonEntity(a.head)
+            request.setJsonEntity(a.head.toJson)
           }
       }
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
-          EntityUtils.toString(entity)
+          val strings = EntityUtils.toString(entity)
+            .split(System.lineSeparator())
+          strings.zip(ps).map(i => {
+            i._2 match {
+              case None => i._1
+              case Some(r) => {
+                val j = parse(i._1)
+                val v = parse(r.toJson)
+                write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+              }
+            }
+          }).mkString(System.lineSeparator())
         } catch {
           case ex: ResponseException => {
             EntityUtils.toString(ex.getResponse.getEntity)
