@@ -16,7 +16,8 @@ case class ScriptEQLContext(endpoint: String,
                             apiKeySecret: Option[String],
                             apiSessionToken: Option[String],
                             awsRegion: Option[String],
-                            timeout: Option[Int]) extends EQLConfig with EQLContext {
+                            timeout: Option[Int],
+                            kibanaProxy: Boolean) extends EQLConfig with EQLContext {
   override implicit lazy val eqlClient: EQLClient =
     buildRestClient(uri,
       auth,
@@ -26,11 +27,12 @@ case class ScriptEQLContext(endpoint: String,
       apiKeySecret,
       apiSessionToken,
       awsRegion,
-      timeout)
+      timeout, kibanaProxy)
 }
 
 object ScriptEQLContext {
   val cache: mutable.Map[String, ScriptEQLContext] = mutable.Map[String, ScriptEQLContext]()
+
   def apply(endpoint: String,
             auth: Option[String] = None,
             username: Option[String] = None,
@@ -40,7 +42,8 @@ object ScriptEQLContext {
             apiSessionToken: Option[String] = None,
             apiRegion: Option[String] = None,
             timeout: Option[Int],
-            vars: Map[String, JsonCollection.Val]): ScriptEQLContext = {
+            vars: Map[String, JsonCollection.Val],
+            kibanaProxy: Boolean): ScriptEQLContext = {
     val uri = URI.create(endpoint)
 
     val cacheKey = s"$endpoint-${auth.getOrElse("")}-${username.getOrElse("")}" +
@@ -64,7 +67,8 @@ object ScriptEQLContext {
       apiKeySecret,
       apiSessionToken,
       apiRegion,
-      timeout
+      timeout,
+      kibanaProxy
     )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
     cache.put(cacheKey, context)

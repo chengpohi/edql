@@ -61,9 +61,6 @@ public class AWSRequestSigningApacheInterceptor implements HttpRequestIntercepto
         this.awsCredentialsProvider = awsCredentialsProvider;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void process(final HttpRequest request, final HttpContext context)
             throws HttpException, IOException {

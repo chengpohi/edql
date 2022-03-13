@@ -29,7 +29,7 @@ trait InstructionInvoker {
     }
 
     val (functions, context) =
-      this.buildContext(scriptContextIns, endpointBind.get.endpoint, runDir)
+      this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
     EQLRunResult(invokeResult.map(i => i.toJson).filter(_.nonEmpty), context)
@@ -37,6 +37,7 @@ trait InstructionInvoker {
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
                            endPoint: String,
+                           kibanaProxy: Boolean,
                            runDir: String) = {
     val importIns = parseImports(cIns, runDir)
 
@@ -102,7 +103,7 @@ trait InstructionInvoker {
       apiSessionToken,
       awsRegion,
       timeout,
-      globalVars)
+      globalVars, kibanaProxy)
 
     evalFunParams(globalFunctions, context, vars)
 
