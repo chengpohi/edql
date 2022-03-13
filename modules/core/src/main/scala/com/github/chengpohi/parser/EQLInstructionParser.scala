@@ -1,9 +1,9 @@
 package com.github.chengpohi.parser
 
+import com.github.chengpohi.parser.Lexical._
 import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
-import Lexical._
 
 trait EQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
@@ -11,6 +11,9 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   def hostBind[_: P] = P(WS ~ "HOST" ~ WS ~ actionPath ~ WS).map(
     c => EndpointBindInstruction(c.extract[String]))
+
+  def kibanaHostBind[_: P] = P(WS ~ "KIBANA_HOST" ~ WS ~ actionPath ~ WS).map(
+    c => EndpointBindInstruction(c.extract[String], kibanaProxy = true))
 
   def timeoutBind[_: P] = P(WS ~ "Timeout" ~ WS ~ number ~ WS).map(
     c => TimeoutInstruction(c.extract[Int]))
@@ -104,7 +107,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
 
   private def inses[_: P]: P[Seq[Instruction2]] = {
     (
-      comment | hostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
+      comment | hostBind | kibanaHostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
         | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
       ).rep(0)

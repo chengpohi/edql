@@ -3,6 +3,7 @@ package com.github.chengpohi.context
 import com.amazonaws.auth.AWS4Signer
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain}
 import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
@@ -37,7 +38,8 @@ trait EQLConfig {
                       apiKeySecret: Option[String] = None,
                       apiSessionToken: Option[String] = None,
                       awsRegion: Option[String] = None,
-                      timeout: Option[Int] = None) = {
+                      timeout: Option[Int] = None,
+                      kibanaProxy: Boolean = false): EQLClient = {
     val restClientBuilder =
       RestClient.builder(new HttpHost(uri.getHost, uri.getPort, uri.getScheme))
         .setRequestConfigCallback(
@@ -107,6 +109,15 @@ trait EQLConfig {
           }
         })
     }
+    if (kibanaProxy) {
+      restClientBuilder.setHttpClientConfigCallback(
+        new RestClientBuilder.HttpClientConfigCallback() {
+          override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
+          }
+        })
+    }
+
     EQLClient(restClientBuilder.build())
   }
 }

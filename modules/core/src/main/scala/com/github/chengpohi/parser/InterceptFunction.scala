@@ -133,7 +133,7 @@ trait InterceptFunction {
     }
   }
 
-  case class EndpointBindInstruction(endpoint: String) extends ScriptContextInstruction2 {
+  case class EndpointBindInstruction(endpoint: String, kibanaProxy: Boolean = false) extends ScriptContextInstruction2 {
     override def name = "host"
 
     def execute(implicit eql: EQLContext): Definition[_] = {
