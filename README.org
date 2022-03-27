@@ -4,7 +4,7 @@
   [[https://gitter.im/fedql/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge][file:https://badges.gitter.im/fedql/community.svg]]
 ** Usage
 
-*** Use with EDQL Intellij Gui Client
+*** Use with EDQL Intellij GUI Client
 Please find more on: [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][EDQL]]
 
 [[https://raw.githubusercontent.com/wiki/chengpohi/edql/images/tutorial.gif]]
