@@ -498,7 +498,11 @@ trait InterceptFunction {
           }
           case s => s.toJson
         }
-        i.replace(vName, v)
+        if (v != null) {
+          i.replace(vName, v)
+        } else {
+          i
+        }
       })
   }
 
