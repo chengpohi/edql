@@ -468,14 +468,14 @@ trait InterceptFunction {
 
 
   private def mapNewPath(variables: scala.collection.mutable.Map[String, JsonCollection.Val], path: String) = {
-    variables.foldLeft(path)((i, o) => {
-      val vName = "\\$" + o._1;
-      val v = o._2 match {
+    val invokePath = variables.get("INVOKE_PATH").map(_.value.asInstanceOf[String]).getOrElse("")
+    variables.filter(i => i._1.startsWith(invokePath)).foldLeft(path)((i, o) => {
+      val vName = o._1.replaceAll(invokePath, "");
+      val v: String = o._2 match {
         case s: JsonCollection.Str => {
           s.value
         }
         case va: JsonCollection.Var => {
-          mapRealValue(variables, va)
           va.realValue match {
             case Some(fa) => fa match {
               case s: JsonCollection.Str => s.value
@@ -484,9 +484,18 @@ trait InterceptFunction {
             case None => va.value
           }
         }
+        case va: JsonCollection.ArithTree => {
+          va.realValue match {
+            case Some(fa) => fa match {
+              case s: JsonCollection.Str => s.value
+              case j => j.toJson
+            }
+            case None => va.toJson
+          }
+        }
         case s => s.toJson
       }
-      i.replaceAll(vName, v)
+      i.replace(vName, v)
     })
   }
 
