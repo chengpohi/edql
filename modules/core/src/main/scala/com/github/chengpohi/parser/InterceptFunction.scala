@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath
 import com.typesafe.config.ConfigFactory
 
 import java.nio.file.{Files, Paths}
+import java.util.Optional
 import java.util.stream.Collectors
 
 trait InterceptFunction {
@@ -468,35 +469,37 @@ trait InterceptFunction {
 
 
   private def mapNewPath(variables: scala.collection.mutable.Map[String, JsonCollection.Val], path: String) = {
-    val invokePath = variables.get("INVOKE_PATH").map(_.value.asInstanceOf[String]).getOrElse("")
-    variables.filter(i => i._1.startsWith(invokePath)).foldLeft(path)((i, o) => {
-      val vName = o._1.replaceAll(invokePath, "");
-      val v: String = o._2 match {
-        case s: JsonCollection.Str => {
-          s.value
-        }
-        case va: JsonCollection.Var => {
-          va.realValue match {
-            case Some(fa) => fa match {
-              case s: JsonCollection.Str => s.value
-              case j => j.toJson
-            }
-            case None => va.value
+    val invokePath = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value).filter(_ != null).getOrElse("")
+    variables.filter(i => Option.apply(invokePath).forall(j => i._1.startsWith(j)))
+      .filter(_._2 != null)
+      .foldLeft(path)((i, o) => {
+        val vName = o._1.replaceAll(invokePath, "");
+        val v: String = o._2 match {
+          case s: JsonCollection.Str => {
+            s.value
           }
-        }
-        case va: JsonCollection.ArithTree => {
-          va.realValue match {
-            case Some(fa) => fa match {
-              case s: JsonCollection.Str => s.value
-              case j => j.toJson
+          case va: JsonCollection.Var => {
+            va.realValue match {
+              case Some(fa) => fa match {
+                case s: JsonCollection.Str => s.value
+                case j => j.toJson
+              }
+              case None => va.value
             }
-            case None => va.toJson
           }
+          case va: JsonCollection.ArithTree => {
+            va.realValue match {
+              case Some(fa) => fa match {
+                case s: JsonCollection.Str => s.value
+                case j => j.toJson
+              }
+              case None => va.toJson
+            }
+          }
+          case s => s.toJson
         }
-        case s => s.toJson
-      }
-      i.replace(vName, v)
-    })
+        i.replace(vName, v)
+      })
   }
 
 
