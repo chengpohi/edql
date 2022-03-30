@@ -257,27 +257,32 @@ trait InstructionInvoker {
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
                       context: ScriptEQLContext,
                       instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
+    context.variables.put("INVOKE_PATH", new JsonCollection.Str(funName.orNull))
+    try {
+      instructions.foreach(po => {
+        evalDs(functions, context, po.ds, funName)
+      })
 
-    instructions.foreach(po => {
-      evalDs(functions, context, po.ds, funName)
-    })
-
-    instructions
-      .filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
-      case r: ForInstruction => {
-        iterCollection(functions, context, r)
+      instructions
+        .filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
+        case r: ForInstruction => {
+          iterCollection(functions, context, r)
+        }
+        case f: FunctionInvokeInstruction =>
+          invokeFunction(functions, context, f, funName)
+        case r: ReturnInstruction => {
+          Seq(r.value)
+        }
+        case r: EchoInstruction =>
+          Seq(r.value)
+        case i => {
+          Seq(JsonCollection.Wrapper(i.execute(context).json))
+        }
       }
-      case f: FunctionInvokeInstruction =>
-        invokeFunction(functions, context, f, funName)
-      case r: ReturnInstruction => {
-        Seq(r.value)
-      }
-      case r: EchoInstruction =>
-        Seq(r.value)
-      case i => {
-        Seq(JsonCollection.Wrapper(i.execute(context).json))
-      }
+    } finally {
+      context.variables.remove("INVOKE_PATH")
     }
+
   }
 
   def evalDs(functions: Map[String, eqlParser.FunctionInstruction],
