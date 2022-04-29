@@ -109,7 +109,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         case a =>
           if (a.size > 1) {
             request.setJsonEntity(
-              a.filter(_.value.nonEmpty).map(_.toJson)
+              a.map(_.toJson)
                 .mkString(System.lineSeparator()) + System.lineSeparator())
           } else if (a.size == 1) {
             request.setJsonEntity(a.head.toJson)
