@@ -1,5 +1,8 @@
 package com.github.chengpohi.parser.collection
 
+
+import org.apache.commons.lang3.StringUtils
+
 import scala.reflect.runtime.universe._
 
 /**
@@ -80,11 +83,18 @@ object JsonCollection {
 
   case class Obj(value: (Val, Val)*) extends AnyVal with Val {
     override def toJson: String = {
-      "{" + value
-        .map {
-          case (n, v) => n.toJson + ":" + v.toJson
+      val valueJson = value.map {
+          case (n, v) => {
+            val j = v.toJson
+            if (StringUtils.equalsIgnoreCase(j, "{}")) {
+              ""
+            } else {
+              n.toJson + ":" + j
+            }
+          }
         }
-        .mkString(",") + "}"
+        .filter(i => StringUtils.isNotBlank(i)).mkString(",")
+      "{" + valueJson + "}"
     }
 
     override def get(path: String): Option[Val] =
