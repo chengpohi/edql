@@ -7,7 +7,6 @@ import com.jayway.jsonpath.JsonPath
 import com.typesafe.config.ConfigFactory
 
 import java.nio.file.{Files, Paths}
-import java.util.Optional
 import java.util.stream.Collectors
 
 trait InterceptFunction {
@@ -441,7 +440,7 @@ trait InterceptFunction {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         if (k.realValue.isEmpty) {
-          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value)
+          var vl = variables.get(funName.map(i => i + "$").getOrElse("$") + k.value)
           if (vl.isEmpty) {
             throw new RuntimeException("could not find variable: " + k.value)
           }
@@ -499,7 +498,7 @@ trait InterceptFunction {
           case s => s.toJson
         }
         if (v != null) {
-          i.replace("$" + vName, v)
+          i.replace(vName, v)
         } else {
           i
         }
