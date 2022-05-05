@@ -83,7 +83,7 @@ trait InstructionInvoker {
     val vars =
       invokeIns.filter(_.isInstanceOf[VariableInstruction])
         .map(i => i.asInstanceOf[VariableInstruction])
-        .map(i => i.variableName -> i.value).toMap
+        .map(i => "$" + i.variableName -> i.value).toMap
 
     val globalFunctions =
       invokeIns.filter(_.isInstanceOf[FunctionInstruction])
