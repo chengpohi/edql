@@ -102,8 +102,8 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         "POST",
         path);
 
-      val as = action.map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
-      val ps = action.map(_.asInstanceOf[JsonCollection.Obj].get("plot"))
+      val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
+      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].get("plot"))
       as match {
         case Seq() =>
         case a =>
