@@ -118,18 +118,22 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
-          val strings = EntityUtils.toString(entity)
-            .split(System.lineSeparator())
-          strings.zip(ps).map(i => {
-            i._2 match {
-              case None => i._1
-              case Some(r) => {
-                val j = parse(i._1)
-                val v = parse(r.toJson)
-                write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+          val entityStr = EntityUtils.toString(entity)
+          val strings = entityStr.split(System.lineSeparator())
+          if (ps.isEmpty) {
+            entityStr
+          } else {
+            strings.zip(ps).map(i => {
+              i._2 match {
+                case None => i._1
+                case Some(r) => {
+                  val j = parse(i._1)
+                  val v = parse(r.toJson)
+                  write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+                }
               }
-            }
-          }).mkString(System.lineSeparator())
+            }).mkString(System.lineSeparator())
+          }
         } catch {
           case ex: ResponseException => {
             EntityUtils.toString(ex.getResponse.getEntity)
