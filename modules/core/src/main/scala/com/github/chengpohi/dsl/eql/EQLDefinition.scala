@@ -119,7 +119,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         try {
           val entity = restClient.performRequest(request).getEntity
           val entityStr = EntityUtils.toString(entity)
-          val strings = entityStr.split(System.lineSeparator())
+          val strings = entityStr.split("}" + System.lineSeparator() + "$")
           if (ps.isEmpty) {
             entityStr
           } else {
