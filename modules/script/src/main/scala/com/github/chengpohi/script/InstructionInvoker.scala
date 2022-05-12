@@ -212,7 +212,7 @@ trait InstructionInvoker {
 
     val instructions = extractCollection(iterVariable).value.flatMap(i => {
       context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
-      context.variables.put(r.tempVariable, i)
+      context.variables.put("$" + r.tempVariable, i)
       runInstructions(functions, context, r.instructions)
     })
 
