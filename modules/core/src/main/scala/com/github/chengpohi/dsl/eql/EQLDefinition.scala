@@ -103,7 +103,7 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         path);
 
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
-      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].get("plot"))
+      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj]).flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
       as match {
         case Seq() =>
         case a =>
@@ -119,22 +119,15 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         try {
           val entity = restClient.performRequest(request).getEntity
           val entityStr = EntityUtils.toString(entity)
-          val strings = entityStr.split("}" + System.lineSeparator() + "$")
           if (ps.isEmpty) {
             entityStr
           } else {
-            strings.zip(ps).map(i => {
-              i._2 match {
-                case None => i._1
-                case Some(r) => {
-                  val j = parse(i._1)
-                  val v = parse(r.toJson)
-                  write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
-                }
-              }
-            }).mkString(System.lineSeparator())
+            val j = parse(entityStr)
+            val v = parse(ps.head.toJson)
+            write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
           }
-        } catch {
+        }
+        catch {
           case ex: ResponseException => {
             EntityUtils.toString(ex.getResponse.getEntity)
           }
