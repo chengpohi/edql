@@ -56,19 +56,19 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       AWSRegionBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P(WS ~ "POST" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.rep ~ WS).map(
+  def postAction[_: P] = P(WS ~ "POST" ~ WS ~ actionPath ~/ WS ~/ obj.rep ~ WS).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
-  def getAction[_: P] = P(WS ~ "GET" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
+  def getAction[_: P] = P(WS ~ "GET" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(
     c => GetActionInstruction(c._1.extract[String], c._2))
 
-  def deleteAction[_: P] = P(WS ~ "DELETE" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
+  def deleteAction[_: P] = P(WS ~ "DELETE" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(
     c => DeleteActionInstruction(c._1.extract[String], c._2))
 
-  def putAction[_: P] = P(WS ~ "PUT" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
+  def putAction[_: P] = P(WS ~ "PUT" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(
     c => PutActionInstruction(c._1.extract[String], c._2))
 
-  def headAction[_: P] = P(WS ~ "HEAD" ~ WS ~ actionPath ~/ WS ~/ jsonExpr.? ~ WS).map(
+  def headAction[_: P] = P(WS ~ "HEAD" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
   def variableAction[_: P] =
