@@ -1,0 +1,165 @@
+function term(field, value) {
+  return {
+    "term": {
+      $field: $value
+    }
+  }
+}
+function sum(index, field, query) {
+  POST $index/_search
+  {
+    "size": 0,
+    "query": $query,
+    "aggs": {
+      "sum": {
+        "sum": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function termQuery(index, field, value) {
+  POST $index/_search
+  {
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "term": {
+              $field: $value
+            }
+          }
+        ]
+      }
+    },
+  }
+}
+
+#distinct fields count
+function cardinality(index, field) {
+  POST $index/_search
+  {
+    "profile": true,
+    "size": "0",
+    "aggs": {
+      "c": {
+        "cardinality": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function distinct(index, field, query) {
+  POST $index/_search
+  {
+    "profile": true,
+    "size": "0",
+    "query": $query,
+    "aggs": {
+      "c": {
+        "terms": {
+          "size": 500,
+          "field": $field,
+          "order": {
+            "_count": "desc"
+          },
+        }
+      }
+    }
+  }
+}
+
+function catIndices() {
+  GET _cat/indices?v
+}
+
+function showTables() {
+  GET _cat/indices?v
+}
+
+function max(index, field, q) {
+  POST $index/_search
+  {
+    "size": 0,
+    "query": $q,
+    "aggs": {
+      "max": {
+        "max": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function unique(index, field, query) {
+  POST $index/_search
+  {
+    "profile": true,
+    "size": "0",
+    "query": $query,
+    "aggs": {
+      "unique": {
+        "cardinality": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function stats(index, field, q) {
+  POST $index/_search
+  {
+    "size": 0,
+    "from": 0,
+    "query": $q,
+    "aggs": {
+      "stats": {
+        "stats": {
+          "field": $field
+        }
+      }
+    }
+  }
+}
+
+function xy(x, y, type) {
+  return {
+    "data": [
+      {
+        "x": $x, # x axis
+        "y": $y, # y axis
+        "type": $type # chart type
+      }
+    ]
+  }
+}
+
+#date histogram and sum
+function dhs(tf, interval, field) {
+  return {
+    "dt": {
+      "date_histogram": {
+        "field": $tf,
+        "calendar_interval": $interval #histogram interval
+      },
+      "aggs": {
+        "sum": {
+          "sum": {
+            "field": $field #sum by interval
+          }
+        }
+      }
+    },
+    "avg": {
+      "avg_bucket": {
+        "buckets_path": "dt.sum" #avg by interval
+      }
+    }
+  }
+}

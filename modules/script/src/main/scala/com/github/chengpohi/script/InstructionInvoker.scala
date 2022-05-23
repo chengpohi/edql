@@ -4,12 +4,14 @@ import com.github.chengpohi.parser.EQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
 
+import java.io.File
 import java.net.URI
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.{HttpClient, HttpRequest}
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 import scala.collection.mutable
+import scala.io.Source
 import scala.util.{Failure, Success}
 
 trait InstructionInvoker {
@@ -39,7 +41,7 @@ trait InstructionInvoker {
                            endPoint: String,
                            kibanaProxy: Boolean,
                            runDir: String) = {
-    val importIns = parseImports(cIns, runDir)
+    val importIns = parseImports(cIns :+ ImportInstruction("/system.edql"), runDir)
 
     val invokeIns = cIns ++ importIns
 
@@ -159,8 +161,22 @@ trait InstructionInvoker {
   }
 
   private def readFile(runDir: String, imp: String): String = {
+    val file = new File(imp)
+    if (file.exists() && file.isAbsolute) {
+      try {
+        return Files.readAllLines(file.toPath).stream().collect(Collectors.joining(System.lineSeparator()))
+      } catch {
+        case _: Throwable => ""
+      }
+    }
     try {
-      Files.readAllLines(Paths.get(runDir + "/" + imp)).stream().collect(Collectors.joining(System.lineSeparator()))
+      return Files.readAllLines(Paths.get(runDir + "/" + imp)).stream().collect(Collectors.joining(System.lineSeparator()))
+    } catch {
+      case _: Throwable => ""
+    }
+
+    try {
+      Source.fromInputStream(this.getClass.getResourceAsStream(imp)).getLines().mkString(System.lineSeparator())
     } catch {
       case _: Throwable => ""
     }
