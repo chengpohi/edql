@@ -56,7 +56,7 @@ trait EQLInstructionParser extends JsonParser with InterceptFunction {
       AWSRegionBindInstruction(c.extract[String])
     })
 
-  def postAction[_: P] = P(WS ~ "POST" ~ WS ~ actionPath ~/ WS ~/ obj.rep(sep = WS) ~ WS).map(
+  def postAction[_: P] = P(WS ~ "POST" ~ WS ~ actionPath ~/ WS ~/ obj.rep(sep = WS_NC) ~ WS).map(
     c => PostActionInstruction(c._1.extract[String], c._2))
 
   def getAction[_: P] = P(WS ~ "GET" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(

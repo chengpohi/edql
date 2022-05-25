@@ -16,6 +16,8 @@ object Lexical {
 
   def WS[_: P] = P(" " | newline | commentChars).rep
 
+  def WS_NC[_: P] = P(" " | newline).rep
+
   def newline[_: P] = P(CharsWhile(NewlineChars))
 
   def stringLiteral[_: P]: P[JsonCollection.Str] = P(longstring("\"\"\"") | shortstring("\""))
