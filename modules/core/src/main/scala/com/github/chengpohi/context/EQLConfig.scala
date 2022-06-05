@@ -1,13 +1,14 @@
 package com.github.chengpohi.context
 
 import com.amazonaws.auth.AWS4Signer
-import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain}
+import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain, UnsafeX509ExtendedTrustManager}
 import com.github.chengpohi.dsl.EQLClient
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
@@ -17,6 +18,7 @@ import org.elasticsearch.client.{RestClient, RestClientBuilder}
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import javax.net.ssl.{SSLContext, TrustManager}
 
 /**
  * eql
@@ -64,6 +66,8 @@ trait EQLConfig {
       )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
+    val sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(null, Array[TrustManager](UnsafeX509ExtendedTrustManager.INSTANCE), null);
 
     if (StringUtils.isNotBlank(uri.getUserInfo)) {
       val credentialsProvider = new BasicCredentialsProvider
@@ -72,6 +76,8 @@ trait EQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+              .setSSLContext(sslContext)
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
@@ -83,6 +89,8 @@ trait EQLConfig {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.disableAuthCaching
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+              .setSSLContext(sslContext)
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
@@ -106,6 +114,8 @@ trait EQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.addInterceptorLast(interceptor)
+              .setSSLContext(sslContext)
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
@@ -114,6 +124,8 @@ trait EQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
+              .setSSLContext(sslContext)
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
