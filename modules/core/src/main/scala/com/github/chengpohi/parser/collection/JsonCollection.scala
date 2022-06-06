@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser.collection
 
 
-import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
 
 import scala.reflect.runtime.universe._
 
@@ -29,7 +29,7 @@ object JsonCollection {
   }
 
   case class Str(value: java.lang.String) extends AnyVal with Arith {
-    override def toJson: String = "\"" + value + "\""
+    override def toJson: String = "\"" + StringEscapeUtils.escapeJson(value) + "\""
 
     override def get(path: String): Option[Val] = None
 
