@@ -129,15 +129,13 @@ function stats(index, field, q) {
 }
 
 function xy(x, y, type) {
-  return {
-    "data": [
-      {
-        "x": $x, # x axis
-        "y": $y, # y axis
-        "type": $type # chart type
-      }
-    ]
-  }
+  return [
+    {
+      "x": $x, # x axis
+      "y": $y, # y axis
+      "type": $type # chart type
+    }
+  ]
 }
 
 #date histogram and sum
