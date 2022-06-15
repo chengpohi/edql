@@ -41,7 +41,7 @@ trait InstructionInvoker {
                            endPoint: String,
                            kibanaProxy: Boolean,
                            runDir: String) = {
-    val importIns = parseImports(cIns :+ ImportInstruction("/system.edql"), runDir)
+    val importIns = parseImports(cIns :+ ImportInstruction("/lib.edql"), runDir)
 
     val invokeIns = cIns ++ importIns
 
