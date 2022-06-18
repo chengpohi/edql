@@ -276,9 +276,9 @@ trait InterceptFunction {
       val newPath = mapNewPath(eql.variables, path)
 
       if (newPath.startsWith("/")) {
-        GetActionDefinition(newPath, action.map(_.toJson))
+        GetActionDefinition(newPath, action)
       } else {
-        GetActionDefinition("/" + newPath, action.map(_.toJson))
+        GetActionDefinition("/" + newPath, action)
       }
     }
 

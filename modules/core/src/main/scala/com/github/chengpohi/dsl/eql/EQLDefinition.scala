@@ -50,17 +50,40 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
   case object id extends AttrType
 
 
-  case class GetActionDefinition(path: String, action: Option[String])
+  case class GetActionDefinition(path: String, action: Option[JsonCollection.Val])
     extends Definition[String] {
     override def execute: Future[String] = {
+      val as = action.filter(_.isInstanceOf[JsonCollection.Obj])
+        .map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
+        .filter(_.value.nonEmpty)
+      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj])
+        .flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
+
       val request = new Request(
         "GET",
         path);
-      request.setJsonEntity(action.orNull)
+
+      as match {
+        case None =>
+        case Some(a) =>
+          request.setJsonEntity(a.toJson + System.lineSeparator())
+      }
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
-          EntityUtils.toString(entity)
+          val entityStr = EntityUtils.toString(entity)
+          if (ps.isEmpty) {
+            entityStr
+          } else {
+            try {
+              val j = parse(entityStr)
+              val v = parse(ps.get.toJson)
+              write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+            } catch {
+              case _: Exception =>
+                entityStr
+            }
+          }
         } catch {
           case ex: ResponseException => {
             EntityUtils.toString(ex.getResponse.getEntity)
@@ -122,9 +145,14 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
           if (ps.isEmpty) {
             entityStr
           } else {
-            val j = parse(entityStr)
-            val v = parse(ps.head.toJson)
-            write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+            try {
+              val j = parse(entityStr)
+              val v = parse(ps.head.toJson)
+              write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
+            } catch {
+              case _: Exception =>
+                entityStr
+            }
           }
         }
         catch {
