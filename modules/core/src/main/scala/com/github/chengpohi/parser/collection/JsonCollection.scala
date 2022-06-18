@@ -26,6 +26,8 @@ object JsonCollection {
     def get(path: String): Option[Val]
 
     def \\(path: String): Option[Val] = get(path)
+
+    def copy: Val
   }
 
   case class Str(value: java.lang.String) extends AnyVal with Arith {
@@ -44,6 +46,8 @@ object JsonCollection {
     override def multiply(i: Arith): Arith = throw new RuntimeException("not support + type: " + i)
 
     override def div(i: Arith): Arith = throw new RuntimeException("not support + type: " + i)
+
+    override def copy: Val = Str(value)
   }
 
   abstract class Dynamic extends Val
@@ -56,12 +60,20 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
 
     override def vars: Seq[Var] = Seq(this)
+
+    override def copy: Val = {
+      val va = Var(value)
+      va.realValue = realValue.map(_.copy)
+      va
+    }
   }
 
   case class Wrapper(value: java.lang.String) extends Val {
     override def toJson: String = value
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = Wrapper(value)
   }
 
 
@@ -71,6 +83,12 @@ object JsonCollection {
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = {
+      val f = Fun((value._1, value._2.map(i => i.copy)))
+      f.realValue = realValue.map(_.copy)
+      f
+    }
   }
 
   case class ArithTree(value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val])) extends Dynamic {
@@ -79,20 +97,26 @@ object JsonCollection {
     override def toJson: String = realValue.map(_.toJson).getOrElse(value._1.toJson)
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = {
+      val tree = ArithTree((value._1.copy, value._2, value._3.map(_.copy)))
+      tree.realValue = realValue.map(_.copy.asInstanceOf[Arith])
+      tree
+    }
   }
 
   case class Obj(value: (Val, Val)*) extends AnyVal with Val {
     override def toJson: String = {
       val valueJson = value.map {
-          case (n, v) => {
-            val j = v.toJson
-            if (StringUtils.equalsIgnoreCase(j, "{}")) {
-              ""
-            } else {
-              n.toJson + ":" + j
-            }
+        case (n, v) => {
+          val j = v.toJson
+          if (StringUtils.equalsIgnoreCase(j, "{}")) {
+            ""
+          } else {
+            n.toJson + ":" + j
           }
         }
+      }
         .filter(i => StringUtils.isNotBlank(i)).mkString(",")
       "{" + valueJson + "}"
     }
@@ -111,6 +135,8 @@ object JsonCollection {
       val nvs = value :+ (Str(k), v)
       Obj(nvs: _*)
     }
+
+    override def copy: Val = Obj(value.map(i => (i._1.copy, i._2.copy)): _*)
   }
 
   case class Arr(value: Val*) extends AnyVal with Val {
@@ -120,6 +146,8 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
 
     override def vars: Seq[Var] = this.value.flatMap(_.vars)
+
+    override def copy: Val = Arr(value.map(_.copy): _*)
   }
 
   case class Tuple(value: Val*) extends AnyVal with Val {
@@ -129,6 +157,8 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
 
     override def vars: Seq[Var] = value.flatMap(_.vars)
+
+    override def copy: Val = Tuple(value.map(_.copy): _*)
   }
 
   trait Arith extends Any with Val {
@@ -174,6 +204,8 @@ object JsonCollection {
         case _ => throw new RuntimeException("not support + type: " + i)
       }
     }
+
+    override def copy: Val = Num(value)
   }
 
   def addNumbers(a: Number, b: Number): Number = {
@@ -196,6 +228,8 @@ object JsonCollection {
     override def toJson: String = value.toString
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = False
   }
 
   case object True extends Val {
@@ -205,6 +239,7 @@ object JsonCollection {
 
     override def get(path: String): Option[Val] = None
 
+    override def copy: Val = True
   }
 
   case object Null extends Val {
@@ -213,6 +248,8 @@ object JsonCollection {
     override def toJson: String = value.map(_.toString).orNull
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = Null
   }
 
 
@@ -236,6 +273,8 @@ object JsonCollection {
     override def toJson: String = value.toString
 
     override def get(path: String): Option[Val] = None
+
+    override def copy: Val = Comment
   }
 
   implicit class JsonConverter(value: Val) {

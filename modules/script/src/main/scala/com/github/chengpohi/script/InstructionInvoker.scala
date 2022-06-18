@@ -250,12 +250,14 @@ trait InstructionInvoker {
     }
 
     val fun = foundFunction.get
+    clearContextBeforeInvoke(fun.instructions)
     val funName = fun.funcName + "_" + fun.variableNames.size
     val funParams = fun.variableNames.map(i => funName + "$" + i).zip(values).toMap
 
     evalFunParams(functions, context, funParams, parentFunName.orElse(Some(funName)))
 
     val instructions = fun.instructions
+
     val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
       .map(i => i.asInstanceOf[VariableInstruction])
       .map(i => {
@@ -268,6 +270,14 @@ trait InstructionInvoker {
 
     context.variables = cachedVariables
     response
+  }
+
+  private def clearContextBeforeInvoke(instructions: Seq[eqlParser.Instruction2]) = {
+    instructions.foreach(fi => {
+      fi.ds.filter(_.isInstanceOf[JsonCollection.Var]).foreach(di => {
+        di.asInstanceOf[JsonCollection.Var].realValue = None
+      })
+    })
   }
 
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
@@ -287,10 +297,10 @@ trait InstructionInvoker {
         case f: FunctionInvokeInstruction =>
           invokeFunction(functions, context, f, funName)
         case r: ReturnInstruction => {
-          Seq(r.value)
+          Seq(r.value.copy)
         }
         case r: EchoInstruction =>
-          Seq(r.value)
+          Seq(r.value.copy)
         case i => {
           Seq(JsonCollection.Wrapper(i.execute(context).json))
         }
