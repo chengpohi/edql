@@ -17,6 +17,7 @@ import scala.util.{Failure, Success}
 trait InstructionInvoker {
   val eqlParser: EQLParser
   val client: HttpClient = HttpClient.newHttpClient()
+  val libs: Seq[String]
 
   import eqlParser._
 
@@ -41,7 +42,8 @@ trait InstructionInvoker {
                            endPoint: String,
                            kibanaProxy: Boolean,
                            runDir: String) = {
-    val importIns = parseImports(cIns :+ ImportInstruction("/lib.edql"), runDir)
+
+    val importIns = parseImports(cIns ++ libs.map(ImportInstruction), runDir)
 
     val invokeIns = cIns ++ importIns
 

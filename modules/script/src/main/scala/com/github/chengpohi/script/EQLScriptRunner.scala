@@ -9,7 +9,7 @@ import java.nio.file.Files
 import java.util.stream.Collectors
 import scala.util.{Failure, Success, Try}
 
-class EQLScriptRunner extends InstructionInvoker {
+class EQLScriptRunner(ls: Seq[String]) extends InstructionInvoker {
   override val eqlParser: EQLParser = new EQLParser
 
   import eqlParser._
@@ -71,4 +71,6 @@ class EQLScriptRunner extends InstructionInvoker {
       case false => None
     }
   }
+
+  override val libs: Seq[String] = ls
 }
