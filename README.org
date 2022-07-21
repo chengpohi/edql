@@ -9,24 +9,3 @@ Please find more on: [[https://chengpohi.github.io/][EDQL Wiki]] or [[https://pl
 
 [[https://raw.githubusercontent.com/wiki/chengpohi/edql/images/tutorial.gif]]
 [[https://raw.githubusercontent.com/wiki/chengpohi/edql/images/visual-editor.gif]]
-
-*** Use with EDQL file:
-
-#+BEGIN_SRC shell
-eql -Deql.file=test.edql
-#+END_SRC
-
-test.edql:
-
-#+BEGIN_SRC text
-HOST http://localhost:9200
-Authorization ""
-POST myindex/_search
-{
-  "query": {
-	"match_all": {}
-  }
-}
-#+END_SRC
-
-
