@@ -31,7 +31,7 @@ object Lexical {
 
   def longstring[_: P](delimiter: String) = P(WS ~ delimiter ~ longstringitem(delimiter).rep.! ~ delimiter ~ WS)
     .map(i => {
-      JsonCollection.Str(StringEscapeUtils.escapeJava(i))
+      JsonCollection.Str(StringEscapeUtils.escapeJava(i).replaceAll("\\r|\\n", ""))
     })
 
   def longstringitem[_: P](quote: String): P[Unit] = P(longstringchar(quote) | escapeseq | !quote ~ quote.take(1))
