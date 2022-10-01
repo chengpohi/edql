@@ -54,7 +54,7 @@ object ScriptEQLContext {
       s"-${apiRegion.getOrElse("")}" +
       s"-${timeout.getOrElse("")}"
     val cacheContext = cache.get(cacheKey)
-    if (cacheContext.isDefined) {
+    if (isCacheValid(cacheContext)) {
       val c = cacheContext.get
       c.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
       return c
@@ -73,6 +73,15 @@ object ScriptEQLContext {
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
     cache.put(cacheKey, context)
     context
+  }
+
+  private def isCacheValid(cacheContext: Option[ScriptEQLContext]) = {
+    cacheContext match {
+      case None => false
+      case Some(c) => {
+        c.eqlClient.restClient.isRunning
+      }
+    }
   }
 }
 
