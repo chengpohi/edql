@@ -28,17 +28,18 @@ object Settings {
     "org.elasticsearch.client" % "elasticsearch-rest-client" % "7.13.0",
     "com.jayway.jsonpath" % "json-path" % "2.6.0" exclude("org.slf4j", "slf4j-api"),
     "com.amazonaws" % "aws-java-sdk-core" % "1.12.141",
-    "org.scalatest" %% "scalatest" % "3.2.3" % "test"
+    "org.scalatest" %% "scalatest" % "3.2.4" % "test"
   )
 
   val replDependencies = Seq(
     "jline" % "jline" % "2.12",
     "org.typelevel" %% "cats-core" % "2.0.0",
-    "org.typelevel" %% "cats-effect" % "2.0.0"
+    "org.typelevel" %% "cats-effect" % "2.0.0",
+    "org.scalatest" %% "scalatest" % "3.2.4" % "test"
   )
 
   val scriptDependencies = Seq(
-    "org.scalatest" %% "scalatest" % "3.2.3" % "test"
+    "org.scalatest" %% "scalatest" % "3.2.4" % "test"
   )
 
   def defaultShellScript(javaOpts: Seq[String] = Seq.empty): Seq[String] = {
