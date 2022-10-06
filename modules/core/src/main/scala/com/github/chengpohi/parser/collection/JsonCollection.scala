@@ -110,14 +110,9 @@ object JsonCollection {
       val valueJson = value.map {
         case (n, v) => {
           val j = v.toJson
-          if (StringUtils.equalsIgnoreCase(j, "{}")) {
-            ""
-          } else {
-            n.toJson + ":" + j
-          }
+          n.toJson + ":" + j
         }
-      }
-        .filter(i => StringUtils.isNotBlank(i)).mkString(",")
+      }.filter(i => StringUtils.isNotBlank(i)).mkString(",")
       "{" + valueJson + "}"
     }
 
