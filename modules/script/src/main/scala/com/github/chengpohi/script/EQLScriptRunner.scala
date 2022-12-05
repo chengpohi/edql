@@ -74,7 +74,7 @@ class EQLScriptRunner(ls: Seq[String]) extends InstructionInvoker {
 
   override val libs: Seq[String] = ls
 
-  def close = {
+  def close(): Unit = {
     for (c <- ScriptEQLContext.cache) {
       c._2.restClient.close()
     }

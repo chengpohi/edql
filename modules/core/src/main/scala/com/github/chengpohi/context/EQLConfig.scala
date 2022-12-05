@@ -51,6 +51,16 @@ trait EQLConfig {
               .setSocketTimeout(timeout.getOrElse(5000));
           })
 
+    val sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(null, Array[TrustManager](UnsafeX509ExtendedTrustManager.INSTANCE), null);
+    restClientBuilder.setHttpClientConfigCallback(
+      new RestClientBuilder.HttpClientConfigCallback() {
+        override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+          httpClientBuilder.setSSLContext(sslContext)
+            .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+        }
+      })
+
     if (auth.isDefined) {
       val defaultHeaders = Array[Header](
         new BasicHeader("Authorization", auth.get)
@@ -66,8 +76,6 @@ trait EQLConfig {
       )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
-    val sslContext = SSLContext.getInstance("TLS");
-    sslContext.init(null, Array[TrustManager](UnsafeX509ExtendedTrustManager.INSTANCE), null);
 
     if (StringUtils.isNotBlank(uri.getUserInfo)) {
       val credentialsProvider = new BasicCredentialsProvider
