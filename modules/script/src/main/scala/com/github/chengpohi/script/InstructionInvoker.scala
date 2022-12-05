@@ -16,7 +16,7 @@ import scala.util.{Failure, Success}
 
 trait InstructionInvoker {
   val eqlParser: EQLParser
-  val client: HttpClient = HttpClient.newHttpClient()
+  val httpClient: HttpClient = HttpClient.newHttpClient()
   val libs: Seq[String]
 
   import eqlParser._
@@ -124,7 +124,7 @@ trait InstructionInvoker {
     }
 
     val importStr = imports.map(i => {
-      handleImport(runDir, client, i)
+      handleImport(runDir, httpClient, i)
     }).mkString("").trim
 
     val importIns = eqlParser.generateInstructions(importStr) match {
