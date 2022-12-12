@@ -11,7 +11,6 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization.write
 
-import java.io.Serializable
 import scala.concurrent.Future
 import scala.reflect.runtime.universe
 
@@ -132,10 +131,12 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
         case a =>
           if (a.size > 1) {
             request.setJsonEntity(
-              a.map(_.toJson)
-                .mkString(System.lineSeparator()) + System.lineSeparator())
+              a.map(i => {
+                trimQueryClause(i).toJson
+              }).mkString(System.lineSeparator()) + System.lineSeparator())
           } else if (a.size == 1) {
-            request.setJsonEntity(a.head.toJson + System.lineSeparator())
+            val h = trimQueryClause(a.head)
+            request.setJsonEntity(h.toJson + System.lineSeparator())
           }
       }
       Future {
@@ -160,6 +161,21 @@ trait EQLDefinition extends ElasticBase with EQLDsl with HttpContext {
             EntityUtils.toString(ex.getResponse.getEntity)
           }
         }
+      }
+    }
+
+    private def trimQueryClause(i: JsonCollection.Obj): JsonCollection.Obj = {
+      val emptyQueryClause = i.get("query").flatMap(_ match {
+        case value: JsonCollection.Var =>
+          value.realValue
+        case a => Some(a)
+      }).filter(i => i.isInstanceOf[JsonCollection.Obj]).exists(i => {
+        i.asInstanceOf[JsonCollection.Obj].value.isEmpty
+      })
+
+      emptyQueryClause match {
+        case true => i.remove("query")
+        case false => i
       }
     }
 
