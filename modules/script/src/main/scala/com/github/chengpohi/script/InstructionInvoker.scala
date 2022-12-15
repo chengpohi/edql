@@ -35,7 +35,7 @@ trait InstructionInvoker {
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
-    EQLRunResult(invokeResult.map(i => i.toJson).filter(_.nonEmpty), context)
+    EQLRunResult(invokeResult, context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
@@ -192,8 +192,8 @@ trait InstructionInvoker {
     val funParms = parms.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
     funParms.foreach(fParam => {
       val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
-      fParam.realValue = Some(value)
-      context.variables.put(fParam.value._1, value)
+      fParam.realValue = Some(value.value)
+      context.variables.put(fParam.value._1, value.value)
     })
 
     val arithes = parms.filter(_._2.isInstanceOf[JsonCollection.ArithTree]).map(i => i._2.asInstanceOf[JsonCollection.ArithTree])
@@ -223,7 +223,7 @@ trait InstructionInvoker {
 
   def iterCollection(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
-                     r: eqlParser.ForInstruction): Seq[JsonCollection.Val] = {
+                     r: eqlParser.ForInstruction): Seq[ExecuteInfo] = {
     val cachedVariables = context.variables
 
     val iterVariable = r.iterVariable
@@ -241,7 +241,7 @@ trait InstructionInvoker {
 
   def invokeFunction(functions: Map[String, eqlParser.FunctionInstruction],
                      context: ScriptEQLContext,
-                     invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[JsonCollection.Val] = {
+                     invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[ExecuteInfo] = {
     val cachedVariables = context.variables
     val values = invoke.vals
 
@@ -284,7 +284,7 @@ trait InstructionInvoker {
 
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
                       context: ScriptEQLContext,
-                      instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
+                      instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[ExecuteInfo] = {
     context.variables.put("INVOKE_PATH", new JsonCollection.Str(funName.orNull))
     try {
       instructions.foreach(po => {
@@ -299,12 +299,12 @@ trait InstructionInvoker {
         case f: FunctionInvokeInstruction =>
           invokeFunction(functions, context, f, funName)
         case r: ReturnInstruction => {
-          Seq(r.value.copy)
+          Seq(ExecuteInfo("", r.value.copy))
         }
         case r: EchoInstruction =>
-          Seq(r.value.copy)
+          Seq(ExecuteInfo("", r.value.copy))
         case i => {
-          Seq(JsonCollection.Wrapper(i.execute(context).json))
+          Seq(ExecuteInfo("", JsonCollection.Wrapper(i.execute(context).json)))
         }
       }
     } finally {
@@ -324,7 +324,7 @@ trait InstructionInvoker {
       case f: JsonCollection.Fun =>
         val res = invokeFunction(functions, context,
           FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
-        f.realValue = Some(res)
+        f.realValue = Some(res.value)
     }
   }
 
@@ -405,8 +405,8 @@ trait InstructionInvoker {
       case f: JsonCollection.Fun => {
         val res = invokeFunction(functions, context,
           FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
-        f.realValue = Some(res)
-        evalBasicValue(functions, context, res, funName)
+        f.realValue = Some(res.value)
+        evalBasicValue(functions, context, res.value, funName)
       }
       case _ => throw new RuntimeException("only support num and str arith expression")
     }
