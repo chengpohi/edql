@@ -25,3 +25,9 @@ esdata/
 .bsp/
 
 null/
+
+build/
+
+
+gen/
+.gradle

@@ -1,6 +1,5 @@
 package com.github.chengpohi.parser.collection
 
-
 import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
 
 import scala.reflect.runtime.universe._

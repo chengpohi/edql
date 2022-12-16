@@ -9,7 +9,7 @@ import scala.util.{Failure, Success}
 object EQLCommand {
   def main(args: Array[String]): Unit = {
     try {
-      val scriptRunner = new EQLScriptRunner(Seq("/lib.edql"))
+      val scriptRunner = new EQLScriptRunner(Seq())
       val file = scriptRunner.getScriptFilePathFromEnv
       file match {
         case Some(f) =>
