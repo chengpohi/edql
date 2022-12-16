@@ -3,19 +3,14 @@
 
 case "$1" in
   "build")
-    sbt compile
     ;;
   "assembly")
-    sbt binary
     ;;
   "pb")
-    sbt clean pbCore
+    ./gradlew :modules:script:publishToMavenLocal
     ;;
   "fmt")
-    sbt eqlCore/scalafmt
-    sbt eqlRepl/scalafmt
     ;;
   *)
-    sbt compile
     ;;
 esac
