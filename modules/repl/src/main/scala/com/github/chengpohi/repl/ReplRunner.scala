@@ -3,7 +3,7 @@ package com.github.chengpohi.repl
 import cats.Id
 import cats.data.Reader
 import cats.effect.{IO, Resource}
-import com.github.chengpohi.context.{EQLConfig, EQLContext}
+import com.github.chengpohi.context.{EDQLConfig, Context}
 import com.github.chengpohi.dsl.serializer.JSONOps
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
@@ -12,19 +12,19 @@ import jline.internal.Configuration
 import java.io.File
 import scala.io.Source
 
-class EQLReplRunner extends EQLConfig
-  with EQLContext
+class ReplRunner extends EDQLConfig
+  with Context
   with JSONOps {
   val ANSI_GREEN = "\u001B[32m"
   val ANSI_RESET = "\u001B[0m"
 
-  val eqlInterpreter = new EQLReplInterpreter(this)
+  val eqlInterpreter = new ReplInterpreter$(this)
 
-  def interpret(line: String): Reader[EQLReplInterpreter, String] = {
-    Reader((interpreter: EQLReplInterpreter) => interpreter.run(line).beautify)
+  def interpret(line: String): Reader[ReplInterpreter$, String] = {
+    Reader((interpreter: ReplInterpreter$) => interpreter.run(line).beautify)
   }
 
-  def run[T](reader: Reader[EQLReplInterpreter, T]): Id[T] = {
+  def run[T](reader: Reader[ReplInterpreter$, T]): Id[T] = {
     reader(eqlInterpreter)
   }
 
@@ -35,7 +35,7 @@ class EQLReplRunner extends EQLConfig
     val reader = new ConsoleReader()
     reader.setPrompt(ANSI_GREEN + "eql>" + ANSI_RESET)
     reader.addCompleter(generateCompleter())
-    reader.setCompletionHandler(new EQLCompletionHandler)
+    reader.setCompletionHandler(new EDQLCompletionHandler)
     reader.setHistory(
       new FileHistory(new File(Configuration.getUserHome, ".eql.history")))
     addShutdownHook(reader)
@@ -79,6 +79,6 @@ class EQLReplRunner extends EQLConfig
   }
 }
 
-object EQLReplRunner {
-  def apply(): EQLReplRunner = new EQLReplRunner()
+object ReplRunner {
+  def apply(): ReplRunner = new ReplRunner()
 }

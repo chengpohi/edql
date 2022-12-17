@@ -5,7 +5,7 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
 
-trait EQLInstructionParser extends JsonParser with InterceptFunction {
+trait EDQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
 

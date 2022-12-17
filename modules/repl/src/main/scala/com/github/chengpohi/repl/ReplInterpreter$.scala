@@ -1,13 +1,13 @@
 package com.github.chengpohi.repl
 
-import com.github.chengpohi.context.{EQLConfig, EQLContext}
-import com.github.chengpohi.parser.EQLParser
+import com.github.chengpohi.context.{EDQLConfig, Context}
+import com.github.chengpohi.parser.EDQLParser
 
 import scala.io.Source
 import scala.util.{Failure, Success}
 
-class EQLReplInterpreter(eql: EQLContext) {
-  val eqlParser: EQLParser = new EQLParser
+class ReplInterpreter$(eql: Context) {
+  val eqlParser: EDQLParser = new EDQLParser
 
   import eqlParser._
 
@@ -27,8 +27,8 @@ class EQLReplInterpreter(eql: EQLContext) {
   }
 }
 
-object EQLReplInterpreter extends EQLContext with EQLConfig {
-  private val runEngine: EQLReplInterpreter = new EQLReplInterpreter(this)
+object ReplInterpreter$ extends Context with EDQLConfig {
+  private val runEngine: ReplInterpreter$ = new ReplInterpreter$(this)
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {

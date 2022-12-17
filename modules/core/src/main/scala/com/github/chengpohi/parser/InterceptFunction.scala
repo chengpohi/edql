@@ -1,7 +1,7 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.context.EQLContext
-import com.github.chengpohi.dsl.eql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
+import com.github.chengpohi.context.Context
+import com.github.chengpohi.dsl.edql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.jayway.jsonpath.JsonPath
 import com.typesafe.config.ConfigFactory
@@ -15,7 +15,7 @@ trait InterceptFunction {
   case class CatNodesInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat nodes
     }
@@ -24,7 +24,7 @@ trait InterceptFunction {
   case class GetAllocationInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat allocation
     }
@@ -33,7 +33,7 @@ trait InterceptFunction {
   case class CatMasterInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat master
     }
@@ -42,7 +42,7 @@ trait InterceptFunction {
   case class CatIndicesInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat indices
     }
@@ -51,7 +51,7 @@ trait InterceptFunction {
   case class CatShardsInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat shards
     }
@@ -60,7 +60,7 @@ trait InterceptFunction {
   case class CatCountInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat count
     }
@@ -69,7 +69,7 @@ trait InterceptFunction {
   case class CatAllocationInstruction() extends Instruction2 {
     override def name: String = "Allocation"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat allocation
     }
@@ -78,7 +78,7 @@ trait InterceptFunction {
   case class CatPendingInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat pending_tasks
     }
@@ -87,7 +87,7 @@ trait InterceptFunction {
   case class CatRecoveryInstruction() extends Instruction2 {
     override def name: String = "GetMapping"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       cat recovery
     }
@@ -96,7 +96,7 @@ trait InterceptFunction {
   trait Instruction2 {
     def name: String
 
-    def execute(implicit eql: EQLContext): Definition[_]
+    def execute(implicit eql: Context): Definition[_]
 
     def ds: Seq[JsonCollection.Dynamic] = Seq()
   }
@@ -106,7 +106,7 @@ trait InterceptFunction {
   case class HelpInstruction(params: Seq[String]) extends Instruction2 {
     override def name = "help"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       params match {
         case Seq(_) =>
           //          val example: String =
@@ -128,7 +128,7 @@ trait InterceptFunction {
   case class CommentInstruction() extends ScriptContextInstruction2 {
     override def name = "comment"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition("")
     }
   }
@@ -136,7 +136,7 @@ trait InterceptFunction {
   case class EndpointBindInstruction(endpoint: String, kibanaProxy: Boolean = false) extends ScriptContextInstruction2 {
     override def name = "host"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$endpoint")
     }
   }
@@ -144,7 +144,7 @@ trait InterceptFunction {
   case class TimeoutInstruction(timeout: Int) extends ScriptContextInstruction2 {
     override def name = "timeout"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"timeout $timeout")
     }
   }
@@ -152,7 +152,7 @@ trait InterceptFunction {
   case class ImportInstruction(imp: String) extends ScriptContextInstruction2 {
     override def name = "import"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$imp")
     }
   }
@@ -160,7 +160,7 @@ trait InterceptFunction {
   case class AuthorizationBindInstruction(auth: String) extends ScriptContextInstruction2 {
     override def name = "authorization"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$auth")
     }
   }
@@ -168,7 +168,7 @@ trait InterceptFunction {
   case class UsernameBindInstruction(username: String) extends ScriptContextInstruction2 {
     override def name = "Username"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$username")
     }
   }
@@ -176,7 +176,7 @@ trait InterceptFunction {
   case class PasswordBindInstruction(password: String) extends ScriptContextInstruction2 {
     override def name = "Password"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$password")
     }
   }
@@ -184,7 +184,7 @@ trait InterceptFunction {
   case class ApiKeyIdBindInstruction(apikeyId: String) extends ScriptContextInstruction2 {
     override def name = "apikeyId"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$apikeyId")
     }
   }
@@ -192,7 +192,7 @@ trait InterceptFunction {
   case class ApiKeySecretBindInstruction(apiSecret: String) extends ScriptContextInstruction2 {
     override def name = "secret"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$apiSecret")
     }
   }
@@ -200,7 +200,7 @@ trait InterceptFunction {
   case class ApiSessionTokenBindInstruction(apiSessionToken: String) extends ScriptContextInstruction2 {
     override def name = "session"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$apiSessionToken")
     }
   }
@@ -208,7 +208,7 @@ trait InterceptFunction {
   case class AWSRegionBindInstruction(awsRegion: String) extends ScriptContextInstruction2 {
     override def name = "region"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"$awsRegion")
     }
   }
@@ -216,7 +216,7 @@ trait InterceptFunction {
   case class PostActionInstruction(path: String, action: Seq[JsonCollection.Val]) extends Instruction2 {
     override def name = "post"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       val newPath = mapNewPath(eql.variables, path)
 
@@ -235,7 +235,7 @@ trait InterceptFunction {
   case class DeleteActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "delete"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       val newPath = mapNewPath(eql.variables, path)
 
@@ -253,7 +253,7 @@ trait InterceptFunction {
   case class PutActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "put"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       val newPath = mapNewPath(eql.variables, path)
 
@@ -271,7 +271,7 @@ trait InterceptFunction {
   case class GetActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "get"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       val newPath = mapNewPath(eql.variables, path)
 
@@ -289,7 +289,7 @@ trait InterceptFunction {
   case class HeadActionInstruction(path: String, action: Option[JsonCollection.Val]) extends Instruction2 {
     override def name = "head"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       import eql._
       val newPath = mapNewPath(eql.variables, path)
 
@@ -308,7 +308,7 @@ trait InterceptFunction {
   case class VariableInstruction(variableName: String, value: JsonCollection.Val) extends ScriptContextInstruction2 {
     override def name = "variable"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
 
@@ -320,7 +320,7 @@ trait InterceptFunction {
   case class FunctionInstruction(funcName: String, variableNames: Seq[String], instructions: Seq[Instruction2]) extends ScriptContextInstruction2 {
     override def name = "function"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
   }
@@ -330,7 +330,7 @@ trait InterceptFunction {
                             instructions: Seq[Instruction2]) extends Instruction2 {
     override def name = "for"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
 
@@ -342,7 +342,7 @@ trait InterceptFunction {
   case class ReturnInstruction(value: JsonCollection.Val) extends Instruction2 {
     override def name = "return"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
 
@@ -354,7 +354,7 @@ trait InterceptFunction {
   case class EchoInstruction(value: JsonCollection.Val) extends Instruction2 {
     override def name = "echo"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
 
@@ -366,7 +366,7 @@ trait InterceptFunction {
   case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
     override def name = "functionInvoke"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
 
@@ -378,7 +378,7 @@ trait InterceptFunction {
   case class ReadJSONInstruction(filePath: JsonCollection.Var) extends Instruction2 {
     override def name = "readJSONInstruction"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       val contextPath = eql.variables.get("CONTEXT_PATH")
       val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
       val targetPath = filePath.toJson
@@ -397,7 +397,7 @@ trait InterceptFunction {
   case class WriteJSONInstruction(filePath: JsonCollection.Val, data: JsonCollection.Val) extends Instruction2 {
     override def name = "writeJSONInstruction"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       val contextPath = eql.variables.get("CONTEXT_PATH")
       val currentDir = contextPath.map(_.asInstanceOf[JsonCollection.Str].value).map(_ + "/").getOrElse("")
 
@@ -415,7 +415,7 @@ trait InterceptFunction {
   case class JQInstruction(data: JsonCollection.Val, path: JsonCollection.Val) extends Instruction2 {
     override def name = "jqInstruction"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       val jsonO = data.toJson
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
       val value = JsonPath.parse(jsonO).read(jsonPath).toString
@@ -430,7 +430,7 @@ trait InterceptFunction {
 
     override def name: String = "error"
 
-    def execute(implicit eql: EQLContext): Definition[_] = {
+    def execute(implicit eql: Context): Definition[_] = {
       ErrorHealthRequestDefinition(error)
     }
   }

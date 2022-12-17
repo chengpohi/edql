@@ -7,7 +7,7 @@ import fastparse._
 import scala.util.Try
 
 
-class EQLParser extends EQLInstructionParser {
+class EDQLParser extends EDQLInstructionParser {
   type PSI = Parsed[Seq[Instruction2]]
 
   def instruction(s: String): PSI = parse(s, instrument(_))

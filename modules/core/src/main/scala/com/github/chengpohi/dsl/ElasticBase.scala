@@ -9,7 +9,7 @@ import scala.jdk.CollectionConverters._;
  * Created by chengpohi on 6/28/15.
  */
 trait ElasticBase {
-  implicit val eqlClient: EQLClient
+  implicit val eqlClient: EDQLClient
   val restClient: RestClient = eqlClient.restClient
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
