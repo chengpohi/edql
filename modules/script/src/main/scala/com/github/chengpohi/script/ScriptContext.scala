@@ -1,24 +1,24 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.context.{EQLConfig, EQLContext}
-import com.github.chengpohi.dsl.EQLClient
+import com.github.chengpohi.context.{EDQLConfig, Context}
+import com.github.chengpohi.dsl.EDQLClient
 import com.github.chengpohi.parser.collection.JsonCollection
 
 import java.net.URI
 import scala.collection.mutable
 
-case class ScriptEQLContext(endpoint: String,
-                            uri: URI,
-                            auth: Option[String],
-                            username: Option[String],
-                            password: Option[String],
-                            apiKeyId: Option[String],
-                            apiKeySecret: Option[String],
-                            apiSessionToken: Option[String],
-                            awsRegion: Option[String],
-                            timeout: Option[Int],
-                            kibanaProxy: Boolean) extends EQLConfig with EQLContext {
-  override implicit lazy val eqlClient: EQLClient =
+case class ScriptContext(endpoint: String,
+                         uri: URI,
+                         auth: Option[String],
+                         username: Option[String],
+                         password: Option[String],
+                         apiKeyId: Option[String],
+                         apiKeySecret: Option[String],
+                         apiSessionToken: Option[String],
+                         awsRegion: Option[String],
+                         timeout: Option[Int],
+                         kibanaProxy: Boolean) extends EDQLConfig with Context {
+  override implicit lazy val eqlClient: EDQLClient =
     buildRestClient(uri,
       auth,
       username,
@@ -30,8 +30,8 @@ case class ScriptEQLContext(endpoint: String,
       timeout, kibanaProxy)
 }
 
-object ScriptEQLContext {
-  val cache: mutable.Map[String, ScriptEQLContext] = mutable.Map[String, ScriptEQLContext]()
+object ScriptContext {
+  val cache: mutable.Map[String, ScriptContext] = mutable.Map[String, ScriptContext]()
 
   def apply(endpoint: String,
             auth: Option[String] = None,
@@ -43,7 +43,7 @@ object ScriptEQLContext {
             apiRegion: Option[String] = None,
             timeout: Option[Int],
             vars: Map[String, JsonCollection.Val],
-            kibanaProxy: Boolean): ScriptEQLContext = {
+            kibanaProxy: Boolean): ScriptContext = {
     val uri = URI.create(endpoint)
 
     val cacheKey = s"$endpoint-${auth.getOrElse("")}-${username.getOrElse("")}" +
@@ -59,7 +59,7 @@ object ScriptEQLContext {
       c.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
       return c
     }
-    val context = new ScriptEQLContext(endpoint, uri,
+    val context = new ScriptContext(endpoint, uri,
       auth,
       username,
       password,
@@ -75,7 +75,7 @@ object ScriptEQLContext {
     context
   }
 
-  private def isCacheValid(cacheContext: Option[ScriptEQLContext]) = {
+  private def isCacheValid(cacheContext: Option[ScriptContext]) = {
     cacheContext match {
       case None => false
       case Some(c) => {

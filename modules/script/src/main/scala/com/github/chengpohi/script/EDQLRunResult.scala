@@ -4,8 +4,8 @@ import scala.collection.SeqMap
 import scala.util.{Success, Try}
 
 
-case class EQLRunResult(response: Try[Seq[String]],
-                        context: Map[String, Any] = Map()) {
+case class EDQLRunResult(response: Try[Seq[String]],
+                         context: Map[String, Any] = Map()) {
   def isSuccess: Boolean = response.isSuccess
 
   def isFail: Boolean = response.isFailure
@@ -15,14 +15,14 @@ case class EQLRunResult(response: Try[Seq[String]],
   def success: Seq[String] = response.get
 }
 
-object EQLRunResult {
-  def apply(response: Try[Seq[String]]): EQLRunResult = {
-    new EQLRunResult(response)
+object EDQLRunResult {
+  def apply(response: Try[Seq[String]]): EDQLRunResult = {
+    new EDQLRunResult(response)
   }
 
   def apply(response: Seq[String],
-            context: ScriptEQLContext): EQLRunResult = {
-    new EQLRunResult(Success(response), SeqMap(
+            context: ScriptContext): EDQLRunResult = {
+    new EDQLRunResult(Success(response), SeqMap(
       "HOST" -> context.endpoint,
       "Authorization" -> context.auth.map(i => s""""$i"""").orNull,
       "Username" -> context.username.map(i => s""""$i"""").orNull,

@@ -1,15 +1,15 @@
 package com.github.chengpohi
 
-import com.github.chengpohi.repl.EQLReplRunner
-import com.github.chengpohi.script.EQLScriptRunner
+import com.github.chengpohi.repl.ReplRunner
+import com.github.chengpohi.script.EDQLScriptRunner
 
 import java.io.File
 import scala.util.{Failure, Success}
 
-object EQLCommand {
+object EDQLCommand {
   def main(args: Array[String]): Unit = {
     try {
-      val scriptRunner = new EQLScriptRunner(Seq("/lib.edql"))
+      val scriptRunner = new EDQLScriptRunner(Seq("/lib.edql"))
       val file = scriptRunner.getScriptFilePathFromEnv
       file match {
         case Some(f) =>
@@ -25,7 +25,7 @@ object EQLCommand {
           }
           System.exit(0)
         case None =>
-          EQLReplRunner().runRepl()
+          ReplRunner().runRepl()
       }
     } catch {
       case ex: Exception => {
