@@ -73,7 +73,7 @@ project(":") {
 project(":modules:core") {
     version = rootProject.version.toString()
     dependencies {
-        implementation(project(":"))
+        api(project(":"))
     }
 
     publishing {
@@ -117,7 +117,7 @@ project(":modules:script") {
     dependencies {
         api(project(":"))
         api(project(":modules:core"))
-        implementation("org.scala-lang:scala-library:2.13.10")
+        api("org.scala-lang:scala-library:2.13.10")
     }
 
 
@@ -145,6 +145,17 @@ project(":modules:script") {
 
 publishing {
     publications {
+        create<MavenPublication>("edql") {
+            groupId = "com.github.chengpohi"
+            artifactId = "edql"
+            version = rootProject.version.toString()
+            from(components["java"])
+
+            pom {
+                name.set("edql")
+                description.set("edql")
+            }
+        }
     }
     repositories {
         mavenLocal()
