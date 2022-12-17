@@ -1,6 +1,6 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.parser.EQLParser
+import com.github.chengpohi.parser.EDQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
 
@@ -15,7 +15,7 @@ import scala.io.Source
 import scala.util.{Failure, Success}
 
 trait InstructionInvoker {
-  val eqlParser: EQLParser
+  val eqlParser: EDQLParser
   val httpClient: HttpClient = HttpClient.newHttpClient()
   val libs: Seq[String]
 
@@ -23,19 +23,19 @@ trait InstructionInvoker {
 
   def invokeInstruction(invokeIns: Seq[eqlParser.Instruction2],
                         scriptContextIns: Seq[eqlParser.Instruction2],
-                        runDir: String): EQLRunResult = {
+                        runDir: String): EDQLRunResult = {
 
     val endpointBind = scriptContextIns.find(_.isInstanceOf[EndpointBindInstruction])
       .map(i => i.asInstanceOf[eqlParser.EndpointBindInstruction])
     if (endpointBind.isEmpty) {
-      return EQLRunResult(Failure(new RuntimeException("should configure host")))
+      return EDQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
     val (functions, context) =
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
-    EQLRunResult(invokeResult.map(i => i.toJson).filter(_.nonEmpty), context)
+    EDQLRunResult(invokeResult.map(i => i.toJson).filter(_.nonEmpty), context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
@@ -97,7 +97,7 @@ trait InstructionInvoker {
 
     val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runDir))
 
-    val context = ScriptEQLContext(
+    val context = ScriptContext(
       endPoint,
       authorization,
       username,
@@ -185,7 +185,7 @@ trait InstructionInvoker {
   }
 
   private def evalFunParams(globalFunctions: Map[String, eqlParser.FunctionInstruction],
-                            context: ScriptEQLContext,
+                            context: ScriptContext,
                             parms: Map[String, JsonCollection.Val],
                             funName: Option[String] = None
                            ) = {
@@ -222,7 +222,7 @@ trait InstructionInvoker {
 
 
   def iterCollection(functions: Map[String, eqlParser.FunctionInstruction],
-                     context: ScriptEQLContext,
+                     context: ScriptContext,
                      r: eqlParser.ForInstruction): Seq[JsonCollection.Val] = {
     val cachedVariables = context.variables
 
@@ -240,7 +240,7 @@ trait InstructionInvoker {
 
 
   def invokeFunction(functions: Map[String, eqlParser.FunctionInstruction],
-                     context: ScriptEQLContext,
+                     context: ScriptContext,
                      invoke: eqlParser.FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[JsonCollection.Val] = {
     val cachedVariables = context.variables
     val values = invoke.vals
@@ -283,7 +283,7 @@ trait InstructionInvoker {
   }
 
   def runInstructions(functions: Map[String, eqlParser.FunctionInstruction],
-                      context: ScriptEQLContext,
+                      context: ScriptContext,
                       instructions: Seq[eqlParser.Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
     context.variables.put("INVOKE_PATH", new JsonCollection.Str(funName.orNull))
     try {
@@ -314,7 +314,7 @@ trait InstructionInvoker {
   }
 
   def evalDs(functions: Map[String, eqlParser.FunctionInstruction],
-             context: ScriptEQLContext,
+             context: ScriptContext,
              vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
     vars.foreach {
       case vr: JsonCollection.Var =>
@@ -330,7 +330,7 @@ trait InstructionInvoker {
 
 
   def evalArith(functions: Map[String, eqlParser.FunctionInstruction],
-                context: ScriptEQLContext,
+                context: ScriptContext,
                 v: JsonCollection.ArithTree,
                 funName: Option[String] = None): Unit = {
     val value = v.value
@@ -383,7 +383,7 @@ trait InstructionInvoker {
 
 
   def evalBasicValue(functions: Map[String, eqlParser.FunctionInstruction],
-                     context: ScriptEQLContext,
+                     context: ScriptContext,
                      v: JsonCollection.Val,
                      funName: Option[String]): JsonCollection.Arith =
     v match {
