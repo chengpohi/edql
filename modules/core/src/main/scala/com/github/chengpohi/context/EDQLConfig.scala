@@ -48,6 +48,7 @@ trait EDQLConfig {
           new RestClientBuilder.RequestConfigCallback() {
             override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = return requestConfigBuilder
               .setConnectTimeout(timeout.getOrElse(5000))
+              .setConnectionRequestTimeout(timeout.getOrElse(5000))
               .setSocketTimeout(timeout.getOrElse(5000));
           })
 
