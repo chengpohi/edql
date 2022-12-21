@@ -1,11 +1,13 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.context.{EDQLConfig, Context}
+import com.github.chengpohi.context.{Context, EDQLConfig}
 import com.github.chengpohi.dsl.EDQLClient
 import com.github.chengpohi.parser.collection.JsonCollection
 
 import java.net.URI
 import scala.collection.mutable
+import scala.concurrent.duration
+import scala.concurrent.duration.Duration
 
 case class ScriptContext(endpoint: String,
                          uri: URI,
@@ -18,6 +20,8 @@ case class ScriptContext(endpoint: String,
                          awsRegion: Option[String],
                          timeout: Option[Int],
                          kibanaProxy: Boolean) extends EDQLConfig with Context {
+  override implicit val resultTimeout: Duration = Duration.apply(timeout.getOrElse(5000), duration.MILLISECONDS)
+
   override implicit lazy val eqlClient: EDQLClient =
     buildRestClient(uri,
       auth,
