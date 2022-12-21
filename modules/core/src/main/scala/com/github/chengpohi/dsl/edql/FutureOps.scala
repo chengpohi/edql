@@ -3,14 +3,15 @@ package com.github.chengpohi.dsl.edql
 import com.github.chengpohi.dsl.converter.ResponseConverter
 import com.github.chengpohi.dsl.serializer.ResponseSerializer
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait FutureOps extends ResponseSerializer with ResponseConverter {
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val resultTimeout: Duration = 5000 millis
   trait FutureAwaitOps[A] {
     val value: Future[A]
-    def await: A = Await.result(value, Duration.Inf)
+    def await: A = Await.result(value, resultTimeout)
   }
 
   implicit def convertToFutureAwaitOps[A](v: Future[A]): FutureAwaitOps[A] =
@@ -23,7 +24,7 @@ trait FutureOps extends ResponseSerializer with ResponseConverter {
     val value: Future[A]
 
     def toJson: String = {
-      val result = Await.result(value, Duration.Inf)
+      val result = Await.result(value, resultTimeout)
       F0.json(result)
     }
   }
