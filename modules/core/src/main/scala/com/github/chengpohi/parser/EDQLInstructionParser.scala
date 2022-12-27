@@ -4,6 +4,7 @@ import com.github.chengpohi.parser.Lexical._
 import com.github.chengpohi.parser.collection.JsonCollection
 import fastparse.NoWhitespace._
 import fastparse._
+import org.apache.commons.lang3.RandomStringUtils
 
 trait EDQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
@@ -71,11 +72,14 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
   def headAction[_: P] = P(WS ~ "HEAD" ~ WS ~ actionPath ~/ WS ~/ obj.? ~ WS).map(
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
-  def variableAction[_: P] =
-    P(WS ~ "var" ~ WS ~ variableName ~ WS ~/ "=" ~ WS ~/ jsonExpr ~ WS).map(
+  def variableAction[_: P]: P[Seq[Instruction2]] =
+    P(WS ~ "var" ~ WS ~ variableName ~ WS ~/ "=" ~ WS ~/ (jsonExpr | getAction | postAction | deleteAction | putAction | headAction) ~ WS).map(
       c => c._2 match {
         case v: JsonCollection.Val =>
-          VariableInstruction(c._1, v)
+          Seq(VariableInstruction(c._1, v))
+        case v: Instruction2 =>
+          val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+          Seq(VariableInstruction(c._1, JsonCollection.Fun((anonymousFun, Seq()))), FunctionInstruction(anonymousFun, Seq(), Seq(v)))
       })
 
   def returnExpr[_: P] = P(WS ~ "return" ~ WS ~/ jsonExpr.map(v => ReturnInstruction(v)) ~ WS)
@@ -110,6 +114,9 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
       comment | hostBind | kibanaHostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
         | postAction | getAction | deleteAction | putAction | headAction
         | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
-      ).rep(0)
+      ).rep(0).map(_.flatMap {
+      case j: Instruction2 => Seq(j)
+      case j: Seq[Instruction2] => j
+    })
   }
 }
