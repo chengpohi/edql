@@ -68,15 +68,6 @@ object JsonCollection {
     }
   }
 
-  case class Wrapper(value: java.lang.String) extends Val {
-    override def toJson: String = value
-
-    override def get(path: String): Option[Val] = None
-
-    override def copy: Val = Wrapper(value)
-  }
-
-
   case class Fun(value: (String, Seq[Val])) extends Dynamic {
     var realValue: Option[JsonCollection.Val] = None
 

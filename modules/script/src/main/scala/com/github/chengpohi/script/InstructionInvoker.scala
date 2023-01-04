@@ -304,7 +304,11 @@ trait InstructionInvoker {
         case r: EchoInstruction =>
           Seq(r.value.copy)
         case i => {
-          Seq(JsonCollection.Wrapper(i.execute(context).json))
+          val json = i.execute(context).json
+          parseJson(json) match {
+            case Success(j) => Seq(j)
+            case Failure(f) => Seq(JsonCollection.Str(json))
+          }
         }
       }
     } finally {
