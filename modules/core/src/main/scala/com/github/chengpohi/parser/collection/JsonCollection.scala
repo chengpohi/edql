@@ -33,6 +33,8 @@ object JsonCollection {
   case class Str(value: java.lang.String) extends AnyVal with Arith {
     override def toJson: String = "\"" + StringEscapeUtils.escapeJson(value) + "\""
 
+    def raw: String = StringEscapeUtils.escapeJson(value)
+
     override def get(path: String): Option[Val] = None
 
     override def plus(i: Arith): Arith = i match {
