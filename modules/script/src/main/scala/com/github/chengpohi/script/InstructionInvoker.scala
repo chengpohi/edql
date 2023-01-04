@@ -304,8 +304,6 @@ trait InstructionInvoker {
         case r: ReturnInstruction => {
           Seq(r.value.copy)
         }
-        case r: EchoInstruction =>
-          Seq(r.value.copy)
         case i => {
           val json = i.execute(context).json
           parseJson(json) match {

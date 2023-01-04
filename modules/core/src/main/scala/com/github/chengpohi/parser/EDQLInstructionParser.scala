@@ -84,11 +84,6 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
 
   def returnExpr[_: P] = P(WS ~ "return" ~ WS ~/ jsonExpr.map(v => ReturnInstruction(v)) ~ WS)
 
-  def echoExpr[_: P] = P(WS ~ "echo" ~ WS ~/ jsonExpr.map {
-    v: JsonCollection.Val =>
-      EchoInstruction(v)
-  } ~ WS)
-
   def functionExpr[_: P] = P(WS ~ "function" ~ WS ~ variableName ~ WS ~/ "(" ~
     WS ~ variableName.rep(sep = WS ~ "," ~ WS) ~ WS ~ ")" ~/
     WS ~ "{" ~/ WS ~ inses ~ WS ~ "}" ~ WS)
@@ -113,7 +108,7 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
     (
       comment | hostBind | kibanaHostBind | timeoutBind | authorizationBind | usernameBind | passwordBind | apiKeyIdBind | apiKeySecretBind | apiSessionTokenBind | awsRegionBind
         | postAction | getAction | deleteAction | putAction | headAction
-        | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr | echoExpr
+        | variableAction | functionExpr | forExpr | functionInvokeExpr | returnExpr | importExpr
       ).rep(0).map(_.flatMap {
       case j: Instruction2 => Seq(j)
       case j: Seq[Instruction2] => j
