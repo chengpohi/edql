@@ -351,18 +351,6 @@ trait InterceptFunction {
     }
   }
 
-  case class EchoInstruction(value: JsonCollection.Val) extends Instruction2 {
-    override def name = "echo"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      PureStringDefinition(s"")
-    }
-
-    override def ds: Seq[JsonCollection.Dynamic] = {
-      extractDynamics(value)
-    }
-  }
-
   case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
     override def name = "functionInvoke"
 
@@ -424,6 +412,22 @@ trait InterceptFunction {
 
     override def ds: Seq[JsonCollection.Dynamic] =
       Seq(path, data).flatMap(i => extractDynamics(i))
+  }
+
+  case class PrintInstruction(v: JsonCollection.Val) extends Instruction2 {
+    override def name = "printInstruction"
+
+    def execute(implicit eql: Context): Definition[_] = {
+      v match {
+        case t: JsonCollection.Str =>
+          PureStringDefinition(t.raw)
+        case t =>
+          PureStringDefinition(t.toJson)
+      }
+    }
+
+    override def ds: Seq[JsonCollection.Dynamic] =
+      Seq(v).flatMap(i => extractDynamics(i))
   }
 
   case class ErrorInstruction(error: String) extends Instruction2 {
@@ -524,6 +528,7 @@ trait InterceptFunction {
   def systemFunction: Map[String, FunctionInstruction] = {
     Map(
       "jq2" -> FunctionInstruction("jq", Seq("data", "path"), Seq(JQInstruction(JsonCollection.Var("data"), JsonCollection.Var("path")))),
+      "print1" -> FunctionInstruction("print", Seq("str"), Seq(PrintInstruction(JsonCollection.Var("str")))),
       "readJSON1" -> FunctionInstruction("readJSON", Seq("filePath"), Seq(ReadJSONInstruction(JsonCollection.Var("filePath")))),
       "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
     )
