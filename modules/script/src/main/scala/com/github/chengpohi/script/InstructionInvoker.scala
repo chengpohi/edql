@@ -189,12 +189,13 @@ trait InstructionInvoker {
                             parms: Map[String, JsonCollection.Val],
                             funName: Option[String] = None
                            ) = {
-    val funParms = parms.filter(_._2.isInstanceOf[JsonCollection.Fun]).map(i => i._2.asInstanceOf[JsonCollection.Fun])
-    funParms.foreach(fParam => {
-      val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
-      fParam.realValue = Some(value)
-      context.variables.put(fParam.value._1, value)
-    })
+    parms.filter(_._2.isInstanceOf[JsonCollection.Fun])
+      .foreach(i => {
+        val fParam = i._2.asInstanceOf[JsonCollection.Fun]
+        val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
+        fParam.realValue = Some(value)
+        context.variables.put(i._1, value)
+      })
 
     val arithes = parms.filter(_._2.isInstanceOf[JsonCollection.ArithTree]).map(i => i._2.asInstanceOf[JsonCollection.ArithTree])
     arithes.foreach(a => {
