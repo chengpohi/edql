@@ -430,6 +430,22 @@ trait InterceptFunction {
       Seq(v).flatMap(i => extractDynamics(i))
   }
 
+  case class PrintlnInstruction(v: JsonCollection.Val) extends Instruction2 {
+    override def name = "printlnInstruction"
+
+    def execute(implicit eql: Context): Definition[_] = {
+      v match {
+        case t: JsonCollection.Str =>
+          PureStringDefinition(t.raw + "\n")
+        case t =>
+          PureStringDefinition(t.toJson + "\n")
+      }
+    }
+
+    override def ds: Seq[JsonCollection.Dynamic] =
+      Seq(v).flatMap(i => extractDynamics(i))
+  }
+
   case class ErrorInstruction(error: String) extends Instruction2 {
 
     override def name: String = "error"
@@ -529,6 +545,7 @@ trait InterceptFunction {
     Map(
       "jq2" -> FunctionInstruction("jq", Seq("data", "path"), Seq(JQInstruction(JsonCollection.Var("data"), JsonCollection.Var("path")))),
       "print1" -> FunctionInstruction("print", Seq("str"), Seq(PrintInstruction(JsonCollection.Var("str")))),
+      "println1" -> FunctionInstruction("println", Seq("str"), Seq(PrintlnInstruction(JsonCollection.Var("str")))),
       "readJSON1" -> FunctionInstruction("readJSON", Seq("filePath"), Seq(ReadJSONInstruction(JsonCollection.Var("filePath")))),
       "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
     )
