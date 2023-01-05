@@ -534,7 +534,7 @@ trait InterceptFunction {
   def systemFunction: Map[String, FunctionInstruction] = {
     Map(
       "jq2" -> FunctionInstruction("jq", Seq("data", "path"), Seq(JQInstruction(JsonCollection.Var("data"), JsonCollection.Var("path")))),
-      "print1" -> FunctionInstruction("print", Seq("str"), Seq(PrintInstruction(JsonCollection.Var("str")))),
+      "print1" -> FunctionInstruction("print", Seq("v"), Seq(PrintInstruction(JsonCollection.Var("v")))),
       "println1" -> FunctionInstruction("println", Seq("str"), Seq(PrintlnInstruction(JsonCollection.Var("str")))),
       "readJSON1" -> FunctionInstruction("readJSON", Seq("filePath"), Seq(ReadJSONInstruction(JsonCollection.Var("filePath")))),
       "writeJSON2" -> FunctionInstruction("writeJSON", Seq("filePath", "data"), Seq(WriteJSONInstruction(JsonCollection.Var("filePath"), JsonCollection.Var("data"))))
