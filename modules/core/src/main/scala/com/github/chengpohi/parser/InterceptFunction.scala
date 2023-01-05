@@ -459,7 +459,9 @@ trait InterceptFunction {
             case fun: JsonCollection.Fun =>
               vl = fun.realValue
             case arith: JsonCollection.ArithTree =>
-              vl = arith.realValue
+              if (arith.realValue.isDefined) {
+                vl = arith.realValue
+              }
             case _ =>
           }
 
