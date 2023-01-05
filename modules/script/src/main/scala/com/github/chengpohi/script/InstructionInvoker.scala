@@ -35,7 +35,14 @@ trait InstructionInvoker {
       this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
-    EDQLRunResult(invokeResult.map(_.toJson).filter(_.nonEmpty), context)
+    EDQLRunResult(invokeResult.map {
+      case j: JsonCollection.Str => j.raw
+      case j: JsonCollection.Var => j.realValue map {
+        case t: JsonCollection.Str => t.raw
+        case t => t.toJson
+      } getOrElse ""
+      case a => a.toJson
+    }.filter(_.nonEmpty), context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
