@@ -421,14 +421,6 @@ trait InterceptFunction {
       v match {
         case t: JsonCollection.Str =>
           PureStringDefinition(t.raw)
-        case v: JsonCollection.Var =>
-          v.realValue match {
-            case Some(s) => s match {
-              case f: JsonCollection.Str => PureStringDefinition(f.raw)
-              case j => PureStringDefinition(j.toJson)
-            }
-            case None => PureStringDefinition("")
-          }
         case t =>
           PureStringDefinition(t.toJson)
       }
