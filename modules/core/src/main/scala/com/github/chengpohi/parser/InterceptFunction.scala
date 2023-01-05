@@ -418,12 +418,7 @@ trait InterceptFunction {
     override def name = "printInstruction"
 
     def execute(implicit eql: Context): Definition[_] = {
-      v match {
-        case t: JsonCollection.Str =>
-          PureStringDefinition(t.raw)
-        case t =>
-          PureStringDefinition(t.toJson)
-      }
+      PureStringDefinition(v.toJson)
     }
 
     override def ds: Seq[JsonCollection.Dynamic] =
@@ -434,12 +429,7 @@ trait InterceptFunction {
     override def name = "printlnInstruction"
 
     def execute(implicit eql: Context): Definition[_] = {
-      v match {
-        case t: JsonCollection.Str =>
-          PureStringDefinition(t.raw + "\n")
-        case t =>
-          PureStringDefinition(t.toJson + "\n")
-      }
+      PureStringDefinition(v.toJson + "\n")
     }
 
     override def ds: Seq[JsonCollection.Dynamic] =
