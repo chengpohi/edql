@@ -111,7 +111,7 @@ trait InstructionInvoker {
       .groupBy(_._1).filter(_._2.size >= 2)
 
     if (duplicateFunctions.nonEmpty) {
-      throw new RuntimeException("duplicate function: " + duplicateVariables.mkString(","))
+      throw new RuntimeException("duplicate function: " + duplicateFunctions.mkString(","))
     }
 
     val globalFunctions =
