@@ -102,7 +102,7 @@ class JsonParser extends InterceptFunction {
   })
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    WS ~ (addSub | obj | array | tuple | stringLiteral | `true` | `false` | `null` | number | variable | fun) ~ WS
+    WS ~ (addSub | obj | array | tuple | stringLiteral | `true` | `false` | `null` | number  | fun | variable) ~ WS
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
