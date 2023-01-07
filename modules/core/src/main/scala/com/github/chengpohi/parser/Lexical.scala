@@ -59,7 +59,7 @@ object Lexical {
 
   def variableName[_: P] = P(variableChars.rep(1)).!
 
-  def variable[_: P] = P(WS ~ "$" ~ variableChars.rep(1).! ~ WS).map(JsonCollection.Var)
+  def variable[_: P] = P(WS ~ variableChars.rep(1).! ~ WS).map(JsonCollection.Var)
 
   //val parameter: P[String] = P(space ~ string ~ ",".? ~ space)
   def strOrVar[_: P] = P(stringLiteral | variable)

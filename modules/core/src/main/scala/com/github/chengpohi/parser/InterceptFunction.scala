@@ -510,7 +510,7 @@ trait InterceptFunction {
           case s => s.toJson
         }
         if (v != null) {
-          i.replace(vName, v)
+          i.replace("$" + vName, v)
         } else {
           i
         }

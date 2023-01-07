@@ -73,7 +73,7 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
     c => HeadActionInstruction(c._1.extract[String], c._2))
 
   def variableAction[_: P]: P[Seq[Instruction2]] =
-    P(WS ~ "var" ~ WS ~ variableName ~ WS ~/ "=" ~ WS ~/ (jsonExpr | getAction | postAction | deleteAction | putAction | headAction) ~ WS).map(
+    P(WS ~ "var" ~ WS ~ variableName ~ WS ~/ "=" ~ WS ~/ (getAction | postAction | deleteAction | putAction | headAction | jsonExpr) ~ WS).map(
       c => c._2 match {
         case v: JsonCollection.Val =>
           Seq(VariableInstruction(c._1, v))
