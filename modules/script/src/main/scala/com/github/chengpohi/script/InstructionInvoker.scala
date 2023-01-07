@@ -103,7 +103,7 @@ trait InstructionInvoker {
     val vars =
       invokeIns.filter(_.isInstanceOf[VariableInstruction])
         .map(i => i.asInstanceOf[VariableInstruction])
-        .map(i => "$" + i.variableName -> i.value).toMap
+        .map(i => i.variableName -> i.value).toMap
 
     val duplicateFunctions = invokeIns.filter(_.isInstanceOf[FunctionInstruction])
       .map(i => i.asInstanceOf[FunctionInstruction])
@@ -256,7 +256,7 @@ trait InstructionInvoker {
 
     val instructions = extractCollection(iterVariable).value.flatMap(i => {
       context.variables = mutable.Map[String, JsonCollection.Val](cachedVariables.toSeq: _*)
-      context.variables.put("$" + r.tempVariable, i)
+      context.variables.put(r.tempVariable, i)
       runInstructions(functions, context, r.instructions)
     })
 

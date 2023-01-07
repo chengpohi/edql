@@ -450,7 +450,7 @@ trait InterceptFunction {
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         if (k.realValue.isEmpty) {
-          var vl = variables.get(funName.map(i => i + "$").getOrElse("$") + k.value).orElse(variables.get("$" + k.value))
+          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value).orElse(variables.get(k.value))
           if (vl.isEmpty) {
             throw new RuntimeException("could not find variable: " + k.value)
           }
