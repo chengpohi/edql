@@ -274,7 +274,7 @@ trait InstructionInvoker {
     val foundFunction = functions.get(invoke.funcName + values.size)
     if (foundFunction.isEmpty) {
       throw new RuntimeException("Could not found method: " + invoke.funcName + " with parameters "
-        + values.map(_.toJson).mkString(","))
+        + values.size)
     }
 
     val fun = foundFunction.get
