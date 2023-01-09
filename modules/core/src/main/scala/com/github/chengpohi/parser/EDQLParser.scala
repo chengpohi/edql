@@ -29,8 +29,12 @@ class EDQLParser extends EDQLInstructionParser {
   }
 
   def parseJson(source: String): Try[JsonCollection.Val] = {
-    parse(source, jsonExpr(_)) match {
-      case Success(ins, _) =>
+    val result = parse(source, jsonExpr(_))
+    result match {
+      case Success(ins, successIndex) =>
+        if (successIndex != source.length) {
+          return scala.util.Failure(new RuntimeException("illegal json: " + source));
+        }
         scala.util.Success(ins)
       case failure: Failure =>
         scala.util.Failure(new RuntimeException(failure.msg));
