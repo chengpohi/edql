@@ -74,6 +74,7 @@ project(":modules:core") {
     version = rootProject.version.toString()
     dependencies {
         api(project(":"))
+        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
     }
 
     publishing {
@@ -108,6 +109,7 @@ project(":modules:repl") {
         implementation("org.typelevel:cats-core_2.13:2.0.0")
         implementation("org.typelevel:cats-effect_2.13:2.0.0")
         implementation("org.scala-lang:scala-library:2.13.10")
+        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
     }
 
 }
@@ -118,6 +120,7 @@ project(":modules:script") {
         api(project(":"))
         api(project(":modules:core"))
         api("org.scala-lang:scala-library:2.13.10")
+        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
     }
 
 
