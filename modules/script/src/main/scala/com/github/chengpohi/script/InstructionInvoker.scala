@@ -282,6 +282,10 @@ trait InstructionInvoker {
     val funName = fun.funcName + "_" + fun.variableNames.size
     val funParams = fun.variableNames.map(i => funName + "$" + i).zip(values).toMap
 
+    funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
+      i._2.asInstanceOf[JsonCollection.Var].realValue = None
+    })
+
     evalFunParams(functions, context, funParams, parentFunName.orElse(Some(funName)))
 
     val instructions = fun.instructions
