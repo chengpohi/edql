@@ -17,9 +17,10 @@ class JsonParser extends InterceptFunction {
     P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
       x => {
         val double = x.toDouble
-        double % 1 match {
-          case 0 => JsonCollection.Num(double.toInt)
-          case _ => JsonCollection.Num(double)
+        if (double % 1 == 0 && double < Int.MaxValue) {
+          JsonCollection.Num(double.toInt)
+        } else {
+          JsonCollection.Num(double)
         }
       }
     )
@@ -102,7 +103,7 @@ class JsonParser extends InterceptFunction {
   })
 
   def jsonExpr[_: P]: P[JsonCollection.Val] = P(
-    WS ~ (addSub | obj | array | tuple | stringLiteral | `true` | `false` | `null` | number  | fun | variable) ~ WS
+    WS ~ (addSub | obj | array | tuple | stringLiteral | `true` | `false` | `null` | number | fun | variable) ~ WS
   )
 
   def ioParser[_: P] = P(jsonExpr.rep(1))
