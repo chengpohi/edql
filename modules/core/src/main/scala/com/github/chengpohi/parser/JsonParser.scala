@@ -17,11 +17,7 @@ class JsonParser extends InterceptFunction {
     P(CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.?).!.map(
       x => {
         val double = x.toDouble
-        if (double % 1 == 0 && double < Int.MaxValue) {
-          JsonCollection.Num(double.toInt)
-        } else {
-          JsonCollection.Num(double)
-        }
+        JsonCollection.Num(double)
       }
     )
 
