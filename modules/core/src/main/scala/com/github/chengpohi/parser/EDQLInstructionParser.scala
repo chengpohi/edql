@@ -17,7 +17,7 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
     c => EndpointBindInstruction(c.extract[String], kibanaProxy = true))
 
   def timeoutBind[_: P] = P(WS ~ "Timeout" ~ WS ~ number ~ WS).map(
-    c => TimeoutInstruction(c.extract[Int]))
+    c => TimeoutInstruction(c.extract[Double].toInt))
 
   def importExpr[_: P] = P(WS ~ "import" ~ WS ~ stringLiteral ~ WS).map(
     c => ImportInstruction(c.extract[String]))
