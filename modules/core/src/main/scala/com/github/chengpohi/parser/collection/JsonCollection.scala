@@ -160,7 +160,7 @@ object JsonCollection {
   }
 
   case class Num(value: Number) extends AnyVal with Arith {
-    override def toJson: String = new java.math.BigDecimal(value.doubleValue()).stripTrailingZeros().toPlainString;
+    override def toJson: String = java.math.BigDecimal.valueOf(value.doubleValue()).stripTrailingZeros().toPlainString;
 
 
     override def get(path: String): Option[Val] = None
