@@ -139,6 +139,9 @@ trait EDQLConfig {
         })
     }
 
+    if (StringUtils.isNotBlank(uri.getPath)) {
+      restClientBuilder.setPathPrefix(uri.getPath)
+    }
     EDQLClient(restClientBuilder.build())
   }
 }
