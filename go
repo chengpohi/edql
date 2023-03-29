@@ -7,7 +7,8 @@ case "$1" in
   "assembly")
     ;;
   "pb")
-    ./gradlew :modules:script:publishToMavenLocal
+    ./gradlew --info :modules:core:publishToMavenLocal
+    ./gradlew --info :modules:script:publishToMavenLocal
     ;;
   "fmt")
     ;;
