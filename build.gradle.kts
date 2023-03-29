@@ -30,6 +30,7 @@ allprojects {
         }
     }
 
+
     tasks.withType<ScalaCompile>().configureEach {
         scalaCompileOptions.forkOptions.apply {
             memoryMaximumSize = "1g"
