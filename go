@@ -9,6 +9,7 @@ case "$1" in
   "pb")
     ./gradlew --info :modules:core:publishToMavenLocal
     ./gradlew --info :modules:script:publishToMavenLocal
+    ./gradlew --info :publishToMavenLocal
     ;;
   "fmt")
     ;;
