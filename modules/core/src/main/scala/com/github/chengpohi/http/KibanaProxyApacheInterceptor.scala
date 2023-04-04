@@ -1,5 +1,6 @@
 package com.github.chengpohi.http
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.methods.HttpRequestWrapper
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.protocol.HttpContext
@@ -18,7 +19,13 @@ class KibanaProxyApacheInterceptor extends HttpRequestInterceptor {
           case f => "?" + f + (if (uri.getPath.contains("_search")) "&pretty=false" else "")
         }
         val method = Option(req.getFirstHeader("KIBANA_PROXY_METHOD")).map(i => i.getValue).getOrElse("POST");
-        val pathPrefix = Option(req.getFirstHeader("KIBANA_PATH_PREFIX")).map(i => i.getValue).getOrElse("");
+        val pathPrefix = Option(req.getFirstHeader("KIBANA_PATH_PREFIX"))
+          .map(i => i.getValue)
+          .filter(i => StringUtils.isNotBlank(i) && !i.equals("/"))
+          .map(i => if (!i.startsWith("/")) {
+            "/" + i
+          } else i)
+          .getOrElse("");
         val proxyUri = new URIBuilder(uri)
           .removeQuery()
           .setPath(pathPrefix + "/api/console/proxy")
