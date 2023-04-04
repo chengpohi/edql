@@ -78,20 +78,22 @@ trait EDQLConfig {
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
 
+    var credentialsProvider: BasicCredentialsProvider = null
     if (StringUtils.isNotBlank(uri.getUserInfo)) {
-      val credentialsProvider = new BasicCredentialsProvider
+      credentialsProvider = new BasicCredentialsProvider
       credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(uri.getUserInfo))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            httpClientBuilder.disableAuthCaching
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
+
     if (username.isDefined && password.isDefined) {
-      val credentialsProvider = new BasicCredentialsProvider
       credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username.get, password.get))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
@@ -117,8 +119,7 @@ trait EDQLConfig {
           apiSessionToken.orNull)
       }).getOrElse(new EDQLAWSCredentialsProviderChain())
 
-      val interceptor =
-        new AWSRequestSigningApacheInterceptor(serviceName, signer, credentialsProvider)
+      val interceptor = new AWSRequestSigningApacheInterceptor(serviceName, signer, credentialsProvider)
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
@@ -137,6 +138,9 @@ trait EDQLConfig {
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+            if (credentialsProvider != null) {
+              httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
             httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
