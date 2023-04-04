@@ -19,7 +19,7 @@ case class ScriptContext(endpoint: String,
                          apiSessionToken: Option[String],
                          awsRegion: Option[String],
                          timeout: Option[Int],
-                         kibanaProxy: Boolean) extends EDQLConfig with Context {
+                         override val kibanaProxy: Boolean) extends EDQLConfig with Context {
   override implicit val resultTimeout: Duration = Duration.apply(timeout.getOrElse(5000), duration.MILLISECONDS)
 
   override implicit lazy val eqlClient: EDQLClient =
