@@ -6,7 +6,7 @@ import com.github.chengpohi.dsl.http.HttpContext
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.github.chengpohi.parser.collection.JsonCollection.Val
 import org.apache.http.util.EntityUtils
-import org.elasticsearch.client.{Request, ResponseException}
+import org.elasticsearch.client.{Request, RequestOptions, ResponseException}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization.write
@@ -58,9 +58,12 @@ trait EDQLDefinition extends ElasticBase with EDQLDsl with HttpContext {
       val ps = action.filter(_.isInstanceOf[JsonCollection.Obj])
         .flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
 
-      val request = new Request(
-        "GET",
-        path);
+      val request = new Request(if (kibanaProxy) "POST" else "GET", path);
+
+      request.setOptions(RequestOptions.DEFAULT.toBuilder
+        .addHeader(KIBANA_PROXY_METHOD, "GET")
+        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+      );
 
       as match {
         case None =>
@@ -97,9 +100,11 @@ trait EDQLDefinition extends ElasticBase with EDQLDsl with HttpContext {
   case class HeadActionDefinition(path: String, action: Option[String])
     extends Definition[String] {
     override def execute: Future[String] = {
-      val request = new Request(
-        "HEAD",
-        path);
+      val request = new Request(if (kibanaProxy) "POST" else "HEAD", path);
+      request.setOptions(RequestOptions.DEFAULT.toBuilder
+        .addHeader(KIBANA_PROXY_METHOD, "HEAD")
+        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+      );
       request.setJsonEntity(action.orNull)
       Future {
         try {
@@ -120,9 +125,12 @@ trait EDQLDefinition extends ElasticBase with EDQLDsl with HttpContext {
   case class PostActionDefinition(path: String, action: Seq[JsonCollection.Val])
     extends Definition[String] {
     override def execute: Future[String] = {
-      val request = new Request(
-        "POST",
-        path);
+      val request = new Request("POST", path);
+
+      request.setOptions(RequestOptions.DEFAULT.toBuilder
+        .addHeader(KIBANA_PROXY_METHOD, "POST")
+        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+      );
 
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
       val ps = action.filter(_.isInstanceOf[JsonCollection.Obj]).flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
@@ -185,9 +193,11 @@ trait EDQLDefinition extends ElasticBase with EDQLDsl with HttpContext {
   case class PutActionDefinition(path: String, action: Option[String])
     extends Definition[String] {
     override def execute: Future[String] = {
-      val request = new Request(
-        "PUT",
-        path);
+      val request = new Request(if (kibanaProxy) "POST" else "PUT", path);
+      request.setOptions(RequestOptions.DEFAULT.toBuilder
+        .addHeader(KIBANA_PROXY_METHOD, "PUT")
+        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+      );
       request.setJsonEntity(action.orNull)
       Future {
         try {
@@ -204,12 +214,17 @@ trait EDQLDefinition extends ElasticBase with EDQLDsl with HttpContext {
     override def json: String = execute.await.json
   }
 
+  val KIBANA_PROXY_METHOD: String = "KIBANA_PROXY_METHOD"
+  val KIBANA_PATH_PREFIX: String = "KIBANA_PATH_PREFIX"
+
   case class DeleteActionDefinition(path: String, action: Option[String])
     extends Definition[String] {
     override def execute: Future[String] = {
-      val request = new Request(
-        "DELETE",
-        path);
+      val request = new Request(if (kibanaProxy) "POST" else "DELETE", path);
+      request.setOptions(RequestOptions.DEFAULT.toBuilder
+        .addHeader(KIBANA_PROXY_METHOD, "DELETE")
+        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+      );
       request.setJsonEntity(action.orNull)
       Future {
         try {

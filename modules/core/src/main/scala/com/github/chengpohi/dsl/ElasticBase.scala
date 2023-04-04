@@ -11,6 +11,8 @@ import scala.jdk.CollectionConverters._;
 trait ElasticBase {
   implicit val eqlClient: EDQLClient
   val restClient: RestClient = eqlClient.restClient
+  val kibanaProxy: Boolean = eqlClient.kibanaProxy
+  val pathPrefix: String = eqlClient.pathPrefix
 
   def toJavaMap[A](m: Map[A, _]): java.util.Map[A, _] = {
     val res = m.map((b: (A, _)) => {
