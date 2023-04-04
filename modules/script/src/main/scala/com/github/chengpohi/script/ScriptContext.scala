@@ -56,7 +56,8 @@ object ScriptContext {
       s"-${apiKeySecret.getOrElse("")}" +
       s"-${apiSessionToken.getOrElse("")}" +
       s"-${apiRegion.getOrElse("")}" +
-      s"-${timeout.getOrElse("")}"
+      s"-${timeout.getOrElse("")}" +
+      s"-${kibanaProxy}"
     val cacheContext = cache.get(cacheKey)
     if (isCacheValid(cacheContext)) {
       val c = cacheContext.get
