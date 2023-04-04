@@ -128,6 +128,11 @@ trait EDQLConfig {
           }
         })
     }
+
+    if (StringUtils.isNotBlank(uri.getPath) && !StringUtils.equals(uri.getPath, "/")) {
+      restClientBuilder.setPathPrefix(uri.getPath)
+    }
+
     if (kibanaProxy) {
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
@@ -139,9 +144,6 @@ trait EDQLConfig {
         })
     }
 
-    if (StringUtils.isNotBlank(uri.getPath)) {
-      restClientBuilder.setPathPrefix(uri.getPath)
-    }
     EDQLClient(restClientBuilder.build())
   }
 }
