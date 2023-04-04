@@ -7,12 +7,20 @@ plugins {
 group = "com.github.chengpohi"
 version = "7.X-SNAPSHOT"
 
-
 allprojects {
     apply {
         plugin("scala")
         plugin("maven-publish")
         plugin("java-library")
+    }
+
+
+    java {
+        withSourcesJar()
+    }
+
+    tasks.withType<Jar> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     repositories {
