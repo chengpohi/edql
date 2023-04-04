@@ -94,6 +94,7 @@ trait EDQLConfig {
     }
 
     if (username.isDefined && password.isDefined) {
+      credentialsProvider = new BasicCredentialsProvider
       credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username.get, password.get))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
