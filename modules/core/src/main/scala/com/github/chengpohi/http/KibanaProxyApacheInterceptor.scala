@@ -6,9 +6,6 @@ import org.apache.http.client.utils.URIBuilder
 import org.apache.http.protocol.HttpContext
 import org.apache.http.{HttpRequest, HttpRequestInterceptor}
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
 class KibanaProxyApacheInterceptor extends HttpRequestInterceptor {
   override def process(request: HttpRequest, context: HttpContext): Unit = {
     request match {
