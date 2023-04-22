@@ -103,8 +103,5 @@ jobs:
           gh release create $TAG \
             --draft \
             --title $TAG \
-            --notes "$(cat << 'EOM'
-          ${CHANGELOG}
-          EOM
-          )"
+            --notes "$CHANGELOG"
           gh release upload --clobber $TAG ./idea-plugin/build/distributions/*
