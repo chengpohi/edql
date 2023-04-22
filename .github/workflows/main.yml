@@ -77,3 +77,4 @@ jobs:
         run: |
           cd idea-plugin && ./gradlew publishPlugin
           ls -lh build/distributions/*
+          cd ..
