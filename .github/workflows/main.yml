@@ -77,6 +77,6 @@ jobs:
         id: edql-plugin
         shell: bash
         run: |
-          cd idea-plugin && ENV=CI ./gradlew publishPlugin
+          cd idea-plugin && ENV=CI ./gradlew buildPlugin
           ls -lh build/distributions/*
           cd ..
