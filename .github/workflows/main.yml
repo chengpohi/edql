@@ -40,16 +40,17 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
 
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
       # Setup Java 11 environment for the next steps
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 11
-          
-      # Check out current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v3
+          cache: gradle
         
       # build edql repository
       - name: Build library
