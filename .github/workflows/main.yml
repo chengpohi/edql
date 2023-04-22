@@ -20,7 +20,7 @@ on:
   # Trigger the workflow on any pull request
   pull_request:
   repository_dispatch:
-    types: [doc_update]
+    types: [build]
 
 jobs:
 
