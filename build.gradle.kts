@@ -7,10 +7,6 @@ plugins {
 group = "com.github.chengpohi"
 version = "7.X-SNAPSHOT"
 
-scala {
-    zincVersion.set("1.8.0")
-}
-
 allprojects {
     apply {
         plugin("scala")
@@ -18,6 +14,9 @@ allprojects {
         plugin("java-library")
     }
 
+    scala {
+        zincVersion.set("1.8.0")
+    }
 
     java {
         withSourcesJar()
