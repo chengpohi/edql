@@ -60,4 +60,5 @@ jobs:
           ./gradlew --info --no-daemon :modules:core:publishToMavenLocal
           ./gradlew --info --no-daemon :modules:script:publishToMavenLocal
           ./gradlew --info --no-daemon :publishToMavenLocal
+          ls -al ~/.m2/repository/com/github/chengpohi
 
