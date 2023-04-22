@@ -62,3 +62,18 @@ jobs:
           ./gradlew --info --no-daemon :publishToMavenLocal
           ls -al ~/.m2/repository/com/github/chengpohi
 
+      # Check out current repository
+      - name: Fetch plugin Sources
+        uses: actions/checkout@v3
+        with:
+          repository: chengpohi/edql-idea-plugin
+          ref: develop
+          token: ${{ secrets.GH_PAT }}
+          path: 'idea-plugin'
+
+      - name: Build plugin
+        id: edql-plugin
+        shell: bash
+        run: |
+          cd idea-plugin && ./gradlew publishPlugin
+          ls -lh build/distributions/*
