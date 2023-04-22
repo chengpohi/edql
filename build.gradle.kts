@@ -41,9 +41,9 @@ allprojects {
 
     tasks.withType<ScalaCompile>().configureEach {
         scalaCompileOptions.forkOptions.apply {
-            memoryMaximumSize = "4g"
+            memoryMaximumSize = "8g"
             jvmArgs = listOf(
-                    "-XX:MaxMetaspaceSize=2g"
+                    "-XX:MaxMetaspaceSize=4g"
             )
         }
         scalaCompileOptions.additionalParameters = listOf(
