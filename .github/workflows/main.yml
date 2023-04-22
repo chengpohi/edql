@@ -19,6 +19,8 @@ on:
     branches: [develop]
   # Trigger the workflow on any pull request
   pull_request:
+  repository_dispatch:
+    types: [doc_update]
 
 jobs:
 
