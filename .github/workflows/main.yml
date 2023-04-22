@@ -46,7 +46,11 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-
+          
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+        
       # build edql repository
       - name: Build  library
         id: edql-lib
