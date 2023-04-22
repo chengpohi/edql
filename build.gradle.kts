@@ -47,15 +47,16 @@ allprojects {
         scalaCompileOptions.forkOptions.apply {
             memoryMaximumSize = "8g"
             jvmArgs = listOf(
-                    "-XX:MaxMetaspaceSize=4g"
+                "-XX:MaxMetaspaceSize=4g",
+                "-Xss8M"
             )
         }
         scalaCompileOptions.additionalParameters = listOf(
-                "-Ywarn-unused",
-                "-feature",
-                "-language:implicitConversions",
-                "-language:higherKinds",
-                "-language:postfixOps",
+            "-Ywarn-unused",
+            "-feature",
+            "-language:implicitConversions",
+            "-language:higherKinds",
+            "-language:postfixOps",
         )
     }
 
