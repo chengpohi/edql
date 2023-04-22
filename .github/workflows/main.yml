@@ -92,7 +92,7 @@ jobs:
       # Create a new release draft which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           cd ${{ github.workspace }}/idea-plugin
           PROPERTIES="$(./gradlew properties --console=plain -q)"
