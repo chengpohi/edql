@@ -8,7 +8,7 @@ group = "com.github.chengpohi"
 version = "7.X-SNAPSHOT"
 
 scala {
-    zincVersion.set("1.6.1")
+    zincVersion.set("1.8.0")
 }
 
 allprojects {
