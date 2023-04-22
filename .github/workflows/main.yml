@@ -106,4 +106,4 @@ jobs:
           ${CHANGELOG}
           EOM
           )"
-          gh release upload $TAG ./build/distributions/*
+          gh release upload --clobber $TAG ./build/distributions/*
