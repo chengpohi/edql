@@ -103,7 +103,7 @@ jobs:
             --draft \
             --title $TAG \
             --notes "$(cat << 'EOM'
-          $CHANGELOG
+          ${{ CHANGELOG }}
           EOM
           )"
           gh release upload $TAG ./build/distributions/*
