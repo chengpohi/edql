@@ -56,7 +56,7 @@ jobs:
         id: edql-lib
         shell: bash
         run: |
-          ./gradlew --info :modules:core:publishToMavenLocal
-          ./gradlew --info :modules:script:publishToMavenLocal
-          ./gradlew --info :publishToMavenLocal
+          ./gradlew --info --no-daemon :modules:core:publishToMavenLocal
+          ./gradlew --info --no-daemon :modules:script:publishToMavenLocal
+          ./gradlew --info --no-daemon :publishToMavenLocal
 
