@@ -18,9 +18,7 @@ on:
   #push:
   #  branches: [develop]
   # Trigger the workflow on any pull request
-  pull_request:
-  repository_dispatch:
-    types: [build]
+  workflow_dispatch:
 
 jobs:
 
