@@ -63,16 +63,17 @@ jobs:
           ls -al ~/.m2/repository/com/github/chengpohi
 
       # Check out current repository
-      - name: Fetch plugin Sources
+      - name: Fetch qsharp Sources
         uses: actions/checkout@v3
         with:
           repository: chengpohi/intellij-qsharp
-          ref: develop
+          ref: qsharp
           token: ${{ secrets.GH_PAT }}
           path: 'intellij-qsharp'
+          submodules: recursive
 
-      - name: Build plugin
-        id: edql-plugin
+      - name: Build qsharp
+        id: intellij-qsharp
         shell: bash
         run: |
           cd intellij-qsharp && qsharp/installers.cmd
