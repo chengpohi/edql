@@ -14,8 +14,9 @@
 
 name: Release
 on:
-  release:
-    types: [prereleased, released]
+  create:
+    tags:
+      - v*
 
 jobs:
 
