@@ -1,0 +1,109 @@
+# GitHub Actions Workflow is created for testing and preparing the plugin release in the following steps:
+# - validate Gradle Wrapper,
+# - run 'test' and 'verifyPlugin' tasks,
+# - run Qodana inspections,
+# - run 'buildPlugin' task and prepare artifact for the further tests,
+# - run 'runPluginVerifier' task,
+# - create a draft release.
+#
+# Workflow is triggered on push and pull_request events.
+#
+# GitHub Actions reference: https://help.github.com/en/actions
+#
+## JBIJPPTPL
+
+name: Release
+on:
+  release:
+    types: [prereleased, released]
+
+jobs:
+
+  # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
+  # Run verifyPlugin, IntelliJ Plugin Verifier, and test Gradle tasks
+  # Build plugin and provide the artifact for the next workflow jobs
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.properties.outputs.version }}
+      changelog: ${{ steps.properties.outputs.changelog }}
+    steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      # Setup Java 11 environment for the next steps
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          cache: gradle
+        
+      # Set environment variables
+      - name: Export Properties
+        id: properties
+        shell: bash
+        run: |
+          CHANGELOG="$(cat << 'EOM' | sed -e 's/^[[:space:]]*$//g' -e '/./,$!d'
+          ${{ github.event.release.body }}
+          EOM
+          )"
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      # build edql repository
+      - name: Build library
+        id: edql-lib
+        shell: bash
+        run: |
+          ./gradlew --info --no-daemon :modules:core:publishToMavenLocal
+          ./gradlew --info --no-daemon :modules:script:publishToMavenLocal
+          ./gradlew --info --no-daemon :publishToMavenLocal
+          ls -al ~/.m2/repository/com/github/chengpohi
+
+      # Check out current repository
+      - name: Fetch plugin Sources
+        uses: actions/checkout@v3
+        with:
+          repository: chengpohi/edql-idea-plugin
+          ref: develop
+          token: ${{ secrets.GH_PAT }}
+          path: 'idea-plugin'
+
+      - name: Build plugin
+        id: edql-plugin
+        shell: bash
+        run: |
+          cd idea-plugin && GH_ENV=CI ./gradlew buildPlugin
+          ls -lh build/distributions/*
+          cd ..
+          
+      # Update Unreleased section with the current release note
+      - name: Patch Changelog
+        if: ${{ steps.properties.outputs.changelog != '' }}
+        env:
+          CHANGELOG: ${{ steps.properties.outputs.changelog }}
+        run: |
+          ./gradlew patchChangelog --release-note="$CHANGELOG"
+
+      # Publish the plugin to the Marketplace
+      - name: Publish Plugin
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: ./gradlew publishPlugin
+          
