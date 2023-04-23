@@ -43,14 +43,21 @@ jobs:
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3
-
+      - uses: actions/cache@v1
+        with:
+          path: |
+            ~/.m2/
+            ~/.gradle/
+          key: ${{ runner.os }}-maven-
+          restore-keys: |
+            ${{ runner.os }}-maven-
       # Setup Java 11 environment for the next steps
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 11
-          cache: maven
+          cache: gradle
         
       # build edql repository
       - name: Build library
