@@ -99,4 +99,4 @@ jobs:
             --draft \
             --title $TAG \
             --notes "$CHANGELOG"
-          gh release upload --clobber $TAG ./intellij-qsharp/out/qsharp-ce/artifacts/*{.tar.gz,zip,dmg}
+          gh release upload --clobber $TAG ${{ github.workspace }}/intellij-qsharp/out/qsharp-ce/artifacts/*{.tar.gz,zip,dmg}
