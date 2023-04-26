@@ -27,41 +27,29 @@ jobs:
   # Build plugin and provide the artifact for the next workflow jobs
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
       changelog: ${{ steps.properties.outputs.changelog }}
     steps:
-
-      # Free GitHub Actions Environment Disk Space
-      - name: Maximize Build Space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3
 
-      # Setup Java 11 environment for the next steps
-      - name: Setup Java
-        uses: actions/setup-java@v3
+      - uses: actions/cache@v3
+        if: always()
         with:
-          distribution: zulu
-          java-version: 11
-          cache: gradle
-        
-      # build edql repository
-      - name: Build library
-        id: edql-lib
-        shell: bash
-        run: |
-          ./gradlew --info --no-daemon :modules:core:publishToMavenLocal
-          ./gradlew --info --no-daemon :modules:script:publishToMavenLocal
-          ./gradlew --info --no-daemon :publishToMavenLocal
-          ls -al ~/.m2/repository/com/github/chengpohi
-
+          path: |
+            ~/.m2/
+            ~/.gradle/
+          key: ${{ runner.os }}-maven-cache
+          restore-keys: |
+            ${{ runner.os }}-maven-cache
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
       # Check out current repository
       - name: Fetch qsharp Sources
         uses: actions/checkout@v3
@@ -72,12 +60,20 @@ jobs:
           path: 'intellij-qsharp'
           submodules: recursive
 
+      # build edql repository
+      - name: Build library
+        id: edql-lib
+        run: |
+          ./gradlew --info --no-daemon :modules:core:publishToMavenLocal
+          ./gradlew --info --no-daemon :modules:script:publishToMavenLocal
+          ./gradlew --info --no-daemon :publishToMavenLocal
       - name: Build qsharp
         id: intellij-qsharp
-        shell: bash
+        continue-on-error: true
         run: |
-          cd intellij-qsharp && qsharp/installers.cmd
-          ls -lh out/qsharp-ce/artifacts/*
+          cd intellij-qsharp
+          qsharp/installers.cmd -Dintellij.build.use.compiled.classes=false
+          ls -lh out/qsharp-ce/artifacts/
           cd ..
 
       # Remove old release drafts by using the curl request for the available releases with a draft flag
