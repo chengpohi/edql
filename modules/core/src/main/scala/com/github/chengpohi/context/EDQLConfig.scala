@@ -2,7 +2,6 @@ package com.github.chengpohi.context
 
 import com.amazonaws.auth.AWS4Signer
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain, UnsafeX509ExtendedTrustManager}
-import com.github.chengpohi.dsl.EDQLClient
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils

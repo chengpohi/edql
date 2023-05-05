@@ -4,7 +4,7 @@ import cats.Id
 import cats.data.Reader
 import cats.effect.{IO, Resource}
 import com.github.chengpohi.context.{EDQLConfig, Context}
-import com.github.chengpohi.dsl.serializer.JSONOps
+import com.github.chengpohi.serializer.JSONOps
 import jline.console.ConsoleReader
 import jline.console.history.FileHistory
 import jline.internal.Configuration

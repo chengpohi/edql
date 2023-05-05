@@ -1,4 +1,4 @@
-package com.github.chengpohi.dsl.edql
+package com.github.chengpohi.context
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._

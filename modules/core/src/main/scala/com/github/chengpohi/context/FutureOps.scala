@@ -1,7 +1,7 @@
-package com.github.chengpohi.dsl.edql
+package com.github.chengpohi.context
 
-import com.github.chengpohi.dsl.converter.ResponseConverter
-import com.github.chengpohi.dsl.serializer.ResponseSerializer
+import com.github.chengpohi.converter.ResponseConverter
+import com.github.chengpohi.serializer.ResponseSerializer
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}

@@ -1,4 +1,4 @@
-package com.github.chengpohi.dsl.serializer
+package com.github.chengpohi.serializer
 
 import java.time.format.DateTimeFormatter
 import java.time.temporal.{TemporalAccessor, TemporalQuery}
