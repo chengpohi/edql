@@ -1,6 +1,6 @@
-package com.github.chengpohi.dsl.converter
+package com.github.chengpohi.converter
 
-import com.github.chengpohi.dsl.serializer.ResponseSerializer
+import com.github.chengpohi.serializer.ResponseSerializer
 
 trait ResponseConverter extends ResponseSerializer {
 

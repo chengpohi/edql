@@ -1,15 +1,14 @@
 package com.github.chengpohi.repl
 
-import java.util
-
 import jline.console.completer.Completer
 
+import java.util
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 import scala.math.min
 
 class StringsCompleter(completions: Set[String], words: Set[String])
-    extends Completer {
+  extends Completer {
 
   def indentFilter(c: String, buffer: String): Boolean = {
     c.split("\\s+").map(s => s.head).mkString("") == buffer
@@ -20,7 +19,7 @@ class StringsCompleter(completions: Set[String], words: Set[String])
       (prev zip prev.tail zip b).scanLeft(prev.head + 1) {
         case (h, ((d, v), y)) =>
           min(min(h + 1, v + 1), d + (if (x == y) 0 else 1))
-    }) last
+      }) last
 
   override def complete(buffer: String,
                         cursor: Int,
@@ -46,7 +45,7 @@ class StringsCompleter(completions: Set[String], words: Set[String])
     }
 
     candidates.isEmpty match {
-      case true  => -1
+      case true => -1
       case false => 0
     }
   }

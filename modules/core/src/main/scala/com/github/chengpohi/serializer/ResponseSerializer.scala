@@ -1,4 +1,4 @@
-package com.github.chengpohi.dsl.serializer
+package com.github.chengpohi.serializer
 
 import org.json4s.jackson.Serialization.write
 

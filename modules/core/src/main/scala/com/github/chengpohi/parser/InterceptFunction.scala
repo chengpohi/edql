@@ -1,98 +1,13 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.context.Context
-import com.github.chengpohi.dsl.edql.{Definition, ErrorHealthRequestDefinition, PureStringDefinition}
+import com.github.chengpohi.context.{Context, Definition, ErrorHealthRequestDefinition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.jayway.jsonpath.JsonPath
-import com.typesafe.config.ConfigFactory
 
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 
 trait InterceptFunction {
-  val MAX_NUMBER: Int = 500
-
-  case class CatNodesInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat nodes
-    }
-  }
-
-  case class GetAllocationInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat allocation
-    }
-  }
-
-  case class CatMasterInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat master
-    }
-  }
-
-  case class CatIndicesInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat indices
-    }
-  }
-
-  case class CatShardsInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat shards
-    }
-  }
-
-  case class CatCountInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat count
-    }
-  }
-
-  case class CatAllocationInstruction() extends Instruction2 {
-    override def name: String = "Allocation"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat allocation
-    }
-  }
-
-  case class CatPendingInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat pending_tasks
-    }
-  }
-
-  case class CatRecoveryInstruction() extends Instruction2 {
-    override def name: String = "GetMapping"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      import eql._
-      cat recovery
-    }
-  }
-
   trait Instruction2 {
     def name: String
 
@@ -100,28 +15,6 @@ trait InterceptFunction {
 
     def ds: Seq[JsonCollection.Dynamic] = Seq()
   }
-
-  lazy val instrumentations = ConfigFactory.load("instrumentations.json")
-
-  case class HelpInstruction(params: Seq[String]) extends Instruction2 {
-    override def name = "help"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      params match {
-        case Seq(_) =>
-          //          val example: String =
-          //            instrumentations.getConfig(i).getString("example")
-          //          val description: String =
-          //            instrumentations.getConfig(i).getString("description")
-          //          val r: Map[String, AnyRef] =
-          //            Map(("example", example), ("description", description))
-          PureStringDefinition("help")
-        case _ =>
-          PureStringDefinition("I have no idea for this.")
-      }
-    }
-  }
-
 
   trait ScriptContextInstruction2 extends Instruction2
 

@@ -11,10 +11,6 @@ import jline.console.completer.{
 
 import scala.collection.JavaConverters._
 
-/**
-  * ELKCompletionHandler
-  * Created by chengpohi on 3/25/16.
-  */
 class EDQLCompletionHandler extends CompletionHandler {
   @throws[IOException]
   override def complete(reader: ConsoleReader,

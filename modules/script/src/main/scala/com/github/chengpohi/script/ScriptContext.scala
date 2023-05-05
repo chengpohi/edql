@@ -1,7 +1,6 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.context.{Context, EDQLConfig}
-import com.github.chengpohi.dsl.EDQLClient
+import com.github.chengpohi.context.{Context, EDQLClient, EDQLConfig}
 import com.github.chengpohi.parser.collection.JsonCollection
 
 import java.net.URI
