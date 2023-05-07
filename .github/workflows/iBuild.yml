@@ -19,6 +19,8 @@ on:
   #  branches: [develop]
   # Trigger the workflow on any pull request
   workflow_dispatch:
+  schedule:
+  - cron: "30 22 * * *"
 
 jobs:
 
