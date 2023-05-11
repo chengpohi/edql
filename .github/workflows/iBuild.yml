@@ -62,7 +62,7 @@ jobs:
           path: 'intellij-qsharp'
           
       # Check out current repository
-      - name: Fetch edql Sources
+      - name: Fetch edql idea Sources
         uses: actions/checkout@v3
         with:
           repository: chengpohi/edql-idea-plugin
