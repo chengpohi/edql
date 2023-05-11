@@ -60,7 +60,15 @@ jobs:
           ref: qsharp
           token: ${{ secrets.GH_PAT }}
           path: 'intellij-qsharp'
-          submodules: recursive
+          
+      # Check out current repository
+      - name: Fetch edql Sources
+        uses: actions/checkout@v3
+        with:
+          repository: chengpohi/edql-idea-plugin
+          ref: qsharp
+          token: ${{ secrets.GH_PAT }}
+          path: 'intellij-qsharp/qsharp/edql-idea-plugin'          
 
       # build edql repository
       - name: Build library
