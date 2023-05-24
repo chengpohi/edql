@@ -4,8 +4,8 @@ import com.github.chengpohi.parser.EDQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
 
-import java.io.File
-import java.net.URI
+import java.io.{BufferedReader, File, InputStreamReader}
+import java.net.{URI, URL}
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.{HttpClient, HttpRequest}
 import java.nio.file.{Files, Paths}
@@ -188,16 +188,10 @@ trait InstructionInvoker {
   }
 
   private def readFile(runDir: String, imp: String): String = {
-    val file = new File(imp)
-    if (file.exists() && file.isAbsolute) {
-      try {
-        return Files.readAllLines(file.toPath).stream().collect(Collectors.joining(System.lineSeparator()))
-      } catch {
-        case _: Throwable => ""
-      }
-    }
     try {
-      return Files.readAllLines(Paths.get(runDir + "/" + imp)).stream().collect(Collectors.joining(System.lineSeparator()))
+      val url = new URL(imp)
+      val reader = new BufferedReader(new InputStreamReader(url.openStream()));
+      return reader.lines().collect(Collectors.joining(System.lineSeparator()))
     } catch {
       case _: Throwable => ""
     }
