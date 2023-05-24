@@ -5,11 +5,12 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
+import java.net.URL
 import java.nio.file.Files
 import java.util.stream.Collectors
 import scala.util.{Failure, Success, Try}
 
-class EDQLScriptRunner(ls: Seq[String]) extends InstructionInvoker {
+class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
   override val eqlParser: EDQLParser = new EDQLParser
 
   import eqlParser._
@@ -72,7 +73,7 @@ class EDQLScriptRunner(ls: Seq[String]) extends InstructionInvoker {
     }
   }
 
-  override val libs: Seq[String] = ls
+  override val libs: Seq[URL] = ls
 
   def close(): Unit = {
     for (c <- ScriptContext.cache) {
