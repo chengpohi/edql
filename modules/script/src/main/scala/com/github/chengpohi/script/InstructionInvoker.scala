@@ -4,11 +4,10 @@ import com.github.chengpohi.parser.EDQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
 
-import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.{URI, URL}
+import java.io.{BufferedReader, InputStreamReader}
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.{HttpClient, HttpRequest}
-import java.nio.file.{Files, Paths}
+import java.net.{URI, URL}
 import java.util.stream.Collectors
 import scala.collection.mutable
 import scala.io.Source
@@ -17,7 +16,7 @@ import scala.util.{Failure, Success}
 trait InstructionInvoker {
   val eqlParser: EDQLParser
   val httpClient: HttpClient = HttpClient.newHttpClient()
-  val libs: Seq[String]
+  val libs: Seq[URL]
 
   import eqlParser._
 
@@ -174,10 +173,10 @@ trait InstructionInvoker {
     throw new RuntimeException("could not found content from " + imp)
   }
 
-  private def readFromWeb(client: HttpClient, imp: String): String = {
+  private def readFromWeb(client: HttpClient, imp: URL): String = {
     try {
       val httpRequest = HttpRequest.newBuilder()
-        .uri(URI.create(imp))
+        .uri(imp.toURI)
         .GET()
         .build();
       val response = client.send(httpRequest, BodyHandlers.ofString())
@@ -187,9 +186,8 @@ trait InstructionInvoker {
     }
   }
 
-  private def readFile(runDir: String, imp: String): String = {
+  private def readFile(runDir: String, url: URL): String = {
     try {
-      val url = new URL(imp)
       val reader = new BufferedReader(new InputStreamReader(url.openStream()));
       return reader.lines().collect(Collectors.joining(System.lineSeparator()))
     } catch {
@@ -197,7 +195,7 @@ trait InstructionInvoker {
     }
 
     try {
-      Source.fromInputStream(this.getClass.getResourceAsStream(imp)).getLines().mkString(System.lineSeparator())
+      Source.fromInputStream(url.openStream()).getLines().mkString(System.lineSeparator())
     } catch {
       case _: Throwable => ""
     }

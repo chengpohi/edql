@@ -6,6 +6,8 @@ import fastparse.NoWhitespace._
 import fastparse._
 import org.apache.commons.lang3.RandomStringUtils
 
+import java.net.URL
+
 trait EDQLInstructionParser extends JsonParser with InterceptFunction {
   def comment[_: P] = P(newline.? ~ "#" ~ notNewlineChars.rep(0).! ~/ newline.?).map(
     _ => CommentInstruction())
@@ -20,7 +22,7 @@ trait EDQLInstructionParser extends JsonParser with InterceptFunction {
     c => TimeoutInstruction(c.extract[Double].toInt))
 
   def importExpr[_: P] = P(WS ~ "import" ~ WS ~ stringLiteral ~ WS).map(
-    c => ImportInstruction(c.extract[String]))
+    c => ImportInstruction(new URL(c.extract[String])))
 
   def authorizationBind[_: P] = P(WS ~ "Authorization" ~ WS ~ (actionPath | stringLiteral) ~ WS).map(
     c => {

@@ -4,6 +4,7 @@ import com.github.chengpohi.context.{Context, Definition, ErrorHealthRequestDefi
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.jayway.jsonpath.JsonPath
 
+import java.net.URL
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 
@@ -42,7 +43,7 @@ trait InterceptFunction {
     }
   }
 
-  case class ImportInstruction(imp: String) extends ScriptContextInstruction2 {
+  case class ImportInstruction(imp: URL) extends ScriptContextInstruction2 {
     override def name = "import"
 
     def execute(implicit eql: Context): Definition[_] = {
