@@ -378,7 +378,7 @@ trait InterceptFunction {
     variables.filter(i => Option.apply(invokePath).forall(j => i._1.startsWith(j)))
       .filter(_._2 != null)
       .foldLeft(path)((i, o) => {
-        val vName = o._1.replaceAll(invokePath, "");
+        val vName = o._1
         val v: String = o._2 match {
           case s: JsonCollection.Str => {
             s.value
