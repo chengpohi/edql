@@ -74,7 +74,7 @@ project(":") {
         api("org.scala-lang:scala-reflect:2.13.10")
         api("org.json4s:json4s-jackson_2.13:3.7.0-M1")
         api("org.apache.logging.log4j:log4j-core:2.11.1")
-        api("org.elasticsearch.client:elasticsearch-rest-client:7.13.0")
+        api("org.elasticsearch.client:elasticsearch-rest-client:8.7.1")
         api("com.jayway.jsonpath:json-path:2.6.0") {
             exclude("org.slf4j", "slf4j-api")
         }
