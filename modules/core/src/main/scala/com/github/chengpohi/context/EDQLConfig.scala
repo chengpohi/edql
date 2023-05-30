@@ -10,6 +10,7 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
+import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
 import org.apache.http.{Header, HttpHost}
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
@@ -57,6 +58,9 @@ trait EDQLConfig {
       new RestClientBuilder.HttpClientConfigCallback() {
         override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           httpClientBuilder.setSSLContext(sslContext)
+            .setDefaultIOReactorConfig(IOReactorConfig.custom()
+              .setSoKeepAlive(true)
+              .build())
             .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
         }
       })
@@ -85,6 +89,9 @@ trait EDQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.disableAuthCaching
+              .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                .setSoKeepAlive(true)
+                .build())
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -99,6 +106,9 @@ trait EDQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.disableAuthCaching
+              .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                .setSoKeepAlive(true)
+                .build())
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -124,6 +134,9 @@ trait EDQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.addInterceptorLast(interceptor)
+              .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                .setSoKeepAlive(true)
+                .build())
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
@@ -142,6 +155,9 @@ trait EDQLConfig {
               httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
             }
             httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
+              .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                .setSoKeepAlive(true)
+                .build())
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
