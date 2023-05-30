@@ -18,6 +18,7 @@ import org.elasticsearch.client.{RestClient, RestClientBuilder}
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.{SSLContext, TrustManager}
 
 /**
@@ -61,6 +62,7 @@ trait EDQLConfig {
             .setDefaultIOReactorConfig(IOReactorConfig.custom()
               .setSoKeepAlive(true)
               .build())
+            .setConnectionTimeToLive(2, TimeUnit.HOURS)
             .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
         }
       })
@@ -92,6 +94,7 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
+              .setConnectionTimeToLive(2, TimeUnit.HOURS)
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -109,6 +112,7 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
+              .setConnectionTimeToLive(2, TimeUnit.HOURS)
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -138,6 +142,7 @@ trait EDQLConfig {
                 .setSoKeepAlive(true)
                 .build())
               .setSSLContext(sslContext)
+              .setConnectionTimeToLive(2, TimeUnit.HOURS)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
@@ -158,6 +163,7 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
+              .setConnectionTimeToLive(2, TimeUnit.HOURS)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
