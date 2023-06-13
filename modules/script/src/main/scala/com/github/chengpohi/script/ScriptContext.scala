@@ -6,7 +6,7 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import java.net.URI
 import scala.collection.mutable
 import scala.concurrent.duration
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, DurationInt}
 
 case class ScriptContext(endpoint: String,
                          uri: URI,
@@ -34,7 +34,7 @@ case class ScriptContext(endpoint: String,
 }
 
 object ScriptContext {
-  val cache: mutable.Map[String, ScriptContext] = mutable.Map[String, ScriptContext]()
+  val cache: mutable.Map[String, (Long, ScriptContext)] = mutable.Map[String, (Long, ScriptContext)]()
 
   def apply(endpoint: String,
             auth: Option[String] = None,
@@ -59,10 +59,11 @@ object ScriptContext {
       s"-${kibanaProxy}"
     val cacheContext = cache.get(cacheKey)
     if (isCacheValid(cacheContext)) {
-      val c = cacheContext.get
+      val c = cacheContext.get._2
       c.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
       return c
     }
+
     val context = new ScriptContext(endpoint, uri,
       auth,
       username,
@@ -75,15 +76,19 @@ object ScriptContext {
       kibanaProxy
     )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
-    cache.put(cacheKey, context)
+    cache.put(cacheKey, (System.currentTimeMillis(), context))
     context
   }
 
-  private def isCacheValid(cacheContext: Option[ScriptContext]) = {
+  private def isCacheValid(cacheContext: Option[(Long, ScriptContext)]) = {
     cacheContext match {
       case None => false
       case Some(c) => {
-        c.eqlClient.restClient.isRunning
+        if ((System.currentTimeMillis() - c._1) > (2 hours).toMillis) {
+          false
+        } else {
+          c._2.eqlClient.restClient.isRunning
+        }
       }
     }
   }
