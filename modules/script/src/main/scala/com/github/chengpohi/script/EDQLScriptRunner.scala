@@ -77,7 +77,7 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
 
   def close(): Unit = {
     for (c <- ScriptContext.cache) {
-      c._2.restClient.close()
+      c._2._2.restClient.close()
     }
   }
 }
