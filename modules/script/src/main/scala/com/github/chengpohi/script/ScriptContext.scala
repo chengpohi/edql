@@ -6,7 +6,7 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import java.net.URI
 import scala.collection.mutable
 import scala.concurrent.duration
-import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.duration.Duration
 
 case class ScriptContext(endpoint: String,
                          uri: URI,
@@ -84,11 +84,7 @@ object ScriptContext {
     cacheContext match {
       case None => false
       case Some(c) => {
-        if ((System.currentTimeMillis() - c._1) > (2 hours).toMillis) {
-          false
-        } else {
-          c._2.eqlClient.restClient.isRunning
-        }
+        c._2.eqlClient.restClient.isRunning
       }
     }
   }
