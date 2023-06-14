@@ -7,12 +7,14 @@ import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.conn.ConnectionKeepAliveStrategy
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
-import org.apache.http.{Header, HttpHost}
+import org.apache.http.protocol.HttpContext
+import org.apache.http.{Header, HttpHost, HttpResponse}
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
 import java.net.URI
@@ -20,6 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.{SSLContext, TrustManager}
+import scala.concurrent.duration.DurationInt
 
 /**
  * eql
@@ -62,7 +65,10 @@ trait EDQLConfig {
             .setDefaultIOReactorConfig(IOReactorConfig.custom()
               .setSoKeepAlive(true)
               .build())
-            .setConnectionTimeToLive(3, TimeUnit.HOURS)
+            .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+              override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
+            })
+            .setConnectionTimeToLive(120, TimeUnit.SECONDS)
             .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
         }
       })
@@ -94,7 +100,10 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
-              .setConnectionTimeToLive(3, TimeUnit.HOURS)
+              .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+                override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
+              })
+              .setConnectionTimeToLive(120, TimeUnit.SECONDS)
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -112,7 +121,10 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
-              .setConnectionTimeToLive(3, TimeUnit.HOURS)
+              .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+                override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
+              })
+              .setConnectionTimeToLive(120, TimeUnit.SECONDS)
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -142,7 +154,10 @@ trait EDQLConfig {
                 .setSoKeepAlive(true)
                 .build())
               .setSSLContext(sslContext)
-              .setConnectionTimeToLive(3, TimeUnit.HOURS)
+              .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+                override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
+              })
+              .setConnectionTimeToLive(120, TimeUnit.SECONDS)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
@@ -163,13 +178,17 @@ trait EDQLConfig {
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
-              .setConnectionTimeToLive(3, TimeUnit.HOURS)
+              .setKeepAliveStrategy(new ConnectionKeepAliveStrategy(){
+                override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long =( 30 minutes).toMillis
+              })
+              .setConnectionTimeToLive(120, TimeUnit.SECONDS)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
     }
 
-    EDQLClient(restClientBuilder.build(), kibanaProxy, uri.getPath)
+    val client = restClientBuilder.build()
+    EDQLClient(client, kibanaProxy, uri.getPath)
   }
 }
