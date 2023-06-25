@@ -13,12 +13,11 @@ case class ScriptContext(endpoint: String,
                          uri: URI,
                          authInfo: Option[AuthInfo],
                          timeout: Option[Int],
-                         override val kibanaProxy: Boolean,
-                         proxy: Option[java.net.Proxy] = None) extends EDQLConfig with Context {
+                         override val kibanaProxy: Boolean) extends EDQLConfig with Context {
   override implicit val resultTimeout: Duration = Duration.apply(timeout.getOrElse(5000), duration.MILLISECONDS)
 
   override implicit lazy val eqlClient: EDQLClient =
-    buildRestClient(uri, authInfo, timeout, kibanaProxy, proxy)
+    buildRestClient(uri, authInfo, timeout, kibanaProxy)
 }
 
 object ScriptContext {
@@ -28,8 +27,7 @@ object ScriptContext {
             authInfo: Option[AuthInfo],
             timeout: Option[Int],
             vars: Map[String, JsonCollection.Val],
-            kibanaProxy: Boolean,
-            proxy: Option[java.net.Proxy] = None): ScriptContext = {
+            kibanaProxy: Boolean): ScriptContext = {
     val uri = URI.create(endpoint)
 
     val cacheKey = s"$endpoint-" + authInfo.map(i => i.cacheKey).getOrElse("") + s"-${timeout.getOrElse("")}" + s"-${kibanaProxy}"
@@ -46,7 +44,6 @@ object ScriptContext {
       authInfo,
       timeout,
       kibanaProxy,
-      proxy
     )
     context.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
     cache.put(cacheKey, (System.currentTimeMillis(), context))
