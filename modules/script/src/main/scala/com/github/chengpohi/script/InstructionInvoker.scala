@@ -1,5 +1,6 @@
 package com.github.chengpohi.script
 
+import com.github.chengpohi.context.AuthInfo
 import com.github.chengpohi.parser.EDQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
@@ -30,8 +31,7 @@ trait InstructionInvoker {
       return EDQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
-    val (functions, context) =
-      this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
+    val (functions, context) = this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
     EDQLRunResult(invokeResult.map {
@@ -123,15 +123,10 @@ trait InstructionInvoker {
 
     val context = ScriptContext(
       endPoint,
-      authorization,
-      username,
-      password,
-      apikeyId,
-      apikeySecret,
-      apiSessionToken,
-      awsRegion,
+      Some(AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)),
       timeout,
-      globalVars, kibanaProxy)
+      globalVars, kibanaProxy,
+      None)
 
     evalFunParams(globalFunctions, context, vars)
 
@@ -315,22 +310,22 @@ trait InstructionInvoker {
 
       instructions
         .filter(!_.isInstanceOf[ScriptContextInstruction2]).flatMap {
-        case r: ForInstruction => {
-          iterCollection(functions, context, r)
-        }
-        case f: FunctionInvokeInstruction =>
-          invokeFunction(functions, context, f, funName)
-        case r: ReturnInstruction => {
-          Seq(r.value.copy)
-        }
-        case i => {
-          val json = i.execute(context).json
-          parseJson(json) match {
-            case Success(j) => Seq(j)
-            case Failure(f) => Seq(JsonCollection.Str(json))
+          case r: ForInstruction => {
+            iterCollection(functions, context, r)
+          }
+          case f: FunctionInvokeInstruction =>
+            invokeFunction(functions, context, f, funName)
+          case r: ReturnInstruction => {
+            Seq(r.value.copy)
+          }
+          case i => {
+            val json = i.execute(context).json
+            parseJson(json) match {
+              case Success(j) => Seq(j)
+              case Failure(f) => Seq(JsonCollection.Str(json))
+            }
           }
         }
-      }
     } finally {
       context.variables.remove("INVOKE_PATH")
     }
