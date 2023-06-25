@@ -1,8 +1,9 @@
 package com.github.chengpohi.parser
 
-import com.github.chengpohi.context.{Context, Definition, ErrorHealthRequestDefinition, PureStringDefinition}
+import com.github.chengpohi.context.{Context, Definition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
-import com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.{Configuration, JsonPath}
+import com.jayway.jsonpath.internal.DefaultsImpl
 
 import java.net.URL
 import java.nio.file.{Files, Paths}
@@ -300,7 +301,7 @@ trait InterceptFunction {
     def execute(implicit eql: Context): Definition[_] = {
       val jsonO = data.toJson
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
-      val value = JsonPath.parse(jsonO).read(jsonPath).toString
+      val value = JsonPath.using(Configuration.defaultConfiguration().addOptions(com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL)).parse(jsonO).read(jsonPath).toString
       PureStringDefinition(value)
     }
 
@@ -328,15 +329,6 @@ trait InterceptFunction {
 
     override def ds: Seq[JsonCollection.Dynamic] =
       Seq(v).flatMap(i => extractDynamics(i))
-  }
-
-  case class ErrorInstruction(error: String) extends Instruction2 {
-
-    override def name: String = "error"
-
-    def execute(implicit eql: Context): Definition[_] = {
-      ErrorHealthRequestDefinition(error)
-    }
   }
 
   def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val],
