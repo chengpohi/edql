@@ -56,7 +56,13 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
             }
           }
         } catch {
-          case ex: ResponseException => ex.getMessage
+          case ex: ResponseException =>
+            val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
+            if (responseEntityStr.isBlank) {
+              ex.getMessage
+            } else {
+              responseEntityStr
+            }
         }
       }
     }
@@ -78,7 +84,13 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => ex.getMessage
+          case ex: ResponseException =>
+            val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
+            if (responseEntityStr.isBlank) {
+              ex.getMessage
+            } else {
+              responseEntityStr
+            }
         }
       }
     }
@@ -130,7 +142,13 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           }
         }
         catch {
-          case ex: ResponseException => ex.getMessage
+          case ex: ResponseException =>
+            val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
+            if (responseEntityStr.isBlank) {
+              ex.getMessage
+            } else {
+              responseEntityStr
+            }
         }
       }
     }
@@ -167,7 +185,13 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => ex.getMessage
+          case ex: ResponseException =>
+            val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
+            if (responseEntityStr.isBlank) {
+              ex.getMessage
+            } else {
+              responseEntityStr
+            }
         }
       }
     }
@@ -189,7 +213,13 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => ex.getMessage
+          case ex: ResponseException =>
+            val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
+            if (responseEntityStr.isBlank) {
+              ex.getMessage
+            } else {
+              responseEntityStr
+            }
         }
       }
     }
