@@ -3,7 +3,6 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.context.{Context, Definition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.jayway.jsonpath.{Configuration, JsonPath}
-import com.jayway.jsonpath.internal.DefaultsImpl
 
 import java.net.URL
 import java.nio.file.{Files, Paths}

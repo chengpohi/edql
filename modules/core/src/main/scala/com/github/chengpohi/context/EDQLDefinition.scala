@@ -4,9 +4,6 @@ import com.github.chengpohi.parser.collection.JsonCollection
 import com.github.chengpohi.parser.collection.JsonCollection.Val
 import org.apache.http.util.EntityUtils
 import org.elasticsearch.client.{Request, RequestOptions, ResponseException}
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization.write
 
 import scala.concurrent.Future
 
@@ -21,12 +18,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
   case class GetActionDefinition(path: String, action: Option[JsonCollection.Val])
     extends Definition[String] {
     override def execute: Future[String] = {
-      val as = action.filter(_.isInstanceOf[JsonCollection.Obj])
-        .map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
-        .filter(_.value.nonEmpty)
-      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj])
-        .flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
-
+      val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       val request = new Request(if (kibanaProxy) "POST" else "GET", path);
 
       request.setOptions(RequestOptions.DEFAULT.toBuilder
@@ -42,19 +34,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
-          val entityStr = EntityUtils.toString(entity)
-          if (ps.isEmpty) {
-            entityStr
-          } else {
-            try {
-              val j = parse(entityStr)
-              val v = parse(ps.get.toJson)
-              write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
-            } catch {
-              case _: Exception =>
-                entityStr
-            }
-          }
+          EntityUtils.toString(entity)
         } catch {
           case ex: ResponseException =>
             val responseEntityStr = EntityUtils.toString(ex.getResponse.getEntity)
@@ -109,8 +89,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
         .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
       );
 
-      val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj].remove("plot"))
-      val ps = action.filter(_.isInstanceOf[JsonCollection.Obj]).flatMap(_.asInstanceOf[JsonCollection.Obj].get("plot"))
+      val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       as match {
         case Seq() =>
         case a =>
@@ -127,19 +106,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
       Future {
         try {
           val entity = restClient.performRequest(request).getEntity
-          val entityStr = EntityUtils.toString(entity)
-          if (ps.isEmpty) {
-            entityStr
-          } else {
-            try {
-              val j = parse(entityStr)
-              val v = parse(ps.head.toJson)
-              write(JsonAST.JObject(j.asInstanceOf[JObject].obj :+ JsonAST.JField("plot", v)))
-            } catch {
-              case _: Exception =>
-                entityStr
-            }
-          }
+          EntityUtils.toString(entity)
         }
         catch {
           case ex: ResponseException =>
