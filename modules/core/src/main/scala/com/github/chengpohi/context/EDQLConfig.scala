@@ -10,7 +10,7 @@ import org.apache.http.client.CredentialsProvider
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.conn.ConnectionKeepAliveStrategy
 import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.impl.client.{BasicCredentialsProvider, SystemDefaultCredentialsProvider}
+import org.apache.http.impl.client.SystemDefaultCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
@@ -18,7 +18,7 @@ import org.apache.http.protocol.HttpContext
 import org.apache.http.{Header, HttpHost, HttpResponse}
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
-import java.net.{Authenticator, URI}
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.concurrent.TimeUnit
