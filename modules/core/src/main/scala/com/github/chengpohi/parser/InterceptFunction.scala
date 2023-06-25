@@ -300,7 +300,8 @@ trait InterceptFunction {
     def execute(implicit eql: Context): Definition[_] = {
       val jsonO = data.toJson
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
-      val value = JsonPath.using(Configuration.defaultConfiguration().addOptions(com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL)).parse(jsonO).read(jsonPath).toString
+      val configuration = Configuration.defaultConfiguration().addOptions(com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL)
+      val value = JsonPath.using(configuration).parse(jsonO).read(jsonPath).toString
       PureStringDefinition(value)
     }
 
