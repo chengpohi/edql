@@ -57,8 +57,7 @@ trait EDQLConfig {
   def buildRestClient(uri: URI,
                       authInfo: Option[AuthInfo] = None,
                       timeout: Option[Int] = None,
-                      kibanaProxy: Boolean = false,
-                      proxy: Option[java.net.Proxy] = None): EDQLClient = {
+                      kibanaProxy: Boolean = false): EDQLClient = {
     val restClientBuilder =
       RestClient.builder(new HttpHost(uri.getHost, uri.getPort, uri.getScheme))
         .setRequestConfigCallback(

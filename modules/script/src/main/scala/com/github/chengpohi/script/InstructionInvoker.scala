@@ -125,8 +125,7 @@ trait InstructionInvoker {
       endPoint,
       Some(AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)),
       timeout,
-      globalVars, kibanaProxy,
-      None)
+      globalVars, kibanaProxy)
 
     evalFunParams(globalFunctions, context, vars)
 

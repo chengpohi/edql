@@ -1,5 +1,4 @@
 package com.github.chengpohi.script
 
 case class EDQLRunContext(targetInstruction: Option[String] = None,
-                          runDir: String = "",
-                          proxy: java.net.Proxy = List())
+                          runDir: String = "")
