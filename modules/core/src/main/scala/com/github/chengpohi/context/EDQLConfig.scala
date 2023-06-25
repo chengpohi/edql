@@ -10,7 +10,7 @@ import org.apache.http.client.CredentialsProvider
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.conn.ConnectionKeepAliveStrategy
 import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.client.{BasicCredentialsProvider, SystemDefaultCredentialsProvider}
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
@@ -18,7 +18,7 @@ import org.apache.http.protocol.HttpContext
 import org.apache.http.{Header, HttpHost, HttpResponse}
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
-import java.net.URI
+import java.net.{Authenticator, URI}
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.concurrent.TimeUnit
@@ -131,7 +131,8 @@ trait EDQLConfig {
   }
 
   private def initAuthInfo(uri: URI, authInfo: Option[AuthInfo],
-                           sslContext: SSLContext, restClientBuilder: RestClientBuilder): CredentialsProvider = {
+                           sslContext: SSLContext,
+                           restClientBuilder: RestClientBuilder): CredentialsProvider = {
     if (authInfo.isEmpty) {
       return null
     }
@@ -153,10 +154,10 @@ trait EDQLConfig {
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
 
-    var credentialsProvider: BasicCredentialsProvider = null
+    var credentialsProvider: CredentialsProvider = null
     if (StringUtils.isNotBlank(uri.getUserInfo)) {
-      credentialsProvider = new BasicCredentialsProvider
-      credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(uri.getUserInfo))
+      credentialsProvider = new SystemDefaultCredentialsProvider
+      credentialsProvider.setCredentials(new AuthScope(uri.getHost, uri.getPort, null, null), new UsernamePasswordCredentials(uri.getUserInfo))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
@@ -177,8 +178,8 @@ trait EDQLConfig {
     }
 
     if (a.username.isDefined && a.password.isDefined) {
-      credentialsProvider = new BasicCredentialsProvider
-      credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(a.username.get, a.password.get))
+      credentialsProvider = new SystemDefaultCredentialsProvider
+      credentialsProvider.setCredentials(new AuthScope(uri.getHost, uri.getPort, null, null), new UsernamePasswordCredentials(a.username.get, a.password.get))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
@@ -230,6 +231,7 @@ trait EDQLConfig {
           }
         })
     }
+
     credentialsProvider
   }
 }
