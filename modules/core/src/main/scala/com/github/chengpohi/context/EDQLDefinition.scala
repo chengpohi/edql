@@ -56,9 +56,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
             }
           }
         } catch {
-          case ex: ResponseException => {
-            EntityUtils.toString(ex.getResponse.getEntity)
-          }
+          case ex: ResponseException => ex.getMessage
         }
       }
     }
@@ -80,9 +78,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => {
-            EntityUtils.toString(ex.getResponse.getEntity)
-          }
+          case ex: ResponseException => ex.getMessage
         }
       }
     }
@@ -134,9 +130,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           }
         }
         catch {
-          case ex: ResponseException => {
-            EntityUtils.toString(ex.getResponse.getEntity)
-          }
+          case ex: ResponseException => ex.getMessage
         }
       }
     }
@@ -173,9 +167,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => {
-            EntityUtils.toString(ex.getResponse.getEntity)
-          }
+          case ex: ResponseException => ex.getMessage
         }
       }
     }
@@ -197,9 +189,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
           val entity = restClient.performRequest(request).getEntity
           EntityUtils.toString(entity)
         } catch {
-          case ex: ResponseException => {
-            EntityUtils.toString(ex.getResponse.getEntity)
-          }
+          case ex: ResponseException => ex.getMessage
         }
       }
     }
