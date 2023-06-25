@@ -17,9 +17,6 @@ trait Definition[A] {
   def json: String
 }
 
-case class ScriptContext(host: String)
-
-
 case class ExtractDefinition(definition: Definition[_], path: String)
   extends Definition[String] with FutureOps {
 

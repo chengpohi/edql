@@ -39,9 +39,9 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
     }
   }
 
-  def run(script: String, eqlRunContext: EDQLRunContext = EDQLRunContext()): EDQLRunResult = {
+  def run(script: String, runContext: EDQLRunContext = EDQLRunContext()): EDQLRunResult = {
     val instructions = eqlParser.generateInstructions(script)
-    val selectedInstruction = eqlRunContext.targetInstruction.map(i => eqlParser.generateInstructions(i))
+    val selectedInstruction = runContext.targetInstruction.map(i => eqlParser.generateInstructions(i))
 
     if (selectedInstruction.exists(_.isFailure)) {
       return EDQLRunResult(Failure(selectedInstruction.get.failed.get))
@@ -53,10 +53,10 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
         val scriptContextIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
         selectedInstruction match {
           case Some(select) => {
-            this.invokeInstruction(select.get, scriptContextIns, eqlRunContext.runDir)
+            this.invokeInstruction(select.get, scriptContextIns, runContext.runDir)
           }
           case None =>
-            this.invokeInstruction(invokeIns, scriptContextIns, eqlRunContext.runDir)
+            this.invokeInstruction(invokeIns, scriptContextIns, runContext.runDir)
         }
       }
       case Failure(f) => {
