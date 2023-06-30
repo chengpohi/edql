@@ -19,9 +19,7 @@ object ScriptContext {
 
   def apply(hostInfo: HostInfo,
             vars: Map[String, JsonCollection.Val]): ScriptContext = {
-    //    val uri = URI.create(endpoint)
-
-    val cacheKey = s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("") + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}"
+    val cacheKey = s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("") + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}" + s"-${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}"
 
     val cacheContext = cache.get(cacheKey)
     if (isCacheValid(cacheContext)) {
