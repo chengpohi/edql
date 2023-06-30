@@ -31,7 +31,7 @@ trait InstructionInvoker {
       return EDQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
-    val (functions, context) = this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runContext)
+    val (functions, context) = this.buildContext(scriptContextIns, endpointBind, runContext)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
     EDQLRunResult(invokeResult.map {
@@ -45,8 +45,7 @@ trait InstructionInvoker {
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
-                           endPoint: String,
-                           kibanaProxy: Boolean,
+                           endpoint: Option[EndpointBindInstruction],
                            runContext: EDQLRunContext) = {
     val importIns = parseImports(cIns ++ libs.map(ImportInstruction), runContext.runDir)
 
@@ -82,14 +81,14 @@ trait InstructionInvoker {
         .toMap ++ systemFunction
 
     val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runContext.runDir))
-    val hostInfo = buildHostInfo(runContext, endPoint, kibanaProxy, invokeIns)
+    val hostInfo = buildHostInfo(runContext, endpoint, invokeIns)
     val context = ScriptContext(hostInfo, globalVars)
 
     evalFunParams(globalFunctions, context, vars)
     (globalFunctions, context)
   }
 
-  private def buildHostInfo(runContext: EDQLRunContext, endPoint: String, kibanaProxy: Boolean, invokeIns: Seq[Instruction2]): HostInfo = {
+  private def buildHostInfo(runContext: EDQLRunContext, endPoint: Option[EndpointBindInstruction], invokeIns: Seq[Instruction2]): HostInfo = {
     if (runContext.hostInfo != null) {
       return runContext.hostInfo
     }
@@ -130,7 +129,7 @@ trait InstructionInvoker {
         .map(i => i.asInstanceOf[TimeoutInstruction])
         .map(i => i.timeout).getOrElse(5000)
     val authInfo = AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)
-    HostInfo(endPoint, URI.create(endPoint), timeout, kibanaProxy, Some(authInfo))
+    HostInfo(endPoint.get.endpoint, URI.create(endPoint.get.endpoint), timeout, endPoint.get.kibanaProxy, Some(authInfo))
   }
 
   private def parseImports(cIns: Seq[eqlParser.Instruction2], runDir: String): Seq[eqlParser.Instruction2] = {
