@@ -47,37 +47,45 @@ case class AuthInfo(auth: Option[String] = None,
   }
 }
 
+case class ProxyInfo(httpHost: String, httpPort: Int, username: Option[String], password: Option[String])
+
+case class HostInfo(host: String,
+                    uri: URI,
+                    timeout: Int = 5000,
+                    kibanaProxy: Boolean = false,
+                    authInfo: Option[AuthInfo] = None,
+                    proxyInfo: Option[ProxyInfo] = None)
+
 trait EDQLConfig {
   lazy val config: Config =
     ConfigFactory.load("eql.conf").getConfig("eql")
 
-  def buildClient(config: Config): EDQLClient =
-    buildRestClient(URI.create(config.getString("host")))
+  def buildClient(config: Config): EDQLClient = {
+    val endPoint = config.getString("host")
+    buildRestClient(HostInfo(endPoint, URI.create(endPoint)))
+  }
 
-  def buildRestClient(uri: URI,
-                      authInfo: Option[AuthInfo] = None,
-                      timeout: Option[Int] = None,
-                      kibanaProxy: Boolean = false): EDQLClient = {
+  def buildRestClient(hostInfo: HostInfo): EDQLClient = {
     val restClientBuilder =
-      RestClient.builder(new HttpHost(uri.getHost, uri.getPort, uri.getScheme))
+      RestClient.builder(new HttpHost(hostInfo.uri.getHost, hostInfo.uri.getPort, hostInfo.uri.getScheme))
         .setRequestConfigCallback(
           new RestClientBuilder.RequestConfigCallback() {
             override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = {
               return requestConfigBuilder
-                .setConnectTimeout(timeout.getOrElse(5000))
-                .setConnectionRequestTimeout(timeout.getOrElse(5000))
-                .setSocketTimeout(timeout.getOrElse(5000))
+                .setConnectTimeout(hostInfo.timeout)
+                .setConnectionRequestTimeout(hostInfo.timeout)
+                .setSocketTimeout(hostInfo.timeout)
             }
           })
 
     val sslContext: SSLContext = initSSLContext(restClientBuilder)
-    val credentialsProvider = initAuthInfo(uri, authInfo, sslContext, restClientBuilder)
-    if (StringUtils.isNotBlank(uri.getPath) && !StringUtils.equals(uri.getPath, "/") && !kibanaProxy) {
-      restClientBuilder.setPathPrefix(uri.getPath)
+    val credentialsProvider = initAuthInfo(hostInfo.uri, hostInfo.authInfo, sslContext, restClientBuilder)
+    if (StringUtils.isNotBlank(hostInfo.uri.getPath) && !StringUtils.equals(hostInfo.uri.getPath, "/") && !hostInfo.kibanaProxy) {
+      restClientBuilder.setPathPrefix(hostInfo.uri.getPath)
     }
-    this.initKibanaProxy(kibanaProxy, sslContext, restClientBuilder, credentialsProvider)
+    this.initKibanaProxy(hostInfo.kibanaProxy, sslContext, restClientBuilder, credentialsProvider)
     val client = restClientBuilder.build()
-    EDQLClient(client, kibanaProxy, uri.getPath)
+    EDQLClient(client, hostInfo.kibanaProxy, hostInfo.uri.getPath)
   }
 
   private def initSSLContext(restClientBuilder: RestClientBuilder) = {

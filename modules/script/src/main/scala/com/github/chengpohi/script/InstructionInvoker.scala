@@ -1,6 +1,6 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.context.AuthInfo
+import com.github.chengpohi.context.{AuthInfo, HostInfo}
 import com.github.chengpohi.parser.EDQLParser
 import com.github.chengpohi.parser.collection.JsonCollection
 import org.apache.commons.lang3.StringUtils
@@ -23,7 +23,7 @@ trait InstructionInvoker {
 
   def invokeInstruction(invokeIns: Seq[eqlParser.Instruction2],
                         scriptContextIns: Seq[eqlParser.Instruction2],
-                        runDir: String): EDQLRunResult = {
+                        runContext: EDQLRunContext): EDQLRunResult = {
 
     val endpointBind = scriptContextIns.find(_.isInstanceOf[EndpointBindInstruction])
       .map(i => i.asInstanceOf[eqlParser.EndpointBindInstruction])
@@ -31,7 +31,7 @@ trait InstructionInvoker {
       return EDQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
-    val (functions, context) = this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runDir)
+    val (functions, context) = this.buildContext(scriptContextIns, endpointBind.get.endpoint, endpointBind.get.kibanaProxy, runContext)
 
     val invokeResult = runInstructions(functions, context, invokeIns)
     EDQLRunResult(invokeResult.map {
@@ -47,11 +47,52 @@ trait InstructionInvoker {
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
                            endPoint: String,
                            kibanaProxy: Boolean,
-                           runDir: String) = {
-
-    val importIns = parseImports(cIns ++ libs.map(ImportInstruction), runDir)
+                           runContext: EDQLRunContext) = {
+    val importIns = parseImports(cIns ++ libs.map(ImportInstruction), runContext.runDir)
 
     val invokeIns = cIns ++ importIns
+
+    val duplicateVariables = invokeIns.filter(_.isInstanceOf[VariableInstruction])
+      .map(i => i.asInstanceOf[VariableInstruction])
+      .groupBy(_.variableName)
+      .filter(_._2.size >= 2)
+
+    if (duplicateVariables.nonEmpty) {
+      throw new RuntimeException("duplicate variable: " + duplicateVariables.mkString(","))
+    }
+
+    val vars =
+      invokeIns.filter(_.isInstanceOf[VariableInstruction])
+        .map(i => i.asInstanceOf[VariableInstruction])
+        .map(i => i.variableName -> i.value).toMap
+
+    val duplicateFunctions = invokeIns.filter(_.isInstanceOf[FunctionInstruction])
+      .map(i => i.asInstanceOf[FunctionInstruction])
+      .map(i => i.funcName + i.variableNames.size -> i)
+      .groupBy(_._1).filter(_._2.size >= 2)
+
+    if (duplicateFunctions.nonEmpty) {
+      throw new RuntimeException("duplicate function: " + duplicateFunctions.mkString(","))
+    }
+
+    val globalFunctions =
+      invokeIns.filter(_.isInstanceOf[FunctionInstruction])
+        .map(i => i.asInstanceOf[FunctionInstruction])
+        .map(i => i.funcName + i.variableNames.size -> i)
+        .toMap ++ systemFunction
+
+    val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runContext.runDir))
+    val hostInfo = buildHostInfo(runContext, endPoint, kibanaProxy, invokeIns)
+    val context = ScriptContext(hostInfo, globalVars)
+
+    evalFunParams(globalFunctions, context, vars)
+    (globalFunctions, context)
+  }
+
+  private def buildHostInfo(runContext: EDQLRunContext, endPoint: String, kibanaProxy: Boolean, invokeIns: Seq[Instruction2]): HostInfo = {
+    if (runContext.hostInfo != null) {
+      return runContext.hostInfo
+    }
 
     val authorization =
       invokeIns.find(_.isInstanceOf[AuthorizationBindInstruction])
@@ -88,48 +129,8 @@ trait InstructionInvoker {
       invokeIns.find(_.isInstanceOf[TimeoutInstruction])
         .map(i => i.asInstanceOf[TimeoutInstruction])
         .map(i => i.timeout)
-
-
-    val duplicateVariables = invokeIns.filter(_.isInstanceOf[VariableInstruction])
-      .map(i => i.asInstanceOf[VariableInstruction])
-      .groupBy(_.variableName)
-      .filter(_._2.size >= 2)
-
-    if (duplicateVariables.nonEmpty) {
-      throw new RuntimeException("duplicate variable: " + duplicateVariables.mkString(","))
-    }
-
-    val vars =
-      invokeIns.filter(_.isInstanceOf[VariableInstruction])
-        .map(i => i.asInstanceOf[VariableInstruction])
-        .map(i => i.variableName -> i.value).toMap
-
-    val duplicateFunctions = invokeIns.filter(_.isInstanceOf[FunctionInstruction])
-      .map(i => i.asInstanceOf[FunctionInstruction])
-      .map(i => i.funcName + i.variableNames.size -> i)
-      .groupBy(_._1).filter(_._2.size >= 2)
-
-    if (duplicateFunctions.nonEmpty) {
-      throw new RuntimeException("duplicate function: " + duplicateFunctions.mkString(","))
-    }
-
-    val globalFunctions =
-      invokeIns.filter(_.isInstanceOf[FunctionInstruction])
-        .map(i => i.asInstanceOf[FunctionInstruction])
-        .map(i => i.funcName + i.variableNames.size -> i)
-        .toMap ++ systemFunction
-
-    val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runDir))
-
-    val context = ScriptContext(
-      endPoint,
-      Some(AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)),
-      timeout,
-      globalVars, kibanaProxy)
-
-    evalFunParams(globalFunctions, context, vars)
-
-    (globalFunctions, context)
+    val authInfo = AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)
+    HostInfo(endPoint, URI.create(endPoint), timeout.getOrElse(5000), kibanaProxy, Some(authInfo))
   }
 
   private def parseImports(cIns: Seq[eqlParser.Instruction2], runDir: String): Seq[eqlParser.Instruction2] = {
