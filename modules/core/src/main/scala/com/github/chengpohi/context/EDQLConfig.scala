@@ -71,31 +71,42 @@ trait EDQLConfig {
         .setRequestConfigCallback(
           new RestClientBuilder.RequestConfigCallback() {
             override def customizeRequestConfig(requestConfigBuilder: RequestConfig.Builder): RequestConfig.Builder = {
-              return requestConfigBuilder
+              requestConfigBuilder
                 .setConnectTimeout(hostInfo.timeout)
                 .setConnectionRequestTimeout(hostInfo.timeout)
                 .setSocketTimeout(hostInfo.timeout)
             }
           })
 
-    val sslContext: SSLContext = initSSLContext(restClientBuilder)
-    val credentialsProvider = initAuthInfo(hostInfo.uri, hostInfo.authInfo, sslContext, restClientBuilder)
+    val sslContext: SSLContext = initSSLContext(hostInfo, restClientBuilder)
+    val credentialsProvider = initAuthInfo(hostInfo, sslContext, restClientBuilder)
+
     if (StringUtils.isNotBlank(hostInfo.uri.getPath) && !StringUtils.equals(hostInfo.uri.getPath, "/") && !hostInfo.kibanaProxy) {
       restClientBuilder.setPathPrefix(hostInfo.uri.getPath)
     }
-    this.initKibanaProxy(hostInfo.kibanaProxy, sslContext, restClientBuilder, credentialsProvider)
+
+    this.initKibanaProxy(hostInfo, sslContext, restClientBuilder, credentialsProvider)
     val client = restClientBuilder.build()
     EDQLClient(client, hostInfo.kibanaProxy, hostInfo.uri.getPath)
   }
 
-  private def initSSLContext(restClientBuilder: RestClientBuilder) = {
+  private def initSSLContext(hostInfo: HostInfo, restClientBuilder: RestClientBuilder) = {
     val sslContext = SSLContext.getInstance("TLS");
     sslContext.init(null, Array[TrustManager](UnsafeX509ExtendedTrustManager.INSTANCE), null);
     restClientBuilder.setHttpClientConfigCallback(
       new RestClientBuilder.HttpClientConfigCallback() {
         override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
+          if (hostInfo.proxyInfo.isDefined) {
+            val proxyInfo = hostInfo.proxyInfo.get
+            httpClientBuilder.setProxy(new HttpHost(proxyInfo.httpHost, proxyInfo.httpPort, "http"))
+            if (proxyInfo.username.isDefined) {
+              val credentialsProvider = new SystemDefaultCredentialsProvider
+              credentialsProvider.setCredentials(new AuthScope(proxyInfo.httpHost, proxyInfo.httpPort), new UsernamePasswordCredentials(proxyInfo.username.orNull, proxyInfo.password.orNull))
+              httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
+          }
+
           httpClientBuilder.setSSLContext(sslContext)
-            .useSystemProperties()
             .setDefaultIOReactorConfig(IOReactorConfig.custom()
               .setSoKeepAlive(true)
               .build())
@@ -109,11 +120,11 @@ trait EDQLConfig {
     sslContext
   }
 
-  private def initKibanaProxy(kibanaProxy: Boolean,
+  private def initKibanaProxy(hostInfo: HostInfo,
                               sslContext: SSLContext,
                               restClientBuilder: RestClientBuilder,
                               credentialsProvider: CredentialsProvider): Unit = {
-    if (!kibanaProxy) {
+    if (!hostInfo.kibanaProxy) {
       return
     }
 
@@ -124,7 +135,6 @@ trait EDQLConfig {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
           }
           httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
-            .useSystemProperties()
             .setDefaultIOReactorConfig(IOReactorConfig.custom()
               .setSoKeepAlive(true)
               .build())
@@ -134,18 +144,28 @@ trait EDQLConfig {
             .setConnectionTimeToLive(120, TimeUnit.SECONDS)
             .setSSLContext(sslContext)
             .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+
+          if (hostInfo.proxyInfo.isDefined) {
+            val proxyInfo = hostInfo.proxyInfo.get
+            httpClientBuilder.setProxy(new HttpHost(proxyInfo.httpHost, proxyInfo.httpPort, "http"))
+            if (proxyInfo.username.isDefined) {
+              credentialsProvider.setCredentials(new AuthScope(proxyInfo.httpHost, proxyInfo.httpPort), new UsernamePasswordCredentials(proxyInfo.username.orNull, proxyInfo.password.orNull))
+              httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
+          }
+          httpClientBuilder
         }
       })
   }
 
-  private def initAuthInfo(uri: URI, authInfo: Option[AuthInfo],
+  private def initAuthInfo(hostInfo: HostInfo,
                            sslContext: SSLContext,
                            restClientBuilder: RestClientBuilder): CredentialsProvider = {
-    if (authInfo.isEmpty) {
+    if (hostInfo.authInfo.isEmpty) {
       return null
     }
 
-    val a = authInfo.get
+    val a = hostInfo.authInfo.get
     if (a.auth != null) {
       val defaultHeaders = Array[Header](
         new BasicHeader("Authorization", a.auth)
@@ -161,16 +181,16 @@ trait EDQLConfig {
       )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
+    val uri = hostInfo.uri
 
     var credentialsProvider: CredentialsProvider = null
-    if (StringUtils.isNotBlank(uri.getUserInfo)) {
+    if (StringUtils.isNotBlank(hostInfo.uri.getUserInfo)) {
       credentialsProvider = new SystemDefaultCredentialsProvider
       credentialsProvider.setCredentials(new AuthScope(uri.getHost, uri.getPort, null, null), new UsernamePasswordCredentials(uri.getUserInfo))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.disableAuthCaching
-              .useSystemProperties()
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
@@ -178,6 +198,16 @@ trait EDQLConfig {
                 override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
               })
               .setConnectionTimeToLive(120, TimeUnit.SECONDS)
+
+
+            if (hostInfo.proxyInfo.isDefined) {
+              val proxyInfo = hostInfo.proxyInfo.get
+              httpClientBuilder.setProxy(new HttpHost(proxyInfo.httpHost, proxyInfo.httpPort, "http"))
+              if (proxyInfo.username.isDefined) {
+                credentialsProvider.setCredentials(new AuthScope(proxyInfo.httpHost, proxyInfo.httpPort), new UsernamePasswordCredentials(proxyInfo.username.orNull, proxyInfo.password.orNull))
+              }
+            }
+
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
@@ -192,7 +222,6 @@ trait EDQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.disableAuthCaching
-              .useSystemProperties()
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
@@ -200,8 +229,16 @@ trait EDQLConfig {
                 override def getKeepAliveDuration(response: HttpResponse, context: HttpContext): Long = (30 minutes).toMillis
               })
               .setConnectionTimeToLive(120, TimeUnit.SECONDS)
+
+            if (hostInfo.proxyInfo.isDefined) {
+              val proxyInfo = hostInfo.proxyInfo.get
+              httpClientBuilder.setProxy(new HttpHost(proxyInfo.httpHost, proxyInfo.httpPort, "http"))
+              if (proxyInfo.username.isDefined) {
+                credentialsProvider.setCredentials(new AuthScope(proxyInfo.httpHost, proxyInfo.httpPort), new UsernamePasswordCredentials(proxyInfo.username.orNull, proxyInfo.password.orNull))
+              }
+            }
+
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-              .useSystemProperties()
               .setSSLContext(sslContext)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
@@ -223,7 +260,6 @@ trait EDQLConfig {
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
             httpClientBuilder.addInterceptorLast(interceptor)
-              .useSystemProperties()
               .setDefaultIOReactorConfig(IOReactorConfig.custom()
                 .setSoKeepAlive(true)
                 .build())
@@ -233,6 +269,17 @@ trait EDQLConfig {
               })
               .setConnectionTimeToLive(120, TimeUnit.SECONDS)
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+
+            if (hostInfo.proxyInfo.isDefined) {
+              val proxyInfo = hostInfo.proxyInfo.get
+              httpClientBuilder.setProxy(new HttpHost(proxyInfo.httpHost, proxyInfo.httpPort, "http"))
+              if (proxyInfo.username.isDefined) {
+                val credentialsProvider = new SystemDefaultCredentialsProvider
+                credentialsProvider.setCredentials(new AuthScope(proxyInfo.httpHost, proxyInfo.httpPort), new UsernamePasswordCredentials(proxyInfo.username.orNull, proxyInfo.password.orNull))
+                httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+              }
+            }
+            httpClientBuilder
           }
         })
     }
