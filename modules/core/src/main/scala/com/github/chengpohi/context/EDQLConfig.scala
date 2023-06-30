@@ -30,19 +30,19 @@ import scala.concurrent.duration.DurationInt
  * Created by chengpohi on 16/06/16.
  */
 
-case class AuthInfo(auth: Option[String] = None,
-                    username: Option[String] = None,
-                    password: Option[String] = None,
-                    apiKeyId: Option[String] = None,
-                    apiKeySecret: Option[String] = None,
-                    apiSessionToken: Option[String] = None,
-                    awsRegion: Option[String] = None) {
+case class AuthInfo(auth: String,
+                    username: String,
+                    password: String,
+                    apiKeyId: String,
+                    apiKeySecret: String,
+                    apiSessionToken: String,
+                    awsRegion: String) {
 
   def cacheKey: String = {
     s"""
-       |${auth.getOrElse("")} - ${username.getOrElse("")}
-       |-${apiKeyId.getOrElse("")} -${apiKeySecret.getOrElse("")}
-       |-${apiSessionToken.getOrElse("")} -${awsRegion.getOrElse("")}
+       |${Option.apply(auth).getOrElse("")} - ${Option.apply(username).getOrElse("")}
+       |-${Option.apply(apiKeyId).getOrElse("")} -${Option.apply(apiKeySecret).getOrElse("")}
+       |-${Option.apply(apiSessionToken).getOrElse("")} -${Option.apply(awsRegion).getOrElse("")}
        |""".stripMargin
   }
 }
@@ -146,15 +146,15 @@ trait EDQLConfig {
     }
 
     val a = authInfo.get
-    if (a.auth.isDefined) {
+    if (a.auth != null) {
       val defaultHeaders = Array[Header](
-        new BasicHeader("Authorization", a.auth.get)
+        new BasicHeader("Authorization", a.auth)
       )
       restClientBuilder.setDefaultHeaders(defaultHeaders)
     }
 
-    if (a.apiKeyId.isDefined && a.apiKeySecret.isDefined) {
-      val apiKeyAuth = Base64.getEncoder.encodeToString((a.apiKeyId.get + ":" + a.apiKeySecret.get).getBytes(StandardCharsets.UTF_8))
+    if (a.apiKeyId != null && a.apiKeySecret != null) {
+      val apiKeyAuth = Base64.getEncoder.encodeToString((a.apiKeyId + ":" + a.apiKeySecret).getBytes(StandardCharsets.UTF_8))
 
       val defaultHeaders = Array[Header](
         new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)
@@ -185,9 +185,9 @@ trait EDQLConfig {
         })
     }
 
-    if (a.username.isDefined && a.password.isDefined) {
+    if (a.username != null && a.password != null) {
       credentialsProvider = new SystemDefaultCredentialsProvider
-      credentialsProvider.setCredentials(new AuthScope(uri.getHost, uri.getPort, null, null), new UsernamePasswordCredentials(a.username.get, a.password.get))
+      credentialsProvider.setCredentials(new AuthScope(uri.getHost, uri.getPort, null, null), new UsernamePasswordCredentials(a.username, a.password))
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
@@ -208,17 +208,14 @@ trait EDQLConfig {
         })
     }
 
-    if (a.awsRegion.isDefined) {
+    if (a.awsRegion != null) {
       val signer = new AWS4Signer
       val serviceName = "es"
       signer.setServiceName(serviceName)
-      signer.setRegionName(a.awsRegion.get)
+      signer.setRegionName(a.awsRegion)
 
-      val credentialsProvider = a.apiKeyId.map(i => {
-        new EDQLAWSCredentialsProviderChain(
-          i,
-          a.apiKeySecret.orNull,
-          a.apiSessionToken.orNull)
+      val credentialsProvider = Option.apply(a.apiKeyId).map(i => {
+        new EDQLAWSCredentialsProviderChain(i, a.apiKeySecret, a.apiSessionToken)
       }).getOrElse(new EDQLAWSCredentialsProviderChain())
 
       val interceptor = new AWSRequestSigningApacheInterceptor(serviceName, signer, credentialsProvider)
