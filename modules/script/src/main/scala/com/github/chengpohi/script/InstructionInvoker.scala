@@ -41,7 +41,7 @@ trait InstructionInvoker {
         case t => t.toJson
       } getOrElse ""
       case a => a.toJson
-    }.filter(_.nonEmpty), context)
+    }.filter(_.nonEmpty), runContext, context)
   }
 
   private def buildContext(cIns: Seq[eqlParser.Instruction2],
@@ -97,40 +97,40 @@ trait InstructionInvoker {
     val authorization =
       invokeIns.find(_.isInstanceOf[AuthorizationBindInstruction])
         .map(i => i.asInstanceOf[AuthorizationBindInstruction])
-        .map(i => i.auth)
+        .map(i => i.auth).orNull
 
     val username =
       invokeIns.find(_.isInstanceOf[UsernameBindInstruction])
         .map(i => i.asInstanceOf[UsernameBindInstruction])
-        .map(i => i.username)
+        .map(i => i.username).orNull
 
     val password =
       invokeIns.find(_.isInstanceOf[PasswordBindInstruction])
         .map(i => i.asInstanceOf[PasswordBindInstruction])
-        .map(i => i.password)
+        .map(i => i.password).orNull
     val apikeyId =
       invokeIns.find(_.isInstanceOf[ApiKeyIdBindInstruction])
         .map(i => i.asInstanceOf[ApiKeyIdBindInstruction])
-        .map(i => i.apikeyId)
+        .map(i => i.apikeyId).orNull
     val apikeySecret =
       invokeIns.find(_.isInstanceOf[ApiKeySecretBindInstruction])
         .map(i => i.asInstanceOf[ApiKeySecretBindInstruction])
-        .map(i => i.apiSecret)
+        .map(i => i.apiSecret).orNull
     val apiSessionToken =
       invokeIns.find(_.isInstanceOf[ApiSessionTokenBindInstruction])
         .map(i => i.asInstanceOf[ApiSessionTokenBindInstruction])
-        .map(i => i.apiSessionToken)
+        .map(i => i.apiSessionToken).orNull
     val awsRegion =
       invokeIns.find(_.isInstanceOf[AWSRegionBindInstruction])
         .map(i => i.asInstanceOf[AWSRegionBindInstruction])
-        .map(i => i.awsRegion)
+        .map(i => i.awsRegion).orNull
 
     val timeout =
       invokeIns.find(_.isInstanceOf[TimeoutInstruction])
         .map(i => i.asInstanceOf[TimeoutInstruction])
-        .map(i => i.timeout)
+        .map(i => i.timeout).getOrElse(5000)
     val authInfo = AuthInfo(authorization, username, password, apikeyId, apikeySecret, apiSessionToken, awsRegion)
-    HostInfo(endPoint, URI.create(endPoint), timeout.getOrElse(5000), kibanaProxy, Some(authInfo))
+    HostInfo(endPoint, URI.create(endPoint), timeout, kibanaProxy, Some(authInfo))
   }
 
   private def parseImports(cIns: Seq[eqlParser.Instruction2], runDir: String): Seq[eqlParser.Instruction2] = {

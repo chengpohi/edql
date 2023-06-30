@@ -41,7 +41,7 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
 
   def run(script: String, runContext: EDQLRunContext = EDQLRunContext()): EDQLRunResult = {
     val instructions = eqlParser.generateInstructions(script)
-    val selectedInstruction = runContext.targetInstruction.map(i => eqlParser.generateInstructions(i))
+    val selectedInstruction = Option.apply(runContext.targetInstruction).map(i => eqlParser.generateInstructions(i))
 
     if (selectedInstruction.exists(_.isFailure)) {
       return EDQLRunResult(Failure(selectedInstruction.get.failed.get))
