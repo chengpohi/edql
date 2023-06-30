@@ -53,10 +53,10 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
         val scriptContextIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
         selectedInstruction match {
           case Some(select) => {
-            this.invokeInstruction(select.get, scriptContextIns, runContext.runDir)
+            this.invokeInstruction(select.get, scriptContextIns, runContext)
           }
           case None =>
-            this.invokeInstruction(invokeIns, scriptContextIns, runContext.runDir)
+            this.invokeInstruction(invokeIns, scriptContextIns, runContext)
         }
       }
       case Failure(f) => {
