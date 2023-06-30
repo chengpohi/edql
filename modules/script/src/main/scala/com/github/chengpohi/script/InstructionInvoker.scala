@@ -27,7 +27,7 @@ trait InstructionInvoker {
 
     val endpointBind = scriptContextIns.find(_.isInstanceOf[EndpointBindInstruction])
       .map(i => i.asInstanceOf[eqlParser.EndpointBindInstruction])
-    if (endpointBind.isEmpty) {
+    if (endpointBind.isEmpty && runContext.hostInfo == null) {
       return EDQLRunResult(Failure(new RuntimeException("should configure host")))
     }
 
