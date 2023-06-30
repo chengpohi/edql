@@ -47,7 +47,14 @@ case class AuthInfo(auth: String,
   }
 }
 
-case class ProxyInfo(httpHost: String, httpPort: Int, username: Option[String], password: Option[String])
+case class ProxyInfo(httpHost: String, httpPort: Int, username: Option[String], password: Option[String]) {
+  def cacheKey: String = {
+    s"""
+       |${Option.apply(httpHost).getOrElse("")} - ${Option.apply(httpPort).getOrElse("")}
+       |-${username.getOrElse("")} -${password.getOrElse("")}
+       |""".stripMargin
+  }
+}
 
 case class HostInfo(host: String,
                     uri: URI,
