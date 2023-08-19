@@ -1,0 +1,23 @@
+PRIVACY POLICY
+
+Effective Date: August 19, 2023
+
+1. INTRODUCTION
+
+This Privacy Policy explains how EDQL ("we," "our," or "us") handles information collected or processed through the use of our application. EDQL is a tool designed for querying and managing Elasticsearch. We are committed to protecting your privacy and ensuring the security of your information. This Privacy Policy applies solely to information processed through the use of EDQL.
+
+2. INFORMATION COLLECTION
+
+EDQL does not collect any personal information or user data. We do not collect, store, or transmit any personally identifiable information about you.
+
+3. DATA SECURITY
+
+While we do not collect any personal information or user data, we implement reasonable security measures to protect the information processed through the use of EDQL. However, please be aware that no method of transmission or storage is completely secure, and we cannot guarantee the absolute security of the information.
+
+4. CHANGES TO THIS PRIVACY POLICY
+
+We reserve the right to modify this Privacy Policy at any time. Any changes to this Privacy Policy will be effective immediately upon posting the revised version. We encourage you to review this Privacy Policy periodically to stay informed about our information practices.
+
+5. CONTACT US
+
+If you have any questions, concerns, or inquiries regarding this Privacy Policy or our privacy practices related to EDQL, please contact us at chengpohi@gmail.com.
