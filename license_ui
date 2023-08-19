@@ -1,0 +1,47 @@
+END-USER LICENSE AGREEMENT (EULA)
+
+IMPORTANT: PLEASE READ THIS END-USER LICENSE AGREEMENT CAREFULLY BEFORE USING EDQL.
+
+1. DEFINITIONS
+
+In this Agreement:
+a. "EDQL" refers to the software application and any associated components, documentation, and any updates or upgrades, specifically designed for querying and managing Elasticsearch.
+b. "Licensee" refers to the end-user of EDQL.
+
+2. LICENSE GRANT
+
+Subject to the terms and conditions of this Agreement, the Licensor grants the Licensee a non-exclusive, non-transferable license to use EDQL for the purpose of querying and managing Elasticsearch.
+
+3. INTELLECTUAL PROPERTY RIGHTS
+
+a. EDQL and any accompanying documentation are the intellectual property of the Licensor and are protected by copyright laws and international intellectual property treaties.
+b. The Licensee acknowledges that the license granted does not transfer any ownership or intellectual property rights to the Licensee.
+
+4. RESTRICTIONS
+
+a. The Licensee shall not modify, reverse-engineer, decompile, or disassemble EDQL, except to the extent expressly permitted by applicable law.
+b. The Licensee shall not rent, lease, lend, sell, sublicense, distribute, or otherwise transfer EDQL to any third party.
+
+5. WARRANTY DISCLAIMER
+
+a. EDQL IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+b. THE LICENSOR DOES NOT WARRANT THAT EDQL WILL MEET THE LICENSEE'S REQUIREMENTS OR THAT THE OPERATION OF EDQL WILL BE UNINTERRUPTED OR ERROR-FREE.
+
+6. LIMITATION OF LIABILITY
+
+a. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE OF OR INABILITY TO USE EDQL, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+b. THE TOTAL LIABILITY OF THE LICENSOR, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), OR OTHERWISE, SHALL NOT EXCEED THE AMOUNT PAID BY THE LICENSEE FOR EDQL.
+
+7. TERMINATION
+
+This Agreement shall remain in effect until terminated. The Licensor may terminate the Licensee's license to use EDQL if the Licensee breaches any provision of this Agreement. Upon termination, the Licensee shall cease all use of EDQL and destroy all copies of EDQL in their possession.
+
+8. GOVERNING LAW
+
+This Agreement shall be governed by and construed in accordance with the laws of [Jurisdiction]. Any disputes arising under or in connection with this Agreement shall be subject to the exclusive jurisdiction of the courts of [Jurisdiction].
+
+9. ENTIRE AGREEMENT
+
+This Agreement constitutes the entire agreement between the Licensor and the Licensee and supersedes all prior or contemporaneous understandings or agreements, whether oral or written, relating to EDQL.
+
+By using EDQL, the Licensee acknowledges that they have read and understood this Agreement and agree to be bound by its terms and conditions.
