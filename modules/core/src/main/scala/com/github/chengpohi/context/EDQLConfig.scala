@@ -256,6 +256,7 @@ trait EDQLConfig {
 
     if (a.awsProfile != null) {
       System.setProperty(com.amazonaws.auth.profile.internal.AwsProfileNameLoader.AWS_PROFILE_ENVIRONMENT_VARIABLE, a.awsProfile)
+      System.setProperty(com.amazonaws.auth.profile.internal.AwsProfileNameLoader.AWS_PROFILE_SYSTEM_PROPERTY, a.awsProfile)
     }
 
     if (a.awsRegion != null) {
