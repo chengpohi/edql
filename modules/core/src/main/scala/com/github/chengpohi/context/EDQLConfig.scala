@@ -36,13 +36,15 @@ case class AuthInfo(auth: String,
                     apiKeyId: String,
                     apiKeySecret: String,
                     apiSessionToken: String,
-                    awsRegion: String) {
+                    awsRegion: String,
+                    awsProfile: String) {
 
   def cacheKey: String = {
     s"""
        |${Option.apply(auth).getOrElse("")} - ${Option.apply(username).getOrElse("")}
        |-${Option.apply(apiKeyId).getOrElse("")} -${Option.apply(apiKeySecret).getOrElse("")}
        |-${Option.apply(apiSessionToken).getOrElse("")} -${Option.apply(awsRegion).getOrElse("")}
+       |-${Option.apply(awsProfile).getOrElse("")}
        |""".stripMargin
   }
 }
@@ -250,6 +252,10 @@ trait EDQLConfig {
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
           }
         })
+    }
+
+    if (a.awsProfile != null) {
+      System.setProperty(com.amazonaws.auth.profile.internal.AwsProfileNameLoader.AWS_PROFILE_ENVIRONMENT_VARIABLE, a.awsProfile)
     }
 
     if (a.awsRegion != null) {
