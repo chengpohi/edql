@@ -1,7 +1,7 @@
 * EDQL
 
 ** Use with EDQL Intellij GUI Client
-Please find more on: [[https://chengpohi.github.io/][EDQL Wiki]] or [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][Install EDQL]]
+Please view more on: [[https://chengpohi.github.io/][EDQL Wiki]] or [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][Install EDQL]]
 
 [[https://chengpohi.github.io/.gitbook/assets/new-connection.gif]]
 [[https://chengpohi.github.io/.gitbook/assets/chatquery.gif]]
