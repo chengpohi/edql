@@ -3,10 +3,12 @@ package com.github.chengpohi.parser
 import com.github.chengpohi.context.{Context, Definition, PureStringDefinition}
 import com.github.chengpohi.parser.collection.JsonCollection
 import com.jayway.jsonpath.{Configuration, JsonPath}
+import org.json4s.jackson.Serialization.write
 
 import java.net.URL
 import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
+
 
 trait InterceptFunction {
   trait Instruction2 {
@@ -301,8 +303,9 @@ trait InterceptFunction {
       val jsonO = data.toJson
       val jsonPath = path.toJson.replaceAll("^\"|\"$", "")
       val configuration = Configuration.defaultConfiguration().addOptions(com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL)
-      val value = JsonPath.using(configuration).parse(jsonO).read(jsonPath).toString
-      PureStringDefinition(value)
+      val pathObj = JsonPath.using(configuration).parse(jsonO).read(jsonPath)
+
+      PureStringDefinition(write(pathObj)(eql.formats))
     }
 
     override def ds: Seq[JsonCollection.Dynamic] =
