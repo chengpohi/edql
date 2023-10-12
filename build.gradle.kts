@@ -80,7 +80,6 @@ project(":") {
     dependencies {
         api("com.typesafe:config:1.3.0")
         api("org.apache.commons:commons-lang3:3.5")
-        api("com.lihaoyi:fastparse_2.13:2.3.0")
         api("org.scala-lang:scala-reflect:2.13.10")
         api("org.json4s:json4s-jackson_2.13:3.7.0-M1")
         api("org.apache.logging.log4j:log4j-core:2.11.1")
