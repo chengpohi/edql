@@ -3,7 +3,7 @@ plugins {
     scala
     `java-library`
     `maven-publish`
-    id("org.jetbrains.grammarkit") version ("2022.3.2")
+    id("org.jetbrains.grammarkit") version ("2021.2.2")
     id("org.jetbrains.intellij") version "1.13.3"
 }
 
