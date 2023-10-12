@@ -1,7 +1,6 @@
 package com.github.chengpohi.context
 
-import com.github.chengpohi.parser.collection.JsonCollection
-
+import com.github.chengpohi.edql.parser.json.JsonCollection
 import scala.collection.mutable
 
 trait Context

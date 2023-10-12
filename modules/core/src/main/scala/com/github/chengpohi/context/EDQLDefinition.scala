@@ -1,7 +1,6 @@
 package com.github.chengpohi.context
 
-import com.github.chengpohi.parser.collection.JsonCollection
-import com.github.chengpohi.parser.collection.JsonCollection.Val
+import com.github.chengpohi.edql.parser.json.JsonCollection
 import org.apache.http.util.EntityUtils
 import org.elasticsearch.client.{Request, RequestOptions, ResponseException}
 
@@ -195,7 +194,7 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
   }
 
 
-  case class ParserErrorDefinition(parameters: Seq[Val])
+  case class ParserErrorDefinition(parameters: Seq[JsonCollection.Val])
     extends Definition[Map[String, AnyRef]] {
 
     override def execute: Future[Map[String, AnyRef]] = {

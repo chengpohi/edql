@@ -1,30 +1,14 @@
 package com.github.chengpohi.repl
 
-import com.github.chengpohi.context.{EDQLConfig, Context}
-import com.github.chengpohi.parser.EDQLParser
+import com.github.chengpohi.context.{Context, EDQLConfig}
+import com.github.chengpohi.edql.parser.{EDQLParserDefinition, EDQLParserFactory, EDQLPsiInterceptor}
 
 import scala.io.Source
-import scala.util.{Failure, Success}
 
 class ReplInterpreter$(eql: Context) {
-  val eqlParser: EDQLParser = new EDQLParser
+  private val factory: EDQLParserFactory = EDQLParserFactory.apply("edql", new EDQLParserDefinition)
+  val parser = new EDQLPsiInterceptor(factory)
 
-  import eqlParser._
-
-  def render(parsed: PSI): String = {
-    val instructions = gi(parsed)
-
-    instructions.map(_.map(j => j.execute(eql).json)) match {
-      case Success(value) => value.mkString(System.lineSeparator())
-      case Failure(exception) => exception.getMessage
-    }
-  }
-
-  def parse: String => PSI = (s: String) => instruction(s)
-
-  def run(source: String): String = {
-    (parse andThen render).apply(source)
-  }
 }
 
 object ReplInterpreter$ extends Context with EDQLConfig {
@@ -41,6 +25,6 @@ object ReplInterpreter$ extends Context with EDQLConfig {
       .filter(!_.trim().startsWith("//"))
       .toList
       .mkString("")
-    println(runEngine.run(parseFile))
+    //    println(runEngine.run(parseFile))
   }
 }

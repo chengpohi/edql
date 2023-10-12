@@ -1,0 +1,45 @@
+POST fff/_search?aaa=222
+{
+  "jj": "aa",
+  "ff": 123,
+  "cc": true
+}
+
+POST ccc/_search?aaa=222
+{
+  "jj": "aa",
+  "ff": {
+    "op": 222,
+    "kk": "123"
+  },
+  "cc": true
+}
+{
+  "tt": "aa",
+}
+
+function hello(a, b, c) {
+  return "1111"
+}
+
+var aa = 11
+
+hello("111")
+
+for(i in aa) {
+  #hello world
+  print(i)
+}
+
+var cc = [1, 2, "3"]
+
+#hello world
+
+
+GET /_index_template/.alerts-observability.apm.alerts-default-index-template
+
+var a = GET _cluster/stats
+
+POST fff*/_search
+{
+}

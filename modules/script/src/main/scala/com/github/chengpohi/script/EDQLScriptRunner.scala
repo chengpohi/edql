@@ -1,7 +1,8 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.parser.EDQLParser
-import com.github.chengpohi.parser.collection.JsonCollection
+import com.github.chengpohi.edql.parser.json.JsonCollection
+import com.github.chengpohi.edql.parser.{EDQLParserDefinition, EDQLParserFactory}
+import com.intellij.psi.impl.PsiFileFactoryImpl
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
@@ -10,10 +11,10 @@ import java.nio.file.Files
 import java.util.stream.Collectors
 import scala.util.{Failure, Success, Try}
 
-class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
-  override val eqlParser: EDQLParser = new EDQLParser
+class EDQLScriptRunner(ls: Seq[URL], psiFileFactoryImpl: PsiFileFactoryImpl) extends InstructionInvoker {
+  override val factory: EDQLParserFactory = new EDQLParserFactory("edql", new EDQLParserDefinition, psiFileFactoryImpl)
 
-  import eqlParser._
+  import parser._
 
   def readFile(file: File): Try[String] = Try {
     val script =
@@ -22,11 +23,11 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
   }
 
   def parseJson(text: String): Try[JsonCollection.Val] = {
-    eqlParser.parseJson(text)
+    parser.parseJson(text)
   }
 
   def extractVars(text: String): Map[String, JsonCollection.Val] = {
-    val instructions = eqlParser.generateInstructions(text)
+    val instructions = parse(text)
     instructions.map(ins => {
       val cIns = ins.filter(_.isInstanceOf[ScriptContextInstruction2])
       cIns.filter(_.isInstanceOf[VariableInstruction])
@@ -40,8 +41,8 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
   }
 
   def run(script: String, runContext: EDQLRunContext = EDQLRunContext()): EDQLRunResult = {
-    val instructions = eqlParser.generateInstructions(script)
-    val selectedInstruction = Option.apply(runContext.targetInstruction).map(i => eqlParser.generateInstructions(i))
+    val instructions = parse(script)
+    val selectedInstruction = Option.apply(runContext.targetInstruction).map(i => parse(i))
 
     if (selectedInstruction.exists(_.isFailure)) {
       return EDQLRunResult(Failure(selectedInstruction.get.failed.get))
@@ -80,4 +81,5 @@ class EDQLScriptRunner(ls: Seq[URL]) extends InstructionInvoker {
       c._2._2.restClient.close()
     }
   }
+
 }

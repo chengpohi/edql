@@ -1,7 +1,10 @@
 plugins {
+    idea
     scala
     `java-library`
     `maven-publish`
+    id("org.jetbrains.grammarkit") version ("2022.3.2")
+    id("org.jetbrains.intellij") version "1.13.3"
 }
 
 group = "com.github.chengpohi"
@@ -12,6 +15,9 @@ allprojects {
         plugin("scala")
         plugin("maven-publish")
         plugin("java-library")
+        plugin("idea")
+        plugin("org.jetbrains.grammarkit")
+        plugin("org.jetbrains.intellij")
     }
 
     scala {
@@ -46,16 +52,16 @@ allprojects {
         scalaCompileOptions.forkOptions.apply {
             memoryMaximumSize = "8g"
             jvmArgs = listOf(
-                "-XX:MaxMetaspaceSize=4g",
-                "-Xss8M"
+                    "-XX:MaxMetaspaceSize=4g",
+                    "-Xss8M"
             )
         }
         scalaCompileOptions.additionalParameters = listOf(
-            "-Ywarn-unused",
-            "-feature",
-            "-language:implicitConversions",
-            "-language:higherKinds",
-            "-language:postfixOps",
+                "-Ywarn-unused",
+                "-feature",
+                "-language:implicitConversions",
+                "-language:higherKinds",
+                "-language:postfixOps",
         )
     }
 
@@ -63,6 +69,10 @@ allprojects {
         withType<Copy> {
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
+    }
+
+    intellij {
+        version.set("2022.1.1")
     }
 }
 

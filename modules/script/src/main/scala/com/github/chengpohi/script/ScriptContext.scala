@@ -1,7 +1,7 @@
 package com.github.chengpohi.script
 
 import com.github.chengpohi.context._
-import com.github.chengpohi.parser.collection.JsonCollection
+import com.github.chengpohi.edql.parser.json.JsonCollection
 
 import scala.collection.mutable
 import scala.concurrent.duration

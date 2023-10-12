@@ -26,6 +26,7 @@ esdata/
 
 null/
 build/
-gen/
+#gen/
 .gradle
 project/
+grammars/
