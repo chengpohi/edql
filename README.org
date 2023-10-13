@@ -1,5 +1,7 @@
 * EDQL
 
+*For now EDQL library could not standalone use, it's heavily depends on intellij grammar kit!!!*
+
 ** Use with EDQL Intellij GUI Client
 Please view more on: [[https://chengpohi.github.io/][EDQL Wiki]] or [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][Install EDQL]]
 
