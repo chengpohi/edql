@@ -84,18 +84,20 @@ object JsonCollection {
     }
   }
 
-  case class ArithTree(value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val])) extends Dynamic {
+  case class ArithTree(var a: JsonCollection.Val, var op: Option[String], var b: Option[JsonCollection.Val]) extends Dynamic {
     var realValue: Option[JsonCollection.Arith] = None
 
-    override def toJson: String = realValue.map(_.toJson).getOrElse(value._1.toJson)
+    override def toJson: String = realValue.map(_.toJson).getOrElse(a.toJson)
 
     override def get(path: String): Option[Val] = None
 
     override def copy: Val = {
-      val tree = ArithTree((value._1.copy, value._2, value._3.map(_.copy)))
+      val tree = ArithTree(a.copy, op, b.map(_.copy))
       tree.realValue = realValue.map(_.copy.asInstanceOf[Arith])
       tree
     }
+
+    override def value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val]) = (a, op, b)
   }
 
   case class Obj(value: (Val, Val)*) extends AnyVal with Val {

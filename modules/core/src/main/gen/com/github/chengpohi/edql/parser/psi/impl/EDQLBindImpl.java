@@ -35,6 +35,12 @@ public class EDQLBindImpl extends ASTWrapperPsiElement implements EDQLBind {
 
   @Override
   @NotNull
+  public List<EDQLBinsuffix> getBinsuffixList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLBinsuffix.class);
+  }
+
+  @Override
+  @NotNull
   public EDQLExpr getExpr() {
     return findNotNullChildByClass(EDQLExpr.class);
   }

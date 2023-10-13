@@ -11,6 +11,9 @@ public interface EDQLBind extends PsiElement {
   EDQLIdentifier0 getIdentifier0();
 
   @NotNull
+  List<EDQLBinsuffix> getBinsuffixList();
+
+  @NotNull
   EDQLExpr getExpr();
 
 }

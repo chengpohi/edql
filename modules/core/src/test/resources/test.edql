@@ -43,3 +43,5 @@ var a = GET _cluster/stats
 POST fff*/_search
 {
 }
+
+var n = 1 + 2 * 3 + 4 * 5 - 7

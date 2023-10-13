@@ -1,7 +1,8 @@
 package com.github.chengpohi.edql.parser.json
 
-import com.github.chengpohi.edql.parser.psi.{EDQLExpr, EDQLFieldname, EDQLObj, EDQLTypes}
+import com.github.chengpohi.edql.parser.psi._
 import com.intellij.psi.PsiElement
+import org.apache.commons.collections.CollectionUtils
 
 import java.util
 import scala.jdk.CollectionConverters.ListHasAsScala
@@ -119,6 +120,65 @@ trait JsonValParser {
     throw new RuntimeException("parse failed: " + expr.getText)
   }
 
+
+  def toJsonVal(bind: EDQLBind): JsonCollection.Val = {
+    if (CollectionUtils.isEmpty(bind.getBinsuffixList)) {
+      return toJsonVal(bind.getExpr)
+    }
+
+    val i = JsonCollection.ArithTree(toJsonVal(bind.getExpr), None, None)
+    var point: (JsonCollection.ArithTree, JsonCollection.ArithTree) = (null, i)
+    for (elem <- bind.getBinsuffixList.asScala) {
+      val (pre, cur) = point
+      val value = toJsonVal(elem.getExpr)
+      elem.getBinaryop.getText match {
+        case ("*" | "/" | "%") => {
+          val op = elem.getBinaryop.getText
+          val now = cur.b match {
+            case Some(j) => {
+              JsonCollection.ArithTree(cur.a, cur.op, Some(JsonCollection.ArithTree(j, Some(op), Some(value))))
+            }
+            case None =>
+              JsonCollection.ArithTree(cur.a, Some(op), Some(value))
+          }
+          pre.b = Some(now)
+          point = (pre, now)
+        }
+        case op => {
+          var now: JsonCollection.ArithTree = null
+          cur.op match {
+            case Some(o) =>
+              now = JsonCollection.ArithTree(cur, Some(op), Some(value))
+              pre.b = Some(now)
+              point = (pre, now)
+            case None =>
+              now = JsonCollection.ArithTree(value, None, None)
+              cur.op = Some(op)
+              cur.b = Some(now)
+              point = (cur, now)
+          }
+        }
+      }
+    }
+    flatten(i)
+  }
+
+  def flatten(i: JsonCollection.Val): JsonCollection.Val = {
+    i match {
+      case a: JsonCollection.ArithTree => {
+        a.a = flatten(a.a)
+        a.op match {
+          case Some(o) =>
+            a.b = Some(flatten(a.b.get))
+            a
+          case None =>
+            a.a
+        }
+      }
+      case j => j
+    }
+
+  }
 
   private def checkParse(expr: PsiElement, str: String): Unit = {
     if (!expr.textMatches(str)) {

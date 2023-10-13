@@ -5,7 +5,8 @@ import com.github.chengpohi.edql.parser.psi._
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.{FileViewProvider, PsiComment, PsiErrorElement, PsiWhiteSpace}
+import com.intellij.psi.{PsiComment, PsiErrorElement, PsiWhiteSpace}
+import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.RandomStringUtils
 
 import java.net.URL
@@ -34,7 +35,6 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
           scala.util.Success(toJsonVal(expr))
         } catch {
           case ex: Throwable => {
-            ex.printStackTrace()
             scala.util.Failure(ex)
           }
         }
@@ -116,6 +116,12 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
     if (expr.getOutervar != null) {
       val outervar = expr.getOutervar
       val varName = outervar.getBind.getIdentifier0.getText
+
+      if (CollectionUtils.isNotEmpty(outervar.getBind.getBinsuffixList)) {
+        val j = toJsonVal(outervar.getBind)
+        return Seq(VariableInstruction(varName, j))
+      }
+
       val e = outervar.getBind.getExpr
       val v = Try.apply(toJsonVal(e))
       if (v.isSuccess) {
@@ -125,7 +131,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
       val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
       return Seq(
         VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
-        FunctionInstruction(anonymousFun, Seq(), parseExpr(e)))
+        FunctionInstruction(anonymousFun, Seq(), parseExpr(outervar.getBind.getExpr)))
     }
 
     throw new RuntimeException("unsupported instruction: " + expr.getText)

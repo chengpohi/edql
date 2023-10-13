@@ -2,7 +2,7 @@ package com.github.chengpohi.script
 
 import com.github.chengpohi.context.{AuthInfo, HostInfo}
 import com.github.chengpohi.edql.parser.json.JsonCollection
-import com.github.chengpohi.edql.parser.{EDQLParserDefinition, EDQLParserFactory, EDQLPsiInterceptor}
+import com.github.chengpohi.edql.parser.{EDQLParserFactory, EDQLPsiInterceptor}
 import org.apache.commons.lang3.StringUtils
 
 import java.io.{BufferedReader, InputStreamReader}
@@ -352,11 +352,10 @@ trait InstructionInvoker {
                 context: ScriptContext,
                 v: JsonCollection.ArithTree,
                 funName: Option[String] = None): Unit = {
-    val value = v.value
-    value._2 match {
+    v.op match {
       case Some("+") =>
-        val v1 = evalBasicValue(functions, context, value._1, funName)
-        value._3 match {
+        val v1 = evalBasicValue(functions, context, v.a, funName)
+        v.b match {
           case Some(v3) => {
             val v2 = evalBasicValue(functions, context, v3, funName)
             v.realValue = Some(v1.plus(v2))
@@ -364,8 +363,8 @@ trait InstructionInvoker {
           case None => v.realValue = Some(v1)
         }
       case Some("-") =>
-        val v1 = evalBasicValue(functions, context, value._1, funName)
-        value._3 match {
+        val v1 = evalBasicValue(functions, context, v.a, funName)
+        v.b match {
           case Some(v3) => {
             val v2 = evalBasicValue(functions, context, v3, funName)
             v.realValue = Some(v1.minus(v2))
@@ -373,8 +372,8 @@ trait InstructionInvoker {
           case None => v.realValue = Some(v1)
         }
       case Some("*") =>
-        val v1 = evalBasicValue(functions, context, value._1, funName)
-        value._3 match {
+        val v1 = evalBasicValue(functions, context, v.a, funName)
+        v.b match {
           case Some(v3) => {
             val v2 = evalBasicValue(functions, context, v3, funName)
             v.realValue = Some(v1.multiply(v2))
@@ -382,20 +381,20 @@ trait InstructionInvoker {
           case None => v.realValue = Some(v1)
         }
       case Some("/") =>
-        val v1 = evalBasicValue(functions, context, value._1, funName)
-        value._3 match {
+        val v1 = evalBasicValue(functions, context, v.a, funName)
+        v.b match {
           case Some(v3) => {
             val v2 = evalBasicValue(functions, context, v3, funName)
             v.realValue = Some(v1.div(v2))
           }
           case None => v.realValue = Some(v1)
         }
-      case None if value._1.isInstanceOf[JsonCollection.ArithTree] => {
-        evalArith(functions, context, value._1.asInstanceOf[JsonCollection.ArithTree], funName)
-        v.realValue = value._1.asInstanceOf[JsonCollection.ArithTree].realValue
+      case None if v.a.isInstanceOf[JsonCollection.ArithTree] => {
+        evalArith(functions, context, v.a.asInstanceOf[JsonCollection.ArithTree], funName)
+        v.realValue = v.a.asInstanceOf[JsonCollection.ArithTree].realValue
       }
-      case i if value._1.isInstanceOf[JsonCollection.Arith] => {
-        v.realValue = Some(v.value._1.asInstanceOf[JsonCollection.Arith])
+      case i if v.a.isInstanceOf[JsonCollection.Arith] => {
+        v.realValue = Some(v.a.asInstanceOf[JsonCollection.Arith])
       }
     }
   }
@@ -407,8 +406,8 @@ trait InstructionInvoker {
                      funName: Option[String]): JsonCollection.Arith =
     v match {
       case i: JsonCollection.ArithTree => {
-        i.value match {
-          case (t, None, None) => evalBasicValue(functions, context, t, funName)
+        i.op match {
+          case None => evalBasicValue(functions, context, i.a, funName)
           case t => {
             evalArith(functions, context, i, funName)
             i.realValue.get

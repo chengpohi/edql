@@ -496,7 +496,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER0 EQUAL expr {
+  // IDENTIFIER0 EQUAL expr (binsuffix)* {
   // }
   public static boolean bind(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bind")) return false;
@@ -506,13 +506,35 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, EQUAL);
     r = r && expr(b, l + 1);
     r = r && bind_3(b, l + 1);
+    r = r && bind_4(b, l + 1);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (binsuffix)*
+  private static boolean bind_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bind_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!bind_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "bind_3", c)) break;
+    }
+    return true;
+  }
+
+  // (binsuffix)
+  private static boolean bind_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bind_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = binsuffix(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
   // {
   // }
-  private static boolean bind_3(PsiBuilder b, int l) {
+  private static boolean bind_4(PsiBuilder b, int l) {
     return true;
   }
 
