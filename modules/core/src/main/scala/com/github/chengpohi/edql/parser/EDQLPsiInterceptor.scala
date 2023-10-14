@@ -142,19 +142,19 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
 
     expr.getMethod.getFirstChild.getNode.getElementType match {
       case EDQLTypes.POST => {
-        PostActionInstruction(expr.getIdentifier0.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v)
+        PostActionInstruction(expr.getPath.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v)
       }
       case EDQLTypes.GET => {
-        GetActionInstruction(expr.getIdentifier0.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
+        GetActionInstruction(expr.getPath.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
       }
       case EDQLTypes.PUT => {
-        PutActionInstruction(expr.getIdentifier0.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
+        PutActionInstruction(expr.getPath.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
       }
       case EDQLTypes.DELETE => {
-        DeleteActionInstruction(expr.getIdentifier0.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
+        DeleteActionInstruction(expr.getPath.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
       }
       case EDQLTypes.HEAD => {
-        HeadActionInstruction(expr.getIdentifier0.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
+        HeadActionInstruction(expr.getPath.getText + Option.apply(expr.getQuery).map(i => i.getText).getOrElse(""), v.headOption)
       }
       case _ => null
     }

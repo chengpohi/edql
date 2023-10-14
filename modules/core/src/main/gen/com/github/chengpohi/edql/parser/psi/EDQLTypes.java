@@ -44,6 +44,7 @@ public interface EDQLTypes {
   IElementType OUTERVAR = new EDQLElementType("OUTERVAR");
   IElementType PARAM = new EDQLElementType("PARAM");
   IElementType PARAMS = new EDQLElementType("PARAMS");
+  IElementType PATH = new EDQLElementType("PATH");
   IElementType RETURN_EXPR = new EDQLElementType("RETURN_EXPR");
   IElementType TIMEOUT_EXPR = new EDQLElementType("TIMEOUT_EXPR");
   IElementType UNARYOP = new EDQLElementType("UNARYOP");
@@ -239,6 +240,9 @@ public interface EDQLTypes {
       }
       else if (type == PARAMS) {
         return new EDQLParamsImpl(node);
+      }
+      else if (type == PATH) {
+        return new EDQLPathImpl(node);
       }
       else if (type == RETURN_EXPR) {
         return new EDQLReturnExprImpl(node);

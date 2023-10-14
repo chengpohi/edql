@@ -154,6 +154,10 @@ public class EDQLVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitPath(@NotNull EDQLPath o) {
+    visitPsiElement(o);
+  }
+
   public void visitReturnExpr(@NotNull EDQLReturnExpr o) {
     visitPsiElement(o);
   }

@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface EDQLActionExpr extends PsiElement {
 
   @NotNull
-  EDQLIdentifier0 getIdentifier0();
-
-  @NotNull
   List<EDQLArr> getArrList();
 
   @NotNull
@@ -21,6 +18,9 @@ public interface EDQLActionExpr extends PsiElement {
 
   @NotNull
   List<EDQLObj> getObjList();
+
+  @NotNull
+  EDQLPath getPath();
 
   @Nullable
   PsiElement getQuery();

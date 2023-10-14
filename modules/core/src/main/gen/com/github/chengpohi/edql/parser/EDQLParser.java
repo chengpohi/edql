@@ -77,13 +77,13 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // method IDENTIFIER0 (QUERY)? (obj | arr | arrcomp)*
+  // method path (QUERY)? (obj | arr | arrcomp)*
   public static boolean actionExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "actionExpr")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, ACTION_EXPR, "<action expr>");
     r = method(b, l + 1);
-    r = r && IDENTIFIER0(b, l + 1);
+    r = r && path(b, l + 1);
     r = r && actionExpr_2(b, l + 1);
     r = r && actionExpr_3(b, l + 1);
     exit_section_(b, l, m, r, false, null);
@@ -1354,6 +1354,55 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   private static boolean params_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "params_2")) return false;
     consumeToken(b, COMMA);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER0 (ASTERISK IDENTIFIER0? ASTERISK?)*
+  public static boolean path(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, PATH, "<path>");
+    r = IDENTIFIER0(b, l + 1);
+    r = r && path_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (ASTERISK IDENTIFIER0? ASTERISK?)*
+  private static boolean path_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!path_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "path_1", c)) break;
+    }
+    return true;
+  }
+
+  // ASTERISK IDENTIFIER0? ASTERISK?
+  private static boolean path_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ASTERISK);
+    r = r && path_1_0_1(b, l + 1);
+    r = r && path_1_0_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // IDENTIFIER0?
+  private static boolean path_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1_0_1")) return false;
+    IDENTIFIER0(b, l + 1);
+    return true;
+  }
+
+  // ASTERISK?
+  private static boolean path_1_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1_0_2")) return false;
+    consumeToken(b, ASTERISK);
     return true;
   }
 
