@@ -27,7 +27,7 @@ var aa = 11
 hello("111")
 
 for(i in aa) {
-  #hello world
+#hello world
   print(i)
 }
 
@@ -49,3 +49,6 @@ var n = 1 + 2 * 3 + 4 * 5 - 7
 var jk = 2 * 3
 
 var kk = 1 + 2*3
+
+[1, 2, 3, 4].map{it => {}}
+var cc = [1, 2, 3, 4].map{it => {}}

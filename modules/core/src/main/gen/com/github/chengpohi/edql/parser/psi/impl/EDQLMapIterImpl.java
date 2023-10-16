@@ -11,14 +11,14 @@ import static com.github.chengpohi.edql.parser.psi.EDQLTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.chengpohi.edql.parser.psi.*;
 
-public class EDQLFunctionBodyImpl extends ASTWrapperPsiElement implements EDQLFunctionBody {
+public class EDQLMapIterImpl extends ASTWrapperPsiElement implements EDQLMapIter {
 
-  public EDQLFunctionBodyImpl(@NotNull ASTNode node) {
+  public EDQLMapIterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull EDQLVisitor visitor) {
-    visitor.visitFunctionBody(this);
+    visitor.visitMapIter(this);
   }
 
   @Override

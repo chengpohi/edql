@@ -94,10 +94,8 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
         i.getIdentifier0.getText
       }).toSeq
       val bs = fun.getFunctionBody.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
-      val rs = fun.getFunctionBody.getReturnExprList.asScala.map(i => {
-        ReturnInstruction(toJsonVal(i.getExpr))
-      }).toSeq
-      return Seq(FunctionInstruction(fun.getIdentifier0.getText, ps, bs ++ rs))
+      val rs = ReturnInstruction(toJsonVal(fun.getFunctionBody.getReturnExpr.getExpr))
+      return Seq(FunctionInstruction(fun.getIdentifier0.getText, ps, bs :+ rs))
     }
 
     if (expr.getForExpr != null) {
@@ -132,6 +130,21 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
       return Seq(
         VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
         FunctionInstruction(anonymousFun, Seq(), parseExpr(outervar.getBind.getExpr)))
+    }
+
+
+    if (expr.getArr != null && expr.getArr.getMapIter != null) {
+      val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+      val arr = expr.getArr.getExprList.asScala.map(i => toJsonVal(i)).toSeq
+      val bs: Seq[Instruction2] = expr.getArr.getMapIter.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
+
+      expr.getArr.getMapIter.getReturnExpr match {
+        case null =>
+          return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs)))
+        case r =>
+          val rs = ReturnInstruction(toJsonVal(r.getExpr))
+          return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs)))
+      }
     }
 
     throw new RuntimeException("unsupported instruction: " + expr.getText)

@@ -254,7 +254,8 @@ trait InstructionInvoker {
 
   def invokeFunction(functions: Map[String, FunctionInstruction],
                      context: ScriptContext,
-                     invoke: FunctionInvokeInstruction, parentFunName: Option[String] = None): Seq[JsonCollection.Val] = {
+                     invoke: FunctionInvokeInstruction,
+                     parentFunName: Option[String] = None): Seq[JsonCollection.Val] = {
     val cachedVariables = context.variables
     val values = invoke.vals
 
@@ -299,6 +300,17 @@ trait InstructionInvoker {
     })
   }
 
+  def invokeMapIter(functions: Map[String, FunctionInstruction],
+                    context: ScriptContext,
+                    m: parser.MapIterInstruction): Seq[JsonCollection.Val] = {
+    val ds = m.ds
+    ds.flatMap(i => {
+      val fun = m.fun
+      context.variables.put(fun.variableNames.head, i)
+      return runInstructions(functions, context, fun.instructions)
+    })
+  }
+
   def runInstructions(functions: Map[String, FunctionInstruction],
                       context: ScriptContext,
                       instructions: Seq[Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
@@ -318,6 +330,8 @@ trait InstructionInvoker {
           case r: ReturnInstruction => {
             Seq(r.value.copy)
           }
+          case m: MapIterInstruction =>
+            invokeMapIter(functions, context, m)
           case i => {
             val json = i.execute(context).json
             parser.parseJson(json) match {

@@ -122,6 +122,10 @@ public class EDQLVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitMapIter(@NotNull EDQLMapIter o) {
+    visitPsiElement(o);
+  }
+
   public void visitMember(@NotNull EDQLMember o) {
     visitPsiElement(o);
   }

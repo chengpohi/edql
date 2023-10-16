@@ -107,6 +107,9 @@ trait JsonValParser {
     }
 
     if (expr.getArr != null) {
+      if (expr.getArr.getMapIter != null) {
+        throw new RuntimeException("parse failed: " + expr.getText)
+      }
       val vs = expr.getArr.getExprList.asScala.map(i => toJsonVal(i)).toSeq
       checkParse(expr, expr.getArr.getText)
       return JsonCollection.Arr(vs: _*)

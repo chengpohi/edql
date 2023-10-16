@@ -223,6 +223,18 @@ trait InterceptFunction {
     }
   }
 
+  case class MapIterInstruction(arr: JsonCollection.Arr, fun: FunctionInstruction) extends ScriptContextInstruction2 {
+    override def name = "mapiter"
+
+    def execute(implicit eql: Context): Definition[_] = {
+      PureStringDefinition(s"")
+    }
+
+    override def ds: Seq[JsonCollection.Dynamic] = {
+      extractDynamics(arr)
+    }
+  }
+
   case class ForInstruction(tempVariable: String,
                             iterVariable: JsonCollection.Val,
                             instructions: Seq[Instruction2]) extends Instruction2 {

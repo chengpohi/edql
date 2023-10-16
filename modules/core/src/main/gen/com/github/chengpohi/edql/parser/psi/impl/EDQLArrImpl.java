@@ -33,4 +33,10 @@ public class EDQLArrImpl extends ASTWrapperPsiElement implements EDQLArr {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLExpr.class);
   }
 
+  @Override
+  @Nullable
+  public EDQLMapIter getMapIter() {
+    return findChildByClass(EDQLMapIter.class);
+  }
+
 }

@@ -47,6 +47,9 @@ public interface EDQLExpr extends PsiElement {
   EDQLIfelse getIfelse();
 
   @Nullable
+  EDQLMapIter getMapIter();
+
+  @Nullable
   EDQLObj getObj();
 
   @Nullable

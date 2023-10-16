@@ -1,7 +1,7 @@
 package com.github.chengpohi.edql.parser.json
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder
-import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
+import org.apache.commons.lang3.StringUtils
 
 import scala.reflect.runtime.universe._
 
@@ -79,6 +79,20 @@ object JsonCollection {
 
     override def copy: Val = {
       val f = Fun((value._1, value._2.map(i => i.copy)))
+      f.realValue = realValue.map(_.copy)
+      f
+    }
+  }
+
+  case class Mapi(value: (Arr, Fun)) extends Dynamic {
+    var realValue: Option[JsonCollection.Val] = None
+
+    override def toJson: String = realValue.map(_.toJson).getOrElse("")
+
+    override def get(path: String): Option[Val] = None
+
+    override def copy: Val = {
+      val f = Mapi((value._1, value._2))
       f.realValue = realValue.map(_.copy)
       f
     }

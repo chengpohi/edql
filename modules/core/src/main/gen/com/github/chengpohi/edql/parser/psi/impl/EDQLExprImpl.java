@@ -107,6 +107,12 @@ public class EDQLExprImpl extends ASTWrapperPsiElement implements EDQLExpr {
 
   @Override
   @Nullable
+  public EDQLMapIter getMapIter() {
+    return findChildByClass(EDQLMapIter.class);
+  }
+
+  @Override
+  @Nullable
   public EDQLObj getObj() {
     return findChildByClass(EDQLObj.class);
   }

@@ -10,4 +10,7 @@ public interface EDQLArr extends PsiElement {
   @NotNull
   List<EDQLExpr> getExprList();
 
+  @Nullable
+  EDQLMapIter getMapIter();
+
 }
