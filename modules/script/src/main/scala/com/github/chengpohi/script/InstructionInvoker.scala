@@ -294,21 +294,25 @@ trait InstructionInvoker {
 
   private def clearContextBeforeInvoke(instructions: Seq[Instruction2]) = {
     instructions.foreach(fi => {
-      fi.ds.filter(_.isInstanceOf[JsonCollection.Var]).foreach(di => {
-        di.asInstanceOf[JsonCollection.Var].realValue = None
+      fi.ds.filter(_.isInstanceOf[JsonCollection.Dynamic]).foreach(di => {
+        di.clean()
       })
     })
   }
 
   def invokeMapIter(functions: Map[String, FunctionInstruction],
                     context: ScriptContext,
-                    m: parser.MapIterInstruction): Seq[JsonCollection.Val] = {
-    val ds = m.ds
-    ds.flatMap(i => {
+                    m: parser.MapIterInstruction, funcName: Option[String]): Seq[JsonCollection.Val] = {
+    val res: Seq[JsonCollection.Val] = m.arr.value.toList.map(i => {
       val fun = m.fun
-      context.variables.put(fun.variableNames.head, i)
-      return runInstructions(functions, context, fun.instructions)
+      val fs: mutable.Map[String, FunctionInstruction] = mutable.Map[String, FunctionInstruction]()
+      fs.addAll(functions)
+      fs.put(fun.funcName + fun.variableNames.size, fun)
+      clearContextBeforeInvoke(fun.instructions)
+      val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
+      runInstructions(fs.toMap, context, Seq(invoke), funcName).last
     })
+    Seq(JsonCollection.Arr(res: _*))
   }
 
   def runInstructions(functions: Map[String, FunctionInstruction],
@@ -331,7 +335,7 @@ trait InstructionInvoker {
             Seq(r.value.copy)
           }
           case m: MapIterInstruction =>
-            invokeMapIter(functions, context, m)
+            invokeMapIter(functions, context, m, funName)
           case i => {
             val json = i.execute(context).json
             parser.parseJson(json) match {
@@ -424,7 +428,7 @@ trait InstructionInvoker {
           case None => evalBasicValue(functions, context, i.a, funName)
           case t => {
             evalArith(functions, context, i, funName)
-            i.realValue.get
+            i.realValue.get.asInstanceOf[JsonCollection.Arith]
           }
         }
       }

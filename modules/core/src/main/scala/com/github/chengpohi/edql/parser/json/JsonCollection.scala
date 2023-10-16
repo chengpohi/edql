@@ -52,10 +52,13 @@ object JsonCollection {
     override def copy: Val = Str(value)
   }
 
-  abstract class Dynamic extends Val
+  abstract class Dynamic extends Val {
+    def clean(): Unit
+
+    var realValue: Option[JsonCollection.Val] = None
+  }
 
   case class Var(value: java.lang.String) extends Dynamic {
-    var realValue: Option[JsonCollection.Val] = None
 
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
@@ -68,11 +71,11 @@ object JsonCollection {
       va.realValue = realValue.map(_.copy)
       va
     }
+
+    override def clean(): Unit = realValue = None
   }
 
   case class Fun(value: (String, Seq[Val])) extends Dynamic {
-    var realValue: Option[JsonCollection.Val] = None
-
     override def toJson: String = realValue.map(_.toJson).getOrElse("")
 
     override def get(path: String): Option[Val] = None
@@ -82,25 +85,14 @@ object JsonCollection {
       f.realValue = realValue.map(_.copy)
       f
     }
-  }
 
-  case class Mapi(value: (Arr, Fun)) extends Dynamic {
-    var realValue: Option[JsonCollection.Val] = None
-
-    override def toJson: String = realValue.map(_.toJson).getOrElse("")
-
-    override def get(path: String): Option[Val] = None
-
-    override def copy: Val = {
-      val f = Mapi((value._1, value._2))
-      f.realValue = realValue.map(_.copy)
-      f
+    override def clean(): Unit = {
+      value._2.filter(_.isInstanceOf[Dynamic]).foreach(_.asInstanceOf[Dynamic].clean())
+      realValue = None
     }
   }
 
   case class ArithTree(var a: JsonCollection.Val, var op: Option[String], var b: Option[JsonCollection.Val]) extends Dynamic {
-    var realValue: Option[JsonCollection.Arith] = None
-
     override def toJson: String = realValue.map(_.toJson).getOrElse(a.toJson)
 
     override def get(path: String): Option[Val] = None
@@ -112,6 +104,18 @@ object JsonCollection {
     }
 
     override def value: (JsonCollection.Val, Option[String], Option[JsonCollection.Val]) = (a, op, b)
+
+    override def clean(): Unit = {
+      a match {
+        case d: Dynamic => d.clean()
+        case _ =>
+      }
+      b match {
+        case Some(o) => if (o.isInstanceOf[Dynamic]) o.asInstanceOf[Dynamic].clean()
+        case _ =>
+      }
+      realValue = None
+    }
   }
 
   case class Obj(value: (Val, Val)*) extends AnyVal with Val {

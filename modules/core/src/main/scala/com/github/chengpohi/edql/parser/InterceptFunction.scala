@@ -229,10 +229,6 @@ trait InterceptFunction {
     def execute(implicit eql: Context): Definition[_] = {
       PureStringDefinition(s"")
     }
-
-    override def ds: Seq[JsonCollection.Dynamic] = {
-      extractDynamics(arr)
-    }
   }
 
   case class ForInstruction(tempVariable: String,
