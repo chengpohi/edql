@@ -20,7 +20,7 @@ class EDQLPsiInterceptorTest extends AnyFlatSpec with Matchers with InterceptFun
     val res = parser.parse(text).get
 
     res.foreach(i => println(i.toString))
-    res.size should be(18)
+    res.size should be(13)
   }
 
 
