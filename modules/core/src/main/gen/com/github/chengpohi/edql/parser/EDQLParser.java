@@ -1162,7 +1162,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '.map' L_CURLY 'it' '=>' L_CURLY expr* returnExpr? R_CURLY R_CURLY
+  // '.map' L_CURLY 'it' MAPPING L_CURLY expr* returnExpr? R_CURLY R_CURLY
   public static boolean mapIter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "mapIter")) return false;
     boolean r;
@@ -1170,8 +1170,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, ".map");
     r = r && consumeToken(b, L_CURLY);
     r = r && consumeToken(b, "it");
-    r = r && consumeToken(b, "=>");
-    r = r && consumeToken(b, L_CURLY);
+    r = r && consumeTokens(b, 0, MAPPING, L_CURLY);
     r = r && mapIter_5(b, l + 1);
     r = r && mapIter_6(b, l + 1);
     r = r && consumeTokens(b, 0, R_CURLY, R_CURLY);
