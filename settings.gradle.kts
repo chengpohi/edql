@@ -1,10 +1,6 @@
 rootProject.name = "edql"
 
-include(
-        "modules:core",
-        "modules:repl",
-        "modules:script"
-)
+include()
 
 pluginManagement {
     repositories {
