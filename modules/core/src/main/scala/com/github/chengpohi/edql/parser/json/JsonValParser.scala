@@ -159,9 +159,17 @@ trait JsonValParser {
           var now: JsonCollection.ArithTree = null
           cur.op match {
             case Some(o) =>
-              now = JsonCollection.ArithTree(cur, Some(op), Some(value))
-              pre.b = Some(now)
-              point = (pre, now)
+              now = JsonCollection.ArithTree(cur.copy, Some(op), Some(value))
+              pre match {
+                case null =>
+                  cur.a = now.a
+                  cur.op = now.op
+                  cur.b = now.b
+                  point = (null, cur)
+                case p =>
+                  p.b = Some(now)
+                  point = (p, now)
+              }
             case None =>
               now = JsonCollection.ArithTree(value, None, None)
               cur.op = Some(op)
