@@ -29,6 +29,12 @@ public class EDQLReturnExprImpl extends ASTWrapperPsiElement implements EDQLRetu
 
   @Override
   @NotNull
+  public List<EDQLBinsuffix> getBinsuffixList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLBinsuffix.class);
+  }
+
+  @Override
+  @NotNull
   public EDQLExpr getExpr() {
     return findNotNullChildByClass(EDQLExpr.class);
   }

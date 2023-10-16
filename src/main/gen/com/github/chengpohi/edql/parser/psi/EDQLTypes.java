@@ -100,7 +100,7 @@ public interface EDQLTypes {
   IElementType L_BRACKET = new EDQLTokenType("[");
   IElementType L_CURLY = new EDQLTokenType("{");
   IElementType L_PAREN = new EDQLTokenType("(");
-  IElementType MAPPING = new EDQLTokenType("=>");
+  IElementType MAPPING = new EDQLTokenType("->");
   IElementType MINUS = new EDQLTokenType("-");
   IElementType NODE = new EDQLTokenType("node");
   IElementType NOT_EQUAL = new EDQLTokenType("NOT_EQUAL");

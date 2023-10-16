@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import org.apache.commons.collections.CollectionUtils
 
 import java.util
+import java.util.List
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 trait JsonValParser {
@@ -124,16 +125,30 @@ trait JsonValParser {
   }
 
 
+  def toJsonVal(re: EDQLReturnExpr): JsonCollection.Val = {
+    val v = toJsonVal(re.getExpr)
+    if (CollectionUtils.isEmpty(re.getBinsuffixList)) {
+      return v
+    }
+
+    toJsonVal(re.getBinsuffixList, v)
+  }
+
   def toJsonVal(bind: EDQLBind): JsonCollection.Val = {
     if (CollectionUtils.isEmpty(bind.getBinsuffixList)) {
       return toJsonVal(bind.getExpr)
     }
 
-    val i = JsonCollection.ArithTree(toJsonVal(bind.getExpr), None, None)
+    toJsonVal(bind.getBinsuffixList, toJsonVal(bind.getExpr))
+  }
+
+
+  def toJsonVal(list: util.List[EDQLBinsuffix], init: JsonCollection.Val): JsonCollection.Val = {
+    val i = JsonCollection.ArithTree(init, None, None)
     var point: (JsonCollection.ArithTree, JsonCollection.ArithTree) = (null, i)
-    for (elem <- bind.getBinsuffixList.asScala) {
+    for (elem <- list.asScala) {
       val (pre, cur) = point
-      val value = toJsonVal(elem.getExpr)
+      val value: JsonCollection.Val = toJsonVal(elem.getExpr)
       elem.getBinaryop.getText match {
         case ("*" | "/" | "%") => {
           val op = elem.getBinaryop.getText
@@ -181,6 +196,7 @@ trait JsonValParser {
     }
     flatten(i)
   }
+
 
   def flatten(i: JsonCollection.Val): JsonCollection.Val = {
     i match {

@@ -103,7 +103,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
         case null =>
           return Seq(FunctionInstruction(fun.getIdentifier0.getText, ps, bs))
         case r =>
-          val rs = ReturnInstruction(toJsonVal(r.getExpr))
+          val rs = ReturnInstruction(toJsonVal(r))
           return Seq(FunctionInstruction(fun.getIdentifier0.getText, ps, bs :+ rs))
       }
     }
@@ -152,7 +152,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
         case null =>
           return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs)))
         case r =>
-          val rs = ReturnInstruction(toJsonVal(r.getExpr))
+          val rs = ReturnInstruction(toJsonVal(r))
           return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs)))
       }
     }

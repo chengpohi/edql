@@ -47,3 +47,7 @@ POST fff*/_search
 var n = 1 + 2 * 3 + 4 * 5 - 7
 
 var jk = 2 * 3 + 1
+
+var a = [1, 2, 3].map{it -> {
+  return it + 1
+}}

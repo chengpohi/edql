@@ -4,6 +4,7 @@ package com.github.chengpohi.edql.parser.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.github.chengpohi.edql.parser.psi.impl.EDQLHeaderInterface;
 
 public class EDQLVisitor extends PsiElementVisitor {

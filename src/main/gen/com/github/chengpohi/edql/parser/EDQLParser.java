@@ -1469,7 +1469,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // RETURN expr
+  // RETURN expr (binsuffix)*
   public static boolean returnExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "returnExpr")) return false;
     if (!nextTokenIs(b, RETURN)) return false;
@@ -1477,7 +1477,29 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b);
     r = consumeToken(b, RETURN);
     r = r && expr(b, l + 1);
+    r = r && returnExpr_2(b, l + 1);
     exit_section_(b, m, RETURN_EXPR, r);
+    return r;
+  }
+
+  // (binsuffix)*
+  private static boolean returnExpr_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "returnExpr_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!returnExpr_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "returnExpr_2", c)) break;
+    }
+    return true;
+  }
+
+  // (binsuffix)
+  private static boolean returnExpr_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "returnExpr_2_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = binsuffix(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 

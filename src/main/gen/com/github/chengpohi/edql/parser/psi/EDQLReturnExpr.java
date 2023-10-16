@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface EDQLReturnExpr extends PsiElement {
 
   @NotNull
+  List<EDQLBinsuffix> getBinsuffixList();
+
+  @NotNull
   EDQLExpr getExpr();
 
 }
