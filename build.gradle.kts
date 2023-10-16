@@ -39,7 +39,7 @@ allprojects {
 
     sourceSets {
         main {
-            java.srcDirs("src/main/gen")
+            java.srcDirs("src/main/gen", "src/main/java")
             resources.srcDirs("src/main/resources")
         }
         test {
@@ -90,26 +90,18 @@ project(":") {
         api("com.amazonaws:aws-java-sdk-core:1.12.141")
         testImplementation("org.scalatest:scalatest_2.13:3.2.4")
     }
-}
-
-project(":modules:core") {
-    version = rootProject.version.toString()
-    dependencies {
-        api(project(":"))
-        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
-    }
 
     publishing {
         publications {
-            create<MavenPublication>("edqlCore") {
+            create<MavenPublication>("lib") {
                 groupId = "com.github.chengpohi"
-                artifactId = "edql-core"
+                artifactId = "edql-lib"
                 version = rootProject.version.toString()
                 from(components["java"])
 
                 pom {
-                    name.set("edql core")
-                    description.set("edql core")
+                    name.set("edql lib")
+                    description.set("edql lib")
                 }
             }
         }
@@ -117,56 +109,7 @@ project(":modules:core") {
             mavenLocal()
         }
     }
-
 }
-
-
-project(":modules:repl") {
-    version = rootProject.version.toString()
-    dependencies {
-        implementation(project(":"))
-        implementation(project(":modules:core"))
-        implementation(project(":modules:script"))
-        implementation("jline:jline:2.12")
-        implementation("org.typelevel:cats-core_2.13:2.0.0")
-        implementation("org.typelevel:cats-effect_2.13:2.0.0")
-        implementation("org.scala-lang:scala-library:2.13.10")
-        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
-    }
-
-}
-
-project(":modules:script") {
-    version = rootProject.version.toString()
-    dependencies {
-        api(project(":"))
-        api(project(":modules:core"))
-        api("org.scala-lang:scala-library:2.13.10")
-        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
-    }
-
-
-    publishing {
-        publications {
-            create<MavenPublication>("edqlScript") {
-                groupId = "com.github.chengpohi"
-                artifactId = "edql-script"
-                version = rootProject.version.toString()
-                from(components["java"])
-
-                pom {
-                    name.set("edql script")
-                    description.set("edql script")
-                }
-            }
-        }
-        repositories {
-            mavenLocal()
-        }
-    }
-
-}
-
 
 publishing {
     publications {
