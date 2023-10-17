@@ -20,9 +20,9 @@ public abstract class EDQLNamedElementImpl extends ASTWrapperPsiElement implemen
     }
 
     @Override
-    public PsiReference @NotNull [] getReferences() {
+    public PsiReference[] getReferences() {
         final PsiReference[] fromProviders =
-                ReferenceProvidersRegistry.getReferencesFromProviders(this);
+            ReferenceProvidersRegistry.getReferencesFromProviders(this);
         return ArrayUtil.prepend(new EDQLIdentifierNameReference(this), fromProviders);
     }
 }

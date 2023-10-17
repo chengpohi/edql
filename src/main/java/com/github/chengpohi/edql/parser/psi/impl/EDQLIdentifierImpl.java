@@ -13,7 +13,7 @@ public abstract class EDQLIdentifierImpl extends ASTWrapperPsiElement implements
     }
 
     @Override
-    public PsiReference @NotNull [] getReferences() {
+    public PsiReference[] getReferences() {
         return ReferenceProvidersRegistry.getReferencesFromProviders(this);
     }
 }

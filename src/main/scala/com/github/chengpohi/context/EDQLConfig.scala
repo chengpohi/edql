@@ -24,6 +24,8 @@ import java.util.Base64
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.{SSLContext, TrustManager}
 import scala.concurrent.duration.DurationInt
+import scala.language.postfixOps
+
 
 /**
  * eql

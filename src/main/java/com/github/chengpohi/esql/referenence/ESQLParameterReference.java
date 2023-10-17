@@ -17,7 +17,7 @@ public class ESQLParameterReference extends PsiReferenceBase<ESQLBindParameter> 
     }
 
     @Override
-    public Object @NotNull [] getVariants() {
+    public Object[] getVariants() {
         return super.getVariants();
     }
 }

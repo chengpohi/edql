@@ -5,6 +5,7 @@ import com.github.chengpohi.serializer.ResponseSerializer
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.language.postfixOps
 
 trait FutureOps extends ResponseSerializer with ResponseConverter {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
