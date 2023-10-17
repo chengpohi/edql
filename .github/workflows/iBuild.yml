@@ -68,13 +68,16 @@ jobs:
           repository: chengpohi/edql-idea-plugin
           ref: develop
           token: ${{ secrets.GH_PAT }}
-          path: 'intellij-qsharp/qsharp/edql-idea-plugin'          
+          path: 'intellij-qsharp/qsharp/edql-idea-plugin'
 
-      # build edql repository
-      - name: Build library
-        id: edql-lib
-        run: |
-          ./gradlew --info --no-daemon publishToMavenLocal
+        # Check out current repository
+      - name: Fetch edql lib Sources
+        uses: actions/checkout@v3
+        with:
+            repository: chengpohi/edql
+            ref: develop
+            path: 'intellij-qsharp/qsharp/edql-lib'
+
       - name: Build qsharp
         id: intellij-qsharp
         continue-on-error: true

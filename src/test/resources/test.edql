@@ -56,6 +56,3 @@ var j = jq(a, ".arr").map{ it -> {
     return it
 }}
 
-var cc = a.map{it => {
-  return it
-}}

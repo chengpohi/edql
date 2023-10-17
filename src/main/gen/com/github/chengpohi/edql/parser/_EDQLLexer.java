@@ -774,14 +774,6 @@ public class _EDQLLexer implements FlexLexer {
   @SuppressWarnings("unused")
   private long yychar;
 
-  /** Whether the scanner is currently at the beginning of a line. */
-  @SuppressWarnings("unused")
-  private boolean zzAtBOL = true;
-
-  /** Whether the user-EOF-code has already been executed. */
-  @SuppressWarnings("unused")
-  private boolean zzEOFDone;
-
   /* user code: */
   public _EDQLLexer() {
     this((java.io.Reader)null);
