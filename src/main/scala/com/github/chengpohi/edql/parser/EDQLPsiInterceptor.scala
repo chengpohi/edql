@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.RandomStringUtils
 
 import java.net.URL
-import java.util.Collections
 import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
 
@@ -118,6 +117,22 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
     if (expr.getFunctionInvokeExpr != null) {
       val funcName = expr.getFunctionInvokeExpr.getIdentifier0.getText
       val ins = expr.getFunctionInvokeExpr.getExprList.asScala.map(i => toJsonVal(i)).toSeq
+
+      val mapIter = expr.getFunctionInvokeExpr.getMapIter
+      if (mapIter != null) {
+        val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+        val bs: Seq[Instruction2] = mapIter.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
+        val m = mapIter.getReturnExpr match {
+          case null =>
+            MapIterInstruction(JsonCollection.Arr(), FunctionInstruction(anonymousFun, Seq("it"), bs))
+          case r =>
+            val rs = ReturnInstruction(toJsonVal(r))
+            MapIterInstruction(JsonCollection.Arr(), FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs))
+        }
+        return Seq(FunctionInvokeInstruction(funcName, ins, Some(m)))
+      }
+
+
       return Seq(FunctionInvokeInstruction(funcName, ins))
     }
 

@@ -257,7 +257,7 @@ trait InterceptFunction {
     }
   }
 
-  case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val]) extends Instruction2 {
+  case class FunctionInvokeInstruction(funcName: String, vals: Seq[JsonCollection.Val], map: Option[MapIterInstruction] = None) extends Instruction2 {
     override def name = "functionInvoke"
 
     def execute(implicit eql: Context): Definition[_] = {

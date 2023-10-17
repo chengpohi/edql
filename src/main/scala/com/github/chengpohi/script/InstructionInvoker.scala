@@ -204,9 +204,9 @@ trait InstructionInvoker {
     parms.filter(_._2.isInstanceOf[JsonCollection.Fun])
       .foreach(i => {
         val fParam = i._2.asInstanceOf[JsonCollection.Fun]
-        val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).last
-        fParam.realValue = Some(value)
-        context.variables.put(i._1, value)
+        val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).lastOption
+        fParam.realValue = value
+        context.variables.put(i._1, value.getOrElse(JsonCollection.Null))
       })
 
     val arithes = parms.filter(_._2.isInstanceOf[JsonCollection.ArithTree]).map(i => i._2.asInstanceOf[JsonCollection.ArithTree])
@@ -289,7 +289,20 @@ trait InstructionInvoker {
     val response = runInstructions(functions, context, instructions, Some(funName))
 
     context.variables = cachedVariables
-    response
+
+    if (invoke.map.isEmpty) {
+      return response
+    }
+    response match {
+      case Seq(r) =>
+        r match {
+          case a: JsonCollection.Arr =>
+            val m = invoke.map.get.copy(arr = a)
+            invokeMapIter(functions, context, m, parentFunName)
+          case _ => response
+        }
+      case _ => response
+    }
   }
 
   private def clearContextBeforeInvoke(instructions: Seq[Instruction2]) = {
@@ -310,8 +323,8 @@ trait InstructionInvoker {
       fs.put(fun.funcName + fun.variableNames.size, fun)
       clearContextBeforeInvoke(fun.instructions)
       val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
-      runInstructions(fs.toMap, context, Seq(invoke), funcName).last
-    })
+      runInstructions(fs.toMap, context, Seq(invoke), funcName).lastOption
+    }).filter(_.isDefined).map(_.get)
     Seq(JsonCollection.Arr(res: _*))
   }
 
@@ -440,9 +453,9 @@ trait InstructionInvoker {
       }
       case f: JsonCollection.Fun => {
         val res = invokeFunction(functions, context,
-          FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
-        f.realValue = Some(res)
-        evalBasicValue(functions, context, res, funName)
+          FunctionInvokeInstruction(f.value._1, f.value._2), funName).lastOption
+        f.realValue = res
+        evalBasicValue(functions, context, res.getOrElse(JsonCollection.Null), funName)
       }
       case _ => throw new RuntimeException("only support num and str arith expression")
     }

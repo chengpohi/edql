@@ -51,3 +51,11 @@ var jk = 2 * 3 + 1
 var a = [1, 2, 3].map{it -> {
   return it + 1
 }}
+
+var j = jq(a, ".arr").map{ it -> {
+    return it
+}}
+
+var cc = a.map{it => {
+  return it
+}}

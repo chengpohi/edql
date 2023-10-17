@@ -39,4 +39,10 @@ public class EDQLFunctionInvokeExprImpl extends ASTWrapperPsiElement implements 
     return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLExpr.class);
   }
 
+  @Override
+  @Nullable
+  public EDQLMapIter getMapIter() {
+    return findChildByClass(EDQLMapIter.class);
+  }
+
 }

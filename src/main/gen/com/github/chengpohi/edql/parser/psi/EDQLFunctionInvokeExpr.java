@@ -13,4 +13,7 @@ public interface EDQLFunctionInvokeExpr extends PsiElement {
   @NotNull
   List<EDQLExpr> getExprList();
 
+  @Nullable
+  EDQLMapIter getMapIter();
+
 }

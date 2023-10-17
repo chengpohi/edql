@@ -931,7 +931,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER0 L_PAREN (expr* (COMMA expr*)* COMMA?)? R_PAREN
+  // IDENTIFIER0 L_PAREN (expr* (COMMA expr*)* COMMA?)? R_PAREN mapIter?
   public static boolean functionInvokeExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr")) return false;
     boolean r;
@@ -940,6 +940,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, L_PAREN);
     r = r && functionInvokeExpr_2(b, l + 1);
     r = r && consumeToken(b, R_PAREN);
+    r = r && functionInvokeExpr_4(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -1011,6 +1012,13 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   private static boolean functionInvokeExpr_2_0_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2_0_2")) return false;
     consumeToken(b, COMMA);
+    return true;
+  }
+
+  // mapIter?
+  private static boolean functionInvokeExpr_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "functionInvokeExpr_4")) return false;
+    mapIter(b, l + 1);
     return true;
   }
 

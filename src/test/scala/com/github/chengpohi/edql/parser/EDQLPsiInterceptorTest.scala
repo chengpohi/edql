@@ -1,6 +1,5 @@
 package com.github.chengpohi.edql.parser
 
-import com.github.chengpohi.edql.parser.{EDQLParserDefinition, EDQLParserFactory, InterceptFunction, MockPsiFactoryBuilder}
 import com.intellij.psi.impl.PsiFileFactoryImpl
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -20,7 +19,7 @@ class EDQLPsiInterceptorTest extends AnyFlatSpec with Matchers with InterceptFun
     val res = parser.parse(text).get
 
     res.foreach(i => println(i.toString))
-    res.size should be(15)
+    res.size should be(16)
   }
 
 
