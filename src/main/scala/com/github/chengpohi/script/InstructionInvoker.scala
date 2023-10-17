@@ -61,10 +61,6 @@ trait InstructionInvoker {
       throw new RuntimeException("duplicate variable: " + duplicateVariables.mkString(","))
     }
 
-    val vars =
-      invokeIns.filter(_.isInstanceOf[VariableInstruction])
-        .map(i => i.asInstanceOf[VariableInstruction])
-        .map(i => i.variableName -> i.value).toMap
 
     val duplicateFunctions = invokeIns.filter(_.isInstanceOf[FunctionInstruction])
       .map(i => i.asInstanceOf[FunctionInstruction])
@@ -80,6 +76,10 @@ trait InstructionInvoker {
         .map(i => i.asInstanceOf[FunctionInstruction])
         .map(i => i.funcName + i.variableNames.size -> i)
         .toMap ++ systemFunction
+
+    val vars = invokeIns.filter(_.isInstanceOf[VariableInstruction])
+      .map(i => i.asInstanceOf[VariableInstruction])
+      .map(i => i.variableName -> i.value).toMap
 
     val globalVars = vars.map(i => i._1 -> i._2) + ("CONTEXT_PATH" -> JsonCollection.Str(runContext.runDir))
     val hostInfo = buildHostInfo(runContext, endpoint, invokeIns)
@@ -297,7 +297,7 @@ trait InstructionInvoker {
       case Seq(r) =>
         r match {
           case a: JsonCollection.Arr =>
-            val m = invoke.map.get.copy(arr = a)
+            val m = invoke.map.get.copy(a = a)
             invokeMapIter(functions, context, m, parentFunName)
           case _ => response
         }
@@ -316,16 +316,25 @@ trait InstructionInvoker {
   def invokeMapIter(functions: Map[String, FunctionInstruction],
                     context: ScriptContext,
                     m: parser.MapIterInstruction, funcName: Option[String]): Seq[JsonCollection.Val] = {
-    val res: Seq[JsonCollection.Val] = m.arr.value.toList.map(i => {
-      val fun = m.fun
-      val fs: mutable.Map[String, FunctionInstruction] = mutable.Map[String, FunctionInstruction]()
-      fs.addAll(functions)
-      fs.put(fun.funcName + fun.variableNames.size, fun)
-      clearContextBeforeInvoke(fun.instructions)
-      val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
-      runInstructions(fs.toMap, context, Seq(invoke), funcName).lastOption
-    }).filter(_.isDefined).map(_.get)
-    Seq(JsonCollection.Arr(res: _*))
+    def mapArr(a: JsonCollection.Arr) = {
+      val res: Seq[JsonCollection.Val] = a.value.toList.map(i => {
+        val fun = m.fun
+        val fs: mutable.Map[String, FunctionInstruction] = mutable.Map[String, FunctionInstruction]()
+        fs.addAll(functions)
+        fs.put(fun.funcName + fun.variableNames.size, fun)
+        clearContextBeforeInvoke(fun.instructions)
+        val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
+        runInstructions(fs.toMap, context, Seq(invoke), funcName).lastOption
+      }).filter(_.isDefined).map(_.get)
+      Seq(JsonCollection.Arr(res: _*))
+    }
+
+    m.a match {
+      case a: JsonCollection.Arr => mapArr(a)
+      case v: JsonCollection.Var if v.realValue.isDefined && v.realValue.get.isInstanceOf[JsonCollection.Arr] =>
+        mapArr(v.realValue.get.asInstanceOf[JsonCollection.Arr])
+      case _ => throw new RuntimeException("not support map")
+    }
   }
 
   def runInstructions(functions: Map[String, FunctionInstruction],

@@ -89,6 +89,12 @@ public class EDQLExprImpl extends ASTWrapperPsiElement implements EDQLExpr {
 
   @Override
   @Nullable
+  public EDQLForeach getForeach() {
+    return findChildByClass(EDQLForeach.class);
+  }
+
+  @Override
+  @Nullable
   public EDQLFunctionExpr getFunctionExpr() {
     return findChildByClass(EDQLFunctionExpr.class);
   }

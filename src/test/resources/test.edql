@@ -56,3 +56,6 @@ var j = jq(a, ".arr").map{ it -> {
     return it
 }}
 
+var aa = a.map{it -> {
+  return it + 2
+}}

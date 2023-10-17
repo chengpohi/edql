@@ -223,7 +223,7 @@ trait InterceptFunction {
     }
   }
 
-  case class MapIterInstruction(arr: JsonCollection.Arr, fun: FunctionInstruction) extends Instruction2 {
+  case class MapIterInstruction(a: JsonCollection.Val, fun: FunctionInstruction) extends Instruction2 {
     override def name = "mapiter"
 
     def execute(implicit eql: Context): Definition[_] = {

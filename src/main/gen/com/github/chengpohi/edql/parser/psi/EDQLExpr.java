@@ -38,6 +38,9 @@ public interface EDQLExpr extends PsiElement {
   EDQLForExpr getForExpr();
 
   @Nullable
+  EDQLForeach getForeach();
+
+  @Nullable
   EDQLFunctionExpr getFunctionExpr();
 
   @Nullable

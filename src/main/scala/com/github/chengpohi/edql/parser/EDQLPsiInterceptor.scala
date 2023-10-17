@@ -120,16 +120,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
 
       val mapIter = expr.getFunctionInvokeExpr.getMapIter
       if (mapIter != null) {
-        val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
-        val bs: Seq[Instruction2] = mapIter.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
-        val m = mapIter.getReturnExpr match {
-          case null =>
-            MapIterInstruction(JsonCollection.Arr(), FunctionInstruction(anonymousFun, Seq("it"), bs))
-          case r =>
-            val rs = ReturnInstruction(toJsonVal(r))
-            MapIterInstruction(JsonCollection.Arr(), FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs))
-        }
-        return Seq(FunctionInvokeInstruction(funcName, ins, Some(m)))
+        return Seq(FunctionInvokeInstruction(funcName, ins, Some(buildMapIterInstruction(JsonCollection.Arr(), mapIter))))
       }
 
 
@@ -140,18 +131,38 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
       val outervar = expr.getOutervar
       val varName = outervar.getBind.getIdentifier0.getText
 
+      val mapIterInstruction: Option[MapIterInstruction] = if (outervar.getBind.getMapIter != null) {
+        Some(buildMapIterInstruction(JsonCollection.Arr(), outervar.getBind.getMapIter))
+      } else None
+
+
       if (CollectionUtils.isNotEmpty(outervar.getBind.getBinsuffixList)) {
         val j = toJsonVal(outervar.getBind)
         return Seq(VariableInstruction(varName, j))
       }
 
+      val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+
       val e = outervar.getBind.getExpr
       val v = Try.apply(toJsonVal(e))
       if (v.isSuccess) {
-        return Seq(VariableInstruction(varName, v.get))
+        v.get match {
+          case arr: JsonCollection.Arr if mapIterInstruction.isDefined =>
+            return Seq(
+              VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
+              FunctionInstruction(anonymousFun, Seq(), Seq(mapIterInstruction.get.copy(a = arr)))
+            )
+          case v: JsonCollection.Var if mapIterInstruction.isDefined =>
+            return Seq(
+              VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
+              FunctionInstruction(anonymousFun, Seq(), Seq(mapIterInstruction.get.copy(a = v)))
+            )
+          case _ =>
+            return Seq(VariableInstruction(varName, v.get))
+        }
       }
 
-      val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+
       return Seq(
         VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
         FunctionInstruction(anonymousFun, Seq(), parseExpr(outervar.getBind.getExpr)))
@@ -159,20 +170,24 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
 
 
     if (expr.getArr != null && expr.getArr.getMapIter != null) {
-      val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
       val arr = expr.getArr.getExprList.asScala.map(i => toJsonVal(i)).toSeq
-      val bs: Seq[Instruction2] = expr.getArr.getMapIter.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
-
-      expr.getArr.getMapIter.getReturnExpr match {
-        case null =>
-          return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs)))
-        case r =>
-          val rs = ReturnInstruction(toJsonVal(r))
-          return Seq(MapIterInstruction(JsonCollection.Arr(arr: _*), FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs)))
-      }
+      return Seq(buildMapIterInstruction(JsonCollection.Arr(arr: _*), expr.getArr.getMapIter))
     }
 
     throw new RuntimeException("unsupported instruction: " + expr.getText)
+  }
+
+  private def buildMapIterInstruction(arr: JsonCollection.Arr, mapIter: EDQLMapIter): MapIterInstruction = {
+    val anonymousFun = "anonymousFun_" + RandomStringUtils.randomAlphabetic(10)
+    val bs: Seq[Instruction2] = mapIter.getExprList.asScala.flatMap(i => parseExpr(i)).toSeq
+
+    mapIter.getReturnExpr match {
+      case null =>
+        MapIterInstruction(arr, FunctionInstruction(anonymousFun, Seq("it"), bs))
+      case r =>
+        val rs = ReturnInstruction(toJsonVal(r))
+        MapIterInstruction(arr, FunctionInstruction(anonymousFun, Seq("it"), bs :+ rs))
+    }
   }
 
   private def parseAction(expr: EDQLActionExpr): Instruction2 = {

@@ -16,4 +16,7 @@ public interface EDQLBind extends PsiElement {
   @NotNull
   EDQLExpr getExpr();
 
+  @Nullable
+  EDQLMapIter getMapIter();
+
 }

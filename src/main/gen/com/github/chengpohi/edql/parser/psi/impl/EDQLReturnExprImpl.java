@@ -39,4 +39,10 @@ public class EDQLReturnExprImpl extends ASTWrapperPsiElement implements EDQLRetu
     return findNotNullChildByClass(EDQLExpr.class);
   }
 
+  @Override
+  @Nullable
+  public EDQLMapIter getMapIter() {
+    return findChildByClass(EDQLMapIter.class);
+  }
+
 }

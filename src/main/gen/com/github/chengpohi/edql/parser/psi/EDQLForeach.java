@@ -5,15 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface EDQLReturnExpr extends PsiElement {
+public interface EDQLForeach extends PsiElement {
 
   @NotNull
-  List<EDQLBinsuffix> getBinsuffixList();
+  EDQLIdentifier0 getIdentifier0();
 
   @NotNull
-  EDQLExpr getExpr();
+  List<EDQLExpr> getExprList();
 
   @Nullable
-  EDQLMapIter getMapIter();
+  EDQLReturnExpr getReturnExpr();
 
 }
