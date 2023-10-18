@@ -59,3 +59,10 @@ var j = jq(a, ".arr").map{ it -> {
 var aa = a.map{it -> {
   return it + 2
 }}
+
+
+POST .ds-metricbeat-8.8.1-2023.06.16-000001/_search
+{
+"query": {
+  "bool": {
+}}}
