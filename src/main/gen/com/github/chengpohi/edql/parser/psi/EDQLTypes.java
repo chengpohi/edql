@@ -47,6 +47,7 @@ public interface EDQLTypes {
   IElementType PARAM = new EDQLElementType("PARAM");
   IElementType PARAMS = new EDQLElementType("PARAMS");
   IElementType PATH = new EDQLElementType("PATH");
+  IElementType PATH_MATCH = new EDQLElementType("PATH_MATCH");
   IElementType RETURN_EXPR = new EDQLElementType("RETURN_EXPR");
   IElementType TIMEOUT_EXPR = new EDQLElementType("TIMEOUT_EXPR");
   IElementType UNARYOP = new EDQLElementType("UNARYOP");
@@ -103,6 +104,7 @@ public interface EDQLTypes {
   IElementType L_PAREN = new EDQLTokenType("(");
   IElementType MAPPING = new EDQLTokenType("->");
   IElementType MINUS = new EDQLTokenType("-");
+  IElementType NEWLINE = new EDQLTokenType("NEWLINE");
   IElementType NODE = new EDQLTokenType("node");
   IElementType NOT_EQUAL = new EDQLTokenType("NOT_EQUAL");
   IElementType NULL = new EDQLTokenType("null");
@@ -252,6 +254,9 @@ public interface EDQLTypes {
       }
       else if (type == PATH) {
         return new EDQLPathImpl(node);
+      }
+      else if (type == PATH_MATCH) {
+        return new EDQLPathMatchImpl(node);
       }
       else if (type == RETURN_EXPR) {
         return new EDQLReturnExprImpl(node);

@@ -11,14 +11,14 @@ import static com.github.chengpohi.edql.parser.psi.EDQLTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.chengpohi.edql.parser.psi.*;
 
-public class EDQLPathImpl extends ASTWrapperPsiElement implements EDQLPath {
+public class EDQLPathMatchImpl extends ASTWrapperPsiElement implements EDQLPathMatch {
 
-  public EDQLPathImpl(@NotNull ASTNode node) {
+  public EDQLPathMatchImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull EDQLVisitor visitor) {
-    visitor.visitPath(this);
+    visitor.visitPathMatch(this);
   }
 
   @Override
@@ -29,8 +29,8 @@ public class EDQLPathImpl extends ASTWrapperPsiElement implements EDQLPath {
 
   @Override
   @NotNull
-  public List<EDQLPathMatch> getPathMatchList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLPathMatch.class);
+  public List<EDQLIdentifier0> getIdentifier0List() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLIdentifier0.class);
   }
 
 }

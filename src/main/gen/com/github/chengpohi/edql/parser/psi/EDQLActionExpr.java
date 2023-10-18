@@ -8,9 +8,21 @@ import com.intellij.psi.PsiElement;
 public interface EDQLActionExpr extends PsiElement {
 
   @NotNull
+  List<EDQLArr> getArrList();
+
+  @NotNull
+  List<EDQLArrcomp> getArrcompList();
+
+  @NotNull
   EDQLMethod getMethod();
 
   @NotNull
+  List<EDQLObj> getObjList();
+
+  @NotNull
   EDQLPath getPath();
+
+  @Nullable
+  PsiElement getQuery();
 
 }

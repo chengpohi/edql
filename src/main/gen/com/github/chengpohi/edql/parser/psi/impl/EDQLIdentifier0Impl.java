@@ -28,9 +28,9 @@ public class EDQLIdentifier0Impl extends EDQLNamedElementImpl implements EDQLIde
   }
 
   @Override
-  @Nullable
+  @NotNull
   public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
+    return findNotNullChildByType(IDENTIFIER);
   }
 
   @Override

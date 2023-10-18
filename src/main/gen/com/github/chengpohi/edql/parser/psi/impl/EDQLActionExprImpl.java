@@ -29,14 +29,38 @@ public class EDQLActionExprImpl extends ASTWrapperPsiElement implements EDQLActi
 
   @Override
   @NotNull
+  public List<EDQLArr> getArrList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLArr.class);
+  }
+
+  @Override
+  @NotNull
+  public List<EDQLArrcomp> getArrcompList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLArrcomp.class);
+  }
+
+  @Override
+  @NotNull
   public EDQLMethod getMethod() {
     return findNotNullChildByClass(EDQLMethod.class);
   }
 
   @Override
   @NotNull
+  public List<EDQLObj> getObjList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLObj.class);
+  }
+
+  @Override
+  @NotNull
   public EDQLPath getPath() {
     return findNotNullChildByClass(EDQLPath.class);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getQuery() {
+    return findChildByType(QUERY);
   }
 
 }

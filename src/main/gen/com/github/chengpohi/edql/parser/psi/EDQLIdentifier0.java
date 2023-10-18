@@ -9,7 +9,7 @@ import com.intellij.navigation.ItemPresentation;
 
 public interface EDQLIdentifier0 extends EDQLNamedElement, PsiNamedElement {
 
-  @Nullable
+  @NotNull
   PsiElement getIdentifier();
 
   String getKey();
