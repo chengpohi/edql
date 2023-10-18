@@ -49,15 +49,23 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (IDENTIFIER)
+  // (DOLLAR)? (IDENTIFIER)
   public static boolean IDENTIFIER0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "IDENTIFIER0")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<identifier 0>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
-    exit_section_(b, m, IDENTIFIER_0, r);
+    Marker m = enter_section_(b, l, _NONE_, IDENTIFIER_0, "<identifier 0>");
+    r = IDENTIFIER0_0(b, l + 1);
+    r = r && consumeToken(b, IDENTIFIER);
+    exit_section_(b, l, m, r, false, null);
     return r;
+  }
+
+  // (DOLLAR)?
+  private static boolean IDENTIFIER0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "IDENTIFIER0_0")) return false;
+    consumeToken(b, DOLLAR);
+    return true;
   }
 
   /* ********************************************************** */
@@ -492,16 +500,16 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // }
   public static boolean bind(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bind")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<bind>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, BIND, "<bind>");
     r = IDENTIFIER0(b, l + 1);
     r = r && consumeToken(b, EQUAL);
     r = r && expr(b, l + 1);
     r = r && bind_3(b, l + 1);
     r = r && bind_4(b, l + 1);
     r = r && bind_5(b, l + 1);
-    exit_section_(b, m, BIND, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -854,9 +862,9 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // IDENTIFIER0 '.foreach' L_CURLY 'it' MAPPING L_CURLY expr* returnExpr? R_CURLY R_CURLY
   public static boolean foreach(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "foreach")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<foreach>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, FOREACH, "<foreach>");
     r = IDENTIFIER0(b, l + 1);
     r = r && consumeToken(b, ".foreach");
     r = r && consumeToken(b, L_CURLY);
@@ -865,7 +873,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = r && foreach_6(b, l + 1);
     r = r && foreach_7(b, l + 1);
     r = r && consumeTokens(b, 0, R_CURLY, R_CURLY);
-    exit_section_(b, m, FOREACH, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -966,15 +974,15 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // IDENTIFIER0 L_PAREN (expr* (COMMA expr*)* COMMA?)? R_PAREN mapIter?
   public static boolean functionInvokeExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<function invoke expr>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, FUNCTION_INVOKE_EXPR, "<function invoke expr>");
     r = IDENTIFIER0(b, l + 1);
     r = r && consumeToken(b, L_PAREN);
     r = r && functionInvokeExpr_2(b, l + 1);
     r = r && consumeToken(b, R_PAREN);
     r = r && functionInvokeExpr_4(b, l + 1);
-    exit_section_(b, m, FUNCTION_INVOKE_EXPR, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1392,12 +1400,12 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // IDENTIFIER0 (EQUAL expr)?
   public static boolean param(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "param")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<param>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, PARAM, "<param>");
     r = IDENTIFIER0(b, l + 1);
     r = r && param_1(b, l + 1);
-    exit_section_(b, m, PARAM, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1423,13 +1431,13 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // param (COMMA param)* ( COMMA )?
   public static boolean params(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "params")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, "<params>", DOLLAR, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, PARAMS, "<params>");
     r = param(b, l + 1);
     r = r && params_1(b, l + 1);
     r = r && params_2(b, l + 1);
-    exit_section_(b, m, PARAMS, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 

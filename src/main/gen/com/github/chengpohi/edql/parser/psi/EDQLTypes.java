@@ -104,7 +104,6 @@ public interface EDQLTypes {
   IElementType L_PAREN = new EDQLTokenType("(");
   IElementType MAPPING = new EDQLTokenType("->");
   IElementType MINUS = new EDQLTokenType("-");
-  IElementType NEWLINE = new EDQLTokenType("NEWLINE");
   IElementType NODE = new EDQLTokenType("node");
   IElementType NOT_EQUAL = new EDQLTokenType("NOT_EQUAL");
   IElementType NULL = new EDQLTokenType("null");

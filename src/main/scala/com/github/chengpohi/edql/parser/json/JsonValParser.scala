@@ -56,6 +56,14 @@ trait JsonValParser {
       return toJsonVal(expr.getExpr)
     }
 
+    if (expr.getBinsuffix != null) {
+      val v = toJsonVal(expr.getBinsuffix.getExpr)
+      if (v.isInstanceOf[JsonCollection.Num]) {
+        return JsonCollection.Num((expr.getBinsuffix.getBinaryop + v.toJson).toDouble)
+      }
+      throw new RuntimeException("unsupported syntax: " + expr.getText)
+    }
+
     if (expr.getDoubleQuotedString != null) {
       val str = expr.getDoubleQuotedString.getText
       checkParse(expr, str)
