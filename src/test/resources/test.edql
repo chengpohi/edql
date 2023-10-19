@@ -70,3 +70,12 @@ POST /.ds-metricbeat-8.8.1-2023.06.16-000001/_search
 var a = GET /_cluster/stats
 
 print(a)
+
+POST .kibana_.17.4_001/_search
+{
+"query": {
+"bool": {
+"must": []
+}
+}
+}
