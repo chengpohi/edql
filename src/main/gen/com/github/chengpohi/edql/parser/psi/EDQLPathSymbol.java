@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface EDQLPathMatch extends PsiElement {
-
-  @NotNull
-  List<EDQLIdentifier0> getIdentifier0List();
+public interface EDQLPathSymbol extends PsiElement {
 
 }

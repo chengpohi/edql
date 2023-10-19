@@ -1471,26 +1471,39 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '/'? path_match ('/' path_match?)*
+  // pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))*
   public static boolean path(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, PATH, "<path>");
     r = path_0(b, l + 1);
-    r = r && path_match(b, l + 1);
+    r = r && path_1(b, l + 1);
     r = r && path_2(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // '/'?
+  // pathSymbol*
   private static boolean path_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_0")) return false;
-    consumeToken(b, SLASH);
+    while (true) {
+      int c = current_position_(b);
+      if (!pathSymbol(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "path_0", c)) break;
+    }
     return true;
   }
 
-  // ('/' path_match?)*
+  // NUMBER | IDENTIFIER0
+  private static boolean path_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1")) return false;
+    boolean r;
+    r = consumeToken(b, NUMBER);
+    if (!r) r = IDENTIFIER0(b, l + 1);
+    return r;
+  }
+
+  // ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))*
   private static boolean path_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_2")) return false;
     while (true) {
@@ -1501,140 +1514,51 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // '/' path_match?
+  // pathSymbol pathSymbol* (NUMBER | IDENTIFIER0)
   private static boolean path_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, SLASH);
+    r = pathSymbol(b, l + 1);
     r = r && path_2_0_1(b, l + 1);
+    r = r && path_2_0_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // path_match?
+  // pathSymbol*
   private static boolean path_2_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_2_0_1")) return false;
-    path_match(b, l + 1);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // (DOT? NUMBER | (DOT? IDENTIFIER0)) ((DOT NUMBER IDENTIFIER0?) | (DOT IDENTIFIER0))* ASTERISK?
-  public static boolean path_match(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, PATH_MATCH, "<path match>");
-    r = path_match_0(b, l + 1);
-    r = r && path_match_1(b, l + 1);
-    r = r && path_match_2(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // DOT? NUMBER | (DOT? IDENTIFIER0)
-  private static boolean path_match_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = path_match_0_0(b, l + 1);
-    if (!r) r = path_match_0_1(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // DOT? NUMBER
-  private static boolean path_match_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_0_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = path_match_0_0_0(b, l + 1);
-    r = r && consumeToken(b, NUMBER);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // DOT?
-  private static boolean path_match_0_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_0_0_0")) return false;
-    consumeToken(b, DOT);
-    return true;
-  }
-
-  // DOT? IDENTIFIER0
-  private static boolean path_match_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_0_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = path_match_0_1_0(b, l + 1);
-    r = r && IDENTIFIER0(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // DOT?
-  private static boolean path_match_0_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_0_1_0")) return false;
-    consumeToken(b, DOT);
-    return true;
-  }
-
-  // ((DOT NUMBER IDENTIFIER0?) | (DOT IDENTIFIER0))*
-  private static boolean path_match_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!path_match_1_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "path_match_1", c)) break;
+      if (!pathSymbol(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "path_2_0_1", c)) break;
     }
     return true;
   }
 
-  // (DOT NUMBER IDENTIFIER0?) | (DOT IDENTIFIER0)
-  private static boolean path_match_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_1_0")) return false;
+  // NUMBER | IDENTIFIER0
+  private static boolean path_2_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_2_0_2")) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = path_match_1_0_0(b, l + 1);
-    if (!r) r = path_match_1_0_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    r = consumeToken(b, NUMBER);
+    if (!r) r = IDENTIFIER0(b, l + 1);
     return r;
   }
 
-  // DOT NUMBER IDENTIFIER0?
-  private static boolean path_match_1_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_1_0_0")) return false;
+  /* ********************************************************** */
+  // DOT | '.' | '/' | ASTERISK | '-'
+  public static boolean pathSymbol(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "pathSymbol")) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, DOT, NUMBER);
-    r = r && path_match_1_0_0_2(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // IDENTIFIER0?
-  private static boolean path_match_1_0_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_1_0_0_2")) return false;
-    IDENTIFIER0(b, l + 1);
-    return true;
-  }
-
-  // DOT IDENTIFIER0
-  private static boolean path_match_1_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_1_0_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, PATH_SYMBOL, "<path symbol>");
     r = consumeToken(b, DOT);
-    r = r && IDENTIFIER0(b, l + 1);
-    exit_section_(b, m, null, r);
+    if (!r) r = consumeToken(b, DOT);
+    if (!r) r = consumeToken(b, SLASH);
+    if (!r) r = consumeToken(b, ASTERISK);
+    if (!r) r = consumeToken(b, MINUS);
+    exit_section_(b, l, m, r, false, null);
     return r;
-  }
-
-  // ASTERISK?
-  private static boolean path_match_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_match_2")) return false;
-    consumeToken(b, ASTERISK);
-    return true;
   }
 
   /* ********************************************************** */

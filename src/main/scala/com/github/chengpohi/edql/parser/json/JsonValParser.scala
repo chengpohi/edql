@@ -59,7 +59,7 @@ trait JsonValParser {
     if (expr.getBinsuffix != null) {
       val v = toJsonVal(expr.getBinsuffix.getExpr)
       if (v.isInstanceOf[JsonCollection.Num]) {
-        return JsonCollection.Num((expr.getBinsuffix.getBinaryop + v.toJson).toDouble)
+        return JsonCollection.Num((expr.getBinsuffix.getBinaryop.getText + v.toJson).toDouble)
       }
       throw new RuntimeException("unsupported syntax: " + expr.getText)
     }

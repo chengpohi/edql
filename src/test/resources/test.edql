@@ -1,11 +1,11 @@
-POST fff/_search
+POST /fff/_search
 {
   "jj": "aa",
   "ff": 123,
   "cc": true
 }
 
-POST ccc/_search?aaa=222
+POST /ccc/_search?aaa=222
 {
   "jj": "aa",
   "ff": {
@@ -38,9 +38,9 @@ var cc = [1, 2, "3"]
 
 GET /_index_template/.alerts-observability.apm.alerts-default-index-template
 
-var a = GET _cluster/stats
+var a = GET /_cluster/stats
 
-POST fff*/_search
+POST /fff*/_search
 {
 }
 
@@ -61,12 +61,12 @@ var aa = a.map{it -> {
 }}
 
 
-POST .ds-metricbeat-8.8.1-2023.06.16-000001/_search
+POST /.ds-metricbeat-8.8.1-2023.06.16-000001/_search
 {
 "query": {
   "bool": {
 }}}
 
-var a = GET _cluster/stats
+var a = GET /_cluster/stats
 
 print(a)

@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface EDQLPath extends PsiElement {
 
   @NotNull
-  List<EDQLPathMatch> getPathMatchList();
+  List<EDQLIdentifier0> getIdentifier0List();
+
+  @NotNull
+  List<EDQLPathSymbol> getPathSymbolList();
 
 }

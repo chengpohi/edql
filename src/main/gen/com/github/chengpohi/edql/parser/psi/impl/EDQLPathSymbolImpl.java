@@ -11,26 +11,20 @@ import static com.github.chengpohi.edql.parser.psi.EDQLTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.chengpohi.edql.parser.psi.*;
 
-public class EDQLPathMatchImpl extends ASTWrapperPsiElement implements EDQLPathMatch {
+public class EDQLPathSymbolImpl extends ASTWrapperPsiElement implements EDQLPathSymbol {
 
-  public EDQLPathMatchImpl(@NotNull ASTNode node) {
+  public EDQLPathSymbolImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull EDQLVisitor visitor) {
-    visitor.visitPathMatch(this);
+    visitor.visitPathSymbol(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof EDQLVisitor) accept((EDQLVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<EDQLIdentifier0> getIdentifier0List() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLIdentifier0.class);
   }
 
 }

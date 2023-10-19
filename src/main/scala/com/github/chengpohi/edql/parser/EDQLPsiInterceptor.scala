@@ -35,6 +35,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
           scala.util.Success(toJsonVal(expr))
         } catch {
           case ex: Throwable => {
+            ex.printStackTrace()
             scala.util.Failure(ex)
           }
         }

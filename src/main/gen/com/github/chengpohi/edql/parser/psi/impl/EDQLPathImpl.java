@@ -29,8 +29,14 @@ public class EDQLPathImpl extends ASTWrapperPsiElement implements EDQLPath {
 
   @Override
   @NotNull
-  public List<EDQLPathMatch> getPathMatchList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLPathMatch.class);
+  public List<EDQLIdentifier0> getIdentifier0List() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLIdentifier0.class);
+  }
+
+  @Override
+  @NotNull
+  public List<EDQLPathSymbol> getPathSymbolList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLPathSymbol.class);
   }
 
 }
