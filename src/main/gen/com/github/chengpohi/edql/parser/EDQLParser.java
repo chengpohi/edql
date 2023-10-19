@@ -69,6 +69,18 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // NULL
+  public static boolean NIL(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "NIL")) return false;
+    if (!nextTokenIs(b, NULL)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, NULL);
+    exit_section_(b, m, NIL, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // method path (QUERY)? (obj | arr | arrcomp)*
   public static boolean actionExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "actionExpr")) return false;
@@ -618,6 +630,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // |   NUMBER
   // |   BOOL
   // |   SELF
+  // |   NIL
   // |   SINGLE_QUOTED_STRING
   // |   TRIPLE_QUOTED_STRING
   // |   DOUBLE_QUOTED_STRING
@@ -651,6 +664,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, NUMBER);
     if (!r) r = BOOL(b, l + 1);
     if (!r) r = consumeToken(b, SELF);
+    if (!r) r = NIL(b, l + 1);
     if (!r) r = consumeToken(b, SINGLE_QUOTED_STRING);
     if (!r) r = consumeToken(b, TRIPLE_QUOTED_STRING);
     if (!r) r = consumeToken(b, DOUBLE_QUOTED_STRING);

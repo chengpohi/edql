@@ -18,6 +18,10 @@ public class EDQLVisitor extends PsiElementVisitor {
     // visitPsiNamedElement(o);
   }
 
+  public void visitNil(@NotNull EDQLNil o) {
+    visitPsiElement(o);
+  }
+
   public void visitActionExpr(@NotNull EDQLActionExpr o) {
     visitPsiElement(o);
   }

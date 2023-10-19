@@ -41,6 +41,7 @@ public interface EDQLTypes {
   IElementType MEMBER = new EDQLElementType("MEMBER");
   IElementType MEMBERS = new EDQLElementType("MEMBERS");
   IElementType METHOD = new EDQLElementType("METHOD");
+  IElementType NIL = new EDQLElementType("NIL");
   IElementType OBJ = new EDQLElementType("OBJ");
   IElementType OBJVAR = new EDQLElementType("OBJVAR");
   IElementType OUTERVAR = new EDQLElementType("OUTERVAR");
@@ -235,6 +236,9 @@ public interface EDQLTypes {
       }
       else if (type == METHOD) {
         return new EDQLMethodImpl(node);
+      }
+      else if (type == NIL) {
+        return new EDQLNilImpl(node);
       }
       else if (type == OBJ) {
         return new EDQLObjImpl(node);

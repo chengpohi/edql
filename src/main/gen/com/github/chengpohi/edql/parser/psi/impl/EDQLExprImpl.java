@@ -41,6 +41,12 @@ public class EDQLExprImpl extends ASTWrapperPsiElement implements EDQLExpr {
 
   @Override
   @Nullable
+  public EDQLNil getNil() {
+    return findChildByClass(EDQLNil.class);
+  }
+
+  @Override
+  @Nullable
   public EDQLActionExpr getActionExpr() {
     return findChildByClass(EDQLActionExpr.class);
   }

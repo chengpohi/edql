@@ -14,6 +14,9 @@ public interface EDQLExpr extends PsiElement {
   EDQLIdentifier0 getIdentifier0();
 
   @Nullable
+  EDQLNil getNil();
+
+  @Nullable
   EDQLActionExpr getActionExpr();
 
   @Nullable

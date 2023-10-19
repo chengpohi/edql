@@ -129,6 +129,11 @@ trait JsonValParser {
       return JsonCollection.Num(expr.getBinsuffix.getText.toDouble)
     }
 
+    if (expr.getNil != null) {
+      checkParse(expr, expr.getNil.getText)
+      return JsonCollection.Null
+    }
+
     throw new RuntimeException("parse failed: " + expr.getText)
   }
 
