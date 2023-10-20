@@ -79,3 +79,5 @@ POST .kibana_.17.4_001/_search
 }
 }
 }
+
+GET /
