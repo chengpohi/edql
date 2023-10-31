@@ -612,7 +612,6 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   // |   binsuffix
   // |	obj
   // |   mapIter
-  // |   foreach
   // |	arr
   // |	arrcomp
   // |   forExpr
@@ -646,20 +645,19 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     if (!r) r = binsuffix(b, l + 1);
     if (!r) r = obj(b, l + 1);
     if (!r) r = mapIter(b, l + 1);
-    if (!r) r = foreach(b, l + 1);
     if (!r) r = arr(b, l + 1);
     if (!r) r = arrcomp(b, l + 1);
     if (!r) r = forExpr(b, l + 1);
     if (!r) r = functionExpr(b, l + 1);
     if (!r) r = functionInvokeExpr(b, l + 1);
+    if (!r) r = expr_10(b, l + 1);
     if (!r) r = expr_11(b, l + 1);
-    if (!r) r = expr_12(b, l + 1);
     if (!r) r = outervar(b, l + 1);
     if (!r) r = ifelse(b, l + 1);
+    if (!r) r = expr_14(b, l + 1);
     if (!r) r = expr_15(b, l + 1);
     if (!r) r = expr_16(b, l + 1);
     if (!r) r = expr_17(b, l + 1);
-    if (!r) r = expr_18(b, l + 1);
     if (!r) r = IDENTIFIER0(b, l + 1);
     if (!r) r = consumeToken(b, NUMBER);
     if (!r) r = BOOL(b, l + 1);
@@ -676,8 +674,8 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // SUPER DOT IDENTIFIER0
-  private static boolean expr_11(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_11")) return false;
+  private static boolean expr_10(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_10")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeTokens(b, 0, SUPER, DOT);
@@ -687,8 +685,8 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // SUPER L_BRACKET expr R_BRACKET
-  private static boolean expr_12(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_12")) return false;
+  private static boolean expr_11(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_11")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeTokens(b, 0, SUPER, L_BRACKET);
@@ -699,31 +697,31 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // L_PAREN expr* R_PAREN
-  private static boolean expr_15(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_15")) return false;
+  private static boolean expr_14(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_14")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, L_PAREN);
-    r = r && expr_15_1(b, l + 1);
+    r = r && expr_14_1(b, l + 1);
     r = r && consumeToken(b, R_PAREN);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // expr*
-  private static boolean expr_15_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_15_1")) return false;
+  private static boolean expr_14_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_14_1")) return false;
     while (true) {
       int c = current_position_(b);
       if (!expr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "expr_15_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "expr_14_1", c)) break;
     }
     return true;
   }
 
   // unaryop expr
-  private static boolean expr_16(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_16")) return false;
+  private static boolean expr_15(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_15")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = unaryop(b, l + 1);
@@ -733,8 +731,8 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // assertStmt SEMICOLON expr
-  private static boolean expr_17(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_17")) return false;
+  private static boolean expr_16(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_16")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = assertStmt(b, l + 1);
@@ -745,8 +743,8 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // ERROR expr
-  private static boolean expr_18(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "expr_18")) return false;
+  private static boolean expr_17(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "expr_17")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, ERROR);
@@ -870,43 +868,6 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, R_CURLY);
     exit_section_(b, m, FOR_EXPR, r);
     return r;
-  }
-
-  /* ********************************************************** */
-  // IDENTIFIER0 '.foreach' L_CURLY 'it' MAPPING L_CURLY expr* returnExpr? R_CURLY R_CURLY
-  public static boolean foreach(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "foreach")) return false;
-    if (!nextTokenIs(b, "<foreach>", DOLLAR, IDENTIFIER)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, FOREACH, "<foreach>");
-    r = IDENTIFIER0(b, l + 1);
-    r = r && consumeToken(b, ".foreach");
-    r = r && consumeToken(b, L_CURLY);
-    r = r && consumeToken(b, "it");
-    r = r && consumeTokens(b, 0, MAPPING, L_CURLY);
-    r = r && foreach_6(b, l + 1);
-    r = r && foreach_7(b, l + 1);
-    r = r && consumeTokens(b, 0, R_CURLY, R_CURLY);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // expr*
-  private static boolean foreach_6(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "foreach_6")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!expr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "foreach_6", c)) break;
-    }
-    return true;
-  }
-
-  // returnExpr?
-  private static boolean foreach_7(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "foreach_7")) return false;
-    returnExpr(b, l + 1);
-    return true;
   }
 
   /* ********************************************************** */

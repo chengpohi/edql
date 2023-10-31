@@ -86,10 +86,6 @@ public class EDQLVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitForeach(@NotNull EDQLForeach o) {
-    visitPsiElement(o);
-  }
-
   public void visitFunctionBody(@NotNull EDQLFunctionBody o) {
     visitPsiElement(o);
   }

@@ -24,7 +24,6 @@ public interface EDQLTypes {
   IElementType EXPR = new EDQLElementType("EXPR");
   IElementType FIELD = new EDQLElementType("FIELD");
   IElementType FIELDNAME = new EDQLElementType("FIELDNAME");
-  IElementType FOREACH = new EDQLElementType("FOREACH");
   IElementType FOR_EXPR = new EDQLElementType("FOR_EXPR");
   IElementType FUNCTION_BODY = new EDQLElementType("FUNCTION_BODY");
   IElementType FUNCTION_EXPR = new EDQLElementType("FUNCTION_EXPR");
@@ -185,9 +184,6 @@ public interface EDQLTypes {
       }
       else if (type == FIELDNAME) {
         return new EDQLFieldnameImpl(node);
-      }
-      else if (type == FOREACH) {
-        return new EDQLForeachImpl(node);
       }
       else if (type == FOR_EXPR) {
         return new EDQLForExprImpl(node);
