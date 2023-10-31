@@ -315,7 +315,8 @@ trait InstructionInvoker {
 
   def invokeMapIter(functions: Map[String, FunctionInstruction],
                     context: ScriptContext,
-                    m: parser.MapIterInstruction, funcName: Option[String]): Seq[JsonCollection.Val] = {
+                    m: parser.MapIterInstruction,
+                    funcName: Option[String]): Seq[JsonCollection.Val] = {
     def mapArr(a: JsonCollection.Arr) = {
       val res: Seq[JsonCollection.Val] = a.value.toList.map(i => {
         val fun = m.fun
@@ -333,7 +334,15 @@ trait InstructionInvoker {
       case a: JsonCollection.Arr => mapArr(a)
       case v: JsonCollection.Var if v.realValue.isDefined && v.realValue.get.isInstanceOf[JsonCollection.Arr] =>
         mapArr(v.realValue.get.asInstanceOf[JsonCollection.Arr])
-      case _ => throw new RuntimeException("not support map")
+      case v: JsonCollection.Var if v.realValue.isEmpty && context.variables.contains(v.value) =>
+        val reaVal = context.variables(v.value)
+        reaVal match {
+          case arr: JsonCollection.Arr =>
+            mapArr(arr)
+          case _ =>
+            throw new RuntimeException("unsupport map")
+        }
+      case _ => throw new RuntimeException("unsupport map")
     }
   }
 

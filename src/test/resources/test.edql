@@ -81,3 +81,9 @@ POST .kibana_.17.4_001/_search
 }
 
 GET /
+
+var jj = jq(ap, "$.hits.hits")
+
+var fff = jj.map{it -> {
+  return jq(it, "$._source")
+}}
