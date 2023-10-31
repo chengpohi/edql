@@ -123,7 +123,6 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
         return Seq(FunctionInvokeInstruction(funcName, ins, Some(buildMapIterInstruction(JsonCollection.Arr(), mapIter))))
       }
 
-
       return Seq(FunctionInvokeInstruction(funcName, ins))
     }
 
@@ -157,6 +156,16 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
               VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
               FunctionInstruction(anonymousFun, Seq(), Seq(mapIterInstruction.get.copy(a = v)))
             )
+          case f: JsonCollection.Fun =>
+            val iter = e.getFunctionInvokeExpr.getMapIter
+            if (iter != null) {
+              val instruction = buildMapIterInstruction(JsonCollection.Arr(), iter)
+              return Seq(
+                VariableInstruction(varName, JsonCollection.Fun((anonymousFun, Seq()))),
+                FunctionInstruction(anonymousFun, Seq(), Seq(instruction.copy(a = f)))
+              )
+            }
+            return Seq(VariableInstruction(varName, v.get))
           case _ =>
             return Seq(VariableInstruction(varName, v.get))
         }

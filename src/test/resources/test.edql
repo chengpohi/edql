@@ -87,3 +87,9 @@ var jj = jq(ap, "$.hits.hits")
 var fff = jj.map{it -> {
   return jq(it, "$._source")
 }}
+
+var jkk = jq(ap, "$.hits.hits").map{it -> {
+    return jq(it, "$._source.endPrice")
+}}
+
+print(jkk)

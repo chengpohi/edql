@@ -316,7 +316,7 @@ trait InstructionInvoker {
   def invokeMapIter(functions: Map[String, FunctionInstruction],
                     context: ScriptContext,
                     m: parser.MapIterInstruction,
-                    funcName: Option[String]): Seq[JsonCollection.Val] = {
+                    funName: Option[String]): Seq[JsonCollection.Val] = {
     def mapArr(a: JsonCollection.Arr) = {
       val res: Seq[JsonCollection.Val] = a.value.toList.map(i => {
         val fun = m.fun
@@ -325,7 +325,7 @@ trait InstructionInvoker {
         fs.put(fun.funcName + fun.variableNames.size, fun)
         clearContextBeforeInvoke(fun.instructions)
         val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
-        runInstructions(fs.toMap, context, Seq(invoke), funcName).lastOption
+        runInstructions(fs.toMap, context, Seq(invoke), funName).lastOption
       }).filter(_.isDefined).map(_.get)
       Seq(JsonCollection.Arr(res: _*))
     }
@@ -340,9 +340,17 @@ trait InstructionInvoker {
           case arr: JsonCollection.Arr =>
             mapArr(arr)
           case _ =>
-            throw new RuntimeException("unsupport map")
+            throw new RuntimeException("unsupported map")
         }
-      case _ => throw new RuntimeException("unsupport map")
+      case f: JsonCollection.Fun =>
+        val res = invokeFunction(functions, context, FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
+        res match {
+          case arr: JsonCollection.Arr =>
+            mapArr(arr)
+          case _ =>
+            throw new RuntimeException("unsupported map")
+        }
+      case _ => throw new RuntimeException("unsupported map")
     }
   }
 
