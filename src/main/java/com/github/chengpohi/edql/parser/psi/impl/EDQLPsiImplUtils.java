@@ -3,6 +3,7 @@ package com.github.chengpohi.edql.parser.psi.impl;
 import com.github.chengpohi.edql.EDQLFileType;
 import com.github.chengpohi.edql.parser.psi.EDQLField;
 import com.github.chengpohi.edql.parser.psi.EDQLFile;
+import com.github.chengpohi.edql.parser.psi.EDQLFunctionInvokeExpr;
 import com.github.chengpohi.edql.parser.psi.EDQLIdentifier0;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
@@ -52,6 +53,12 @@ public final class EDQLPsiImplUtils {
         EDQLFile file = createFile(project, text);
 
         return PsiTreeUtil.findChildOfType(file, EDQLActionExprImpl.class);
+    }
+
+    public static EDQLFunctionInvokeExpr createFunctionInvokeFromText(Project project, String text) {
+        EDQLFile file = createFile(project, text);
+
+        return PsiTreeUtil.findChildOfType(file, EDQLFunctionInvokeExpr.class);
     }
 
     public static EDQLHostExprImpl createHostFromText(Project project, String text, boolean isKibanaHost) {
