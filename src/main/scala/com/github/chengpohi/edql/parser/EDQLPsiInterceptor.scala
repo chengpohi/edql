@@ -5,7 +5,7 @@ import com.github.chengpohi.edql.parser.psi._
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.{PsiComment, PsiErrorElement, PsiWhiteSpace}
+import com.intellij.psi.{PsiComment, PsiErrorElement, PsiFile, PsiWhiteSpace}
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.RandomStringUtils
 
@@ -37,6 +37,24 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
           case ex: Throwable => {
             scala.util.Failure(ex)
           }
+        }
+      }
+    })
+  }
+
+  def parseExpr(text: String): Try[PsiFile] = {
+    ApplicationManager.getApplication.runReadAction(new Computable[Try[PsiFile]] {
+      override def compute(): Try[PsiFile] = {
+        try {
+          val psiFile = createFile("dummmy", text)
+          val element = PsiTreeUtil.findChildOfType(psiFile, classOf[PsiErrorElement])
+          if (element != null) {
+            throw new RuntimeException(element.getErrorDescription)
+          }
+
+          scala.util.Success(psiFile)
+        } catch {
+          case ex: Exception => scala.util.Failure(ex)
         }
       }
     })

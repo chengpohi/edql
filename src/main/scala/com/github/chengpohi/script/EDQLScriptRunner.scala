@@ -2,6 +2,7 @@ package com.github.chengpohi.script
 
 import com.github.chengpohi.edql.parser.json.JsonCollection
 import com.github.chengpohi.edql.parser.{EDQLParserDefinition, EDQLParserFactory}
+import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.PsiFileFactoryImpl
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -24,6 +25,10 @@ class EDQLScriptRunner(ls: Seq[URL], psiFileFactoryImpl: PsiFileFactoryImpl) ext
 
   def parseJson(text: String): Try[JsonCollection.Val] = {
     parser.parseJson(text)
+  }
+
+  def parseExpr(text: String): Try[PsiFile] = {
+    parser.parseExpr(text)
   }
 
   def extractVars(text: String): Map[String, JsonCollection.Val] = {
