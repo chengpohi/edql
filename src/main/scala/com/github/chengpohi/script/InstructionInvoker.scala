@@ -261,7 +261,7 @@ trait InstructionInvoker {
 
     val foundFunction = functions.get(invoke.funcName + values.size)
     if (foundFunction.isEmpty) {
-      throw new RuntimeException("Could not found method: " + invoke.funcName + " with parameters "
+      throw new RuntimeException("could not found method: " + invoke.funcName + " with parameters "
         + values.size)
     }
 
@@ -278,15 +278,29 @@ trait InstructionInvoker {
 
     val instructions = fun.instructions
 
+    val nestFunctions = instructions.filter(_.isInstanceOf[FunctionInstruction]).map(i => {
+      val f = i.asInstanceOf[FunctionInstruction]
+      f.funcName + f.variableNames.size -> f
+    }).toMap
+
     val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
       .map(i => i.asInstanceOf[VariableInstruction])
       .map(i => {
         funName + "$" + i.variableName -> i.value
       }).toMap
 
-    evalFunParams(functions, context, funcBodyVars, Some(funName))
+    val nestVars = (funcBodyVars ++ funParams).flatMap(fv => {
+      nestFunctions.map(n => {
+        fv._1.replaceAll(funName, n._2.funcName + "_" + n._2.variableNames.size) -> fv._2
+      })
+    })
 
-    val response = runInstructions(functions, context, instructions, Some(funName))
+    context.variables.addAll(nestVars)
+
+    evalFunParams(functions ++ nestFunctions, context, funcBodyVars, Some(funName))
+
+
+    val response = runInstructions(functions ++ nestFunctions, context, instructions, Some(funName))
 
     context.variables = cachedVariables
 
