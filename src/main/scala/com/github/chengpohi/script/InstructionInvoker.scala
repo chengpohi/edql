@@ -201,13 +201,21 @@ trait InstructionInvoker {
                             parms: Map[String, JsonCollection.Val],
                             funName: Option[String] = None
                            ) = {
-    parms.filter(_._2.isInstanceOf[JsonCollection.Fun])
-      .foreach(i => {
-        val fParam = i._2.asInstanceOf[JsonCollection.Fun]
-        val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).lastOption
-        fParam.realValue = value
-        context.variables.put(i._1, value.getOrElse(JsonCollection.Null))
-      })
+    parms.map(it => {
+      it._2 match {
+        case i: JsonCollection.Fun =>
+          val fParam = it._2.asInstanceOf[JsonCollection.Fun]
+          val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).lastOption
+          fParam.realValue = value
+          context.variables.put(it._1, value.getOrElse(JsonCollection.Null))
+        case i: JsonCollection.Var =>
+          mapRealValue(context.variables, it._2, funName)
+          context.variables.put(it._1, it._2)
+        case i: JsonCollection.ArithTree =>
+        case _ =>
+          context.variables.put(it._1, it._2)
+      }
+    })
 
     val arithes = parms.filter(_._2.isInstanceOf[JsonCollection.ArithTree]).map(i => i._2.asInstanceOf[JsonCollection.ArithTree])
     arithes.foreach(a => {
