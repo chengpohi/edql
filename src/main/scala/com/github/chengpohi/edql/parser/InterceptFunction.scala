@@ -343,40 +343,6 @@ trait InterceptFunction {
       Seq(v).flatMap(i => extractDynamics(i))
   }
 
-  def mapRealValue(variables: scala.collection.mutable.Map[String, JsonCollection.Val],
-                   v: JsonCollection.Val, funName: Option[String] = None): Unit = {
-    if (v.vars.nonEmpty) {
-      v.vars.foreach(k => {
-        if (k.realValue.isEmpty) {
-          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value).orElse(variables.get(k.value))
-          if (vl.isEmpty) {
-            throw new RuntimeException("could not find variable: " + k.value)
-          }
-
-          vl.get match {
-            case fun: JsonCollection.Fun =>
-              vl = fun.realValue
-            case arith: JsonCollection.ArithTree =>
-              if (arith.realValue.isDefined) {
-                vl = arith.realValue
-              }
-            case _ =>
-          }
-
-          vl.foreach(r => {
-            if (r.vars.nonEmpty) {
-              r.vars.foreach(t => {
-                mapRealValue(variables, t, funName)
-              })
-            }
-          })
-          k.realValue = vl
-        }
-      })
-    }
-  }
-
-
   private def mapNewPath(variables: scala.collection.mutable.Map[String, JsonCollection.Val], path: String) = {
     val invokePath = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value).filter(_ != null).getOrElse("")
     variables.filter(i => Option.apply(invokePath).forall(j => i._1.startsWith(j)))

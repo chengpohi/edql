@@ -29,7 +29,7 @@ public class ESQLFileType extends LanguageFileType {
 
     @Override
     public @NlsSafe @NotNull String getDefaultExtension() {
-        return ".esql";
+        return "esql";
     }
 
     @Override

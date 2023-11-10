@@ -209,7 +209,7 @@ trait InstructionInvoker {
           fParam.realValue = value
           context.variables.put(it._1, value.getOrElse(JsonCollection.Null))
         case i: JsonCollection.Var =>
-          mapRealValue(context.variables, it._2, funName)
+          mapRealValue(globalFunctions, context, it._2, funName)
           context.variables.put(it._1, it._2)
         case i: JsonCollection.ArithTree =>
         case _ =>
@@ -224,7 +224,7 @@ trait InstructionInvoker {
 
     val vals = parms.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
       if (i._2.isInstanceOf[JsonCollection.Var]) {
-        mapRealValue(context.variables, i._2, funName)
+        mapRealValue(globalFunctions, context, i._2, funName)
       }
       i._1 -> i._2
     })
@@ -416,7 +416,7 @@ trait InstructionInvoker {
              vars: Seq[JsonCollection.Dynamic], funName: Option[String] = None) = {
     vars.foreach {
       case vr: JsonCollection.Var =>
-        mapRealValue(context.variables, vr, funName)
+        mapRealValue(functions, context, vr, funName)
       case v: JsonCollection.ArithTree =>
         evalArith(functions, context, v, funName)
       case f: JsonCollection.Fun =>
@@ -496,7 +496,7 @@ trait InstructionInvoker {
       case i: JsonCollection.Num => i
       case i: JsonCollection.Str => i
       case i: JsonCollection.Var => {
-        mapRealValue(context.variables, i, funName)
+        mapRealValue(functions, context, i, funName)
         evalBasicValue(functions, context, i.realValue.get, funName)
       }
       case f: JsonCollection.Fun => {
@@ -507,4 +507,47 @@ trait InstructionInvoker {
       }
       case _ => throw new RuntimeException("only support num and str arith expression")
     }
+
+
+  def mapRealValue(functions: Map[String, FunctionInstruction],
+                   context: ScriptContext,
+                   v: JsonCollection.Val, funName: Option[String] = None): Unit = {
+    val variables = context.variables
+    if (v.vars.nonEmpty) {
+      v.vars.foreach(k => {
+        if (k.realValue.isEmpty) {
+          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value).orElse(variables.get(k.value))
+          if (vl.isEmpty) {
+            throw new RuntimeException("could not find variable: " + k.value)
+          }
+
+          vl.get match {
+            case fun: JsonCollection.Fun =>
+              val res = invokeFunction(functions, context,
+                FunctionInvokeInstruction(fun.value._1, fun.value._2), funName).last
+              vl = Some(res)
+            case arith: JsonCollection.ArithTree =>
+              if (arith.realValue.isDefined) {
+                vl = arith.realValue
+              }
+            case v: JsonCollection.Var =>
+              mapRealValue(functions, context, v, funName)
+              vl = v.realValue
+            case _ =>
+          }
+
+          vl.foreach(r => {
+            if (r.vars.nonEmpty) {
+              r.vars.foreach(t => {
+                mapRealValue(functions, context, t, funName)
+              })
+            }
+          })
+          k.realValue = vl
+        }
+      })
+    }
+  }
+
+
 }
