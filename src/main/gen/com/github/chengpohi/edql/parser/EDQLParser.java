@@ -1446,7 +1446,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ((pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))*)) | '/'
+  // ((pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?)) | '/'
   public static boolean path(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path")) return false;
     boolean r;
@@ -1457,7 +1457,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))*
+  // pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?
   private static boolean path_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_0")) return false;
     boolean r;
@@ -1465,6 +1465,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     r = path_0_0(b, l + 1);
     r = r && path_0_1(b, l + 1);
     r = r && path_0_2(b, l + 1);
+    r = r && path_0_3(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1532,18 +1533,34 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return r;
   }
 
+  // (ASTERISK | ',')?
+  private static boolean path_0_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_3")) return false;
+    path_0_3_0(b, l + 1);
+    return true;
+  }
+
+  // ASTERISK | ','
+  private static boolean path_0_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_3_0")) return false;
+    boolean r;
+    r = consumeToken(b, ASTERISK);
+    if (!r) r = consumeToken(b, COMMA);
+    return r;
+  }
+
   /* ********************************************************** */
-  // DOT | '.' | '/' | ASTERISK | '-' | ':'
+  // DOT | '/' | ASTERISK | '-' | ':' | ','
   public static boolean pathSymbol(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "pathSymbol")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, PATH_SYMBOL, "<path symbol>");
     r = consumeToken(b, DOT);
-    if (!r) r = consumeToken(b, DOT);
     if (!r) r = consumeToken(b, SLASH);
     if (!r) r = consumeToken(b, ASTERISK);
     if (!r) r = consumeToken(b, MINUS);
     if (!r) r = consumeToken(b, COLON);
+    if (!r) r = consumeToken(b, COMMA);
     exit_section_(b, l, m, r, false, null);
     return r;
   }

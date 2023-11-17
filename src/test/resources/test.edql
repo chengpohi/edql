@@ -93,3 +93,24 @@ var jkk = jq(ap, "$.hits.hits").map{it -> {
 }}
 
 print(jkk)
+
+
+GET _cat/indices/*force*,*vehicle*,*duty*,*person*,*provider*?h=idx
+
+POST force*,vehicle*/_search
+{
+"query": {
+"bool": {
+"must": [
+{
+"terms": {
+"id": [
+"6afa60a0-3cf9-47b9-bf32-730b35d37b9a"
+],
+"boost": 1.0
+}
+}
+]
+}
+}
+}
