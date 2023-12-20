@@ -1550,7 +1550,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DOT | '/' | ASTERISK | '-' | ':' | ','
+  // DOT | '/' | ASTERISK | '-' | ':' | ',' | '@'
   public static boolean pathSymbol(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "pathSymbol")) return false;
     boolean r;
@@ -1561,6 +1561,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, MINUS);
     if (!r) r = consumeToken(b, COLON);
     if (!r) r = consumeToken(b, COMMA);
+    if (!r) r = consumeToken(b, "@");
     exit_section_(b, l, m, r, false, null);
     return r;
   }

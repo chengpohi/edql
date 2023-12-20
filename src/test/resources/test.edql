@@ -114,3 +114,13 @@ POST force*,vehicle*/_search
 }
 }
 }
+
+POST fff@fff/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+      ]
+    }
+  }
+}
