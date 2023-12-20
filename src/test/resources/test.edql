@@ -1,25 +1,25 @@
 POST /fff/_search
 {
-  "jj": "aa",
-  "ff": 123,
-  "cc": true
+    "jj": "aa",
+    "ff": 123,
+    "cc": true
 }
 
 POST /ccc/_search?aaa=222
 {
-  "jj": "aa",
-  "ff": {
-    "op": 222,
-    "kk": "123"
-  },
-  "cc": true
+    "jj": "aa",
+    "ff": {
+        "op": 222,
+        "kk": "123"
+    },
+    "cc": true
 }
 {
-  "tt": "aa",
+    "tt": "aa",
 }
 
 function hello(a, b, c) {
-  return "1111"
+    return "1111"
 }
 
 var aa = 11
@@ -48,24 +48,32 @@ var n = 1 + 2 * 3 + 4 * 5 - 7
 
 var jk = 2 * 3 + 1
 
-var a = [1, 2, 3].map{it -> {
-  return it + 1
-}}
+var a = [1, 2, 3].map{
+    it -> {
+    return it + 1
+}
+}
 
-var j = jq(a, ".arr").map{ it -> {
+var j = jq(a, ".arr").map{
+    it -> {
     return it
-}}
+}
+}
 
-var aa = a.map{it -> {
-  return it + 2
-}}
+var aa = a.map{
+    it -> {
+    return it + 2
+}
+}
 
 
 POST /.ds-metricbeat-8.8.1-2023.06.16-000001/_search
 {
-"query": {
-  "bool": {
-}}}
+    "query": {
+        "bool": {
+        }
+    }
+}
 
 var a = GET /_cluster/stats
 
@@ -73,24 +81,28 @@ print(a)
 
 POST .kibana_.17.4_001/_search
 {
-"query": {
-"bool": {
-"must": []
-}
-}
+    "query": {
+        "bool": {
+            "must": []
+        }
+    }
 }
 
 GET /
 
 var jj = jq(ap, "$.hits.hits")
 
-var fff = jj.map{it -> {
-  return jq(it, "$._source")
-}}
+var fff = jj.map{
+    it -> {
+    return jq(it, "$._source")
+}
+}
 
-var jkk = jq(ap, "$.hits.hits").map{it -> {
+var jkk = jq(ap, "$.hits.hits").map{
+    it -> {
     return jq(it, "$._source.endPrice")
-}}
+}
+}
 
 print(jkk)
 
@@ -99,28 +111,28 @@ GET _cat/indices/*force*,*vehicle*,*duty*,*person*,*provider*?h=idx
 
 POST force*,vehicle*/_search
 {
-"query": {
-"bool": {
-"must": [
-{
-"terms": {
-"id": [
-"6afa60a0-3cf9-47b9-bf32-730b35d37b9a"
-],
-"boost": 1.0
-}
-}
-]
-}
-}
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "terms": {
+                        "id": [
+                            "6afa60a0-3cf9-47b9-bf32-730b35d37b9a"
+                        ],
+                        "boost": 1.0
+                    }
+                }
+            ]
+        }
+    }
 }
 
 POST fff@fff/_search
 {
   "query": {
     "bool": {
-      "must": [
-      ]
+       "must": [
+       ]
     }
   }
 }
