@@ -42,7 +42,7 @@ trait InstructionInvoker {
         case t => t.toJson
       } getOrElse ""
       case a => a.toJson
-    }.filter(_.nonEmpty), runContext, context)
+    }.filter(_.nonEmpty), runContext)
   }
 
   private def buildContext(cIns: Seq[Instruction2],

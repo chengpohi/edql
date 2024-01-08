@@ -8,7 +8,7 @@ import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 
 
-case class ScriptContext(hostInfo: HostInfo) extends EDQLConfig with Context {
+sealed case class ScriptContext(hostInfo: HostInfo) extends EDQLConfig with Context {
   override implicit val resultTimeout: Duration = Duration.apply(hostInfo.timeout, duration.MILLISECONDS)
   override implicit val kibanaProxy: Boolean = hostInfo.kibanaProxy
   override implicit lazy val eqlClient: EDQLClient = buildRestClient(hostInfo)

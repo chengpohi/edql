@@ -1,11 +1,8 @@
 package com.github.chengpohi.script
 
-import com.github.chengpohi.context.HostInfo
-
 import scala.util.{Success, Try}
 
-
-case class EDQLRunResult(response: Try[Seq[String]], targetInstruction: String = null, runDir: String = "", hostInfo: HostInfo = null) {
+case class EDQLRunResult(response: Try[Seq[String]], context: EDQLRunContext = null) {
 
   def isSuccess: Boolean = response.isSuccess
 
@@ -21,7 +18,7 @@ object EDQLRunResult {
     new EDQLRunResult(response)
   }
 
-  def apply(response: Seq[String], runContext: EDQLRunContext, scriptContext: ScriptContext): EDQLRunResult = {
-    new EDQLRunResult(Success(response), runContext.targetInstruction, runContext.runDir, scriptContext.hostInfo)
+  def apply(response: Seq[String], runContext: EDQLRunContext): EDQLRunResult = {
+    new EDQLRunResult(Success(response), runContext)
   }
 }
