@@ -23,6 +23,8 @@ object JsonCollection {
 
     def vars: Seq[Var] = Seq()
 
+    def funs: Seq[Fun] = Seq()
+
     def get(path: String): Option[Val]
 
     def \\(path: String): Option[Val] = get(path)
@@ -80,6 +82,8 @@ object JsonCollection {
 
     override def get(path: String): Option[Val] = None
 
+    override def funs: Seq[Fun] = Seq(this)
+
     override def copy: Val = {
       val f = Fun((value._1, value._2.map(i => i.copy)))
       f.realValue = realValue.map(_.copy)
@@ -134,6 +138,8 @@ object JsonCollection {
 
     override def vars: Seq[Var] = this.value.flatMap(i => i._1.vars ++ i._2.vars)
 
+    override def funs: Seq[Fun] = this.value.flatMap(i => i._1.funs ++ i._2.funs)
+
     def remove(v: String): Obj = {
       val nvs = value.filter(i => i._1.asInstanceOf[Str].value != v)
       Obj(nvs: _*)
@@ -155,6 +161,8 @@ object JsonCollection {
 
     override def vars: Seq[Var] = this.value.flatMap(_.vars)
 
+    override def funs: Seq[Fun] = this.value.flatMap(_.funs)
+
     override def copy: Val = Arr(value.map(_.copy): _*)
   }
 
@@ -165,6 +173,8 @@ object JsonCollection {
     override def get(path: String): Option[Val] = None
 
     override def vars: Seq[Var] = value.flatMap(_.vars)
+
+    override def funs: Seq[Fun] = value.flatMap(_.funs)
 
     override def copy: Val = Tuple(value.map(_.copy): _*)
   }

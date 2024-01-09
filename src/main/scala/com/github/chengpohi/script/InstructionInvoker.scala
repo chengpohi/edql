@@ -201,7 +201,7 @@ trait InstructionInvoker {
                             parms: Map[String, JsonCollection.Val],
                             funName: Option[String] = None
                            ) = {
-    parms.map(it => {
+    parms.foreach(it => {
       it._2 match {
         case i: JsonCollection.Fun =>
           val fParam = it._2.asInstanceOf[JsonCollection.Fun]
@@ -511,8 +511,17 @@ trait InstructionInvoker {
 
   def mapRealValue(functions: Map[String, FunctionInstruction],
                    context: ScriptContext,
-                   v: JsonCollection.Val, funName: Option[String] = None): Unit = {
+                   v: JsonCollection.Val,
+                   funName: Option[String] = None): Unit = {
     val variables = context.variables
+    if (v.isInstanceOf[JsonCollection.Fun]) {
+      val fun = v.asInstanceOf[JsonCollection.Fun]
+      val last = invokeFunction(functions, context,
+        FunctionInvokeInstruction(fun.value._1, fun.value._2), funName).lastOption
+      fun.realValue = last
+      return
+    }
+
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         if (k.realValue.isEmpty) {
@@ -533,6 +542,10 @@ trait InstructionInvoker {
             case v: JsonCollection.Var =>
               mapRealValue(functions, context, v, funName)
               vl = v.realValue
+            case a: JsonCollection.Arr =>
+              a.value.foreach(i => {
+                mapRealValue(functions, context, i, funName)
+              })
             case _ =>
           }
 
@@ -540,6 +553,12 @@ trait InstructionInvoker {
             if (r.vars.nonEmpty) {
               r.vars.foreach(t => {
                 mapRealValue(functions, context, t, funName)
+              })
+            }
+
+            if (r.funs.nonEmpty) {
+              r.funs.foreach(f => {
+                mapRealValue(functions, context, f, funName)
               })
             }
           })
