@@ -278,6 +278,8 @@ trait InstructionInvoker {
     val funName = fun.funcName + "_" + fun.variableNames.size
     val funParams = fun.variableNames.map(i => funName + "$" + i).zip(values).toMap
 
+    invokePath(context, parentFunName, Some(funName))
+
     funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
       i._2.asInstanceOf[JsonCollection.Var].realValue = None
     })
@@ -325,6 +327,12 @@ trait InstructionInvoker {
         }
       case _ => response
     }
+  }
+
+  private def invokePath(context: ScriptContext, parentFunName: Option[String], funName: Option[String]) = {
+    val invokePath = context.variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
+    val path = List(invokePath, parentFunName, funName).filter(_.isDefined).map(_.get).filter(!_.isBlank).mkString("$")
+    context.variables.put("INVOKE_PATH", JsonCollection.Str(path.split("\\$").distinct.mkString("$")))
   }
 
   private def clearContextBeforeInvoke(instructions: Seq[Instruction2]) = {
@@ -379,7 +387,7 @@ trait InstructionInvoker {
   def runInstructions(functions: Map[String, FunctionInstruction],
                       context: ScriptContext,
                       instructions: Seq[Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
-    context.variables.put("INVOKE_PATH", new JsonCollection.Str(funName.orNull))
+    invokePath(context, None, funName)
     try {
       instructions.foreach(po => {
         evalDs(functions, context, po.ds, funName)
@@ -406,7 +414,8 @@ trait InstructionInvoker {
           }
         }
     } finally {
-      context.variables.remove("INVOKE_PATH")
+      val strs = context.variables.getOrElse("INVOKE_PATH", "").asInstanceOf[JsonCollection.Str].value.split("\\$")
+      context.variables.put("INVOKE_PATH", JsonCollection.Str(strs.dropRight(1).mkString("$")))
     }
 
   }
@@ -522,10 +531,33 @@ trait InstructionInvoker {
       return
     }
 
+    def findVariable(k: JsonCollection.Var): Option[JsonCollection.Val] = {
+      val scopeVal = variables.get(funName.map(i => i + "$").getOrElse("") + k.value)
+      if (scopeVal.isDefined) {
+        return scopeVal
+      }
+      val ipt = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
+
+      if (ipt.isEmpty) {
+        return variables.get(k.value)
+      }
+
+      val ipts = ipt.get.split("\\$")
+      val option = (0 to ipts.size).flatMap(i => {
+        val pts = ipts.slice(0, ipts.size - i)
+        variables.get(pts.mkString("$") + "$" + k.value)
+      }).headOption
+
+      if (option.isEmpty) {
+        return variables.get(k.value)
+      }
+      return option
+    }
+
     if (v.vars.nonEmpty) {
       v.vars.foreach(k => {
         if (k.realValue.isEmpty) {
-          var vl = variables.get(funName.map(i => i + "$").getOrElse("") + k.value).orElse(variables.get(k.value))
+          var vl = findVariable(k)
           if (vl.isEmpty) {
             throw new RuntimeException("could not find variable: " + k.value)
           }
