@@ -344,8 +344,9 @@ trait InterceptFunction {
   }
 
   private def mapNewPath(variables: scala.collection.mutable.Map[String, JsonCollection.Val], path: String) = {
-    val invokePath = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value).filter(_ != null).getOrElse("")
-    variables.filter(i => Option.apply(invokePath).forall(j => i._1.startsWith(j)))
+    val invokePath = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value).filter(_ != null)
+      .getOrElse("").split("\\$").distinct.mkString("$")
+    variables.filter(i => i._1.startsWith(invokePath))
       .filter(_._2 != null)
       .foldLeft(path)((i, o) => {
         val vName = o._1.replace(invokePath + "$", "");

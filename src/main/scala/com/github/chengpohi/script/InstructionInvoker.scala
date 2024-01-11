@@ -211,8 +211,8 @@ trait InstructionInvoker {
           }
           context.variables.put(it._1, i.realValue.getOrElse(JsonCollection.Null))
         case i: JsonCollection.Var =>
-          mapRealValue(globalFunctions, context, it._2, funName)
-          context.variables.put(it._1, it._2)
+          mapRealValue(globalFunctions, context, i, funName)
+          context.variables.put(it._1, i.realValue.get)
         case i: JsonCollection.ArithTree =>
         case _ =>
           context.variables.put(it._1, it._2)
@@ -225,10 +225,13 @@ trait InstructionInvoker {
     })
 
     val vals = parms.filter(!_._2.isInstanceOf[JsonCollection.Fun]).map(i => {
-      if (i._2.isInstanceOf[JsonCollection.Var]) {
-        mapRealValue(globalFunctions, context, i._2, funName)
+      i._2 match {
+        case va: JsonCollection.Var =>
+          mapRealValue(globalFunctions, context, i._2, funName)
+          i._1 -> va.realValue.get
+        case _ =>
+          i._1 -> i._2
       }
-      i._1 -> i._2
     })
     context.variables.addAll(vals)
   }
@@ -279,57 +282,61 @@ trait InstructionInvoker {
     clearContextBeforeInvoke(fun.instructions)
     val funName = fun.funcName + "_" + fun.variableNames.size
 
-    setInvokePath(context, parentFunName, Some(funName))
+    setInvokePath(context, Some(funName))
 
-    val funParams = fun.variableNames.map(i => context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i).zip(values).toMap
+    try {
+      val funParams = fun.variableNames.map(i => context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i).zip(values).toMap
 
 
-    funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
-      i._2.asInstanceOf[JsonCollection.Var].realValue = None
-    })
+      funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
+        i._2.asInstanceOf[JsonCollection.Var].realValue = None
+      })
 
-    evalFunParams(functions, context, funParams, parentFunName.orElse(Some(funName)))
+      evalFunParams(functions, context, funParams, parentFunName.orElse(Some(funName)))
 
-    val instructions = fun.instructions
+      val instructions = fun.instructions
 
-    val nestFunctions = instructions.filter(_.isInstanceOf[FunctionInstruction]).map(i => {
-      val f = i.asInstanceOf[FunctionInstruction]
-      f.funcName + f.variableNames.size -> f
-    }).toMap
-
-    val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
-      .map(i => i.asInstanceOf[VariableInstruction])
-      .map(i => {
-        context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i.variableName -> i.value
+      val nestFunctions = instructions.filter(_.isInstanceOf[FunctionInstruction]).map(i => {
+        val f = i.asInstanceOf[FunctionInstruction]
+        f.funcName + f.variableNames.size -> f
       }).toMap
 
-    val nestVars = (funcBodyVars ++ funParams).flatMap(fv => {
-      nestFunctions.map(n => {
-        fv._1.replaceAll(funName, n._2.funcName + "_" + n._2.variableNames.size) -> fv._2
+      val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
+        .map(i => i.asInstanceOf[VariableInstruction])
+        .map(i => {
+          context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i.variableName -> i.value
+        }).toMap
+
+      val nestVars = (funcBodyVars ++ funParams).flatMap(fv => {
+        nestFunctions.map(n => {
+          fv._1.replaceAll(funName, n._2.funcName + "_" + n._2.variableNames.size) -> fv._2
+        })
       })
-    })
 
-    context.variables.addAll(nestVars)
+      context.variables.addAll(nestVars)
 
-    evalFunParams(functions ++ nestFunctions, context, funcBodyVars, Some(funName))
+      evalFunParams(functions ++ nestFunctions, context, funcBodyVars, Some(funName))
 
 
-    val response = runInstructions(functions ++ nestFunctions, context, instructions, Some(funName))
+      val response = runInstructions(functions ++ nestFunctions, context, instructions, Some(funName))
 
-    context.variables = cachedVariables
+      context.variables = cachedVariables
 
-    if (invoke.map.isEmpty) {
-      return response
-    }
-    response match {
-      case Seq(r) =>
-        r match {
-          case a: JsonCollection.Arr =>
-            val m = invoke.map.get.copy(a = a)
-            invokeMapIter(functions, context, m, parentFunName)
-          case _ => response
-        }
-      case _ => response
+      if (invoke.map.isEmpty) {
+        return response
+      }
+      response match {
+        case Seq(r) =>
+          r match {
+            case a: JsonCollection.Arr =>
+              val m = invoke.map.get.copy(a = a)
+              invokeMapIter(functions, context, m, parentFunName)
+            case _ => response
+          }
+        case _ => response
+      }
+    } finally {
+      dropOnePath(context)
     }
   }
 
@@ -353,7 +360,6 @@ trait InstructionInvoker {
         fs.put(fun.funcName + fun.variableNames.size, fun)
         clearContextBeforeInvoke(fun.instructions)
         val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
-        setInvokePath(context, None, Some(fun.funcName + "_" + fun.variableNames.size))
         runInstructions(fs.toMap, context, Seq(invoke), funName).lastOption
       }).filter(_.isDefined).map(_.get)
       Seq(JsonCollection.Arr(res: _*))
@@ -386,7 +392,7 @@ trait InstructionInvoker {
   def runInstructions(functions: Map[String, FunctionInstruction],
                       context: ScriptContext,
                       instructions: Seq[Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
-    setInvokePath(context, None, funName)
+    setInvokePath(context, funName)
     try {
       instructions.foreach(po => {
         evalDs(functions, context, po.ds, funName)
@@ -523,6 +529,9 @@ trait InstructionInvoker {
     val variables = context.variables
     if (v.isInstanceOf[JsonCollection.Fun]) {
       val fun = v.asInstanceOf[JsonCollection.Fun]
+      if (fun.realValue.isDefined) {
+        return
+      }
       val last = invokeFunction(functions, context,
         FunctionInvokeInstruction(fun.value._1, fun.value._2), funName).lastOption
       fun.realValue = last
@@ -570,8 +579,10 @@ trait InstructionInvoker {
                 vl = arith.realValue
               }
             case v: JsonCollection.Var =>
-              mapRealValue(functions, context, v, funName)
-              vl = v.realValue
+              if (v.realValue.isEmpty) {
+                mapRealValue(functions, context, v, funName)
+                vl = v.realValue
+              }
             case a: JsonCollection.Arr =>
               a.value.foreach(i => {
                 mapRealValue(functions, context, i, funName)
@@ -604,9 +615,9 @@ trait InstructionInvoker {
     context.variables.put("INVOKE_PATH", JsonCollection.Str(strs.dropRight(1).mkString("$")))
   }
 
-  private def setInvokePath(context: ScriptContext, parentFunName: Option[String], funName: Option[String]) = {
+  private def setInvokePath(context: ScriptContext, funName: Option[String]) = {
     val invokePath = getInvokePath(context.variables)
-    val path = List(invokePath, parentFunName, funName).filter(_.isDefined).map(_.get).filter(!_.isBlank).mkString("$")
+    val path = List(invokePath, funName).filter(_.isDefined).map(_.get).filter(!_.isBlank).mkString("$")
     putInvokePath(context, path)
   }
 
