@@ -539,10 +539,6 @@ trait InstructionInvoker {
     }
 
     def findVariable(k: JsonCollection.Var): Option[JsonCollection.Val] = {
-      val scopeVal = variables.get(funName.map(i => i + "$").getOrElse("") + k.value)
-      if (scopeVal.isDefined) {
-        return scopeVal
-      }
       val ipt = getInvokePath(variables)
 
       if (ipt.isEmpty) {
@@ -556,6 +552,10 @@ trait InstructionInvoker {
       }).headOption
 
       if (option.isEmpty) {
+        val scopeVal = variables.get(funName.map(i => i + "$").getOrElse("") + k.value)
+        if (scopeVal.isDefined) {
+          return scopeVal
+        }
         return variables.get(k.value)
       }
       return option
@@ -579,10 +579,8 @@ trait InstructionInvoker {
                 vl = arith.realValue
               }
             case v: JsonCollection.Var =>
-              if (v.realValue.isEmpty) {
-                mapRealValue(functions, context, v, funName)
-                vl = v.realValue
-              }
+              mapRealValue(functions, context, v, funName)
+              vl = v.realValue
             case a: JsonCollection.Arr =>
               a.value.foreach(i => {
                 mapRealValue(functions, context, i, funName)
