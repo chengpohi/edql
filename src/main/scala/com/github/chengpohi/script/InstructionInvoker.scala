@@ -279,14 +279,13 @@ trait InstructionInvoker {
     }
 
     val fun = foundFunction.get
-    clearContextBeforeInvoke(fun.instructions)
     val funName = fun.funcName + "_" + fun.variableNames.size
 
     setInvokePath(context, Some(funName))
 
     try {
       val funParams = fun.variableNames.map(i => context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i).zip(values).toMap
-
+      clearContextBeforeInvoke(context, fun.instructions, funParams)
 
       funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
         i._2.asInstanceOf[JsonCollection.Var].realValue = None
@@ -340,12 +339,16 @@ trait InstructionInvoker {
     }
   }
 
-  private def clearContextBeforeInvoke(instructions: Seq[Instruction2]) = {
+  private def clearContextBeforeInvoke(context: ScriptContext, instructions: Seq[Instruction2], funParams: Map[String, JsonCollection.Val]) = {
     instructions.foreach(fi => {
       fi.ds.filter(_.isInstanceOf[JsonCollection.Dynamic]).foreach(di => {
         di.clean()
       })
     })
+
+    for (elem <- funParams) {
+      context.variables.remove(elem._1)
+    }
   }
 
   def invokeMapIter(functions: Map[String, FunctionInstruction],
@@ -358,7 +361,7 @@ trait InstructionInvoker {
         val fs: mutable.Map[String, FunctionInstruction] = mutable.Map[String, FunctionInstruction]()
         fs.addAll(functions)
         fs.put(fun.funcName + fun.variableNames.size, fun)
-        clearContextBeforeInvoke(fun.instructions)
+        clearContextBeforeInvoke(context, fun.instructions, Map())
         val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
         runInstructions(fs.toMap, context, Seq(invoke), funName).lastOption
       }).filter(_.isDefined).map(_.get)
@@ -433,8 +436,9 @@ trait InstructionInvoker {
       case v: JsonCollection.ArithTree =>
         evalArith(functions, context, v, funName)
       case f: JsonCollection.Fun =>
-        val res = invokeFunction(functions, context,
-          FunctionInvokeInstruction(f.value._1, f.value._2), funName).last
+        val vss = invokeFunction(functions, context,
+          FunctionInvokeInstruction(f.value._1, f.value._2), funName)
+        val res = vss.last
         f.realValue = Some(res)
     }
   }
