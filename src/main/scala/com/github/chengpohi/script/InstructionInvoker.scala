@@ -204,10 +204,12 @@ trait InstructionInvoker {
     parms.foreach(it => {
       it._2 match {
         case i: JsonCollection.Fun =>
-          val fParam = it._2.asInstanceOf[JsonCollection.Fun]
-          val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).lastOption
-          fParam.realValue = value
-          context.variables.put(it._1, value.getOrElse(JsonCollection.Null))
+          if (i.realValue.isEmpty) {
+            val fParam = it._2.asInstanceOf[JsonCollection.Fun]
+            val value = invokeFunction(globalFunctions, context, FunctionInvokeInstruction(fParam.value._1, fParam.value._2), funName).lastOption
+            fParam.realValue = value
+          }
+          context.variables.put(it._1, i.realValue.getOrElse(JsonCollection.Null))
         case i: JsonCollection.Var =>
           mapRealValue(globalFunctions, context, it._2, funName)
           context.variables.put(it._1, it._2)
@@ -328,6 +330,7 @@ trait InstructionInvoker {
       case _ => response
     }
   }
+
 
   private def invokePath(context: ScriptContext, parentFunName: Option[String], funName: Option[String]) = {
     val invokePath = context.variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
