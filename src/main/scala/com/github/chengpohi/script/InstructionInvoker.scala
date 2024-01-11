@@ -278,9 +278,11 @@ trait InstructionInvoker {
     val fun = foundFunction.get
     clearContextBeforeInvoke(fun.instructions)
     val funName = fun.funcName + "_" + fun.variableNames.size
-    val funParams = fun.variableNames.map(i => funName + "$" + i).zip(values).toMap
 
-    invokePath(context, parentFunName, Some(funName))
+    setInvokePath(context, parentFunName, Some(funName))
+
+    val funParams = fun.variableNames.map(i => context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i).zip(values).toMap
+
 
     funParams.filter(_._2.isInstanceOf[JsonCollection.Var]).foreach(i => {
       i._2.asInstanceOf[JsonCollection.Var].realValue = None
@@ -298,7 +300,7 @@ trait InstructionInvoker {
     val funcBodyVars = instructions.filter(_.isInstanceOf[VariableInstruction])
       .map(i => i.asInstanceOf[VariableInstruction])
       .map(i => {
-        funName + "$" + i.variableName -> i.value
+        context.variables.get("INVOKE_PATH").map(_.value).getOrElse(funName) + "$" + i.variableName -> i.value
       }).toMap
 
     val nestVars = (funcBodyVars ++ funParams).flatMap(fv => {
@@ -331,13 +333,6 @@ trait InstructionInvoker {
     }
   }
 
-
-  private def invokePath(context: ScriptContext, parentFunName: Option[String], funName: Option[String]) = {
-    val invokePath = context.variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
-    val path = List(invokePath, parentFunName, funName).filter(_.isDefined).map(_.get).filter(!_.isBlank).mkString("$")
-    context.variables.put("INVOKE_PATH", JsonCollection.Str(path.split("\\$").distinct.mkString("$")))
-  }
-
   private def clearContextBeforeInvoke(instructions: Seq[Instruction2]) = {
     instructions.foreach(fi => {
       fi.ds.filter(_.isInstanceOf[JsonCollection.Dynamic]).foreach(di => {
@@ -358,6 +353,7 @@ trait InstructionInvoker {
         fs.put(fun.funcName + fun.variableNames.size, fun)
         clearContextBeforeInvoke(fun.instructions)
         val invoke = FunctionInvokeInstruction(fun.funcName, Seq(i))
+        setInvokePath(context, None, Some(fun.funcName + "_" + fun.variableNames.size))
         runInstructions(fs.toMap, context, Seq(invoke), funName).lastOption
       }).filter(_.isDefined).map(_.get)
       Seq(JsonCollection.Arr(res: _*))
@@ -390,7 +386,7 @@ trait InstructionInvoker {
   def runInstructions(functions: Map[String, FunctionInstruction],
                       context: ScriptContext,
                       instructions: Seq[Instruction2], funName: Option[String] = None): Seq[JsonCollection.Val] = {
-    invokePath(context, None, funName)
+    setInvokePath(context, None, funName)
     try {
       instructions.foreach(po => {
         evalDs(functions, context, po.ds, funName)
@@ -417,8 +413,7 @@ trait InstructionInvoker {
           }
         }
     } finally {
-      val strs = context.variables.getOrElse("INVOKE_PATH", "").asInstanceOf[JsonCollection.Str].value.split("\\$")
-      context.variables.put("INVOKE_PATH", JsonCollection.Str(strs.dropRight(1).mkString("$")))
+      dropOnePath(context)
     }
 
   }
@@ -539,15 +534,15 @@ trait InstructionInvoker {
       if (scopeVal.isDefined) {
         return scopeVal
       }
-      val ipt = variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
+      val ipt = getInvokePath(variables)
 
       if (ipt.isEmpty) {
         return variables.get(k.value)
       }
 
       val ipts = ipt.get.split("\\$")
-      val option = (0 to ipts.size).flatMap(i => {
-        val pts = ipts.slice(0, ipts.size - i)
+      val option = (0 to ipts.length).flatMap(i => {
+        val pts = ipts.slice(0, ipts.length - i)
         variables.get(pts.mkString("$") + "$" + k.value)
       }).headOption
 
@@ -604,4 +599,23 @@ trait InstructionInvoker {
   }
 
 
+  private def dropOnePath(context: ScriptContext): Unit = {
+    val strs = context.variables.getOrElse("INVOKE_PATH", "").asInstanceOf[JsonCollection.Str].value.split("\\$")
+    context.variables.put("INVOKE_PATH", JsonCollection.Str(strs.dropRight(1).mkString("$")))
+  }
+
+  private def setInvokePath(context: ScriptContext, parentFunName: Option[String], funName: Option[String]) = {
+    val invokePath = getInvokePath(context.variables)
+    val path = List(invokePath, parentFunName, funName).filter(_.isDefined).map(_.get).filter(!_.isBlank).mkString("$")
+    putInvokePath(context, path)
+  }
+
+  private def putInvokePath(context: ScriptContext, path: String) = {
+    context.variables.put("INVOKE_PATH", JsonCollection.Str(path.split("\\$").mkString("$")))
+  }
+
+
+  private def getInvokePath(variables: mutable.Map[String, JsonCollection.Val]) = {
+    variables.get("INVOKE_PATH").map(_.asInstanceOf[JsonCollection.Str].value)
+  }
 }
