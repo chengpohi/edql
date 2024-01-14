@@ -1,6 +1,7 @@
 * EDQL
 
 For now, EDQL relies on the IntelliJ Grammar Kit for its functionality and integration.
+> before it uses standable parser and lexer for edql files.
 
 ** Use with EDQL Intellij GUI Client
 Please view more on: [[https://chengpohi.github.io/][EDQL Wiki]] or [[https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql/][Install EDQL]]
