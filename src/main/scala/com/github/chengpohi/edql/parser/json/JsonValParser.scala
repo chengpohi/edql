@@ -1,5 +1,6 @@
 package com.github.chengpohi.edql.parser.json
 
+import com.fasterxml.jackson.core.json.JsonReadFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.chengpohi.edql.parser.psi._
 import com.intellij.psi.PsiElement
@@ -9,7 +10,11 @@ import java.util
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 trait JsonValParser {
-  private val mapper = new ObjectMapper()
+  private val mapper: ObjectMapper = new ObjectMapper()
+  mapper.configure(
+    JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(),
+    true
+  );
 
   def toJsonVal(getObjList: util.List[EDQLObj]): Seq[JsonCollection.Val] = {
     getObjList.asScala.map(i => toJsonVal(i)).toSeq

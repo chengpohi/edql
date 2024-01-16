@@ -14,7 +14,6 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
 
 class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends InterceptFunction with JsonValParser {
-
   import parserFactory._
 
   def parseJson(text: String): Try[JsonCollection.Val] = {
@@ -239,4 +238,5 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) extends Intercept
       case _ => null
     }
   }
+
 }
