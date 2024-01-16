@@ -1,6 +1,7 @@
 package com.github.chengpohi.edql.parser.json
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder
+import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.StringUtils
 
 import scala.reflect.runtime.universe._
@@ -33,7 +34,9 @@ object JsonCollection {
   }
 
   case class Str(value: java.lang.String) extends AnyVal with Arith {
-    override def toJson: String = "\"" + new String(JsonStringEncoder.getInstance().quoteAsString(value)) + "\""
+    override def toJson: String = {
+      "\"" + new String(JsonStringEncoder.getInstance().quoteAsString(value)) + "\""
+    }
 
     def raw: String = value
 

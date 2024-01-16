@@ -1,14 +1,16 @@
 package com.github.chengpohi.edql.parser.json
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.chengpohi.edql.parser.psi._
 import com.intellij.psi.PsiElement
 import org.apache.commons.collections.CollectionUtils
 
 import java.util
-import java.util.List
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 trait JsonValParser {
+  private val mapper = new ObjectMapper()
+
   def toJsonVal(getObjList: util.List[EDQLObj]): Seq[JsonCollection.Val] = {
     getObjList.asScala.map(i => toJsonVal(i)).toSeq
   }
@@ -67,19 +69,19 @@ trait JsonValParser {
     if (expr.getDoubleQuotedString != null) {
       val str = expr.getDoubleQuotedString.getText
       checkParse(expr, str)
-      return JsonCollection.Str(str.substring(1, str.length - 1))
+      return JsonCollection.Str(mapper.readTree(str).textValue())
     }
 
     if (expr.getTripleQuotedString != null) {
       val str = expr.getTripleQuotedString.getText
       checkParse(expr, str)
-      return JsonCollection.Str(str.substring(3, str.length - 3))
+      return JsonCollection.Str(mapper.readTree(str.substring(2, str.length - 2)).textValue())
     }
 
     if (expr.getSingleQuotedString != null) {
       val str = expr.getSingleQuotedString.getText
       checkParse(expr, str)
-      return JsonCollection.Str(str.substring(3, str.length - 3))
+      return JsonCollection.Str(mapper.readTree(str).textValue())
     }
 
     if (expr.getNumber != null) {
