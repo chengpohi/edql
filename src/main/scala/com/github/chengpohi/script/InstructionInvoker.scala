@@ -438,8 +438,8 @@ trait InstructionInvoker {
       case f: JsonCollection.Fun =>
         val vss = invokeFunction(functions, context,
           FunctionInvokeInstruction(f.value._1, f.value._2), funName)
-        val res = vss.last
-        f.realValue = Some(res)
+        val res = vss.lastOption
+        f.realValue = res
     }
   }
 
@@ -570,14 +570,18 @@ trait InstructionInvoker {
         if (k.realValue.isEmpty) {
           var vl = findVariable(k)
           if (vl.isEmpty) {
-            throw new RuntimeException("could not find variable: " + k.value)
+            throw new RuntimeException(s"could not find variable: ${getInvokePath(variables).getOrElse("")}: ${k.value}")
           }
 
           vl.get match {
             case fun: JsonCollection.Fun =>
-              val res = invokeFunction(functions, context,
-                FunctionInvokeInstruction(fun.value._1, fun.value._2), funName).last
-              vl = Some(res)
+              if (fun.realValue.isDefined) {
+                vl = fun.realValue
+              } else {
+                val res = invokeFunction(functions, context,
+                  FunctionInvokeInstruction(fun.value._1, fun.value._2), funName).last
+                vl = Some(res)
+              }
             case arith: JsonCollection.ArithTree =>
               if (arith.realValue.isDefined) {
                 vl = arith.realValue
