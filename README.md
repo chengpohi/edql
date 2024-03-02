@@ -1,4 +1,4 @@
-# EDQL
+# EDQL <a href="https://link.depay.com/4E72qeMls2w333TEuTa2Op" alt="Donate shield"><img src="https://img.shields.io/badge/-Donate-red?logo=undertale" /></a>
 
 EDQL is a professional query and management tool for Elasticsearch. It's intelligent and powerful for manage Elasticsearch cluster and query from Elasticsearch. also It always follow Elasticsearch newest features.
 
