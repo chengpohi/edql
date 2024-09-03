@@ -110,7 +110,7 @@ trait JsonValParser {
 
     if (expr.getNumber != null) {
       checkParse(expr, expr.getNumber.getText)
-      return JsonCollection.Num(expr.getNumber.getText.toDouble)
+      return JsonCollection.Num(BigDecimal(expr.getNumber.getText))
     }
 
     if (expr.getBool != null) {
