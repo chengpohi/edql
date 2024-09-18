@@ -1457,44 +1457,55 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ((pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?)) | '/'
+  // ((pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?)) SLASH? | SLASH?
   public static boolean path(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, PATH, "<path>");
     r = path_0(b, l + 1);
-    if (!r) r = consumeToken(b, SLASH);
+    if (!r) r = path_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?
+  // ((pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?)) SLASH?
   private static boolean path_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "path_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = path_0_0(b, l + 1);
     r = r && path_0_1(b, l + 1);
-    r = r && path_0_2(b, l + 1);
-    r = r && path_0_3(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // pathSymbol* (NUMBER | IDENTIFIER0) ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))* (ASTERISK | ',')?
+  private static boolean path_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = path_0_0_0(b, l + 1);
+    r = r && path_0_0_1(b, l + 1);
+    r = r && path_0_0_2(b, l + 1);
+    r = r && path_0_0_3(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // pathSymbol*
-  private static boolean path_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_0")) return false;
+  private static boolean path_0_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_0")) return false;
     while (true) {
       int c = current_position_(b);
       if (!pathSymbol(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "path_0_0", c)) break;
+      if (!empty_element_parsed_guard_(b, "path_0_0_0", c)) break;
     }
     return true;
   }
 
   // NUMBER | IDENTIFIER0
-  private static boolean path_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_1")) return false;
+  private static boolean path_0_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_1")) return false;
     boolean r;
     r = consumeToken(b, NUMBER);
     if (!r) r = IDENTIFIER0(b, l + 1);
@@ -1502,42 +1513,42 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // ( pathSymbol pathSymbol* (NUMBER | IDENTIFIER0))*
-  private static boolean path_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_2")) return false;
+  private static boolean path_0_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!path_0_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "path_0_2", c)) break;
+      if (!path_0_0_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "path_0_0_2", c)) break;
     }
     return true;
   }
 
   // pathSymbol pathSymbol* (NUMBER | IDENTIFIER0)
-  private static boolean path_0_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_2_0")) return false;
+  private static boolean path_0_0_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = pathSymbol(b, l + 1);
-    r = r && path_0_2_0_1(b, l + 1);
-    r = r && path_0_2_0_2(b, l + 1);
+    r = r && path_0_0_2_0_1(b, l + 1);
+    r = r && path_0_0_2_0_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // pathSymbol*
-  private static boolean path_0_2_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_2_0_1")) return false;
+  private static boolean path_0_0_2_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_2_0_1")) return false;
     while (true) {
       int c = current_position_(b);
       if (!pathSymbol(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "path_0_2_0_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "path_0_0_2_0_1", c)) break;
     }
     return true;
   }
 
   // NUMBER | IDENTIFIER0
-  private static boolean path_0_2_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_2_0_2")) return false;
+  private static boolean path_0_0_2_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_2_0_2")) return false;
     boolean r;
     r = consumeToken(b, NUMBER);
     if (!r) r = IDENTIFIER0(b, l + 1);
@@ -1545,23 +1556,37 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   // (ASTERISK | ',')?
-  private static boolean path_0_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_3")) return false;
-    path_0_3_0(b, l + 1);
+  private static boolean path_0_0_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_3")) return false;
+    path_0_0_3_0(b, l + 1);
     return true;
   }
 
   // ASTERISK | ','
-  private static boolean path_0_3_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "path_0_3_0")) return false;
+  private static boolean path_0_0_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_0_3_0")) return false;
     boolean r;
     r = consumeToken(b, ASTERISK);
     if (!r) r = consumeToken(b, COMMA);
     return r;
   }
 
+  // SLASH?
+  private static boolean path_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_0_1")) return false;
+    consumeToken(b, SLASH);
+    return true;
+  }
+
+  // SLASH?
+  private static boolean path_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "path_1")) return false;
+    consumeToken(b, SLASH);
+    return true;
+  }
+
   /* ********************************************************** */
-  // DOT | '/' | ASTERISK | '-' | ':' | ',' | '@'
+  // DOT | SLASH | ASTERISK | '-' | ':' | ',' | '@'
   public static boolean pathSymbol(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "pathSymbol")) return false;
     boolean r;
