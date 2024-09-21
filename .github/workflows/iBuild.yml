@@ -20,7 +20,7 @@ on:
   # Trigger the workflow on any pull request
   workflow_dispatch:
   schedule:
-  - cron: "30 22 * * *"
+  - cron: "30 08 * * *"
 
 jobs:
 
