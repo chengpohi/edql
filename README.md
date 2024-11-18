@@ -32,7 +32,7 @@ POST my-index/_search
   }
 }
 ```
-## 1. Install and Use
+## 1. Install and Query
 
 ### 1.1 Install EDQL Plugin on Intellij
 1. Download from Intellij plugin by search EDQL and install
@@ -42,12 +42,11 @@ POST my-index/_search
 ### 1.2 Install EDQL Standalone GUI
 Download from [Github Releases](https://github.com/chengpohi/edql/releases), find latest QSharp version(ex: [QSharp1.10.16](https://github.com/chengpohi/edql/releases/tag/QSharp1.10.16)), Since it's not signed, you should trust it and install.
 
-### 1.3 Create a Connection and Query
+### 1.3 New Connection and Query
 ![Create a Connection and Query](https://chengpohi.github.io/.gitbook/assets/new-connection.gif)
 
 ### 1.4 Chat Query Elasticsearch
 ![Chat Query](https://chengpohi.github.io/.gitbook/assets/chatquery.gif)
 
 ### 1.5 Plot Panel
-
 
