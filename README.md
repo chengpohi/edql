@@ -32,7 +32,7 @@ POST my-index/_search
   }
 }
 ```
-## 1. Install and Query
+## 1 Install and Query
 
 ### 1.1 Install EDQL Plugin on Intellij
 - Search EDQL from [Intellij plugin marketplace](https://plugins.jetbrains.com/) and install
