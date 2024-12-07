@@ -31,6 +31,7 @@ class KibanaProxyApacheInterceptor extends HttpRequestInterceptor {
           .build();
         req.setURI(proxyUri)
         req.addHeader("kbn-xsrf", "kibana")
+        req.addHeader("osd-xsrf", "true")
       case _ =>
     }
   }
