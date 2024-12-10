@@ -2,6 +2,7 @@ package com.github.chengpohi.script
 
 import com.github.chengpohi.context._
 import com.github.chengpohi.edql.parser.json.JsonCollection
+import org.apache.commons.codec.binary.Base64
 
 import scala.collection.mutable
 import scala.concurrent.duration
@@ -22,7 +23,11 @@ object ScriptContext {
 
   def apply(hostInfo: HostInfo,
             vars: Map[String, JsonCollection.Val]): ScriptContext = {
-    val cacheKey = s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("") + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}" + s"-${hostInfo.readOnly}" + s"-${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}"
+    val keyBytes = (s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("")
+      + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}" + s"-${hostInfo.readOnly}"
+      + s"-${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}").getBytes
+
+    val cacheKey = Base64.encodeBase64String(keyBytes)
 
     val cacheContext = cache.get(cacheKey)
     if (isCacheValid(cacheContext)) {

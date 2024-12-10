@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 trait InstructionInvoker {
   val factory: EDQLParserFactory
   lazy val parser = new EDQLPsiInterceptor(factory)
-  private val httpClient: HttpClient = HttpClient.newHttpClient()
+  private lazy val httpClient: HttpClient = HttpClient.newHttpClient()
   val libs: Seq[URL]
 
   import parser._
