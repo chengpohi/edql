@@ -17,12 +17,14 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       val request = new Request(if (kibanaProxy) "POST" else "GET", path);
 
+      val builder = RequestOptions.DEFAULT.toBuilder
+      builder.addHeader("Content-Type", "application/json")
       if (kibanaProxy) {
-        request.setOptions(RequestOptions.DEFAULT.toBuilder
-          .addHeader(KIBANA_PROXY_METHOD, "GET")
+        builder.addHeader(KIBANA_PROXY_METHOD, "GET")
           .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-        )
       }
+      request.setOptions(builder)
+
 
       as match {
         case None =>

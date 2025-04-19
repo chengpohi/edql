@@ -1,167 +1,125 @@
 package com.github.chengpohi.aws;
 
-import com.amazonaws.DefaultRequest;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.Signer;
-import com.amazonaws.http.HttpMethodName;
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.auth.spi.signer.HttpSigner;
+import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
+import software.amazon.awssdk.identity.spi.AwsCredentialsIdentity;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.apache.http.protocol.HttpCoreContext.HTTP_TARGET_HOST;
-
 /**
- * An {@link HttpRequestInterceptor} that signs requests using any AWS {@link Signer}
- * and {@link AWSCredentialsProvider}.
+ * An {@link HttpRequestInterceptor} that signs requests for any AWS service
+ * running in a specific region using an AWS {@link HttpSigner} and
+ * {@link AwsCredentialsProvider}.
  */
-public class AWSRequestSigningApacheInterceptor implements HttpRequestInterceptor {
-    /**
-     * The service that we're connecting to. Technically not necessary.
-     * Could be used by a future Signer, though.
-     */
-    private final String service;
+public final class AWSRequestSigningApacheInterceptor implements HttpRequestInterceptor {
+    private RequestSigner signer;
+
 
     /**
-     * The particular signer implementation.
-     */
-    private final Signer signer;
-
-    /**
-     * The source of AWS credentials for signing.
-     */
-    private final AWSCredentialsProvider awsCredentialsProvider;
-
-    /**
-     * @param service                service that we're connecting to
-     * @param signer                 particular signer implementation
+     * Creates an {@code AwsRequestSigningApacheInterceptor} with the
+     * ability to sign request for a specific service in a region and
+     * defined credentials.
+     *
+     * @param service                service the client is connecting to
+     * @param signer                 signer implementation.
      * @param awsCredentialsProvider source of AWS credentials for signing
+     * @param region                 signing region
      */
-    public AWSRequestSigningApacheInterceptor(final String service,
-                                              final Signer signer,
-                                              final AWSCredentialsProvider awsCredentialsProvider) {
-        this.service = service;
-        this.signer = signer;
-        this.awsCredentialsProvider = awsCredentialsProvider;
+    public AWSRequestSigningApacheInterceptor(String service,
+                                              HttpSigner<AwsCredentialsIdentity> signer,
+                                              AwsCredentialsProvider awsCredentialsProvider,
+                                              String region) {
+        this.signer = new RequestSigner(service, signer, awsCredentialsProvider, region);
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void process(final HttpRequest request, final HttpContext context)
-            throws HttpException, IOException {
-        URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(request.getRequestLine().getUri());
-        } catch (URISyntaxException e) {
-            throw new IOException("Invalid URI", e);
-        }
+    public void process(HttpRequest request, HttpContext context)
+        throws HttpException, IOException {
+        URI requestUri = RequestSigner.buildUri(context, request.getRequestLine().getUri());
 
-        // Copy Apache HttpRequest to AWS DefaultRequest
-        DefaultRequest<?> signableRequest = new DefaultRequest<>(service);
-
-        HttpHost host = (HttpHost) context.getAttribute(HTTP_TARGET_HOST);
-        if (host != null) {
-            signableRequest.setEndpoint(URI.create(host.toURI()));
-        }
-        final HttpMethodName httpMethod =
-                HttpMethodName.fromValue(request.getRequestLine().getMethod());
-        signableRequest.setHttpMethod(httpMethod);
-        try {
-            signableRequest.setResourcePath(uriBuilder.build().getRawPath());
-        } catch (URISyntaxException e) {
-            throw new IOException("Invalid URI", e);
-        }
+        // copy Apache HttpRequest to AWS request
+        SdkHttpFullRequest.Builder requestBuilder = SdkHttpFullRequest.builder()
+            .method(SdkHttpMethod.fromValue(request.getRequestLine().getMethod()))
+            .uri(requestUri);
 
         if (request instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest httpEntityEnclosingRequest =
-                    (HttpEntityEnclosingRequest) request;
-            if (httpEntityEnclosingRequest.getEntity() == null) {
-                signableRequest.setContent(new ByteArrayInputStream(new byte[0]));
-            } else {
-                signableRequest.setContent(httpEntityEnclosingRequest.getEntity().getContent());
-            }
-        }
-        signableRequest.setParameters(nvpToMapParams(uriBuilder.getQueryParams()));
-        signableRequest.setHeaders(headerArrayToMap(request.getAllHeaders()));
-
-        // Sign it
-        signer.sign(signableRequest, awsCredentialsProvider.getCredentials());
-
-        // Now copy everything back
-        request.setHeaders(mapToHeaderArray(signableRequest.getHeaders()));
-        if (request instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest httpEntityEnclosingRequest =
-                    (HttpEntityEnclosingRequest) request;
+            HttpEntityEnclosingRequest httpEntityEnclosingRequest = (HttpEntityEnclosingRequest)request;
             if (httpEntityEnclosingRequest.getEntity() != null) {
-                BasicHttpEntity basicHttpEntity = new BasicHttpEntity();
-                basicHttpEntity.setContent(signableRequest.getContent());
-                httpEntityEnclosingRequest.setEntity(basicHttpEntity);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                httpEntityEnclosingRequest.getEntity().writeTo(outputStream);
+                if (!httpEntityEnclosingRequest.getEntity().isRepeatable()) {
+                    // copy back the entity, so it can be read again
+                    BasicHttpEntity entity = new BasicHttpEntity();
+                    entity.setContent(new ByteArrayInputStream(outputStream.toByteArray()));
+                    // wrap into repeatable entity to support retries
+                    httpEntityEnclosingRequest.setEntity(new BufferedHttpEntity(entity));
+                }
+                requestBuilder.contentStreamProvider(() -> new ByteArrayInputStream(outputStream.toByteArray()));
             }
         }
+
+        Map<String, List<String>> headers = headerArrayToMap(request.getAllHeaders());
+        // adds a hash of the request payload when signing
+        headers.put("x-amz-content-sha256", Collections.singletonList("required"));
+        requestBuilder.headers(headers);
+        SignedRequest signedRequest = signer.signRequest(requestBuilder.build());
+
+        // copy everything back
+        request.setHeaders(mapToHeaderArray(signedRequest.request().headers()));
     }
 
-    /**
-     * @param params list of HTTP query params as NameValuePairs
-     * @return a multimap of HTTP query params
-     */
-    private static Map<String, List<String>> nvpToMapParams(final List<NameValuePair> params) {
-        Map<String, List<String>> parameterMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        for (NameValuePair nvp : params) {
-            List<String> argsList =
-                    parameterMap.computeIfAbsent(nvp.getName(), k -> new ArrayList<>());
-            argsList.add(nvp.getValue());
-        }
-        return parameterMap;
-    }
-
-    /**
-     * @param headers modeled Header objects
-     * @return a Map of header entries
-     */
-    private static Map<String, String> headerArrayToMap(final Header[] headers) {
-        Map<String, String> headersMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private static Map<String, List<String>> headerArrayToMap(Header[] headers) {
+        Map<String, List<String>> headersMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (Header header : headers) {
             if (!skipHeader(header)) {
-                headersMap.put(header.getName(), header.getValue());
+                headersMap.put(header.getName(),
+                               headersMap.getOrDefault(header.getName(),
+                                                       new LinkedList<>(Collections.singletonList(header.getValue()))));
             }
         }
         return headersMap;
     }
 
-    /**
-     * @param header header line to check
-     * @return true if the given header should be excluded when signing
-     */
-    private static boolean skipHeader(final Header header) {
-        return ("content-length".equalsIgnoreCase(header.getName())
+    private static boolean skipHeader(Header header) {
+        return (HTTP.CONTENT_LEN.equalsIgnoreCase(header.getName())
                 && "0".equals(header.getValue())) // Strip Content-Length: 0
-                || "host".equalsIgnoreCase(header.getName()); // Host comes from endpoint
+               || HTTP.TARGET_HOST.equalsIgnoreCase(header.getName())
+               || "Authorization".equalsIgnoreCase(header.getName())
+            ; // Host comes from endpoint
     }
 
-    /**
-     * @param mapHeaders Map of header entries
-     * @return modeled Header objects
-     */
-    private static Header[] mapToHeaderArray(final Map<String, String> mapHeaders) {
+    private static Header[] mapToHeaderArray(Map<String, List<String>> mapHeaders) {
         Header[] headers = new Header[mapHeaders.size()];
         int i = 0;
-        for (Map.Entry<String, String> headerEntry : mapHeaders.entrySet()) {
-            headers[i++] = new BasicHeader(headerEntry.getKey(), headerEntry.getValue());
+        for (Map.Entry<String, List<String>> headerEntry : mapHeaders.entrySet()) {
+            for (String value : headerEntry.getValue()) {
+                headers[i++] = new BasicHeader(headerEntry.getKey(), value);
+            }
         }
         return headers;
     }

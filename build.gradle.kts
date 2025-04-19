@@ -87,7 +87,7 @@ project(":") {
         api("com.jayway.jsonpath:json-path:2.6.0") {
             exclude("org.slf4j", "slf4j-api")
         }
-        api("com.amazonaws:aws-java-sdk-core:1.12.141")
+        api("software.amazon.awssdk:auth:2.31.12")
         testImplementation("org.scalatest:scalatest_2.13:3.2.4")
     }
 

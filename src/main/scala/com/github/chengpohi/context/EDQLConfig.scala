@@ -1,7 +1,7 @@
 package com.github.chengpohi.context
 
-import com.amazonaws.auth.AWS4Signer
-import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, EDQLAWSCredentialsProviderChain, UnsafeX509ExtendedTrustManager}
+import com.amazonaws.auth.{AWS4Signer, BasicAWSCredentials}
+import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, UnsafeX509ExtendedTrustManager}
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.lang3.StringUtils
@@ -17,6 +17,8 @@ import org.apache.http.message.BasicHeader
 import org.apache.http.protocol.HttpContext
 import org.apache.http.{Header, HttpHost, HttpResponse}
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, DefaultCredentialsProvider, StaticCredentialsProvider}
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner
 
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -37,7 +39,7 @@ case class AuthInfo(auth: String,
                     password: String,
                     apiKeyId: String,
                     apiKeySecret: String,
-                    apiSessionToken: String,
+                    awsService: String,
                     awsRegion: String,
                     awsProfile: String) {
 
@@ -45,7 +47,7 @@ case class AuthInfo(auth: String,
     s"""
        |${Option.apply(auth).getOrElse("")} - ${Option.apply(username).getOrElse("")}
        |-${Option.apply(apiKeyId).getOrElse("")} -${Option.apply(apiKeySecret).getOrElse("")}
-       |-${Option.apply(apiSessionToken).getOrElse("")} -${Option.apply(awsRegion).getOrElse("")}
+       |-${Option.apply(awsService).getOrElse("")} -${Option.apply(awsRegion).getOrElse("")}
        |-${Option.apply(awsProfile).getOrElse("")}
        |""".stripMargin
   }
@@ -265,15 +267,16 @@ trait EDQLConfig {
 
     if (a.awsRegion != null) {
       val signer = new AWS4Signer
-      val serviceName = "es"
-      signer.setServiceName(serviceName)
+      val service = if (a.awsService == null || a.awsService.isBlank) "es" else a.awsService
+      signer.setServiceName(service)
       signer.setRegionName(a.awsRegion)
 
       val credentialsProvider = Option.apply(a.apiKeyId).map(i => {
-        new EDQLAWSCredentialsProviderChain(i, a.apiKeySecret, a.apiSessionToken)
-      }).getOrElse(new EDQLAWSCredentialsProviderChain())
+        val credentials = AwsBasicCredentials.builder().accessKeyId(i).secretAccessKey(a.apiKeySecret).build()
+        StaticCredentialsProvider.create(credentials)
+      }).getOrElse(DefaultCredentialsProvider.create())
 
-      val interceptor = new AWSRequestSigningApacheInterceptor(serviceName, signer, credentialsProvider)
+      val interceptor = new AWSRequestSigningApacheInterceptor(service, AwsV4HttpSigner.create(), credentialsProvider, a.awsRegion)
       restClientBuilder.setHttpClientConfigCallback(
         new RestClientBuilder.HttpClientConfigCallback() {
           override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
