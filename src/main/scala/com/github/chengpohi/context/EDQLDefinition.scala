@@ -17,10 +17,12 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       val request = new Request(if (kibanaProxy) "POST" else "GET", path);
 
-      request.setOptions(RequestOptions.DEFAULT.toBuilder
-        .addHeader(KIBANA_PROXY_METHOD, "GET")
-        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-      );
+      if (kibanaProxy) {
+        request.setOptions(RequestOptions.DEFAULT.toBuilder
+          .addHeader(KIBANA_PROXY_METHOD, "GET")
+          .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+        )
+      }
 
       as match {
         case None =>
@@ -54,10 +56,12 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
       }
 
       val request = new Request(if (kibanaProxy) "POST" else "HEAD", path);
-      request.setOptions(RequestOptions.DEFAULT.toBuilder
-        .addHeader(KIBANA_PROXY_METHOD, "HEAD")
-        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-      );
+      if (kibanaProxy) {
+        request.setOptions(RequestOptions.DEFAULT.toBuilder
+          .addHeader(KIBANA_PROXY_METHOD, "HEAD")
+          .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+        )
+      }
       request.setJsonEntity(action.orNull)
       Future {
         try {
@@ -89,10 +93,12 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
 
       val request = new Request("POST", path);
 
-      request.setOptions(RequestOptions.DEFAULT.toBuilder
-        .addHeader(KIBANA_PROXY_METHOD, "POST")
-        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-      );
+      if (kibanaProxy) {
+        request.setOptions(RequestOptions.DEFAULT.toBuilder
+          .addHeader(KIBANA_PROXY_METHOD, "POST")
+          .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+        )
+      }
 
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       as match {
@@ -135,10 +141,12 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
         throw new RuntimeException(READONLY_MODE)
       }
       val request = new Request(if (kibanaProxy) "POST" else "PUT", path);
-      request.setOptions(RequestOptions.DEFAULT.toBuilder
-        .addHeader(KIBANA_PROXY_METHOD, "PUT")
-        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-      );
+      if (kibanaProxy) {
+        request.setOptions(RequestOptions.DEFAULT.toBuilder
+          .addHeader(KIBANA_PROXY_METHOD, "PUT")
+          .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+        )
+      }
       val as = action.filter(_.isInstanceOf[JsonCollection.Obj]).map(_.asInstanceOf[JsonCollection.Obj])
       as match {
         case Seq() =>
@@ -179,10 +187,12 @@ trait EDQLDefinition extends ElasticBase with EDQLExecutor with FutureOps {
         throw new RuntimeException(READONLY_MODE)
       }
       val request = new Request(if (kibanaProxy) "POST" else "DELETE", path);
-      request.setOptions(RequestOptions.DEFAULT.toBuilder
-        .addHeader(KIBANA_PROXY_METHOD, "DELETE")
-        .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
-      );
+      if (kibanaProxy) {
+        request.setOptions(RequestOptions.DEFAULT.toBuilder
+          .addHeader(KIBANA_PROXY_METHOD, "DELETE")
+          .addHeader(KIBANA_PATH_PREFIX, pathPrefix)
+        )
+      }
       request.setJsonEntity(action.orNull)
       Future {
         try {
