@@ -1,6 +1,5 @@
 package com.github.chengpohi.context
 
-import com.amazonaws.auth.AWS4Signer
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, UnsafeX509ExtendedTrustManager}
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
@@ -261,8 +260,8 @@ trait EDQLConfig {
     }
 
     if (a.awsProfile != null) {
-      System.setProperty(com.amazonaws.auth.profile.internal.AwsProfileNameLoader.AWS_PROFILE_ENVIRONMENT_VARIABLE, a.awsProfile)
-      System.setProperty(com.amazonaws.auth.profile.internal.AwsProfileNameLoader.AWS_PROFILE_SYSTEM_PROPERTY, a.awsProfile)
+      System.setProperty("AWS_PROFILE", a.awsProfile)
+      System.setProperty("aws.profile", a.awsProfile)
     }
 
     if (a.awsRegion != null) {
