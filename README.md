@@ -6,8 +6,7 @@ manage Elasticsearch cluster and query from Elasticsearch. also It always follow
 It is full compatible with official Query DSL, we can just copy DSL and run on EDQL without any 
 extra effort. also EDQL has visual editor for quickly write query conditions with interactive UI.
 
-EDQL also integrate ChatGPT AI, you can use your own AI to help you easily writing query DSL and can directly
-ask AI to help query Elasticsearch data without remembering complex query DSL.
+Powered by ChatGPT and LLM capabilities, you can now query your Elasticsearch data using natural language - just describe what you're looking for, and let EDQL translate it into powerful search queries. This revolutionary feature combines the robust search capabilities of Elasticsearch with the intuitive nature of conversational AI, making complex data exploration as simple as having a conversation. Whether you're a data analyst, developer, or DevOps engineer, EDQL's AI-powered search will dramatically boost your productivity. (Note: ChatGPT features require your own API key)
 
 It has powerful script engine: function, variable and iteration etc. with smart Intellij you 
 can easily write query DSL(live templates, refactor, extract...). view more on:  [EDQL Wiki](https://chengpohi.github.io/)
