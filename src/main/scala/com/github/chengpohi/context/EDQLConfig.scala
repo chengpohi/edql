@@ -1,6 +1,6 @@
 package com.github.chengpohi.context
 
-import com.amazonaws.auth.{AWS4Signer, BasicAWSCredentials}
+import com.amazonaws.auth.AWS4Signer
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, UnsafeX509ExtendedTrustManager}
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
@@ -266,11 +266,7 @@ trait EDQLConfig {
     }
 
     if (a.awsRegion != null) {
-      val signer = new AWS4Signer
       val service = if (a.awsService == null || a.awsService.isBlank) "es" else a.awsService
-      signer.setServiceName(service)
-      signer.setRegionName(a.awsRegion)
-
       val credentialsProvider = Option.apply(a.apiKeyId).map(i => {
         val credentials = AwsBasicCredentials.builder().accessKeyId(i).secretAccessKey(a.apiKeySecret).build()
         StaticCredentialsProvider.create(credentials)
