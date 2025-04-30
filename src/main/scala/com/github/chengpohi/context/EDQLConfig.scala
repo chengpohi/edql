@@ -43,21 +43,19 @@ case class AuthInfo(auth: String,
                     awsProfile: String) {
 
   def cacheKey: String = {
-    s"""
-       |${Option.apply(auth).getOrElse("")} - ${Option.apply(username).getOrElse("")}
-       |-${Option.apply(apiKeyId).getOrElse("")} -${Option.apply(apiKeySecret).getOrElse("")}
-       |-${Option.apply(awsService).getOrElse("")} -${Option.apply(awsRegion).getOrElse("")}
+    s"""${Option.apply(auth).getOrElse("")}-${Option.apply(username).getOrElse("")}
+       |-${Option.apply(apiKeyId).getOrElse("")}-${Option.apply(apiKeySecret).getOrElse("")}
+       |-${Option.apply(awsService).getOrElse("")}-${Option.apply(awsRegion).getOrElse("")}
        |-${Option.apply(awsProfile).getOrElse("")}
-       |""".stripMargin
+       |""".stripMargin.stripLineEnd
   }
 }
 
 case class ProxyInfo(httpHost: String, httpPort: Int, username: Option[String], password: Option[String]) {
   def cacheKey: String = {
-    s"""
-       |${Option.apply(httpHost).getOrElse("")} - ${Option.apply(httpPort).getOrElse("")}
-       |-${username.getOrElse("")} -${password.getOrElse("")}
-       |""".stripMargin
+    s"""${Option.apply(httpHost).getOrElse("")}-${Option.apply(httpPort).getOrElse("")}
+       |-${username.getOrElse("")}-${password.getOrElse("")}
+       |""".stripMargin.stripLineEnd
   }
 }
 

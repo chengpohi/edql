@@ -23,14 +23,10 @@ object ScriptContext {
 
   def apply(hostInfo: HostInfo,
             vars: Map[String, JsonCollection.Val]): ScriptContext = {
-    val keyBytes = (s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("")
-      + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}" + s"-${hostInfo.readOnly}"
-      + s"-${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}").getBytes
-
-    val cacheKey = Base64.encodeBase64String(keyBytes)
-
-    val cacheContext = cache.get(cacheKey)
-    if (isCacheValid(cacheContext)) {
+    val cacheInfo = getCacheConnection(hostInfo)
+    val cacheKey = cacheInfo._1
+    val cacheContext = cacheInfo._2
+    if (cacheContext.isDefined) {
       val c = cacheContext.get._2
       c.variables = mutable.Map[String, JsonCollection.Val](vars.toSeq: _*)
       return c
@@ -42,13 +38,32 @@ object ScriptContext {
     context
   }
 
-  private def isCacheValid(cacheContext: Option[(Long, ScriptContext)]) = {
+  def getCacheConnection(hostInfo: HostInfo) = {
+    val cacheKey =
+      s"""${hostInfo.host}-${hostInfo.authInfo.map(i => i.cacheKey).getOrElse("")}
+         |-${hostInfo.timeout}-${hostInfo.kibanaProxy}-${hostInfo.readOnly}-
+         |${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}""".stripMargin
+
+    val cacheContext = cache.get(cacheKey)
     cacheContext match {
-      case None => false
+      case None => (cacheKey, None)
       case Some(c) => {
-        c._2.eqlClient.restClient.isRunning
+        c._2.eqlClient.restClient.isRunning match {
+          case true => (cacheKey, cacheContext)
+          case false => (cacheKey, None)
+        }
       }
     }
+  }
+
+  def removeCacheConnection(hostInfo: HostInfo) = {
+    val keyBytes = (s"$hostInfo.endpoint-" + hostInfo.authInfo.map(i => i.cacheKey).getOrElse("")
+      + s"-${hostInfo.timeout}" + s"-${hostInfo.kibanaProxy}" + s"-${hostInfo.readOnly}"
+      + s"-${hostInfo.proxyInfo.map(i => i.cacheKey).getOrElse("")}").getBytes
+
+    val cacheKey = Base64.encodeBase64String(keyBytes)
+
+    cache.remove(cacheKey)
   }
 }
 
