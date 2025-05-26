@@ -34,9 +34,11 @@ jobs:
       version: ${{ steps.properties.outputs.version }}
       changelog: ${{ steps.properties.outputs.changelog }}
     steps:
-      - name: setup 7-Zip
-        uses: milliewalky/setup-7-zip@v2
-        
+      - name: Set Env
+        id: set-env
+        run: |
+            ln -s /opt/homebrew/bin/7z /usr/local/bin/7z
+            which 7z
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3
@@ -76,6 +78,7 @@ jobs:
       - name: Build library
         id: edql-lib
         run: |
+            ln -s /opt/homebrew/bin/7z /usr/local/bin/7z
             which 7z
             ./gradlew --info --no-daemon publishToMavenLocal
       - name: Build qsharp
