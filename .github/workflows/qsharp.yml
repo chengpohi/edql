@@ -38,7 +38,7 @@ jobs:
         id: set-env
         run: |
             ln -s /opt/homebrew/bin/7z /usr/local/bin/7z
-            which 7z
+            /usrloca/bin/7z
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3
