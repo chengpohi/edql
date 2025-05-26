@@ -73,6 +73,7 @@ jobs:
       - name: Build library
         id: edql-lib
         run: |
+            which 7z
             ./gradlew --info --no-daemon publishToMavenLocal
       - name: Build qsharp
         id: intellij-qsharp
