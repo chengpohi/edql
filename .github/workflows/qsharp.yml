@@ -34,6 +34,9 @@ jobs:
       version: ${{ steps.properties.outputs.version }}
       changelog: ${{ steps.properties.outputs.changelog }}
     steps:
+      - name: setup 7-Zip
+        uses: milliewalky/setup-7-zip@v2
+        
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3
