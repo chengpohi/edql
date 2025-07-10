@@ -3,13 +3,17 @@ package com.github.chengpohi.context
 import com.github.chengpohi.aws.{AWSRequestSigningApacheInterceptor, UnsafeX509ExtendedTrustManager}
 import com.github.chengpohi.http.KibanaProxyApacheInterceptor
 import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.commons.codec.net.URLCodec
+import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.CredentialsProvider
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.conn.ConnectionKeepAliveStrategy
 import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider
+import org.apache.http.cookie.ClientCookie
+import org.apache.http.impl.client.{BasicCookieStore, LaxRedirectStrategy, SystemDefaultCredentialsProvider}
+import org.apache.http.impl.cookie.BasicClientCookie
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
@@ -19,9 +23,9 @@ import org.elasticsearch.client.{RestClient, RestClientBuilder}
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, DefaultCredentialsProvider, StaticCredentialsProvider}
 import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner
 
-import java.net.URI
+import java.net.{URI, URLDecoder}
 import java.nio.charset.StandardCharsets
-import java.util.Base64
+import java.util.{Base64, Date}
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.{SSLContext, TrustManager}
 import scala.concurrent.duration.DurationInt
@@ -34,6 +38,7 @@ import scala.language.postfixOps
  */
 
 case class AuthInfo(auth: String,
+                    cookie: String,
                     username: String,
                     password: String,
                     apiKeyId: String,
@@ -47,7 +52,8 @@ case class AuthInfo(auth: String,
        |-${Option.apply(apiKeyId).getOrElse("")}-${Option.apply(apiKeySecret).getOrElse("")}
        |-${Option.apply(awsService).getOrElse("")}-${Option.apply(awsRegion).getOrElse("")}
        |-${Option.apply(awsProfile).getOrElse("")}
-       |""".stripMargin.stripLineEnd
+       |-${Option.apply(cookie).getOrElse("")}
+       |       |""".stripMargin.stripLineEnd
   }
 }
 
@@ -145,6 +151,35 @@ trait EDQLConfig {
         override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+          }
+          if (hostInfo.authInfo.isDefined) {
+            val cookie = hostInfo.authInfo.get.cookie
+            if (cookie != null) {
+              val cookies = cookie.split(";\\s+")
+              val cookieStore = new BasicCookieStore();
+              cookies.foreach(c => {
+                c.split("=") match {
+                  case Array(name, value) =>
+                    val clientCookie = new BasicClientCookie(name, value)
+                    clientCookie.setDomain(hostInfo.uri.getHost)
+                    clientCookie.setPath("/")
+                    clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
+                    clientCookie.setSecure(true)
+
+                    cookieStore.addCookie(clientCookie)
+                  case Array(name) =>
+                    val clientCookie = new BasicClientCookie(name, "")
+                    clientCookie.setDomain(hostInfo.uri.getHost)
+                    clientCookie.setPath("/")
+                    clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
+                    clientCookie.setSecure(true)
+                    cookieStore.addCookie(clientCookie)
+                  case _ =>
+                }
+              })
+              httpClientBuilder.setDefaultCookieStore(cookieStore)
+              httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy())
+            }
           }
           httpClientBuilder.addInterceptorLast(new KibanaProxyApacheInterceptor)
             .setDefaultIOReactorConfig(IOReactorConfig.custom()
