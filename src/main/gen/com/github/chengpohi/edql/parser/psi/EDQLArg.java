@@ -7,8 +7,8 @@ import com.intellij.psi.PsiElement;
 
 public interface EDQLArg extends PsiElement {
 
-  @Nullable
-  EDQLIdentifier0 getIdentifier0();
+  @NotNull
+  List<EDQLBinsuffix> getBinsuffixList();
 
   @NotNull
   EDQLExpr getExpr();

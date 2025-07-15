@@ -123,74 +123,25 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (IDENTIFIER0 EQUAL)? expr
+  // expr binsuffix*
   public static boolean arg(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "arg")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, ARG, "<arg>");
-    r = arg_0(b, l + 1);
-    r = r && expr(b, l + 1);
+    r = expr(b, l + 1);
+    r = r && arg_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // (IDENTIFIER0 EQUAL)?
-  private static boolean arg_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_0")) return false;
-    arg_0_0(b, l + 1);
-    return true;
-  }
-
-  // IDENTIFIER0 EQUAL
-  private static boolean arg_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_0_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = IDENTIFIER0(b, l + 1);
-    r = r && consumeToken(b, EQUAL);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // arg ( COMMA arg )* ( COMMA )?
-  public static boolean args(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "args")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, ARGS, "<args>");
-    r = arg(b, l + 1);
-    r = r && args_1(b, l + 1);
-    r = r && args_2(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // ( COMMA arg )*
-  private static boolean args_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "args_1")) return false;
+  // binsuffix*
+  private static boolean arg_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "arg_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!args_1_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "args_1", c)) break;
+      if (!binsuffix(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "arg_1", c)) break;
     }
-    return true;
-  }
-
-  // COMMA arg
-  private static boolean args_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "args_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, COMMA);
-    r = r && arg(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // ( COMMA )?
-  private static boolean args_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "args_2")) return false;
-    consumeToken(b, COMMA);
     return true;
   }
 
@@ -946,7 +897,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER0 L_PAREN (expr* (COMMA expr*)* COMMA?)? R_PAREN mapIter?
+  // IDENTIFIER0 L_PAREN (arg (COMMA (arg))* COMMA?)? R_PAREN mapIter?
   public static boolean functionInvokeExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr")) return false;
     if (!nextTokenIs(b, "<function invoke expr>", DOLLAR, IDENTIFIER)) return false;
@@ -961,37 +912,26 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (expr* (COMMA expr*)* COMMA?)?
+  // (arg (COMMA (arg))* COMMA?)?
   private static boolean functionInvokeExpr_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2")) return false;
     functionInvokeExpr_2_0(b, l + 1);
     return true;
   }
 
-  // expr* (COMMA expr*)* COMMA?
+  // arg (COMMA (arg))* COMMA?
   private static boolean functionInvokeExpr_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = functionInvokeExpr_2_0_0(b, l + 1);
+    r = arg(b, l + 1);
     r = r && functionInvokeExpr_2_0_1(b, l + 1);
     r = r && functionInvokeExpr_2_0_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // expr*
-  private static boolean functionInvokeExpr_2_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "functionInvokeExpr_2_0_0")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!expr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "functionInvokeExpr_2_0_0", c)) break;
-    }
-    return true;
-  }
-
-  // (COMMA expr*)*
+  // (COMMA (arg))*
   private static boolean functionInvokeExpr_2_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2_0_1")) return false;
     while (true) {
@@ -1002,7 +942,7 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // COMMA expr*
+  // COMMA (arg)
   private static boolean functionInvokeExpr_2_0_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2_0_1_0")) return false;
     boolean r;
@@ -1013,15 +953,14 @@ public class EDQLParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // expr*
+  // (arg)
   private static boolean functionInvokeExpr_2_0_1_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "functionInvokeExpr_2_0_1_0_1")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!expr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "functionInvokeExpr_2_0_1_0_1", c)) break;
-    }
-    return true;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = arg(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
   // COMMA?

@@ -35,8 +35,8 @@ public class EDQLFunctionInvokeExprImpl extends ASTWrapperPsiElement implements 
 
   @Override
   @NotNull
-  public List<EDQLExpr> getExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLExpr.class);
+  public List<EDQLArg> getArgList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLArg.class);
   }
 
   @Override

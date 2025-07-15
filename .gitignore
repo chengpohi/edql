@@ -31,3 +31,6 @@ build/
 project/
 grammars/
 grammars
+
+.intellijPlatform
+.kotlin/

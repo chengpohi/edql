@@ -10,7 +10,6 @@ public interface EDQLTypes {
 
   IElementType ACTION_EXPR = new EDQLElementType("ACTION_EXPR");
   IElementType ARG = new EDQLElementType("ARG");
-  IElementType ARGS = new EDQLElementType("ARGS");
   IElementType ARR = new EDQLElementType("ARR");
   IElementType ARRCOMP = new EDQLElementType("ARRCOMP");
   IElementType ASSERT_STMT = new EDQLElementType("ASSERT_STMT");
@@ -140,9 +139,6 @@ public interface EDQLTypes {
       }
       else if (type == ARG) {
         return new EDQLArgImpl(node);
-      }
-      else if (type == ARGS) {
-        return new EDQLArgsImpl(node);
       }
       else if (type == ARR) {
         return new EDQLArrImpl(node);

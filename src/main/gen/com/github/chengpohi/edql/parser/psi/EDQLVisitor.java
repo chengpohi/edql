@@ -30,10 +30,6 @@ public class EDQLVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitArgs(@NotNull EDQLArgs o) {
-    visitPsiElement(o);
-  }
-
   public void visitArr(@NotNull EDQLArr o) {
     visitPsiElement(o);
   }

@@ -28,9 +28,9 @@ public class EDQLArgImpl extends ASTWrapperPsiElement implements EDQLArg {
   }
 
   @Override
-  @Nullable
-  public EDQLIdentifier0 getIdentifier0() {
-    return findChildByClass(EDQLIdentifier0.class);
+  @NotNull
+  public List<EDQLBinsuffix> getBinsuffixList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, EDQLBinsuffix.class);
   }
 
   @Override

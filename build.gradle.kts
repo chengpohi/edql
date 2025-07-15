@@ -1,10 +1,11 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     idea
-    scala
     `java-library`
     `maven-publish`
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
     id("org.jetbrains.grammarkit") version ("2021.2.2")
-    id("org.jetbrains.intellij") version "1.13.3"
 }
 
 group = "com.github.chengpohi"
@@ -12,16 +13,11 @@ version = "7.X-SNAPSHOT"
 
 allprojects {
     apply {
-        plugin("scala")
+        plugin("org.jetbrains.kotlin.jvm")
         plugin("maven-publish")
         plugin("java-library")
         plugin("idea")
         plugin("org.jetbrains.grammarkit")
-        plugin("org.jetbrains.intellij")
-    }
-
-    scala {
-        zincVersion.set("1.8.0")
     }
 
     java {
@@ -40,29 +36,14 @@ allprojects {
     sourceSets {
         main {
             java.srcDirs("src/main/gen", "src/main/java")
+            kotlin.srcDirs("src/main/java")
             resources.srcDirs("src/main/resources")
         }
         test {
+            java.srcDirs("src/test/java")
+            kotlin.srcDirs("src/test/java")
             resources.srcDirs("src/test/resources")
         }
-    }
-
-
-    tasks.withType<ScalaCompile>().configureEach {
-        scalaCompileOptions.forkOptions.apply {
-            memoryMaximumSize = "8g"
-            jvmArgs = listOf(
-                    "-XX:MaxMetaspaceSize=4g",
-                    "-Xss8M"
-            )
-        }
-        scalaCompileOptions.additionalParameters = listOf(
-                "-Ywarn-unused",
-                "-feature",
-                "-language:implicitConversions",
-                "-language:higherKinds",
-                "-language:postfixOps",
-        )
     }
 
     tasks {
@@ -70,58 +51,46 @@ allprojects {
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
-
-    intellij {
-        version.set("2022.1.1")
-    }
 }
 
-project(":") {
-    dependencies {
-        api("com.typesafe:config:1.3.0")
-        api("org.apache.commons:commons-lang3:3.5")
-        api("org.scala-lang:scala-reflect:2.13.10")
-        api("org.json4s:json4s-jackson_2.13:3.7.0-M1")
-        api("org.apache.logging.log4j:log4j-core:2.11.1")
-        api("org.elasticsearch.client:elasticsearch-rest-client:8.7.1")
-        api("com.jayway.jsonpath:json-path:2.6.0") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        api("software.amazon.awssdk:auth:2.31.12")
-        testImplementation("org.scalatest:scalatest_2.13:3.2.4")
+dependencies {
+    compileOnly("org.apache.commons:commons-lang3:3.5")
+    compileOnly("org.apache.commons:commons-collections4:4.4")
+    compileOnly("org.apache.logging.log4j:log4j-core:2.11.1")
+    api("org.elasticsearch.client:elasticsearch-rest-client:8.7.1")
+    api("com.jayway.jsonpath:json-path:2.6.0") {
+        exclude("org.slf4j", "slf4j-api")
     }
+    api("software.amazon.awssdk:auth:2.31.12")
 
-    publishing {
-        publications {
-            create<MavenPublication>("lib") {
-                groupId = "com.github.chengpohi"
-                artifactId = "edql-lib"
-                version = rootProject.version.toString()
-                from(components["java"])
+    // Kotlin dependencies
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+    compileOnly("org.jetbrains.kotlin:kotlin-reflect")
+    // IntelliJ dependencies
+    compileOnly("com.jetbrains.intellij.platform:lang-impl:243.26574.98")
+    compileOnly("com.jetbrains.intellij.java:java-psi-impl:243.26574.91")
+    compileOnly("com.jetbrains.intellij.platform:icons:243.26574.98")
+    compileOnly("com.fasterxml.jackson.core:jackson-core:2.15.0")
+    compileOnly("com.fasterxml.jackson.core:jackson-databind:2.10.0")
 
-                pom {
-                    name.set("edql lib")
-                    description.set("edql lib")
-                }
-            }
-        }
-        repositories {
-            mavenLocal()
-        }
-    }
+    // Test dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }
 
 publishing {
     publications {
-        create<MavenPublication>("edql") {
+        create<MavenPublication>("lib") {
             groupId = "com.github.chengpohi"
-            artifactId = "edql"
+            artifactId = "edql-lib"
             version = rootProject.version.toString()
             from(components["java"])
-
             pom {
-                name.set("edql")
-                description.set("edql")
+                name.set("edql lib")
+                description.set("edql lib")
             }
         }
     }

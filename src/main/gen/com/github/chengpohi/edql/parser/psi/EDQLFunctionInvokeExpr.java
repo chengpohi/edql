@@ -11,7 +11,7 @@ public interface EDQLFunctionInvokeExpr extends PsiElement {
   EDQLIdentifier0 getIdentifier0();
 
   @NotNull
-  List<EDQLExpr> getExprList();
+  List<EDQLArg> getArgList();
 
   @Nullable
   EDQLMapIter getMapIter();
