@@ -4,7 +4,7 @@ plugins {
     idea
     `java-library`
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+    id("org.jetbrains.kotlin.jvm") version "1.9.25"
     id("org.jetbrains.grammarkit") version ("2021.2.2")
 }
 
