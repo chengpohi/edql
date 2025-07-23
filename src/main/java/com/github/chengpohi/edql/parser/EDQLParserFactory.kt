@@ -16,10 +16,6 @@ class EDQLParserFactory(
     fun createFile(name: String, text: String): PsiFile {
         val virtualFile = LightVirtualFile(name, EDQLLanguage.INSTANCE, text)
         virtualFile.charset = StandardCharsets.UTF_8
-        return createFile(virtualFile)
-    }
-
-    fun createFile(virtualFile: LightVirtualFile): PsiFile {
         return psiFileFactory.trySetupPsiForFile(virtualFile, EDQLLanguage.INSTANCE, false, false)!!
     }
 

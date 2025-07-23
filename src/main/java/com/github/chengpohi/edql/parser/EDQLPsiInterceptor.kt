@@ -119,7 +119,7 @@ class EDQLPsiInterceptor(val parserFactory: EDQLParserFactory) : JsonValParser {
             val bs = expr.forExpr!!.functionBody.exprList.flatMap { i -> parseExpr(i) }
             return listOf(InterceptFunction.ForInstruction(vname, v, bs))
         }
-        
+
         if (expr.functionInvokeExpr != null) {
             val funcName = expr.functionInvokeExpr!!.identifier0.text
             val ins = expr.functionInvokeExpr!!.argList.map { it -> toJsonVal(it) }

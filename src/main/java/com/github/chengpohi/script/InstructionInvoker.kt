@@ -73,9 +73,7 @@ class InstructionInvoker(private val libs: List<URL>, private val parser: EDQLPs
             .map { it.variableName to it.value }
 
         val globalVars = vars + ("CONTEXT_PATH" to JsonCollection.Str(runContext.runDir))
-        val context = ScriptContext(runContext.hostInfo)
-        context.variables = globalVars.toMap().toMutableMap()
-
+        val context = ScriptContext.apply(runContext.hostInfo, globalVars.toMap().toMutableMap())
         evalFunParams(globalFunctions, context, vars)
         return Pair(globalFunctions, context)
     }
