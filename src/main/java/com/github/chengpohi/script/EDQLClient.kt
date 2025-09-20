@@ -17,6 +17,7 @@ import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.LaxRedirectStrategy
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider
 import org.apache.http.impl.cookie.BasicClientCookie
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.reactor.IOReactorConfig
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClient
@@ -115,32 +116,8 @@ class EDQLClient(val hostInfo: HostInfo) {
                 if (credentialsProvider != null) {
                     httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
                 }
-                if (hostInfo.authInfo != null) {
-                    val cookie = hostInfo.authInfo.cookie
-                    if (cookie != null) {
-                        val cookies = cookie.split(";\\s+".toRegex())
-                        val cookieStore = BasicCookieStore()
-                        cookies.forEach { c ->
-                            val parts = c.split("=")
-                            if (parts.size == 2) {
-                                val clientCookie = BasicClientCookie(parts[0], parts[1])
-                                clientCookie.domain = hostInfo.uri.host
-                                clientCookie.path = "/"
-                                clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true")
-                                clientCookie.isSecure = true
-                                cookieStore.addCookie(clientCookie)
-                            } else {
-                                val clientCookie = BasicClientCookie(parts[0], "")
-                                clientCookie.domain = hostInfo.uri.host
-                                clientCookie.path = "/"
-                                clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true")
-                                clientCookie.isSecure = true
-                                cookieStore.addCookie(clientCookie)
-                            }
-                        }
-                        httpClientBuilder.setDefaultCookieStore(cookieStore)
-                        httpClientBuilder.setRedirectStrategy(LaxRedirectStrategy())
-                    }
+                if (hostInfo.authInfo?.cookie != null) {
+                    bindCookie(hostInfo.authInfo.cookie, hostInfo, httpClientBuilder)
                 }
                 httpClientBuilder.addInterceptorLast(KibanaProxyApacheInterceptor())
                     .setDefaultIOReactorConfig(
@@ -255,16 +232,7 @@ class EDQLClient(val hostInfo: HostInfo) {
                         })
                         .setConnectionTimeToLive(120, TimeUnit.SECONDS)
 
-                    if (hostInfo.proxyInfo != null) {
-                        val proxyInfo = hostInfo.proxyInfo
-                        httpClientBuilder.setProxy(HttpHost(proxyInfo.httpHost, proxyInfo.httpPort!!, "http"))
-                        if (proxyInfo.username != null && credentialsProvider != null) {
-                            credentialsProvider.setCredentials(
-                                AuthScope(proxyInfo.httpHost, proxyInfo.httpPort),
-                                UsernamePasswordCredentials(proxyInfo.username, proxyInfo.password)
-                            )
-                        }
-                    }
+                    bindProxy(hostInfo, httpClientBuilder, credentialsProvider)
 
                     httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
                         .setSSLContext(sslContext)
@@ -276,6 +244,27 @@ class EDQLClient(val hostInfo: HostInfo) {
         if (a.awsProfile != null) {
             System.setProperty("AWS_PROFILE", a.awsProfile)
             System.setProperty("aws.profile", a.awsProfile)
+        }
+
+        if (hostInfo.authInfo.cookie != null) {
+            restClientBuilder.setHttpClientConfigCallback(
+                RestClientBuilder.HttpClientConfigCallback { httpClientBuilder ->
+                    httpClientBuilder.disableAuthCaching()
+                        .setDefaultIOReactorConfig(
+                            IOReactorConfig.custom()
+                                .setSoKeepAlive(true)
+                                .build()
+                        )
+                        .setKeepAliveStrategy(ConnectionKeepAliveStrategy { response, context ->
+                            (30.minutes).inWholeMilliseconds
+                        })
+                        .setConnectionTimeToLive(120, TimeUnit.SECONDS)
+
+                    bindCookie(hostInfo.authInfo.cookie, hostInfo, httpClientBuilder)
+                    bindProxy(hostInfo, httpClientBuilder, credentialsProvider)
+                    httpClientBuilder
+                }
+            )
         }
 
         if (a.awsRegion != null) {
@@ -326,6 +315,49 @@ class EDQLClient(val hostInfo: HostInfo) {
             )
         }
         return credentialsProvider
+    }
+
+    private fun bindProxy(hostInfo: HostInfo, httpClientBuilder: HttpAsyncClientBuilder, credentialsProvider: CredentialsProvider?) {
+        if (hostInfo.proxyInfo != null) {
+            val proxyInfo = hostInfo.proxyInfo
+            httpClientBuilder.setProxy(HttpHost(proxyInfo.httpHost, proxyInfo.httpPort!!, "http"))
+            if (proxyInfo.username != null && credentialsProvider != null) {
+                credentialsProvider.setCredentials(
+                    AuthScope(proxyInfo.httpHost, proxyInfo.httpPort),
+                    UsernamePasswordCredentials(proxyInfo.username, proxyInfo.password)
+                )
+            }
+        }
+    }
+
+
+    private fun bindCookie(
+        cookie: String,
+        hostInfo: HostInfo,
+        httpClientBuilder: HttpAsyncClientBuilder
+    ) {
+        val cookies = cookie.split(";\\s+".toRegex())
+        val cookieStore = BasicCookieStore()
+        cookies.forEach { c ->
+            val parts = c.split("=")
+            if (parts.size == 2) {
+                val clientCookie = BasicClientCookie(parts[0], parts[1])
+                clientCookie.domain = hostInfo.uri.host
+                clientCookie.path = "/"
+                clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true")
+                clientCookie.isSecure = true
+                cookieStore.addCookie(clientCookie)
+            } else {
+                val clientCookie = BasicClientCookie(parts[0], "")
+                clientCookie.domain = hostInfo.uri.host
+                clientCookie.path = "/"
+                clientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true")
+                clientCookie.isSecure = true
+                cookieStore.addCookie(clientCookie)
+            }
+        }
+        httpClientBuilder.setDefaultCookieStore(cookieStore)
+        httpClientBuilder.setRedirectStrategy(LaxRedirectStrategy())
     }
 
 }
