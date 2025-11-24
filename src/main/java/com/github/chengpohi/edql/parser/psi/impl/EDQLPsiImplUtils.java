@@ -5,6 +5,9 @@ import com.github.chengpohi.edql.parser.psi.EDQLField;
 import com.github.chengpohi.edql.parser.psi.EDQLFile;
 import com.github.chengpohi.edql.parser.psi.EDQLFunctionInvokeExpr;
 import com.github.chengpohi.edql.parser.psi.EDQLIdentifier0;
+import com.github.chengpohi.esql.ESQLFileType;
+import com.github.chengpohi.esql.parser.psi.ESQLFile;
+import com.github.chengpohi.esql.parser.psi.impl.ESQLSelectStatementImpl;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.project.Project;
@@ -55,6 +58,12 @@ public final class EDQLPsiImplUtils {
         return PsiTreeUtil.findChildOfType(file, EDQLActionExprImpl.class);
     }
 
+    public static ESQLSelectStatementImpl createSQLActionFromText(Project project, String text) {
+        ESQLFile file = createSQLFile(project, text);
+
+        return PsiTreeUtil.findChildOfType(file, ESQLSelectStatementImpl.class);
+    }
+
     public static EDQLFunctionInvokeExpr createFunctionInvokeFromText(Project project, String text) {
         EDQLFile file = createFile(project, text);
 
@@ -88,8 +97,14 @@ public final class EDQLPsiImplUtils {
 
     public static EDQLFile createFile(Project project, String text) {
         String name = "dummy.edql";
-        return (EDQLFile) PsiFileFactory.getInstance(project).
-                createFileFromText(name, EDQLFileType.INSTANCE, text);
+        return (EDQLFile)PsiFileFactory.getInstance(project).
+            createFileFromText(name, EDQLFileType.INSTANCE, text);
+    }
+
+    public static ESQLFile createSQLFile(Project project, String text) {
+        String name = "dummy.esql";
+        return (ESQLFile)PsiFileFactory.getInstance(project).
+            createFileFromText(name, ESQLFileType.INSTANCE, text);
     }
 
     public static PsiElement getNameIdentifier(EDQLIdentifier0 element) {
@@ -138,7 +153,7 @@ public final class EDQLPsiImplUtils {
      */
     public static boolean isPropertyValue(@NotNull PsiElement element) {
         final PsiElement parent = element.getParent();
-        return parent instanceof EDQLField && element == ((EDQLField) parent).getExpr();
+        return parent instanceof EDQLField && element == ((EDQLField)parent).getExpr();
     }
 
     public static boolean isQSharp() {
