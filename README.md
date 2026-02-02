@@ -46,6 +46,5 @@ POST my-index/_search
 ### 1.4 Chat Query Elasticsearch
 ![Chat Query](https://chengpohi.github.io/.gitbook/assets/chatquery.gif)
 
-### 1.5 Plot Panel
 
 
